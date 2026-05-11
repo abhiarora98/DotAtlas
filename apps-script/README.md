@@ -31,18 +31,19 @@ A new browser tab opens with an editor showing a blank `Code.gs`.
 - Open `apps-script/Code.gs` in this repo, copy its full contents,
   paste into the editor.
 
-### 3. Check the tab name (only if your sheet's tab isn't called "Masters")
+### 3. Check the tab name
 
 At the top of `Code.gs`:
 
 ```js
-const PI_SHEET_NAME      = 'Masters';
+const PI_SHEET_NAME      = 'Comfort_atlas';
 const PARTIES_SHEET_NAME = 'Parties';
 ```
 
-Change `'Masters'` to match the actual tab name where your PI data
-lives. Leave `'Parties'` alone — that tab will be auto-created the
-first time someone adds a party.
+The default is set to `Comfort_atlas` (the tab where Comfort
+Industries' PI line items live). Change it if your tab name differs.
+Leave `'Parties'` alone — that tab is auto-created the first time
+someone adds a party.
 
 ### 4. Save
 

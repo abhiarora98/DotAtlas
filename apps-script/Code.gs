@@ -14,8 +14,8 @@
  * Setup is in apps-script/README.md in the same repo.
  */
 
-const PI_SHEET_NAME      = 'Masters';   // change if your PI sheet tab is named differently
-const PARTIES_SHEET_NAME = 'Parties';   // optional — created on first Add Party
+const PI_SHEET_NAME      = 'Comfort_atlas';   // tab name where PI line items live
+const PARTIES_SHEET_NAME = 'Parties';         // optional — created on first Add Party
 
 // ---------- request entry points ----------
 
