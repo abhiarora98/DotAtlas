@@ -834,6 +834,14 @@
     width: 100%;
   }
   .pi-input::placeholder { color: var(--text-4); }
+  /* Force uppercase display across all text inputs in the form.
+     Excludes number / date / tel / email / time inputs. The JS handler
+     also uppercases the underlying value so the stored data matches. */
+  .pi-input:not([type="number"]):not([type="date"]):not([type="tel"]):not([type="email"]):not([type="time"]),
+  .pi-combo:not([type="number"]) {
+    text-transform: uppercase;
+  }
+  .pi-input.no-upper { text-transform: none; }
   .pi-input:hover, .pi-select:hover { border-color: var(--line-2); }
   .pi-input:focus, .pi-select:focus {
     outline: none; border-color: var(--emerald);
@@ -2733,10 +2741,12 @@
   }
   function pickParty(p){
     if (!p) return;
-    state.party = p.name;
-    state.partyCode = p.code || '';
-    $('pi-party').value = p.name;
-    $('pi-party-code').value = p.code || '';
+    const nameU = String(p.name || '').toUpperCase();
+    const codeU = String(p.code || '').toUpperCase();
+    state.party = nameU;
+    state.partyCode = codeU;
+    $('pi-party').value = nameU;
+    $('pi-party-code').value = codeU;
     $('pi-party-results').hidden = true;
     partyTypeahead.open = false;
     renderTotals();
@@ -2986,14 +2996,44 @@
     });
   }
 
+  // ---------- uppercase normalization ----------
+  // Force every text input within `root` to uppercase. Runs in the
+  // capture phase so subsequent state-update handlers see the
+  // already-uppercased value.
+  function attachUppercase(root){
+    if (!root) return;
+    root.addEventListener('input', (e) => {
+      const el = e.target;
+      if (!el || el.tagName !== 'INPUT') return;
+      const t = (el.type || '').toLowerCase();
+      if (t === 'number' || t === 'date' || t === 'tel' || t === 'email' || t === 'password' || t === 'time') return;
+      if (el.classList.contains('no-upper')) return;
+      const v = el.value;
+      if (v && v !== v.toUpperCase()){
+        const s = el.selectionStart, en = el.selectionEnd;
+        el.value = v.toUpperCase();
+        try { el.setSelectionRange(s, en); } catch(_){}
+      }
+    }, true);
+  }
+
   // ---------- init ----------
   function init(){
     restoreDraft();
+    // Uppercase any restored draft values up-front so existing state matches.
+    if (state.party)     state.party     = String(state.party).toUpperCase();
+    if (state.partyCode) state.partyCode = String(state.partyCode).toUpperCase();
+    state.lines.forEach(ln => {
+      ['model','backing','colour','width','length','category'].forEach(k => {
+        if (ln[k]) ln[k] = String(ln[k]).toUpperCase();
+      });
+    });
     renderHeader();
     renderLines();
     renderTotals();
     wireHeader();
     wireKeyboard();
+    attachUppercase(document.querySelector('[data-page="create-pi"]'));
     // persist on any input
     document.querySelector('[data-page="create-pi"]').addEventListener('input', saveDraft);
     document.querySelector('[data-page="create-pi"]').addEventListener('change', saveDraft);
@@ -3168,13 +3208,13 @@
   }
 
   function submit(){
-    const name  = $('ap-name').value.trim();
-    const code  = $('ap-code').value.trim();
+    const name  = $('ap-name').value.trim().toUpperCase();
+    const code  = $('ap-code').value.trim().toUpperCase();
     const poc   = $('ap-poc').value;
-    const gst   = $('ap-gst').value.trim();
-    const state = $('ap-state').value.trim();
+    const gst   = $('ap-gst').value.trim().toUpperCase();
+    const state = $('ap-state').value.trim().toUpperCase();
     const phone = $('ap-phone').value.trim();
-    const city  = $('ap-city').value.trim();
+    const city  = $('ap-city').value.trim().toUpperCase();
 
     if (!name)  { setStatus('err', 'Party name is required.'); $('ap-name').focus();  return; }
     if (!code)  { setStatus('err', 'Party code is required.'); $('ap-code').focus();  return; }
@@ -3233,9 +3273,27 @@
       .finally(() => { $('ap-submit').disabled = false; });
   }
 
+  function attachUppercase(root){
+    if (!root) return;
+    root.addEventListener('input', (e) => {
+      const el = e.target;
+      if (!el || el.tagName !== 'INPUT') return;
+      const t = (el.type || '').toLowerCase();
+      if (t === 'number' || t === 'date' || t === 'tel' || t === 'email' || t === 'password' || t === 'time') return;
+      if (el.classList.contains('no-upper')) return;
+      const v = el.value;
+      if (v && v !== v.toUpperCase()){
+        const s = el.selectionStart, en = el.selectionEnd;
+        el.value = v.toUpperCase();
+        try { el.setSelectionRange(s, en); } catch(_){}
+      }
+    }, true);
+  }
+
   function init(){
     mergeCustomIntoVocab();
     refreshCustomCount();
+    attachUppercase(document.querySelector('.ap-modal'));
 
     const addBtn = $('parties-add-btn');
     if (addBtn) addBtn.addEventListener('click', openModal);
