@@ -1,0 +1,9 @@
+{
+  "name": "dotatlas",
+  "version": "1.0.0",
+  "private": true,
+  "description": "atlas dashboard — Vercel serverless API",
+  "dependencies": {
+    "googleapis": "^144.0.0"
+  }
+}

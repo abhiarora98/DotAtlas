@@ -2256,9 +2256,11 @@
   })();
 </script>
 
-<!-- atlas backend endpoint (Google Apps Script web app bound to the Comfort_atlas sheet) -->
+<!-- atlas backend endpoint (Vercel serverless function backed by Google Sheets API + service account) -->
 <script>
-  window.ATLAS_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyI_IzfhHMbWp9ZH9WVRcFfhFz-ugCkmWZDxALFmh66RrN4w1YkOW1uTWgxgcccEx7Qnw/exec";
+  // Same-origin Vercel serverless function. Replaces the Apps Script /exec URL
+  // for ~5x faster writes. See api/README.md for setup.
+  window.ATLAS_APPS_SCRIPT_URL = "/api/pi";
 </script>
 
 <!-- vocabularies extracted from data/masters_seed.csv -->

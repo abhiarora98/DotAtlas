@@ -1,0 +1,119 @@
+# atlas — Vercel serverless backend
+
+Replaces the Apps Script web app. Faster, more robust, lives in this
+repo. Same payload shape so the frontend doesn't change much.
+
+## Setup (one-time, ~15 minutes)
+
+### 1. Create a Google Cloud project + service account
+
+A service account is a robot Google account that owns no data of its
+own but can be granted access to specific files (like your sheet).
+
+1. Open https://console.cloud.google.com.
+2. Top bar → project dropdown → **New Project**.
+   - Name: `atlas-dashboard` (or anything).
+   - Click **Create**.
+3. Wait ~30 sec; select the new project.
+4. Left menu → **APIs & Services → Library**. Search **Google Sheets API**
+   → click → **Enable**.
+5. Left menu → **APIs & Services → Credentials**. Click **+ Create
+   credentials → Service account**.
+6. Name: `atlas-sheets-writer`. Skip the optional grant steps (Continue
+   → Done).
+7. Click the new service account in the list → **Keys** tab → **Add key
+   → Create new key → JSON**. A `.json` file downloads. **Keep it
+   safe** — anyone with this file can read/write any sheet shared with
+   the service account's email.
+
+### 2. Share the sheet with the service account
+
+1. Open the JSON file you downloaded. Find the `"client_email"` field
+   (looks like `atlas-sheets-writer@atlas-dashboard.iam.gserviceaccount.com`).
+2. Open your **Comfort_atlas** Google Sheet.
+3. Click **Share** (top-right) → paste the client_email → role **Editor**
+   → uncheck "Notify people" → **Share**.
+
+### 3. Get the Spreadsheet ID
+
+From the sheet's URL: `https://docs.google.com/spreadsheets/d/<THIS_IS_THE_ID>/edit#gid=...`.
+Copy the long string between `/d/` and `/edit`.
+
+### 4. Add the env vars to Vercel
+
+1. https://vercel.com → your `dotatlas` project → **Settings → Environment
+   Variables**.
+2. Add two variables (all three environments: Production, Preview, Development):
+
+   | Name                     | Value |
+   | ------------------------ | ----- |
+   | `SHEETS_SPREADSHEET_ID`  | the long ID from step 3 |
+   | `GOOGLE_SERVICE_ACCOUNT` | paste the **entire contents** of the JSON file from step 1 |
+
+   For `GOOGLE_SERVICE_ACCOUNT`, paste the JSON file's contents as-is.
+   Vercel's env-var input handles multiline values fine. The code also
+   supports base64-encoded JSON if you'd rather:
+   `cat key.json | base64 | pbcopy` then paste the base64 string.
+
+3. Click **Save**.
+
+### 5. Redeploy
+
+Either push a new commit, or:
+- Vercel project → **Deployments** → latest deployment → "..." menu →
+  **Redeploy** → check **Use existing Build Cache** **OFF** → Deploy.
+
+### 6. Test
+
+Hit your live `/api/pi` endpoint in a browser to verify it's alive:
+
+```
+https://<your-vercel>.vercel.app/api/pi
+```
+
+You should see:
+
+```json
+{"ok":true,"app":"atlas","backend":"sheets-api","piSheet":"Comfort_atlas","partiesSheet":"Parties","time":"..."}
+```
+
+Then submit a test PI from the dashboard — should land in the sheet
+in ~300ms.
+
+## Endpoints
+
+- **`GET /api/pi`** → health check. Returns the JSON above.
+- **`POST /api/pi`** with body `{ kind: 'pi', header, rows }` → appends
+  N rows to the `Comfort_atlas` tab.
+- **`POST /api/pi`** with body `{ kind: 'party', party }` → appends one
+  row to the `Parties` tab (auto-created on first call).
+
+## Why this is faster than Apps Script
+
+| Step | Apps Script | Sheets API |
+|---|---|---|
+| Cold runtime spin-up | 1-2 sec | none (Vercel keeps function warm) |
+| HTTP round-trip | direct to Google | direct to Google |
+| Auth | per-request OAuth | cached service-account JWT |
+| Typical write latency | 1-3 sec | 200-500 ms |
+
+## Troubleshooting
+
+- **`GOOGLE_SERVICE_ACCOUNT is not valid JSON`** → you pasted only part
+  of the file. Paste the entire file contents starting with `{` and
+  ending with `}`.
+- **`403 The caller does not have permission`** → you didn't share the
+  sheet with the service account's `client_email`. Step 2.
+- **`Requested entity was not found`** → wrong `SHEETS_SPREADSHEET_ID`,
+  or the sheet tab isn't named `Comfort_atlas`. Edit the constant
+  `PI_SHEET` at the top of `api/pi.js` if your tab name differs.
+- **Function not deploying** → check Vercel's build log. If it says
+  "No package.json found" or similar, the function build is being
+  skipped — make sure `package.json` at the repo root still lists
+  `googleapis` under `dependencies`.
+
+## Falling back to Apps Script
+
+The old Apps Script endpoint at
+`apps-script/Code.gs` still works. To revert, change `ATLAS_APPS_SCRIPT_URL`
+in `public/index.html` back to the `/exec` URL.
