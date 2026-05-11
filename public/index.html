@@ -2040,9 +2040,88 @@
     lines: [],
   };
 
+  // ---------- category specs (from Updated_Product_Specs.pdf) ----------
+  // Defines the valid Model / Backing / Colour / Width / Length per Category.
+  // Categories not in this map fall back to the full vocabulary (legacy data).
+  const CATEGORY_SPECS = {
+    'Cushion': {
+      models:   ['ALTO', 'NIMBO', 'CIRRO', 'STRATO', 'METO'],
+      backings: ['Diamond', 'Spike', 'Coin'],
+      colours:  null, // single + double both → use full vocab
+      widths:   ['0.61M', '1.22M'],
+      lengths:  ['10M', '12M', '15M'],
+    },
+    'Tefno': {
+      models:   ['TEFNO - 400', 'TEFNO - 600', 'TEFNO - 900'],
+      backings: [],
+      colours:  null,
+      widths:   ['0.61M', '1.22M'],
+      lengths:  ['10M', '12M', '15M'],
+    },
+    'Turf': {
+      models:   ['KAPPA', 'COSMO'],
+      backings: [],
+      colours:  null,
+      widths:   ['0.6M', '0.9M', '1M', '1.2M'],
+      lengths:  ['15M'],
+    },
+    'Artificial Grass': {
+      models:   ['20MM', '25MM', '35MM', '40MM'],
+      backings: [],
+      colours:  null,
+      widths:   ['0.6M', '0.9M', '1M', '1.2M', '2M'],
+      lengths:  ['25M'],
+    },
+    'Mono Grass': {
+      models:   ['25MM', '35MM', '40MM'],
+      backings: ['Diamond', 'Grass', 'Spike'],
+      colours:  ['Green', 'Black', 'Green-Black', 'Red-Black', 'Grey-Black', 'Beige-Brown'],
+      widths:   ['0.61M', '1.22M'],
+      lengths:  ['12M', '12.5M', '25M'],
+    },
+    'Footmat': {
+      models:   ['ALTO', 'NIMBO', 'CIRRO', 'STRATO', 'METO', 'TEFNO', 'TURF', 'Artificial Grass', 'Mono Grass'],
+      backings: ['Diamond', 'Spike', 'METO', 'Grass'],
+      colours:  null,
+      widths:   ['12in', '14in', '15in', '16in', '18in', '24in'],
+      lengths:  ['18in', '23in', '24in', '30in', '36in'],
+    },
+    'Footmat (Welcome)': {
+      models:   ['ALTO', 'NIMBO', 'CIRRO', 'STRATO', 'METO'],
+      backings: ['Diamond', 'Spike', 'Coin'],
+      colours:  null,
+      widths:   ['30CM', '38CM', '45CM', '60CM'],
+      lengths:  ['45CM', '58CM', '75CM', '90CM'],
+    },
+    'Car Set': {
+      models:   ['ALTO', 'NIMBO', 'CIRRO', 'STRATO', 'METO'],
+      backings: ['Diamond', 'Spike', 'Coin'],
+      colours:  null,
+      widths:   ['3 PCS', '4 PCS', '5 PCS'],
+      lengths:  [],
+    },
+  };
+  // Categories whose Units is always 1 per piece (mats, sets) — not roll sq.ft.
+  const PIECE_CATS = new Set(['Footmat', 'Footmat (Welcome)', 'Car Set', 'Foot Mat', 'S-Mat']);
+  // Canonical category order: PDF categories first, legacy (still in sheet) after.
+  const CATEGORIES_ORDERED = [
+    'Cushion', 'Tefno', 'Turf', 'Artificial Grass', 'Mono Grass',
+    'Footmat', 'Footmat (Welcome)', 'Car Set',
+    // legacy categories present in historical data
+    'Rolls', 'S-Mat', 'Foot Mat', 'Monograss', 'Grass',
+    'Backing Sheet', 'Heavy', 'WIRE',
+  ];
+
+  function specOf(cat){ return CATEGORY_SPECS[cat] || null; }
+  function modelsFor(cat){   const s = specOf(cat); return s && s.models   ? s.models   : V.models; }
+  function backingsFor(cat){ const s = specOf(cat); return s && s.backings ? s.backings : V.backings; }
+  function coloursFor(cat){  const s = specOf(cat); return s && s.colours  ? s.colours  : V.colours; }
+  function widthsFor(cat){   const s = specOf(cat); return s && s.widths   ? s.widths   : V.widths; }
+  function lengthsFor(cat){  const s = specOf(cat); return s && s.lengths  ? s.lengths  : V.lengths; }
+
   function newLine(){
     return {
-      category: 'Rolls',
+      category: 'Cushion',
       model: '',
       backing: '',
       colour: '',
@@ -2056,18 +2135,22 @@
   }
 
   // ---------- derived per line ----------
-  function rollsUnits(w, l){
-    // Matches "4ft" × "12m" pattern → sq.ft.
-    const mw = String(w).match(/^(\d+(?:\.\d+)?)ft$/i);
-    const ml = String(l).match(/^(\d+(?:\.\d+)?)m$/i);
-    if (mw && ml) return parseFloat(mw[1]) * parseFloat(ml[1]) * 3.281;
+  // Parse a dimension token like "4ft", "0.61M", "30 CM", "12in", "2mtr" → meters.
+  function dimToMeters(s){
+    const t = String(s || '').trim().toUpperCase().replace(/\s+/g, '');
+    let m;
+    if ((m = t.match(/^(\d+(?:\.\d+)?)MTR$/))) return parseFloat(m[1]);
+    if ((m = t.match(/^(\d+(?:\.\d+)?)CM$/)))  return parseFloat(m[1]) / 100;
+    if ((m = t.match(/^(\d+(?:\.\d+)?)FT$/)))  return parseFloat(m[1]) * 0.3048;
+    if ((m = t.match(/^(\d+(?:\.\d+)?)IN$/)))  return parseFloat(m[1]) * 0.0254;
+    if ((m = t.match(/^(\d+(?:\.\d+)?)M$/)))   return parseFloat(m[1]);
     return null;
   }
   function unitsFor(line){
-    if (line.category === 'Rolls') {
-      const u = rollsUnits(line.width, line.length);
-      if (u !== null) return u;
-    }
+    if (PIECE_CATS.has(line.category)) return 1;
+    const w = dimToMeters(line.width);
+    const l = dimToMeters(line.length);
+    if (w !== null && l !== null) return w * l * 10.7639; // sq.m → sq.ft
     return 1;
   }
   function derived(line){
@@ -2177,19 +2260,68 @@
 
       tr.appendChild(el('td', { class: 'idx' }, String(i+1).padStart(2, '0')));
 
-      tr.appendChild(el('td', {}, selectOf(line.category, V.categories, 'category',
-        e => { line.category = e.target.value; renderLines(); renderTotals(); })));
-      tr.appendChild(el('td', {}, selectOf(line.model, V.models, 'model',
+      // === CATEGORY (drives every dependent dropdown below) ===
+      tr.appendChild(el('td', {}, selectOf(line.category, CATEGORIES_ORDERED, 'category',
+        e => {
+          const nextCat = e.target.value;
+          line.category = nextCat;
+          // Clear dependent fields whose current value isn't valid for the new category.
+          const inList = (val, list) => !val || (list && list.includes(val));
+          if (!inList(line.model,   modelsFor(nextCat)))   line.model = '';
+          if (!inList(line.backing, backingsFor(nextCat))) line.backing = '';
+          if (!inList(line.colour,  coloursFor(nextCat)))  line.colour = '';
+          if (!inList(line.width,   widthsFor(nextCat)))   line.width = '';
+          if (!inList(line.length,  lengthsFor(nextCat)))  line.length = '';
+          renderLines(); renderTotals();
+        })));
+
+      // === MODEL ===
+      tr.appendChild(el('td', {}, selectOf(line.model, modelsFor(line.category), 'model',
         e => { line.model = e.target.value; renderTotals(); })));
-      tr.appendChild(el('td', {}, selectOf(line.backing, V.backings, 'backing',
-        e => { line.backing = e.target.value; renderTotals(); })));
-      tr.appendChild(el('td', {}, selectOf(line.colour, V.colours, 'colour',
+
+      // === BACKING — disabled "n/a" when category has no backings ===
+      const backingsList = backingsFor(line.category);
+      const spec = specOf(line.category);
+      const backingDisabled = !!(spec && spec.backings && spec.backings.length === 0);
+      if (backingDisabled){
+        const sel = el('select', { class: 'pi-select', disabled: 'disabled' });
+        sel.appendChild(el('option', { value: '' }, 'n/a'));
+        line.backing = '';
+        tr.appendChild(el('td', {}, sel));
+      } else {
+        tr.appendChild(el('td', {}, selectOf(line.backing, backingsList, 'backing',
+          e => { line.backing = e.target.value; renderTotals(); })));
+      }
+
+      // === COLOUR ===
+      tr.appendChild(el('td', {}, selectOf(line.colour, coloursFor(line.category), 'colour',
         e => { line.colour = e.target.value; renderTotals(); })));
 
-      tr.appendChild(el('td', {}, datalistInput(line.width, V.widths, 'pi-widths-list', 'W',
-        v => { line.width = v; renderLines(); renderTotals(); })));
-      tr.appendChild(el('td', {}, datalistInput(line.length, V.lengths, 'pi-lengths-list', 'L',
-        v => { line.length = v; renderLines(); renderTotals(); })));
+      // === WIDTH ===
+      const widthsList = widthsFor(line.category);
+      const widthDisabled = !!(spec && spec.widths && spec.widths.length === 0);
+      if (widthDisabled){
+        const sel = el('select', { class: 'pi-select', disabled: 'disabled' });
+        sel.appendChild(el('option', { value: '' }, 'n/a'));
+        line.width = '';
+        tr.appendChild(el('td', {}, sel));
+      } else {
+        tr.appendChild(el('td', {}, selectOf(line.width, widthsList, 'W',
+          e => { line.width = e.target.value; renderLines(); renderTotals(); })));
+      }
+
+      // === LENGTH ===
+      const lengthsList = lengthsFor(line.category);
+      const lengthDisabled = !!(spec && spec.lengths && spec.lengths.length === 0);
+      if (lengthDisabled){
+        const sel = el('select', { class: 'pi-select', disabled: 'disabled' });
+        sel.appendChild(el('option', { value: '' }, 'n/a'));
+        line.length = '';
+        tr.appendChild(el('td', {}, sel));
+      } else {
+        tr.appendChild(el('td', {}, selectOf(line.length, lengthsList, 'L',
+          e => { line.length = e.target.value; renderLines(); renderTotals(); })));
+      }
 
       const qtyInp = el('input', { class: 'pi-input num', type: 'number', min: '0', step: '1', value: line.qty,
         oninput: e => { line.qty = e.target.value; renderTotals(); refreshDerivedRow(tr, line); }});
