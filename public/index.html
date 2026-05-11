@@ -982,6 +982,50 @@
   @media (max-width: 1100px) {
     .pi-grid { grid-template-columns: 1fr 1fr; }
   }
+
+  /* Keyboard shortcuts hint bar */
+  .pi-shortcuts {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 14px;
+    margin: -8px 0 16px 0;
+    padding: 8px 14px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: rgba(255,255,255,0.018);
+    font-size: 11px;
+    color: var(--text-3);
+    font-family: var(--fm);
+    letter-spacing: 0.04em;
+  }
+  .pi-shortcuts .lbl {
+    font-size: 10px; letter-spacing: 0.18em; color: var(--text-3);
+    padding-right: 6px; border-right: 1px solid var(--line);
+    text-transform: uppercase;
+  }
+  .pi-shortcuts .sep { color: var(--text-4); }
+  .pi-shortcuts kbd {
+    display: inline-block;
+    padding: 1px 6px;
+    font-family: var(--fm); font-size: 10px;
+    color: var(--text-2);
+    background: var(--surface-2);
+    border: 1px solid var(--line-2);
+    border-radius: 4px;
+    box-shadow: 0 1px 0 var(--line);
+    margin: 0 2px;
+    line-height: 1.4;
+  }
+  body[data-mode="light"] .pi-shortcuts {
+    background: var(--surface-2);
+    border-color: var(--line);
+    color: var(--text-3);
+  }
+  body[data-mode="light"] .pi-shortcuts .lbl { border-right-color: var(--line); }
+  body[data-mode="light"] .pi-shortcuts kbd {
+    background: var(--surface);
+    color: var(--text-2);
+    border-color: var(--line-2);
+    box-shadow: 0 1px 0 var(--line-2);
+  }
 </style>
 </head>
 <body>
@@ -1632,6 +1676,19 @@
         <div class="when">WORKSPACE · <b>COMFORT INDUSTRIES</b><br/>SHEET · <b>MASTERS</b><br/>REF# · <b id="pi-eb-ref">—</b></div>
       </div>
 
+      <!-- KEYBOARD SHORTCUTS HINT -->
+      <div class="pi-shortcuts" aria-label="Keyboard shortcuts">
+        <span class="lbl">KEYS</span>
+        <span><kbd>Enter</kbd> next field</span>
+        <span><kbd>Tab</kbd> next field</span>
+        <span><kbd>Esc</kbd> blur</span>
+        <span class="sep">·</span>
+        <span>Type to filter any dropdown</span>
+        <span class="sep">·</span>
+        <span><kbd>⌘</kbd>+<kbd>S</kbd> save draft</span>
+        <span><kbd>⌘</kbd>+<kbd>Enter</kbd> create PI</span>
+      </div>
+
       <!-- HEADER CARD -->
       <div class="card">
         <div class="card-h">
@@ -2205,6 +2262,27 @@
     }
     return s;
   }
+
+  // Tally-style typeahead combobox: <input list> + <datalist>. The browser
+  // filters options as the user types and offers first-match autocomplete.
+  // Returns [input, datalist] — el() unwraps arrays so caller wraps in <td>.
+  let _dlCounter = 0;
+  function comboBox(value, options, placeholder, onChange){
+    const listId = 'pi-dl-' + (++_dlCounter);
+    const inp = el('input', {
+      class: 'pi-input pi-combo',
+      list: listId,
+      value: value || '',
+      placeholder,
+      autocomplete: 'off',
+      spellcheck: 'false',
+      oninput: e => onChange(e),
+      onchange: e => onChange(e),
+    });
+    const dl = el('datalist', { id: listId });
+    for (const o of options || []) dl.appendChild(el('option', { value: o }));
+    return [inp, dl];
+  }
   function datalistInput(value, options, listId, placeholder, onInput){
     const wrap = document.createDocumentFragment();
     const inp = el('input', {
@@ -2266,7 +2344,7 @@
       tr.appendChild(el('td', { class: 'idx' }, String(i+1).padStart(2, '0')));
 
       // === CATEGORY (drives every dependent dropdown below) ===
-      tr.appendChild(el('td', {}, selectOf(line.category, CATEGORIES_ORDERED, 'category',
+      tr.appendChild(el('td', {}, comboBox(line.category, CATEGORIES_ORDERED, 'category',
         e => {
           const nextCat = e.target.value;
           line.category = nextCat;
@@ -2277,11 +2355,13 @@
           if (!inList(line.colour,  coloursFor(nextCat)))  line.colour = '';
           if (!inList(line.width,   widthsFor(nextCat)))   line.width = '';
           if (!inList(line.length,  lengthsFor(nextCat)))  line.length = '';
-          renderLines(); renderTotals();
+          // Only re-render the whole table if the value actually changed (avoid losing focus on every keystroke).
+          if (e.type === 'change') { renderLines(); renderTotals(); }
+          else renderTotals();
         })));
 
       // === MODEL ===
-      tr.appendChild(el('td', {}, selectOf(line.model, modelsFor(line.category), 'model',
+      tr.appendChild(el('td', {}, comboBox(line.model, modelsFor(line.category), 'model',
         e => { line.model = e.target.value; renderTotals(); })));
 
       // === BACKING — disabled "n/a" when category has no backings ===
@@ -2289,43 +2369,48 @@
       const spec = specOf(line.category);
       const backingDisabled = !!(spec && spec.backings && spec.backings.length === 0);
       if (backingDisabled){
-        const sel = el('select', { class: 'pi-select', disabled: 'disabled' });
-        sel.appendChild(el('option', { value: '' }, 'n/a'));
+        const naInp = el('input', { class: 'pi-input pi-combo', value: 'n/a', disabled: 'disabled' });
         line.backing = '';
-        tr.appendChild(el('td', {}, sel));
+        tr.appendChild(el('td', {}, naInp));
       } else {
-        tr.appendChild(el('td', {}, selectOf(line.backing, backingsList, 'backing',
+        tr.appendChild(el('td', {}, comboBox(line.backing, backingsList, 'backing',
           e => { line.backing = e.target.value; renderTotals(); })));
       }
 
       // === COLOUR ===
-      tr.appendChild(el('td', {}, selectOf(line.colour, coloursFor(line.category), 'colour',
+      tr.appendChild(el('td', {}, comboBox(line.colour, coloursFor(line.category), 'colour',
         e => { line.colour = e.target.value; renderTotals(); })));
 
       // === WIDTH ===
       const widthsList = widthsFor(line.category);
       const widthDisabled = !!(spec && spec.widths && spec.widths.length === 0);
       if (widthDisabled){
-        const sel = el('select', { class: 'pi-select', disabled: 'disabled' });
-        sel.appendChild(el('option', { value: '' }, 'n/a'));
+        const naInp = el('input', { class: 'pi-input pi-combo', value: 'n/a', disabled: 'disabled' });
         line.width = '';
-        tr.appendChild(el('td', {}, sel));
+        tr.appendChild(el('td', {}, naInp));
       } else {
-        tr.appendChild(el('td', {}, selectOf(line.width, widthsList, 'W',
-          e => { line.width = e.target.value; renderLines(); renderTotals(); })));
+        tr.appendChild(el('td', {}, comboBox(line.width, widthsList, 'W',
+          e => {
+            line.width = e.target.value;
+            if (e.type === 'change') { renderLines(); renderTotals(); }
+            else { renderTotals(); refreshDerivedRow(tr, line); }
+          })));
       }
 
       // === LENGTH ===
       const lengthsList = lengthsFor(line.category);
       const lengthDisabled = !!(spec && spec.lengths && spec.lengths.length === 0);
       if (lengthDisabled){
-        const sel = el('select', { class: 'pi-select', disabled: 'disabled' });
-        sel.appendChild(el('option', { value: '' }, 'n/a'));
+        const naInp = el('input', { class: 'pi-input pi-combo', value: 'n/a', disabled: 'disabled' });
         line.length = '';
-        tr.appendChild(el('td', {}, sel));
+        tr.appendChild(el('td', {}, naInp));
       } else {
-        tr.appendChild(el('td', {}, selectOf(line.length, lengthsList, 'L',
-          e => { line.length = e.target.value; renderLines(); renderTotals(); })));
+        tr.appendChild(el('td', {}, comboBox(line.length, lengthsList, 'L',
+          e => {
+            line.length = e.target.value;
+            if (e.type === 'change') { renderLines(); renderTotals(); }
+            else { renderTotals(); refreshDerivedRow(tr, line); }
+          })));
       }
 
       const qtyInp = el('input', { class: 'pi-input num', type: 'number', min: '0', step: '1', value: line.qty,
@@ -2543,6 +2628,68 @@
     } catch(e){}
   }
 
+  // ---------- Tally-style keyboard navigation ----------
+  function focusables(root){
+    return Array.from(root.querySelectorAll('input, select, button.pi-btn, button#pi-add-line'))
+      .filter(el => !el.disabled && el.offsetParent !== null && el.type !== 'hidden');
+  }
+  function focusFirstOfLastLine(){
+    const rows = document.querySelectorAll('#pi-lines tr.pi-row');
+    const last = rows[rows.length - 1];
+    if (!last) return;
+    const first = last.querySelector('input:not([disabled]), select:not([disabled])');
+    if (first){ first.focus(); if (first.select) try { first.select(); } catch(e){} }
+  }
+  function wireKeyboard(){
+    const root = document.querySelector('[data-page="create-pi"]');
+    if (!root) return;
+
+    root.addEventListener('keydown', (e) => {
+      // ⌘/Ctrl + Enter → submit
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)){
+        e.preventDefault();
+        $('pi-submit').click();
+        return;
+      }
+      // ⌘/Ctrl + S → save draft (intercept browser save)
+      if ((e.key === 's' || e.key === 'S') && (e.ctrlKey || e.metaKey)){
+        e.preventDefault();
+        $('pi-save-draft').click();
+        return;
+      }
+      // Esc → blur active field (no modal to close)
+      if (e.key === 'Escape'){
+        if (document.activeElement && document.activeElement.blur){
+          document.activeElement.blur();
+        }
+        return;
+      }
+      // Enter → advance to next focusable
+      if (e.key === 'Enter' && !e.shiftKey){
+        const target = e.target;
+        // Don't override Enter on buttons (let them fire their click)
+        if (target.tagName === 'BUTTON') return;
+        // Date input: let native Enter behavior be (commits the picker)
+        if (target.type === 'date') {
+          // fall through to advance
+        }
+        e.preventDefault();
+        const list = focusables(root);
+        const idx = list.indexOf(target);
+        if (idx === -1) return;
+        const next = list[idx + 1];
+        if (next && next.id !== 'pi-add-line' && !next.classList.contains('pi-btn')){
+          next.focus();
+          if (next.select) try { next.select(); } catch(err){}
+        } else {
+          // End of form: add a new line and focus its first cell.
+          $('pi-add-line').click();
+          setTimeout(focusFirstOfLastLine, 0);
+        }
+      }
+    });
+  }
+
   // ---------- init ----------
   function init(){
     restoreDraft();
@@ -2550,6 +2697,7 @@
     renderLines();
     renderTotals();
     wireHeader();
+    wireKeyboard();
     // persist on any input
     document.querySelector('[data-page="create-pi"]').addEventListener('input', saveDraft);
     document.querySelector('[data-page="create-pi"]').addEventListener('change', saveDraft);
