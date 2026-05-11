@@ -2062,14 +2062,14 @@
       models:   ['KAPPA', 'COSMO'],
       backings: [],
       colours:  null,
-      widths:   ['0.6M', '0.9M', '1M', '1.2M'],
+      widths:   ['2ft', '3ft', '1M', '4ft'],
       lengths:  ['15M'],
     },
     'Artificial Grass': {
       models:   ['20MM', '25MM', '35MM', '40MM'],
       backings: [],
       colours:  null,
-      widths:   ['0.6M', '0.9M', '1M', '1.2M', '2M'],
+      widths:   ['2ft', '3ft', '1M', '4ft', '2M'],
       lengths:  ['25M'],
     },
     'Mono Grass': {
@@ -2141,6 +2141,7 @@
   function dimToMeters(s){
     const t = String(s || '').trim().toUpperCase().replace(/\s+/g, '');
     if (t === '2FT') return 0.61;
+    if (t === '3FT') return 0.9;
     if (t === '4FT') return 1.22;
     let m;
     if ((m = t.match(/^(\d+(?:\.\d+)?)MTR$/))) return parseFloat(m[1]);
