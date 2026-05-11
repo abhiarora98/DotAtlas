@@ -983,6 +983,81 @@
     .pi-grid { grid-template-columns: 1fr 1fr; }
   }
 
+  /* Party typeahead (custom, only shows on type) */
+  .pi-party-wrap { position: relative; }
+  .pi-typeahead {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 30;
+    max-height: 280px;
+    overflow-y: auto;
+    background: var(--surface);
+    border: 1px solid var(--line-2);
+    border-radius: 6px;
+    box-shadow:
+      0 4px 12px rgba(0,0,0,0.32),
+      0 0 0 1px var(--line) inset;
+    padding: 4px;
+  }
+  .pi-typeahead .row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+    padding: 8px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text);
+    transition: background 120ms var(--ease);
+  }
+  .pi-typeahead .row:hover,
+  .pi-typeahead .row.active {
+    background: var(--surface-3);
+  }
+  .pi-typeahead .row .nm { font-weight: 500; }
+  .pi-typeahead .row .nm mark {
+    background: transparent;
+    color: var(--emerald);
+    font-weight: 600;
+  }
+  .pi-typeahead .row .code {
+    font-family: var(--fm);
+    font-size: 11px;
+    color: var(--text-3);
+    letter-spacing: 0.04em;
+  }
+  .pi-typeahead .empty {
+    padding: 12px;
+    color: var(--text-3);
+    font-size: 12.5px;
+    font-style: italic;
+    text-align: center;
+  }
+  .pi-typeahead .footer {
+    padding: 6px 10px;
+    color: var(--text-3);
+    font-size: 10.5px;
+    font-family: var(--fm);
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    border-top: 1px solid var(--line);
+    margin-top: 4px;
+    display: flex; justify-content: space-between;
+  }
+  body[data-mode="light"] .pi-typeahead {
+    background: var(--surface);
+    border-color: var(--line-2);
+    box-shadow:
+      0 4px 16px rgba(11,18,32,0.08),
+      0 0 0 1px var(--line) inset;
+  }
+  body[data-mode="light"] .pi-typeahead .row:hover,
+  body[data-mode="light"] .pi-typeahead .row.active {
+    background: var(--surface-2);
+  }
+  body[data-mode="light"] .pi-typeahead .row .nm mark { color: var(--emerald); }
+
   /* Keyboard shortcuts hint bar */
   .pi-shortcuts {
     display: flex; align-items: center; flex-wrap: wrap; gap: 14px;
@@ -1701,10 +1776,10 @@
         </div>
         <div class="card-b">
           <div class="pi-grid">
-            <div class="pi-field">
+            <div class="pi-field pi-party-wrap">
               <label for="pi-party">Party</label>
-              <input class="pi-input" list="pi-parties-list" id="pi-party" placeholder="Search 278 parties…" autocomplete="off">
-              <datalist id="pi-parties-list"></datalist>
+              <input class="pi-input" id="pi-party" placeholder="Start typing party name or code…" autocomplete="off" spellcheck="false">
+              <div class="pi-typeahead" id="pi-party-results" role="listbox" aria-label="Party suggestions" hidden></div>
             </div>
             <div class="pi-field">
               <label for="pi-party-code">Party Code</label>
@@ -2316,14 +2391,6 @@
     }
     pocSel.value = state.poc;
 
-    // parties datalist
-    const pl = $('pi-parties-list');
-    if (pl && !pl.children.length){
-      for (const p of V.parties){
-        pl.appendChild(el('option', { value: p.name }, p.code || ''));
-      }
-    }
-
     $('pi-party').value = state.party;
     $('pi-party-code').value = state.partyCode;
     $('pi-date').value = state.date;
@@ -2489,13 +2556,137 @@
     return state.lines.some(ln => Number(ln.qty) > 0 && (Number(ln.billRate) || Number(ln.actualRate)) > 0);
   }
 
+  // ---------- party typeahead (custom; hidden until user types) ----------
+  function escapeHtml(s){
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+  function highlight(text, needle){
+    if (!needle) return escapeHtml(text);
+    const t = String(text);
+    const i = t.toLowerCase().indexOf(needle.toLowerCase());
+    if (i < 0) return escapeHtml(t);
+    return escapeHtml(t.slice(0, i)) +
+      '<mark>' + escapeHtml(t.slice(i, i + needle.length)) + '</mark>' +
+      escapeHtml(t.slice(i + needle.length));
+  }
+  const PARTY_LIMIT = 8;
+  let partyTypeahead = { open: false, results: [], cursor: -1, query: '' };
+
+  function renderPartyResults(query){
+    const box = $('pi-party-results');
+    const q = String(query || '').trim();
+    if (!q){
+      box.hidden = true;
+      partyTypeahead = { open: false, results: [], cursor: -1, query: '' };
+      return;
+    }
+    const ql = q.toLowerCase();
+    const matches = [];
+    // Prefer prefix matches first, then substring
+    const prefix = [], substring = [];
+    for (const p of V.parties){
+      const nm = p.name.toLowerCase();
+      const cd = (p.code || '').toLowerCase();
+      if (nm.startsWith(ql) || cd.startsWith(ql)) prefix.push(p);
+      else if (nm.includes(ql) || cd.includes(ql)) substring.push(p);
+      if (prefix.length >= PARTY_LIMIT) break;
+    }
+    const ordered = prefix.concat(substring).slice(0, PARTY_LIMIT);
+    partyTypeahead.results = ordered;
+    partyTypeahead.cursor = ordered.length ? 0 : -1;
+    partyTypeahead.query = q;
+    partyTypeahead.open = true;
+
+    if (!ordered.length){
+      box.innerHTML = '<div class="empty">No party matches <b>' + escapeHtml(q) + '</b></div>';
+    } else {
+      const rows = ordered.map((p, i) =>
+        '<div class="row' + (i === 0 ? ' active' : '') + '" data-i="' + i + '">' +
+          '<span class="nm">' + highlight(p.name, q) + '</span>' +
+          '<span class="code">' + (highlight(p.code || '', q) || '—') + '</span>' +
+        '</div>'
+      ).join('');
+      const footer = '<div class="footer"><span>↑↓ navigate</span><span>Enter select</span><span>Esc close</span></div>';
+      box.innerHTML = rows + footer;
+      box.querySelectorAll('.row').forEach(row => {
+        row.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          const i = Number(row.getAttribute('data-i'));
+          pickParty(ordered[i]);
+        });
+        row.addEventListener('mouseenter', () => {
+          partyTypeahead.cursor = Number(row.getAttribute('data-i'));
+          updatePartyCursor();
+        });
+      });
+    }
+    box.hidden = false;
+  }
+  function updatePartyCursor(){
+    const box = $('pi-party-results');
+    box.querySelectorAll('.row').forEach((r, i) => {
+      r.classList.toggle('active', i === partyTypeahead.cursor);
+      if (i === partyTypeahead.cursor) r.scrollIntoView({ block: 'nearest' });
+    });
+  }
+  function pickParty(p){
+    if (!p) return;
+    state.party = p.name;
+    state.partyCode = p.code || '';
+    $('pi-party').value = p.name;
+    $('pi-party-code').value = p.code || '';
+    $('pi-party-results').hidden = true;
+    partyTypeahead.open = false;
+    renderTotals();
+    saveDraft();
+    // advance focus naturally (next input is the Party Code field)
+    $('pi-party-code').focus();
+    try { $('pi-party-code').select(); } catch(e){}
+  }
+
   // ---------- header wiring ----------
   function wireHeader(){
-    $('pi-party').addEventListener('input', e => {
+    const partyInp = $('pi-party');
+    partyInp.addEventListener('input', e => {
       state.party = e.target.value;
-      const match = V.parties.find(p => p.name === state.party);
-      if (match) { state.partyCode = match.code || ''; $('pi-party-code').value = state.partyCode; }
+      const exact = V.parties.find(p => p.name === state.party);
+      if (exact) { state.partyCode = exact.code || ''; $('pi-party-code').value = state.partyCode; }
+      renderPartyResults(state.party);
       renderTotals();
+    });
+    partyInp.addEventListener('focus', e => {
+      // Don't show on bare focus — only show if there's already a query
+      if (e.target.value.trim()) renderPartyResults(e.target.value);
+    });
+    partyInp.addEventListener('blur', () => {
+      // delay so click on a row registers first
+      setTimeout(() => { $('pi-party-results').hidden = true; partyTypeahead.open = false; }, 120);
+    });
+    partyInp.addEventListener('keydown', (e) => {
+      if (!partyTypeahead.open) return;
+      const n = partyTypeahead.results.length;
+      if (e.key === 'ArrowDown'){
+        e.preventDefault();
+        partyTypeahead.cursor = (partyTypeahead.cursor + 1) % Math.max(n, 1);
+        updatePartyCursor();
+      } else if (e.key === 'ArrowUp'){
+        e.preventDefault();
+        partyTypeahead.cursor = (partyTypeahead.cursor - 1 + n) % Math.max(n, 1);
+        updatePartyCursor();
+      } else if (e.key === 'Enter'){
+        if (n > 0 && partyTypeahead.cursor >= 0){
+          e.preventDefault();
+          e.stopPropagation();
+          pickParty(partyTypeahead.results[partyTypeahead.cursor]);
+        }
+      } else if (e.key === 'Escape'){
+        e.preventDefault();
+        $('pi-party-results').hidden = true;
+        partyTypeahead.open = false;
+      }
     });
     $('pi-party-code').addEventListener('input', e => { state.partyCode = e.target.value; });
     $('pi-date').addEventListener('input', e => { state.date = e.target.value; });
