@@ -676,6 +676,179 @@
     background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0.4));
   }
   body[data-mode="light"] .theme-toggle { color: #D97706; }
+
+  /* ===== CREATE PI FORM ===== */
+  .pi-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+    gap: 14px 16px;
+  }
+  .pi-field { display: flex; flex-direction: column; gap: 6px; }
+  .pi-field > label {
+    font-family: var(--fm); font-size: 10.5px; color: var(--text-3);
+    letter-spacing: 0.14em; text-transform: uppercase; font-weight: 500;
+  }
+  .pi-input, .pi-select {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 9px 11px;
+    font-family: var(--fb);
+    font-size: 13px;
+    line-height: 1.2;
+    transition: border-color 200ms var(--ease), background 200ms var(--ease);
+    width: 100%;
+  }
+  .pi-input::placeholder { color: var(--text-4); }
+  .pi-input:hover, .pi-select:hover { border-color: var(--line-2); }
+  .pi-input:focus, .pi-select:focus {
+    outline: none; border-color: var(--emerald);
+    background: var(--surface-2);
+    box-shadow: 0 0 0 3px rgba(78,222,163,0.08);
+  }
+  .pi-input[readonly] {
+    background: var(--surface-2); color: var(--text-2); cursor: not-allowed;
+  }
+  .pi-input.mono { font-family: var(--fm); font-size: 12.5px; letter-spacing: 0.02em; }
+  .pi-input.num { font-family: var(--fm); text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* line items table */
+  .pi-lines-wrap {
+    overflow-x: auto;
+    margin: 0 -22px -20px -22px;
+    padding: 0 22px 20px 22px;
+  }
+  table.pi-table {
+    width: 100%; border-collapse: collapse;
+    font-size: 12.5px;
+  }
+  table.pi-table th {
+    text-align: left;
+    font-family: var(--fm); font-size: 10px; letter-spacing: 0.14em;
+    color: var(--text-3); text-transform: uppercase; font-weight: 500;
+    padding: 0 8px 12px 8px;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  table.pi-table th.num { text-align: right; }
+  table.pi-table td {
+    padding: 8px 6px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+  }
+  table.pi-table tr.pi-row { transition: background 200ms var(--ease); }
+  table.pi-table tr.pi-row:hover { background: rgba(255,255,255,0.018); }
+  table.pi-table td.idx {
+    font-family: var(--fm); color: var(--text-3); font-size: 11px; width: 28px;
+    letter-spacing: 0.06em; padding-left: 4px;
+  }
+  table.pi-table td .pi-input, table.pi-table td .pi-select {
+    padding: 6px 8px; font-size: 12.5px; min-width: 88px;
+  }
+  table.pi-table td.num { white-space: nowrap; }
+  table.pi-table td.num .v {
+    font-family: var(--fm); font-variant-numeric: tabular-nums;
+    color: var(--text); font-size: 12.5px;
+  }
+  table.pi-table td.num .v.muted { color: var(--text-3); }
+  .pi-remove {
+    background: transparent; border: 1px solid var(--line);
+    color: var(--text-3); border-radius: 6px; width: 26px; height: 26px;
+    cursor: pointer; transition: all 200ms var(--ease);
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .pi-remove:hover { border-color: var(--rose); color: var(--rose); }
+  .pi-add-line {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: transparent; color: var(--emerald);
+    border: 1px dashed rgba(78,222,163,0.30);
+    padding: 8px 14px; border-radius: 6px;
+    font-family: var(--fm); font-size: 11px; letter-spacing: 0.10em;
+    text-transform: uppercase; font-weight: 500;
+    cursor: pointer; transition: all 200ms var(--ease);
+    margin-top: 12px;
+  }
+  .pi-add-line:hover { background: var(--emerald-soft); border-color: var(--emerald); }
+  .pi-empty-lines {
+    padding: 28px 12px; text-align: center;
+    color: var(--text-3); font-size: 13px;
+    border: 1px dashed var(--line); border-radius: 8px;
+    margin-top: 4px;
+  }
+
+  /* totals card */
+  .pi-totals .kr {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 8px 0; border-bottom: 1px solid var(--line);
+  }
+  .pi-totals .kr:last-child { border-bottom: none; }
+  .pi-totals .kr > span:first-child {
+    color: var(--text-2); font-size: 12.5px;
+  }
+  .pi-totals .kr > b {
+    font-family: var(--fm); font-variant-numeric: tabular-nums;
+    font-weight: 500; color: var(--text); font-size: 13px; letter-spacing: 0.02em;
+  }
+  .pi-totals .kr.big {
+    padding-top: 14px; margin-top: 4px;
+    border-top: 1px solid var(--line-2);
+  }
+  .pi-totals .kr.big > span:first-child {
+    font-family: var(--fm); font-size: 11px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--text);
+  }
+  .pi-totals .kr.big > b {
+    font-family: var(--fd); font-size: 24px; font-weight: 600;
+    color: var(--emerald); letter-spacing: -0.02em;
+  }
+
+  /* submit card */
+  .pi-actions { display: flex; gap: 10px; margin-top: 12px; }
+  .pi-btn {
+    flex: 1;
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-family: var(--fm); font-size: 11px; letter-spacing: 0.12em;
+    text-transform: uppercase; font-weight: 500;
+    cursor: pointer; transition: all 200ms var(--ease);
+    border: 1px solid var(--line-2);
+    background: var(--surface);
+    color: var(--text-2);
+  }
+  .pi-btn:hover { border-color: var(--line-3); color: var(--text); }
+  .pi-btn.prime {
+    background: var(--emerald); color: var(--void);
+    border-color: var(--emerald); font-weight: 600;
+  }
+  .pi-btn.prime:hover { background: var(--emerald-2); border-color: var(--emerald-2); }
+  .pi-btn:disabled {
+    opacity: 0.4; cursor: not-allowed;
+    background: var(--surface); color: var(--text-3); border-color: var(--line);
+  }
+  .pi-btn:disabled:hover { background: var(--surface); color: var(--text-3); border-color: var(--line); }
+
+  .pi-status {
+    margin-top: 14px; padding: 10px 12px;
+    border-radius: 6px; font-size: 12.5px;
+    font-family: var(--fm); letter-spacing: 0.02em;
+    display: none;
+  }
+  .pi-status.ok    { display: block; background: var(--emerald-soft); color: var(--emerald-2); border: 1px solid var(--emerald); }
+  .pi-status.warn  { display: block; background: rgba(245,158,11,0.06); color: var(--amber); border: 1px solid rgba(245,158,11,0.3); }
+  .pi-status.err   { display: block; background: rgba(255,138,138,0.06); color: var(--rose); border: 1px solid rgba(255,138,138,0.3); }
+
+  .pi-note {
+    color: var(--text-3); font-size: 12px; line-height: 1.55;
+    padding: 10px 12px; border-radius: 6px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--line);
+  }
+  .pi-note b { color: var(--text-2); font-weight: 500; }
+
+  @media (max-width: 1100px) {
+    .pi-grid { grid-template-columns: 1fr 1fr; }
+  }
 </style>
 </head>
 <body>
@@ -1320,28 +1493,126 @@
     <section class="page" data-page="create-pi" hidden>
       <div class="hero-h">
         <div>
-          <div class="eb"><span class="live-dot"></span>Operate · create PI · draft</div>
+          <div class="eb"><span class="live-dot"></span>Operate · create PI · <span id="pi-eb-status">draft</span></div>
           <h1>One <span class="em">proforma invoice</span>, <span class="accent">many lines</span>.</h1>
         </div>
-        <div class="when">WORKSPACE · <b>COMFORT INDUSTRIES</b><br/>SHEET · <b>MASTERS</b><br/>STATUS · <b>NOT YET WIRED</b></div>
+        <div class="when">WORKSPACE · <b>COMFORT INDUSTRIES</b><br/>SHEET · <b>MASTERS</b><br/>REF# · <b id="pi-eb-ref">—</b></div>
       </div>
 
-      <div class="card" style="padding: 48px; text-align: left;">
-        <div style="display:flex; flex-direction:column; gap:18px; max-width: 640px;">
-          <div class="eb" style="color: var(--em);">
-            <span class="live-dot"></span>this is where we build it together
+      <!-- HEADER CARD -->
+      <div class="card">
+        <div class="card-h">
+          <div class="t">
+            <span class="ic">+</span>
+            <h3>Header</h3>
+            <span class="sub">PARTY · POC · DATE · REF</span>
           </div>
-          <h2 style="font-family: var(--fd); font-size: 28px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.15; margin: 0;">
-            The <span style="font-style: italic; font-weight: 500;">form lives here</span>. Right now it is intentionally <span style="color: var(--em);">empty</span>.
-          </h2>
-          <p style="color: var(--text-2); font-size: 14px; line-height: 1.6; margin: 0;">
-            Once the Apps Script endpoint is deployed against the Masters sheet, this page will host the multi-line PI form: party search, sales POC, REF # auto-suggest, line-items table with all six dropdowns wired to the real vocabularies, and live totals beneath. Submit writes N rows to the sheet under one REF #.
-          </p>
-          <div style="display:flex; gap:10px; margin-top:8px;">
-            <span class="chip emerald">phase 1 · next</span>
-            <span class="chip">apps script</span>
-            <span class="chip">multi-line</span>
-            <span class="chip">live totals</span>
+          <span class="more" id="pi-clear">RESET</span>
+        </div>
+        <div class="card-b">
+          <div class="pi-grid">
+            <div class="pi-field">
+              <label for="pi-party">Party</label>
+              <input class="pi-input" list="pi-parties-list" id="pi-party" placeholder="Search 278 parties…" autocomplete="off">
+              <datalist id="pi-parties-list"></datalist>
+            </div>
+            <div class="pi-field">
+              <label for="pi-party-code">Party Code</label>
+              <input class="pi-input mono" id="pi-party-code" placeholder="auto-fills" autocomplete="off">
+            </div>
+            <div class="pi-field">
+              <label for="pi-date">PI Date</label>
+              <input class="pi-input" type="date" id="pi-date">
+            </div>
+            <div class="pi-field">
+              <label for="pi-poc">Sales POC</label>
+              <select class="pi-select" id="pi-poc"></select>
+            </div>
+            <div class="pi-field">
+              <label for="pi-ref">REF #</label>
+              <input class="pi-input mono" type="number" id="pi-ref" placeholder="auto" autocomplete="off">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LINE ITEMS CARD -->
+      <div class="card">
+        <div class="card-h">
+          <div class="t">
+            <span class="ic">◆</span>
+            <h3>Line items</h3>
+            <span class="sub"><span id="pi-line-count">0</span> LINES</span>
+          </div>
+        </div>
+        <div class="card-b">
+          <div class="pi-lines-wrap">
+            <table class="pi-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Category</th>
+                  <th>Model</th>
+                  <th>Backing</th>
+                  <th>Colour</th>
+                  <th>Width</th>
+                  <th>Length</th>
+                  <th class="num">Qty</th>
+                  <th class="num">Actual ₹</th>
+                  <th class="num">Bill ₹</th>
+                  <th class="num">Freight</th>
+                  <th class="num">Units</th>
+                  <th class="num">Taxable</th>
+                  <th class="num">Total inc GST</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="pi-lines"></tbody>
+            </table>
+            <div id="pi-empty-lines" class="pi-empty-lines">No lines yet. Add the first one →</div>
+          </div>
+          <button class="pi-add-line" id="pi-add-line">+ add line</button>
+        </div>
+      </div>
+
+      <!-- TOTALS + ACTIONS -->
+      <div class="row-2" style="grid-template-columns: 1fr 1fr;">
+        <div class="card">
+          <div class="card-h">
+            <div class="t">
+              <span class="ic">∑</span>
+              <h3>Totals</h3>
+              <span class="sub">LIVE</span>
+            </div>
+          </div>
+          <div class="card-b pi-totals">
+            <div class="kr"><span>Lines</span><b id="pi-tot-lines">0</b></div>
+            <div class="kr"><span>Units total (sq.ft./pc)</span><b id="pi-tot-units">0</b></div>
+            <div class="kr"><span>Trade discount tracked</span><b id="pi-tot-td">₹0</b></div>
+            <div class="kr"><span>Freight</span><b id="pi-tot-freight">₹0</b></div>
+            <div class="kr"><span>Taxable value</span><b id="pi-tot-taxable">₹0</b></div>
+            <div class="kr"><span>GST 18%</span><b id="pi-tot-gst">₹0</b></div>
+            <div class="kr big"><span>Total (inc GST)</span><b id="pi-tot-total">₹0</b></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-h">
+            <div class="t">
+              <span class="ic">→</span>
+              <h3>Submit</h3>
+              <span class="sub">DRAFT</span>
+            </div>
+          </div>
+          <div class="card-b">
+            <div class="pi-note">
+              <b>Sheet write not wired yet.</b> Clicking <i>Create PI</i> below will validate the form, build the payload of N rows, and log it to the browser console. Once you deploy the Apps Script web app, paste the URL here and submit will POST to your Masters sheet.
+            </div>
+            <div class="pi-actions">
+              <button class="pi-btn" id="pi-save-draft">Save draft</button>
+              <button class="pi-btn prime" id="pi-submit">Create PI →</button>
+            </div>
+            <div class="pi-status" id="pi-status"></div>
           </div>
         </div>
       </div>
@@ -1616,6 +1887,410 @@
       }
     });
   })();
+</script>
+
+<!-- vocabularies extracted from data/masters_seed.csv -->
+<script src="pi-vocab.js"></script>
+
+<!-- Create PI form behavior -->
+<script>
+(function(){
+  const V = window.PI_VOCAB;
+  if (!V) { console.warn('PI_VOCAB missing'); return; }
+
+  // ---------- state ----------
+  const state = {
+    party: '', partyCode: '',
+    date: new Date().toISOString().slice(0,10),
+    poc: V.pocs[0] || '',
+    ref: V.nextRefNumber,
+    lines: [],
+  };
+
+  function newLine(){
+    return {
+      category: 'Rolls',
+      model: '',
+      backing: '',
+      colour: '',
+      width: '',
+      length: '',
+      qty: 1,
+      actualRate: '',
+      billRate: '',
+      freight: 0,
+    };
+  }
+
+  // ---------- derived per line ----------
+  function rollsUnits(w, l){
+    // Matches "4ft" × "12m" pattern → sq.ft.
+    const mw = String(w).match(/^(\d+(?:\.\d+)?)ft$/i);
+    const ml = String(l).match(/^(\d+(?:\.\d+)?)m$/i);
+    if (mw && ml) return parseFloat(mw[1]) * parseFloat(ml[1]) * 3.281;
+    return null;
+  }
+  function unitsFor(line){
+    if (line.category === 'Rolls') {
+      const u = rollsUnits(line.width, line.length);
+      if (u !== null) return u;
+    }
+    return 1;
+  }
+  function derived(line){
+    const units = unitsFor(line);
+    const qty = Number(line.qty) || 0;
+    const ar = Number(line.actualRate) || 0;
+    const br = Number(line.billRate) || ar;
+    const freight = Number(line.freight) || 0;
+    const td = Math.max(0, (ar - br)) * units * qty;
+    const taxable = br * units * qty + freight;
+    const gst = taxable * 0.18;
+    const total = taxable + gst;
+    return { units, td, taxable, gst, total };
+  }
+
+  // ---------- formatters ----------
+  const inr = n => '₹' + Math.round(Number(n) || 0).toLocaleString('en-IN');
+  const num = (n, d=2) => {
+    const v = Number(n) || 0;
+    return v.toLocaleString('en-IN', { maximumFractionDigits: d, minimumFractionDigits: 0 });
+  };
+
+  // ---------- DOM helpers ----------
+  function $(id){ return document.getElementById(id); }
+  function el(tag, attrs = {}, ...children){
+    const n = document.createElement(tag);
+    for (const k in attrs){
+      if (k === 'class') n.className = attrs[k];
+      else if (k === 'value') n.value = attrs[k];
+      else if (k.startsWith('on')) n.addEventListener(k.slice(2), attrs[k]);
+      else n.setAttribute(k, attrs[k]);
+    }
+    children.flat().forEach(c => {
+      if (c == null || c === false) return;
+      n.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+    });
+    return n;
+  }
+
+  function selectOf(value, options, placeholder, onChange){
+    const s = el('select', { class: 'pi-select', onchange: onChange });
+    s.appendChild(el('option', { value: '' }, placeholder));
+    for (const o of options){
+      const opt = el('option', { value: o }, o);
+      if (o === value) opt.selected = true;
+      s.appendChild(opt);
+    }
+    return s;
+  }
+  function datalistInput(value, options, listId, placeholder, onInput){
+    const wrap = document.createDocumentFragment();
+    const inp = el('input', {
+      class: 'pi-input',
+      list: listId,
+      value: value || '',
+      placeholder,
+      autocomplete: 'off',
+      oninput: e => onInput(e.target.value),
+      onchange: e => onInput(e.target.value),
+    });
+    let dl = document.getElementById(listId);
+    if (!dl){
+      dl = el('datalist', { id: listId });
+      for (const o of options) dl.appendChild(el('option', { value: o }));
+      document.body.appendChild(dl);
+    }
+    wrap.appendChild(inp);
+    return inp;
+  }
+
+  // ---------- render ----------
+  function renderHeader(){
+    // populate POC select once
+    const pocSel = $('pi-poc');
+    if (pocSel && !pocSel.options.length){
+      for (const p of V.pocs){
+        const opt = el('option', { value: p }, p);
+        pocSel.appendChild(opt);
+      }
+    }
+    pocSel.value = state.poc;
+
+    // parties datalist
+    const pl = $('pi-parties-list');
+    if (pl && !pl.children.length){
+      for (const p of V.parties){
+        pl.appendChild(el('option', { value: p.name }, p.code || ''));
+      }
+    }
+
+    $('pi-party').value = state.party;
+    $('pi-party-code').value = state.partyCode;
+    $('pi-date').value = state.date;
+    $('pi-ref').value = state.ref;
+
+    $('pi-eb-ref').textContent = state.ref || '—';
+  }
+
+  function renderLines(){
+    const tbody = $('pi-lines');
+    tbody.innerHTML = '';
+    $('pi-empty-lines').style.display = state.lines.length ? 'none' : 'block';
+
+    state.lines.forEach((line, i) => {
+      const d = derived(line);
+      const tr = el('tr', { class: 'pi-row' });
+
+      tr.appendChild(el('td', { class: 'idx' }, String(i+1).padStart(2, '0')));
+
+      tr.appendChild(el('td', {}, selectOf(line.category, V.categories, 'category',
+        e => { line.category = e.target.value; renderLines(); renderTotals(); })));
+      tr.appendChild(el('td', {}, selectOf(line.model, V.models, 'model',
+        e => { line.model = e.target.value; renderTotals(); })));
+      tr.appendChild(el('td', {}, selectOf(line.backing, V.backings, 'backing',
+        e => { line.backing = e.target.value; renderTotals(); })));
+      tr.appendChild(el('td', {}, selectOf(line.colour, V.colours, 'colour',
+        e => { line.colour = e.target.value; renderTotals(); })));
+
+      tr.appendChild(el('td', {}, datalistInput(line.width, V.widths, 'pi-widths-list', 'W',
+        v => { line.width = v; renderLines(); renderTotals(); })));
+      tr.appendChild(el('td', {}, datalistInput(line.length, V.lengths, 'pi-lengths-list', 'L',
+        v => { line.length = v; renderLines(); renderTotals(); })));
+
+      const qtyInp = el('input', { class: 'pi-input num', type: 'number', min: '0', step: '1', value: line.qty,
+        oninput: e => { line.qty = e.target.value; renderTotals(); refreshDerivedRow(tr, line); }});
+      tr.appendChild(el('td', { class: 'num' }, qtyInp));
+
+      const arInp = el('input', { class: 'pi-input num', type: 'number', min: '0', step: '0.01', value: line.actualRate, placeholder: '0',
+        oninput: e => {
+          line.actualRate = e.target.value;
+          if (!line.billRate) line.billRate = e.target.value;
+          renderTotals(); refreshDerivedRow(tr, line);
+          if (!line.billRate) renderLines();
+        }});
+      tr.appendChild(el('td', { class: 'num' }, arInp));
+
+      const brInp = el('input', { class: 'pi-input num', type: 'number', min: '0', step: '0.01', value: line.billRate, placeholder: line.actualRate || '0',
+        oninput: e => { line.billRate = e.target.value; renderTotals(); refreshDerivedRow(tr, line); }});
+      tr.appendChild(el('td', { class: 'num' }, brInp));
+
+      const frInp = el('input', { class: 'pi-input num', type: 'number', min: '0', step: '1', value: line.freight, placeholder: '0',
+        oninput: e => { line.freight = e.target.value; renderTotals(); refreshDerivedRow(tr, line); }});
+      tr.appendChild(el('td', { class: 'num' }, frInp));
+
+      tr.appendChild(el('td', { class: 'num' }, el('span', { class: 'v ' + (d.units === 1 ? 'muted' : ''), 'data-c': 'units' }, num(d.units, 2))));
+      tr.appendChild(el('td', { class: 'num' }, el('span', { class: 'v', 'data-c': 'taxable' }, inr(d.taxable))));
+      tr.appendChild(el('td', { class: 'num' }, el('span', { class: 'v', 'data-c': 'total' }, inr(d.total))));
+
+      const rm = el('button', { class: 'pi-remove', title: 'Remove line',
+        onclick: () => { state.lines.splice(i, 1); renderLines(); renderTotals(); } }, '×');
+      tr.appendChild(el('td', {}, rm));
+
+      tbody.appendChild(tr);
+    });
+
+    $('pi-line-count').textContent = state.lines.length;
+  }
+
+  function refreshDerivedRow(tr, line){
+    const d = derived(line);
+    const set = (key, val) => {
+      const cell = tr.querySelector('[data-c="' + key + '"]');
+      if (cell) cell.textContent = val;
+    };
+    set('units', num(d.units, 2));
+    set('taxable', inr(d.taxable));
+    set('total', inr(d.total));
+  }
+
+  function renderTotals(){
+    let lines = state.lines.length;
+    let units = 0, td = 0, freight = 0, taxable = 0, gst = 0, total = 0;
+    for (const ln of state.lines){
+      const d = derived(ln);
+      units += d.units * (Number(ln.qty)||0);
+      td += d.td;
+      freight += Number(ln.freight)||0;
+      taxable += d.taxable;
+      gst += d.gst;
+      total += d.total;
+    }
+    $('pi-tot-lines').textContent = lines;
+    $('pi-tot-units').textContent = num(units, 2);
+    $('pi-tot-td').textContent = inr(td);
+    $('pi-tot-freight').textContent = inr(freight);
+    $('pi-tot-taxable').textContent = inr(taxable);
+    $('pi-tot-gst').textContent = inr(gst);
+    $('pi-tot-total').textContent = inr(total);
+
+    $('pi-submit').disabled = !canSubmit();
+  }
+
+  function canSubmit(){
+    if (!state.party) return false;
+    if (!state.ref) return false;
+    if (!state.lines.length) return false;
+    return state.lines.some(ln => Number(ln.qty) > 0 && (Number(ln.billRate) || Number(ln.actualRate)) > 0);
+  }
+
+  // ---------- header wiring ----------
+  function wireHeader(){
+    $('pi-party').addEventListener('input', e => {
+      state.party = e.target.value;
+      const match = V.parties.find(p => p.name === state.party);
+      if (match) { state.partyCode = match.code || ''; $('pi-party-code').value = state.partyCode; }
+      renderTotals();
+    });
+    $('pi-party-code').addEventListener('input', e => { state.partyCode = e.target.value; });
+    $('pi-date').addEventListener('input', e => { state.date = e.target.value; });
+    $('pi-poc').addEventListener('change', e => { state.poc = e.target.value; });
+    $('pi-ref').addEventListener('input', e => {
+      state.ref = e.target.value;
+      $('pi-eb-ref').textContent = state.ref || '—';
+      renderTotals();
+    });
+
+    $('pi-add-line').addEventListener('click', () => {
+      state.lines.push(newLine());
+      renderLines(); renderTotals();
+      saveDraft();
+    });
+
+    $('pi-clear').addEventListener('click', () => {
+      if (!confirm('Reset the form? Unsaved changes will be lost.')) return;
+      localStorage.removeItem('atlas-pi-draft');
+      state.party = ''; state.partyCode = '';
+      state.date = new Date().toISOString().slice(0,10);
+      state.poc = V.pocs[0] || '';
+      state.ref = V.nextRefNumber;
+      state.lines = [];
+      renderHeader(); renderLines(); renderTotals();
+      setStatus('', '');
+    });
+
+    $('pi-save-draft').addEventListener('click', () => {
+      saveDraft();
+      setStatus('ok', 'Draft saved locally. It will restore the next time you open Create PI on this browser.');
+    });
+
+    $('pi-submit').addEventListener('click', onSubmit);
+  }
+
+  function setStatus(kind, text){
+    const s = $('pi-status');
+    s.className = 'pi-status' + (kind ? ' ' + kind : '');
+    s.textContent = text;
+  }
+
+  function buildPayload(){
+    const rows = state.lines.map((ln, i) => {
+      const d = derived(ln);
+      const refId = 'PI-' + state.ref + '-' + state.poc + '/' + state.ref;
+      return {
+        partyCode: state.partyCode || '',
+        partyName: state.party,
+        salesPoc: state.poc,
+        ref: state.ref,
+        piDate: state.date,
+        oNo: i + 1,
+        qty: Number(ln.qty)||0,
+        category: ln.category,
+        model: ln.model,
+        backing: ln.backing,
+        colour: ln.colour,
+        width: ln.width,
+        length: ln.length,
+        units: Number(d.units.toFixed(2)),
+        actualRate: Number(ln.actualRate)||0,
+        billRate: Number(ln.billRate)||Number(ln.actualRate)||0,
+        freight: Number(ln.freight)||0,
+        td: Number(d.td.toFixed(2)),
+        taxable: Number(d.taxable.toFixed(2)),
+        totalIncGst: Number(d.total.toFixed(2)),
+        dispatchApproved: '',
+        approvalDate: '',
+        totalReceived: '',
+        invoiceNo: '',
+        dispatchDate: '',
+        remarks: '',
+        dispatchStatus: 'Pending',
+        month: '',
+        state: '',
+        referenceId: refId,
+      };
+    });
+    return { header: { party: state.party, partyCode: state.partyCode, date: state.date, poc: state.poc, ref: state.ref }, rows };
+  }
+
+  async function onSubmit(){
+    if (!canSubmit()){ setStatus('warn', 'Add a party, REF#, and at least one line with quantity and rate.'); return; }
+    const payload = buildPayload();
+    console.log('[atlas] Create PI payload:', payload);
+
+    const url = (window.ATLAS_APPS_SCRIPT_URL || '').trim();
+    if (!url){
+      setStatus('ok',
+        'Form valid. ' + payload.rows.length + ' line(s) ready, total ' + inr(payload.rows.reduce((a,r) => a + r.totalIncGst, 0)) +
+        '. Payload logged to browser console. Once Apps Script URL is wired (window.ATLAS_APPS_SCRIPT_URL), submit will POST to the sheet.');
+      return;
+    }
+
+    setStatus('warn', 'Submitting ' + payload.rows.length + ' line(s) to sheet…');
+    $('pi-submit').disabled = true;
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        mode: 'cors',
+        body: JSON.stringify(payload),
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      setStatus('ok', 'PI ' + payload.header.ref + ' created — ' + payload.rows.length + ' line(s) written to Masters.');
+      // bump ref for next PI
+      state.ref = Number(state.ref) + 1;
+      state.lines = [];
+      renderHeader(); renderLines(); renderTotals();
+      localStorage.removeItem('atlas-pi-draft');
+    } catch (err){
+      console.error(err);
+      setStatus('err', 'Submit failed: ' + err.message + '. Payload preserved in form.');
+    } finally {
+      renderTotals();
+    }
+  }
+
+  // ---------- draft persistence ----------
+  function saveDraft(){
+    try { localStorage.setItem('atlas-pi-draft', JSON.stringify(state)); } catch(e){}
+  }
+  function restoreDraft(){
+    try {
+      const raw = localStorage.getItem('atlas-pi-draft');
+      if (!raw) return;
+      const d = JSON.parse(raw);
+      Object.assign(state, d);
+    } catch(e){}
+  }
+
+  // ---------- init ----------
+  function init(){
+    restoreDraft();
+    renderHeader();
+    renderLines();
+    renderTotals();
+    wireHeader();
+    // persist on any input
+    document.querySelector('[data-page="create-pi"]').addEventListener('input', saveDraft);
+    document.querySelector('[data-page="create-pi"]').addEventListener('change', saveDraft);
+  }
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
 </script>
 
 </body>
