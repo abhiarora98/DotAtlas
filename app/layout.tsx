@@ -5,13 +5,14 @@ import "./globals.css";
 
 const manrope = Manrope({
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700"],
   variable: "--font-display-loaded",
   display: "swap",
 });
 const inter = Inter({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
   variable: "--font-sans-loaded",
   display: "swap",
 });

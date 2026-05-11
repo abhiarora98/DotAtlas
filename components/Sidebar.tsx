@@ -39,11 +39,7 @@ export function Sidebar() {
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      className="flex items-center justify-between rounded-md px-2 py-1.5 text-[13px] transition-all duration-200"
-                      style={{
-                        color: active ? "var(--color-text-1)" : "var(--color-text-2)",
-                        background: active ? "var(--color-bg-2)" : "transparent",
-                      }}
+                      className={`nav-item ${active ? "active" : ""}`}
                     >
                       <span>{item.label}</span>
                       {item.badge && (
@@ -68,7 +64,7 @@ export function Sidebar() {
       </nav>
 
       <div
-        className="mx-3 mb-4 flex items-center gap-2 rounded-md px-2 py-2"
+        className="mx-3 mb-4 flex items-center gap-2 rounded-md border px-2 py-2 transition-colors duration-200"
         style={{
           background: "var(--color-bg-1)",
           borderColor: "var(--color-line-1)",
