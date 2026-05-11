@@ -22,12 +22,12 @@
     --text-2: rgba(242,244,246,0.62);
     --text-3: rgba(242,244,246,0.38);
     --text-4: rgba(242,244,246,0.22);
-    --emerald: #4EDEA3;
-    --emerald-2: #6FFBBE;
-    --emerald-soft: rgba(78,222,163,0.10);
-    --emerald-mute: rgba(78,222,163,0.22);
-    --blue: #7CA8FF;
-    --blue-soft: rgba(124,168,255,0.10);
+    --emerald: #4D7EFF;
+    --emerald-2: #7AA1FF;
+    --emerald-soft: rgba(77,126,255,0.10);
+    --emerald-mute: rgba(77,126,255,0.22);
+    --blue: #8FB3FF;
+    --blue-soft: rgba(143,179,255,0.10);
     --amber: #FFB079;
     --amber-soft: rgba(255,176,121,0.10);
     --rose: #FF8AA8;
@@ -44,8 +44,8 @@
   body::before {
     content: ''; position: fixed; inset: 0;
     background:
-      radial-gradient(ellipse 1200px 900px at 18% -10%, rgba(78,222,163,0.07), transparent 55%),
-      radial-gradient(ellipse 800px 800px at 110% 110%, rgba(124,168,255,0.04), transparent 55%);
+      radial-gradient(ellipse 1200px 900px at 18% -10%, rgba(77,126,255,0.07), transparent 55%),
+      radial-gradient(ellipse 800px 800px at 110% 110%, rgba(143,179,255,0.04), transparent 55%);
     pointer-events: none; z-index: 0;
   }
   body::after {
@@ -91,8 +91,8 @@
     margin-bottom: 28px;
   }
   .dot-mark { width: 22px; height: 22px; position: relative; }
-  .dot-mark .core { position: absolute; top: 50%; left: 50%; width: 7px; height: 7px; margin: -3.5px; border-radius: 50%; background: var(--emerald); box-shadow: 0 0 0 4px rgba(78,222,163,0.12), 0 0 16px rgba(78,222,163,0.5); }
-  .dot-mark .ring { position: absolute; inset: 0; border: 1px solid rgba(78,222,163,0.25); border-radius: 50%; animation: pulseRing 4s var(--ease) infinite; }
+  .dot-mark .core { position: absolute; top: 50%; left: 50%; width: 7px; height: 7px; margin: -3.5px; border-radius: 50%; background: var(--emerald); box-shadow: 0 0 0 4px rgba(77,126,255,0.12), 0 0 16px rgba(77,126,255,0.5); }
+  .dot-mark .ring { position: absolute; inset: 0; border: 1px solid rgba(77,126,255,0.25); border-radius: 50%; animation: pulseRing 4s var(--ease) infinite; }
   @keyframes pulseRing { 0%,100% { transform: scale(0.85); opacity: 0.5; } 50% { transform: scale(1.1); opacity: 0; } }
   .wm { font-family: var(--fd); font-weight: 600; font-size: 16px; letter-spacing: -0.04em; color: var(--text); }
   .wm .dot { color: var(--emerald); }
@@ -138,7 +138,7 @@
   }
   .nav-item:hover { background: rgba(255,255,255,0.025); color: var(--text); transform: translateX(2px); }
   .nav-item.active {
-    background: linear-gradient(90deg, rgba(78,222,163,0.10) 0%, rgba(78,222,163,0.02) 100%);
+    background: linear-gradient(90deg, rgba(77,126,255,0.10) 0%, rgba(77,126,255,0.02) 100%);
     color: var(--text);
     border-left: 0;
   }
@@ -244,8 +244,8 @@
   .hero-h::before {
     content: ''; position: absolute; inset: -20px -40px -20px -40px; z-index: -1;
     background:
-      radial-gradient(ellipse 700px 240px at 28% 100%, rgba(78,222,163,0.10), transparent 70%),
-      radial-gradient(ellipse 500px 200px at 80% 0%, rgba(124,168,255,0.06), transparent 70%);
+      radial-gradient(ellipse 700px 240px at 28% 100%, rgba(77,126,255,0.10), transparent 70%),
+      radial-gradient(ellipse 500px 200px at 80% 0%, rgba(143,179,255,0.06), transparent 70%);
     pointer-events: none;
   }
     margin-bottom: 36px;
@@ -259,10 +259,10 @@
   .hero-h .eb .live-dot {
     width: 6px; height: 6px; border-radius: 50%;
     background: var(--emerald);
-    box-shadow: 0 0 0 3px rgba(78,222,163,0.18), 0 0 10px var(--emerald);
+    box-shadow: 0 0 0 3px rgba(77,126,255,0.18), 0 0 10px var(--emerald);
     animation: pulseDot 2.4s ease-in-out infinite;
   }
-  @keyframes pulseDot { 0%,100% { box-shadow: 0 0 0 3px rgba(78,222,163,0.18), 0 0 10px var(--emerald); } 50% { box-shadow: 0 0 0 6px rgba(78,222,163,0.06), 0 0 16px var(--emerald); } }
+  @keyframes pulseDot { 0%,100% { box-shadow: 0 0 0 3px rgba(77,126,255,0.18), 0 0 10px var(--emerald); } 50% { box-shadow: 0 0 0 6px rgba(77,126,255,0.06), 0 0 16px var(--emerald); } }
   .hero-h h1 {
     font-family: var(--fd);
     font-size: 42px; font-weight: 300;
@@ -311,7 +311,7 @@
     display: inline-flex; gap: 6px; align-items: center;
   }
   .chip:hover { border-color: var(--line-2); color: var(--text); }
-  .chip.emerald { color: var(--emerald); border-color: rgba(78,222,163,0.25); }
+  .chip.emerald { color: var(--emerald); border-color: rgba(77,126,255,0.25); }
   .chip.emerald:hover { background: var(--emerald-soft); }
 
   /* KPI ROW */
@@ -385,7 +385,7 @@
   /* CARD — atmospheric plane, not a box */
   .card {
     background:
-      radial-gradient(ellipse 600px 220px at 0% 0%, rgba(78,222,163,0.025), transparent 50%),
+      radial-gradient(ellipse 600px 220px at 0% 0%, rgba(77,126,255,0.025), transparent 50%),
       linear-gradient(180deg, rgba(255,255,255,0.018) 0%, rgba(255,255,255,0) 60%),
       linear-gradient(180deg, rgba(19,24,31,0.55) 0%, rgba(14,18,23,0.35) 100%);
     border: 1px solid rgba(255,255,255,0.04);
@@ -452,11 +452,11 @@
   .signal .pip {
     width: 8px; height: 8px; border-radius: 50%;
     background: var(--emerald);
-    box-shadow: 0 0 0 3px rgba(78,222,163,0.14), 0 0 10px var(--emerald);
+    box-shadow: 0 0 0 3px rgba(77,126,255,0.14), 0 0 10px var(--emerald);
     margin-top: 5px;
   }
   .signal .pip.a { background: var(--amber); box-shadow: 0 0 0 3px rgba(255,176,121,0.14), 0 0 10px var(--amber); }
-  .signal .pip.b { background: var(--blue); box-shadow: 0 0 0 3px rgba(124,168,255,0.14), 0 0 10px var(--blue); }
+  .signal .pip.b { background: var(--blue); box-shadow: 0 0 0 3px rgba(143,179,255,0.14), 0 0 10px var(--blue); }
   .signal .pip.r { background: var(--rose); box-shadow: 0 0 0 3px rgba(255,138,168,0.14), 0 0 10px var(--rose); }
   .signal .title {
     font-size: 13.5px; color: var(--text);
@@ -516,8 +516,8 @@
     background: var(--surface-3);
     border: 1px solid var(--line);
   }
-  .table .name .av-sq.e { background: linear-gradient(135deg, rgba(78,222,163,0.18), rgba(78,222,163,0.04)); color: var(--emerald); border-color: rgba(78,222,163,0.18); }
-  .table .name .av-sq.b { background: linear-gradient(135deg, rgba(124,168,255,0.18), rgba(124,168,255,0.04)); color: var(--blue); border-color: rgba(124,168,255,0.18); }
+  .table .name .av-sq.e { background: linear-gradient(135deg, rgba(77,126,255,0.18), rgba(77,126,255,0.04)); color: var(--emerald); border-color: rgba(77,126,255,0.18); }
+  .table .name .av-sq.b { background: linear-gradient(135deg, rgba(143,179,255,0.18), rgba(143,179,255,0.04)); color: var(--blue); border-color: rgba(143,179,255,0.18); }
   .table .name .av-sq.a { background: linear-gradient(135deg, rgba(255,176,121,0.18), rgba(255,176,121,0.04)); color: var(--amber); border-color: rgba(255,176,121,0.18); }
   .table .name .nm-c .pri { font-weight: 500; font-size: 13px; }
   .table .name .nm-c .sec { font-family: var(--fm); font-size: 10.5px; color: var(--text-3); margin-top: 2px; letter-spacing: 0.04em; }
@@ -636,46 +636,179 @@
   }
 </style>
 <style id="light-mode">
+  /* === LIGHT MODE: Linear / Apple Pro / premium finance === */
   body[data-mode="light"] {
-    --void: #F7F6F2;
-    --void-2: #FBFAF7;
+    /* True-white surfaces, no warm tint */
+    --void: #FFFFFF;
+    --void-2: #FFFFFF;
     --surface: #FFFFFF;
-    --surface-2: #FBFAF7;
-    --surface-3: #F2F1ED;
-    --surface-4: #E7E5DF;
-    --line: rgba(10,22,40,0.08);
-    --line-2: rgba(10,22,40,0.12);
-    --line-3: rgba(10,22,40,0.20);
-    --text: #0A1628;
-    --text-2: rgba(10,22,40,0.62);
-    --text-3: rgba(10,22,40,0.42);
-    --text-4: rgba(10,22,40,0.26);
-    --emerald: #00A572;
-    --emerald-2: #00C786;
-    --emerald-soft: rgba(0,165,114,0.10);
-    --emerald-mute: rgba(0,165,114,0.22);
-    --blue: #3B6BFF;
-    --amber: #D97706;
-    --rose: #D14545;
+    --surface-2: #F7F8FA;
+    --surface-3: #EEF0F4;
+    --surface-4: #E1E5EC;
+    /* Hairline borders — actual visible greys */
+    --line: #E6E8EE;
+    --line-2: #D4D8E0;
+    --line-3: #98A0AE;
+    /* Near-black text, sharp hierarchy */
+    --text: #0B1220;
+    --text-2: #4B5563;
+    --text-3: #6B7280;
+    --text-4: #9CA3AF;
+    /* Blue accent — deeper for white-background contrast */
+    --emerald: #2C5BFF;
+    --emerald-2: #1840CC;
+    --emerald-soft: rgba(44,91,255,0.06);
+    --emerald-mute: rgba(44,91,255,0.14);
+    --blue: #2C5BFF;
+    --amber: #C2410C;
+    --rose: #DC2626;
   }
-  body[data-mode="light"]::before {
-    background:
-      radial-gradient(ellipse 1200px 900px at 18% -10%, rgba(0,165,114,0.06), transparent 55%),
-      radial-gradient(ellipse 800px 800px at 110% 110%, rgba(59,107,255,0.05), transparent 55%);
+
+  /* Atmosphere in light: zero glow, zero grain, ghost meridians only */
+  body[data-mode="light"]::before { background: none; }
+  body[data-mode="light"]::after { display: none; }
+  body[data-mode="light"] .meridian { opacity: 0.06; }
+  body[data-mode="light"] .meridian svg path { stroke: rgba(11,18,32,0.45); }
+
+  /* Cards: solid white, defined borders, layered subtle shadows */
+  body[data-mode="light"] .card,
+  body[data-mode="light"] .kpi {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    box-shadow:
+      0 0 0 1px rgba(11,18,32,0.02),
+      0 1px 2px rgba(11,18,32,0.04),
+      0 2px 6px rgba(11,18,32,0.04);
   }
-  body[data-mode="light"]::after { mix-blend-mode: multiply; opacity: 0.18; }
-  body[data-mode="light"] .meridian { opacity: 0.35; }
-  body[data-mode="light"] .card {
-    background:
-      radial-gradient(ellipse 600px 220px at 0% 0%, rgba(0,165,114,0.04), transparent 50%),
-      linear-gradient(180deg, #FFFFFF 0%, #FBFAF7 100%);
-    border-color: rgba(10,22,40,0.06);
-    box-shadow: 0 1px 3px rgba(10,22,40,0.03);
+  body[data-mode="light"] .card::before { display: none; }
+  body[data-mode="light"] .card:hover,
+  body[data-mode="light"] .kpi:hover {
+    border-color: var(--line-2);
+    box-shadow:
+      0 0 0 1px rgba(11,18,32,0.03),
+      0 2px 4px rgba(11,18,32,0.05),
+      0 8px 20px rgba(11,18,32,0.06);
   }
+
+  /* Sidebar: solid white, no blur, hairline edge */
   body[data-mode="light"] aside.rail {
-    background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0.4));
+    background: var(--surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-right-color: var(--line);
   }
-  body[data-mode="light"] .theme-toggle { color: #D97706; }
+  body[data-mode="light"] aside.rail::before { background: none; }
+  body[data-mode="light"] .nav-item:hover {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+  body[data-mode="light"] .nav-item.active {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+  body[data-mode="light"] .nav-item.active::before { background: var(--emerald); }
+
+  /* Topbar: solid white, sharp underline */
+  body[data-mode="light"] .top {
+    background: var(--surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-bottom-color: var(--line);
+  }
+
+  /* Hero floor-light: kill the radial glow */
+  body[data-mode="light"] .hero-h::before { background: none; }
+  body[data-mode="light"] .kpi::before { display: none; }
+
+  /* Theme toggle uses accent */
+  body[data-mode="light"] .theme-toggle { color: var(--emerald); }
+
+  /* Pills: stronger borders */
+  body[data-mode="light"] .pill-s {
+    border: 1px solid var(--line-2);
+    background: var(--surface);
+  }
+
+  /* Form inputs */
+  body[data-mode="light"] .pi-input,
+  body[data-mode="light"] .pi-select {
+    background: var(--surface);
+    border-color: var(--line-2);
+    color: var(--text);
+  }
+  body[data-mode="light"] .pi-input:hover,
+  body[data-mode="light"] .pi-select:hover { border-color: var(--line-3); }
+  body[data-mode="light"] .pi-input:focus,
+  body[data-mode="light"] .pi-select:focus {
+    border-color: var(--emerald);
+    background: var(--surface);
+    box-shadow: 0 0 0 3px rgba(44,91,255,0.14);
+  }
+  body[data-mode="light"] .pi-input[readonly] {
+    background: var(--surface-2); color: var(--text-3);
+  }
+  body[data-mode="light"] table.pi-table th { color: var(--text-3); border-bottom-color: var(--line); }
+  body[data-mode="light"] table.pi-table td { border-bottom-color: var(--line); }
+  body[data-mode="light"] table.pi-table tr.pi-row:hover { background: var(--surface-2); }
+  body[data-mode="light"] .pi-empty-lines {
+    border-color: var(--line-2); color: var(--text-3); background: var(--surface-2);
+  }
+  body[data-mode="light"] .pi-add-line {
+    background: var(--surface-2); color: var(--emerald);
+    border: 1px dashed rgba(44,91,255,0.30);
+  }
+  body[data-mode="light"] .pi-add-line:hover {
+    background: rgba(44,91,255,0.05); border-color: var(--emerald);
+  }
+  body[data-mode="light"] .pi-totals .kr { border-bottom-color: var(--line); }
+  body[data-mode="light"] .pi-totals .kr.big > b { color: var(--emerald); }
+
+  /* Buttons */
+  body[data-mode="light"] .pi-btn {
+    background: var(--surface);
+    border-color: var(--line-2);
+    color: var(--text-2);
+  }
+  body[data-mode="light"] .pi-btn:hover { border-color: var(--line-3); color: var(--text); }
+  body[data-mode="light"] .pi-btn.prime {
+    background: var(--emerald); color: #FFFFFF; border-color: var(--emerald);
+    box-shadow: 0 1px 2px rgba(44,91,255,0.16);
+  }
+  body[data-mode="light"] .pi-btn.prime:hover {
+    background: var(--emerald-2); border-color: var(--emerald-2);
+    box-shadow: 0 2px 6px rgba(44,91,255,0.22);
+  }
+  body[data-mode="light"] .pi-btn:disabled {
+    background: var(--surface-2); color: var(--text-4); border-color: var(--line);
+    box-shadow: none;
+  }
+  body[data-mode="light"] .pi-note {
+    background: var(--surface-2); border-color: var(--line); color: var(--text-2);
+  }
+
+  /* Live dot — sharper on white */
+  body[data-mode="light"] .live-dot {
+    background: var(--emerald);
+    box-shadow: 0 0 0 3px rgba(44,91,255,0.16), 0 0 10px rgba(44,91,255,0.35);
+  }
+
+  /* Chips: solid borders */
+  body[data-mode="light"] .chip {
+    background: var(--surface);
+    border-color: var(--line-2);
+    color: var(--text-2);
+  }
+  body[data-mode="light"] .chip:hover { border-color: var(--line-3); color: var(--text); }
+  body[data-mode="light"] .chip.emerald {
+    color: var(--emerald);
+    border-color: rgba(44,91,255,0.30);
+    background: rgba(44,91,255,0.04);
+  }
+
+  /* Strengthen typography weight on white */
+  body[data-mode="light"] .hero-h h1 { font-weight: 400; color: var(--text); }
+  body[data-mode="light"] .hero-h h1 .em { font-weight: 500; }
+  body[data-mode="light"] .hero-h h1 b { font-weight: 600; }
 
   /* ===== CREATE PI FORM ===== */
   .pi-grid {
@@ -705,7 +838,7 @@
   .pi-input:focus, .pi-select:focus {
     outline: none; border-color: var(--emerald);
     background: var(--surface-2);
-    box-shadow: 0 0 0 3px rgba(78,222,163,0.08);
+    box-shadow: 0 0 0 3px rgba(77,126,255,0.08);
   }
   .pi-input[readonly] {
     background: var(--surface-2); color: var(--text-2); cursor: not-allowed;
@@ -762,7 +895,7 @@
   .pi-add-line {
     display: inline-flex; align-items: center; gap: 8px;
     background: transparent; color: var(--emerald);
-    border: 1px dashed rgba(78,222,163,0.30);
+    border: 1px dashed rgba(77,126,255,0.30);
     padding: 8px 14px; border-radius: 6px;
     font-family: var(--fm); font-size: 11px; letter-spacing: 0.10em;
     text-transform: uppercase; font-weight: 500;
@@ -858,22 +991,22 @@
   <svg viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
     <defs>
       <linearGradient id="arcG" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%"  stop-color="rgba(78,222,163,0)"/>
-        <stop offset="50%" stop-color="rgba(78,222,163,0.30)"/>
-        <stop offset="100%" stop-color="rgba(78,222,163,0)"/>
+        <stop offset="0%"  stop-color="rgba(77,126,255,0)"/>
+        <stop offset="50%" stop-color="rgba(77,126,255,0.30)"/>
+        <stop offset="100%" stop-color="rgba(77,126,255,0)"/>
       </linearGradient>
       <linearGradient id="arcG2" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%"  stop-color="rgba(124,168,255,0)"/>
-        <stop offset="50%" stop-color="rgba(124,168,255,0.22)"/>
-        <stop offset="100%" stop-color="rgba(124,168,255,0)"/>
+        <stop offset="0%"  stop-color="rgba(143,179,255,0)"/>
+        <stop offset="50%" stop-color="rgba(143,179,255,0.22)"/>
+        <stop offset="100%" stop-color="rgba(143,179,255,0)"/>
       </linearGradient>
     </defs>
     <path d="M -200 220 Q 800 -120 1800 320" fill="none" stroke="url(#arcG)" stroke-width="1"/>
     <path d="M -200 720 Q 800 420 1800 880" fill="none" stroke="url(#arcG2)" stroke-width="1"/>
     <path d="M -200 480 Q 800 200 1800 560" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
-    <circle cx="320" cy="178" r="2" fill="rgba(78,222,163,0.7)"/>
+    <circle cx="320" cy="178" r="2" fill="rgba(77,126,255,0.7)"/>
     <circle cx="1180" cy="262" r="2" fill="rgba(255,255,255,0.6)"/>
-    <circle cx="720" cy="498" r="1.5" fill="rgba(124,168,255,0.6)"/>
+    <circle cx="720" cy="498" r="1.5" fill="rgba(143,179,255,0.6)"/>
   </svg>
 </div>
 
@@ -1008,10 +1141,10 @@
         <div class="v"><span class="cur">₹</span>62.4<span class="un">L</span></div>
         <div class="d"><span class="arr">↑</span>+12.4% vs. last Mon</div>
         <svg class="spark" height="32" viewBox="0 0 200 32" preserveAspectRatio="none">
-          <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(78,222,163,0.35)"/><stop offset="100%" stop-color="rgba(78,222,163,0)"/></linearGradient></defs>
+          <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(77,126,255,0.35)"/><stop offset="100%" stop-color="rgba(77,126,255,0)"/></linearGradient></defs>
           <path d="M0,24 L20,22 L40,23 L60,18 L80,15 L100,13 L120,14 L140,10 L160,8 L180,6 L200,4 L200,32 L0,32 Z" fill="url(#g1)"/>
-          <path d="M0,24 L20,22 L40,23 L60,18 L80,15 L100,13 L120,14 L140,10 L160,8 L180,6 L200,4" stroke="rgb(78,222,163)" stroke-width="1.5" fill="none"/>
-          <circle cx="200" cy="4" r="2.6" fill="rgb(78,222,163)"/>
+          <path d="M0,24 L20,22 L40,23 L60,18 L80,15 L100,13 L120,14 L140,10 L160,8 L180,6 L200,4" stroke="rgb(77,126,255)" stroke-width="1.5" fill="none"/>
+          <circle cx="200" cy="4" r="2.6" fill="rgb(77,126,255)"/>
         </svg>
       </div>
 
@@ -1032,7 +1165,7 @@
         <div class="v">312</div>
         <div class="d"><span class="arr">↑</span>+24 since 6 AM</div>
         <svg class="spark" height="32" viewBox="0 0 200 32" preserveAspectRatio="none">
-          <defs><linearGradient id="g3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(124,168,255,0.32)"/><stop offset="100%" stop-color="rgba(124,168,255,0)"/></linearGradient></defs>
+          <defs><linearGradient id="g3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(143,179,255,0.32)"/><stop offset="100%" stop-color="rgba(143,179,255,0)"/></linearGradient></defs>
           <path d="M0,22 L20,18 L40,20 L60,15 L80,16 L100,11 L120,12 L140,9 L160,10 L180,7 L200,5 L200,32 L0,32 Z" fill="url(#g3)"/>
           <path d="M0,22 L20,18 L40,20 L60,15 L80,16 L100,11 L120,12 L140,9 L160,10 L180,7 L200,5" stroke="rgb(124,168,255)" stroke-width="1.5" fill="none"/>
           <circle cx="200" cy="5" r="2.6" fill="rgb(124,168,255)"/>
@@ -1081,8 +1214,8 @@
           <svg viewBox="0 0 720 220" preserveAspectRatio="none" style="width:100%; height:220px; display:block;">
             <defs>
               <linearGradient id="inflow" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="rgba(78,222,163,0.32)"/>
-                <stop offset="100%" stop-color="rgba(78,222,163,0)"/>
+                <stop offset="0%" stop-color="rgba(77,126,255,0.32)"/>
+                <stop offset="100%" stop-color="rgba(77,126,255,0)"/>
               </linearGradient>
               <linearGradient id="outflow" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="rgba(255,138,168,0.24)"/>
@@ -1104,22 +1237,22 @@
 
             <!-- inflow area + line -->
             <path d="M30,170 L65,160 L100,150 L135,140 L170,130 L205,135 L240,120 L275,115 L310,100 L345,110 L380,90 L415,85 L450,75 L485,80 L520,60 L555,55 L590,50 L625,40 L660,45 L660,200 L30,200 Z" fill="url(#inflow)"/>
-            <path d="M30,170 L65,160 L100,150 L135,140 L170,130 L205,135 L240,120 L275,115 L310,100 L345,110 L380,90 L415,85 L450,75 L485,80 L520,60 L555,55 L590,50 L625,40 L660,45" stroke="rgb(78,222,163)" stroke-width="1.6" fill="none"/>
+            <path d="M30,170 L65,160 L100,150 L135,140 L170,130 L205,135 L240,120 L275,115 L310,100 L345,110 L380,90 L415,85 L450,75 L485,80 L520,60 L555,55 L590,50 L625,40 L660,45" stroke="rgb(77,126,255)" stroke-width="1.6" fill="none"/>
 
             <!-- outflow area + line -->
             <path d="M30,180 L65,178 L100,170 L135,175 L170,165 L205,170 L240,160 L275,165 L310,150 L345,155 L380,145 L415,140 L450,130 L485,135 L520,120 L555,125 L590,110 L625,105 L660,100 L660,200 L30,200 Z" fill="url(#outflow)"/>
             <path d="M30,180 L65,178 L100,170 L135,175 L170,165 L205,170 L240,160 L275,165 L310,150 L345,155 L380,145 L415,140 L450,130 L485,135 L520,120 L555,125 L590,110 L625,105 L660,100" stroke="rgba(255,138,168,0.7)" stroke-width="1.4" fill="none"/>
 
             <!-- forecast dashed -->
-            <path d="M660,45 L685,38 L710,30" stroke="rgba(78,222,163,0.55)" stroke-width="1.4" fill="none" stroke-dasharray="3 3"/>
+            <path d="M660,45 L685,38 L710,30" stroke="rgba(77,126,255,0.55)" stroke-width="1.4" fill="none" stroke-dasharray="3 3"/>
 
             <!-- annotation at peak -->
             <g>
-              <line x1="555" y1="55" x2="555" y2="22" stroke="rgba(124,168,255,0.4)" stroke-width="1" stroke-dasharray="2 2"/>
-              <circle cx="555" cy="55" r="4" fill="rgb(78,222,163)"/>
-              <circle cx="555" cy="55" r="9" fill="rgba(78,222,163,0.25)"/>
+              <line x1="555" y1="55" x2="555" y2="22" stroke="rgba(143,179,255,0.4)" stroke-width="1" stroke-dasharray="2 2"/>
+              <circle cx="555" cy="55" r="4" fill="rgb(77,126,255)"/>
+              <circle cx="555" cy="55" r="9" fill="rgba(77,126,255,0.25)"/>
               <rect x="488" y="6" width="138" height="20" rx="4" fill="rgba(19,24,31,0.95)" stroke="rgba(255,255,255,0.12)"/>
-              <text x="498" y="20" font-family="Inter" font-size="10.5" fill="rgb(78,222,163)" font-weight="600">▲ Goyal · ₹9.42L cleared</text>
+              <text x="498" y="20" font-family="Inter" font-size="10.5" fill="rgb(77,126,255)" font-weight="600">▲ Goyal · ₹9.42L cleared</text>
             </g>
             <!-- today marker -->
             <g>
@@ -1300,10 +1433,10 @@
             <span>PEAK · <b style="color:var(--text);font-weight:500;">FRI · 47 orders</b></span>
             <span class="heatmap-legend">
               less
-              <span class="sw" style="background:rgba(78,222,163,0.10);"></span>
-              <span class="sw" style="background:rgba(78,222,163,0.28);"></span>
-              <span class="sw" style="background:rgba(78,222,163,0.50);"></span>
-              <span class="sw" style="background:rgba(78,222,163,0.75);"></span>
+              <span class="sw" style="background:rgba(77,126,255,0.10);"></span>
+              <span class="sw" style="background:rgba(77,126,255,0.28);"></span>
+              <span class="sw" style="background:rgba(77,126,255,0.50);"></span>
+              <span class="sw" style="background:rgba(77,126,255,0.75);"></span>
               <span class="sw" style="background:var(--emerald);"></span>
               more
             </span>
@@ -1855,11 +1988,11 @@
       if (alpha < 0.15) {
         cell.style.background = 'rgba(255,255,255,0.04)';
       } else {
-        cell.style.background = `rgba(78,222,163,${alpha})`;
+        cell.style.background = `rgba(77,126,255,${alpha})`;
       }
       // last column most-recent — give a dot indicator
       if (col === 23 && row === 0) {
-        cell.style.outline = '1px solid rgba(78,222,163,0.6)';
+        cell.style.outline = '1px solid rgba(77,126,255,0.6)';
         cell.style.outlineOffset = '1px';
       }
       hm.appendChild(cell);
