@@ -2862,16 +2862,22 @@
     return { header: { party: state.party, partyCode: state.partyCode, date: state.date, poc: state.poc, ref: state.ref }, rows };
   }
 
+  function getEndpointUrl(){
+    return (window.ATLAS_APPS_SCRIPT_URL ||
+            localStorage.getItem('atlas-apps-script-url') || '').trim();
+  }
+
   async function onSubmit(){
     if (!canSubmit()){ setStatus('warn', 'Add a party, REF#, and at least one line with quantity and rate.'); return; }
     const payload = buildPayload();
+    payload.kind = 'pi';
     console.log('[atlas] Create PI payload:', payload);
 
-    const url = (window.ATLAS_APPS_SCRIPT_URL || '').trim();
+    const url = getEndpointUrl();
     if (!url){
       setStatus('ok',
         'Form valid. ' + payload.rows.length + ' line(s) ready, total ' + inr(payload.rows.reduce((a,r) => a + r.totalIncGst, 0)) +
-        '. Payload logged to browser console. Once Apps Script URL is wired (window.ATLAS_APPS_SCRIPT_URL), submit will POST to the sheet.');
+        '. Payload logged to browser console. Apps Script URL not yet wired — once deployed, paste it via window.ATLAS_APPS_SCRIPT_URL or localStorage["atlas-apps-script-url"].');
       return;
     }
 
@@ -3180,6 +3186,8 @@
     }
 
     const entry = { name, code, poc, gst, state, phone, city, createdAt: new Date().toISOString() };
+
+    // Always save locally first as fallback.
     const list = loadCustom();
     list.push(entry);
     saveCustom(list);
@@ -3187,10 +3195,36 @@
     // Update vocab so the new party shows up in Create PI typeahead immediately.
     V.parties.push({ name, code });
     V.parties.sort((a, b) => a.name.localeCompare(b.name));
-
     refreshCustomCount();
-    setStatus('ok', 'Added ' + name + '. It will now appear in Create PI suggestions.');
-    setTimeout(closeModal, 900);
+
+    // If Apps Script is wired, also write to the Parties sheet.
+    const url = (window.ATLAS_APPS_SCRIPT_URL ||
+                 localStorage.getItem('atlas-apps-script-url') || '').trim();
+    if (!url){
+      setStatus('ok', 'Added ' + name + ' locally. It will appear in Create PI suggestions. (Apps Script not yet wired — not written to Parties sheet.)');
+      setTimeout(closeModal, 1100);
+      return;
+    }
+
+    setStatus('warn', 'Writing to Parties sheet…');
+    $('ap-submit').disabled = true;
+    fetch(url, {
+      method: 'POST',
+      mode: 'cors',
+      body: JSON.stringify({ kind: 'party', party: entry }),
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    })
+      .then(r => r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)))
+      .then(res => {
+        if (!res.ok) throw new Error(res.error || 'Apps Script returned ok:false');
+        setStatus('ok', 'Added ' + name + ' to Parties sheet and Create PI suggestions.');
+        setTimeout(closeModal, 900);
+      })
+      .catch(err => {
+        console.error(err);
+        setStatus('err', 'Saved locally, but sheet write failed: ' + err.message);
+      })
+      .finally(() => { $('ap-submit').disabled = false; });
   }
 
   function init(){
