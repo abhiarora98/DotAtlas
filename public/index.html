@@ -1,0 +1,1622 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>dotatlas — operating surface</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --void: #060912;
+    --void-2: #0A0E18;
+    --surface: #0F1320;
+    --surface-2: #141828;
+    --surface-3: #1A1F30;
+    --surface-4: #232A3E;
+    --line: rgba(255,255,255,0.06);
+    --line-2: rgba(255,255,255,0.10);
+    --line-3: rgba(255,255,255,0.18);
+    --text: #F2F4F6;
+    --text-2: rgba(242,244,246,0.62);
+    --text-3: rgba(242,244,246,0.38);
+    --text-4: rgba(242,244,246,0.22);
+    --emerald: #4EDEA3;
+    --emerald-2: #6FFBBE;
+    --emerald-soft: rgba(78,222,163,0.10);
+    --emerald-mute: rgba(78,222,163,0.22);
+    --blue: #7CA8FF;
+    --blue-soft: rgba(124,168,255,0.10);
+    --amber: #FFB079;
+    --amber-soft: rgba(255,176,121,0.10);
+    --rose: #FF8AA8;
+    --rose-soft: rgba(255,138,168,0.10);
+    --fd: 'Manrope', system-ui, sans-serif;
+    --fb: 'Inter', system-ui, sans-serif;
+    --fm: 'JetBrains Mono', ui-monospace, monospace;
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--void); color: var(--text); font-family: var(--fb); -webkit-font-smoothing: antialiased; }
+
+  /* Ambient atmosphere — quiet emerald */
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 1200px 900px at 18% -10%, rgba(78,222,163,0.07), transparent 55%),
+      radial-gradient(ellipse 800px 800px at 110% 110%, rgba(124,168,255,0.04), transparent 55%);
+    pointer-events: none; z-index: 0;
+  }
+  body::after {
+    content: ''; position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.55'/></svg>");
+    opacity: 0.025; pointer-events: none; z-index: 1;
+  }
+  /* Meridian arc — single faint sweep */
+  .meridian { position: fixed; inset: 0; pointer-events: none; z-index: 1; opacity: 0.28; }
+  .meridian svg { width: 100%; height: 100%; }
+
+  .app {
+    position: relative; z-index: 2;
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 100vh;
+  }
+
+  /* SIDEBAR — architectural rail */
+  aside.rail {
+    border-right: 1px solid var(--line);
+    padding: 22px 16px 22px 20px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.020) 0%, rgba(255,255,255,0) 40%),
+      linear-gradient(180deg, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    position: sticky; top: 0; height: 100vh;
+    display: flex; flex-direction: column;
+  }
+  /* Faint map-grid behind rail */
+  aside.rail::before {
+    content: ''; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 28px 28px;
+    opacity: 0.5; pointer-events: none;
+    mask-image: linear-gradient(180deg, black 0%, transparent 70%);
+  }
+  .brand {
+    display: inline-flex; align-items: center; gap: 11px;
+    margin-bottom: 28px;
+  }
+  .dot-mark { width: 22px; height: 22px; position: relative; }
+  .dot-mark .core { position: absolute; top: 50%; left: 50%; width: 7px; height: 7px; margin: -3.5px; border-radius: 50%; background: var(--emerald); box-shadow: 0 0 0 4px rgba(78,222,163,0.12), 0 0 16px rgba(78,222,163,0.5); }
+  .dot-mark .ring { position: absolute; inset: 0; border: 1px solid rgba(78,222,163,0.25); border-radius: 50%; animation: pulseRing 4s var(--ease) infinite; }
+  @keyframes pulseRing { 0%,100% { transform: scale(0.85); opacity: 0.5; } 50% { transform: scale(1.1); opacity: 0; } }
+  .wm { font-family: var(--fd); font-weight: 600; font-size: 16px; letter-spacing: -0.04em; color: var(--text); }
+  .wm .dot { color: var(--emerald); }
+
+  .workspace {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 9px 11px;
+    margin-bottom: 22px;
+    display: flex; align-items: center; gap: 10px;
+    cursor: pointer;
+    transition: border-color 250ms var(--ease);
+  }
+  .workspace:hover { border-color: var(--line-2); }
+  .workspace .ws-mono {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, var(--emerald), var(--blue));
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--fd); font-weight: 700; font-size: 13px; color: var(--void);
+  }
+  .workspace .ws-name { font-size: 12.5px; font-weight: 500; color: var(--text); line-height: 1.1; }
+  .workspace .ws-sub { font-family: var(--fm); font-size: 9.5px; color: var(--text-3); margin-top: 2px; letter-spacing: 0.06em; }
+  .workspace .ws-caret { margin-left: auto; color: var(--text-3); font-size: 11px; }
+
+  .rail-section {
+    font-family: var(--fm); font-size: 9.5px; color: var(--text-4);
+    letter-spacing: 0.16em; text-transform: uppercase;
+    padding: 0 10px 8px; margin-top: 18px;
+  }
+  .rail-section:first-of-type { margin-top: 4px; }
+  .nav-item {
+    display: grid; grid-template-columns: 16px 1fr auto;
+    gap: 11px; align-items: center;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 13px; color: var(--text-2);
+    cursor: pointer;
+    transition: all 280ms var(--ease);
+    margin-bottom: 1px;
+    position: relative;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.025); color: var(--text); transform: translateX(2px); }
+  .nav-item.active {
+    background: linear-gradient(90deg, rgba(78,222,163,0.10) 0%, rgba(78,222,163,0.02) 100%);
+    color: var(--text);
+    border-left: 0;
+  }
+  .nav-item.active::before {
+    content: ''; position: absolute; left: -16px; top: 50%; width: 3px; height: 18px; margin-top: -9px;
+    background: var(--emerald);
+    border-radius: 0 2px 2px 0;
+  }
+  }
+  .nav-item .glyph { color: var(--text-3); width: 16px; display: inline-flex; justify-content: center; }
+  .nav-item.active .glyph { color: var(--emerald); }
+  .nav-item .badge {
+    font-family: var(--fm); font-size: 9.5px;
+    padding: 1px 6px; border-radius: 999px;
+    background: var(--surface-3); color: var(--text-2);
+    letter-spacing: 0.04em;
+  }
+  .nav-item .badge.live { color: var(--emerald); background: var(--emerald-soft); }
+  .nav-item .badge.warn { color: var(--amber); background: var(--amber-soft); }
+
+  .rail-foot {
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+  .rail-foot .user {
+    display: grid; grid-template-columns: 26px 1fr auto;
+    gap: 10px; align-items: center;
+    padding: 6px 4px;
+    cursor: pointer;
+  }
+  .rail-foot .av {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: linear-gradient(135deg, #1A2029, #283448);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--fd); font-weight: 600; font-size: 11px;
+    color: var(--text-2);
+  }
+  .rail-foot .user-n { font-size: 12.5px; font-weight: 500; }
+  .rail-foot .user-r { font-family: var(--fm); font-size: 9.5px; color: var(--text-3); letter-spacing: 0.06em; margin-top: 2px; }
+
+  /* MAIN COLUMN */
+  main.col {
+    padding: 22px 36px 60px;
+    min-width: 0;
+  }
+
+  /* TOPBAR */
+  .top {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 24px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 36px;
+  }
+  .crumb {
+    display: inline-flex; gap: 10px; align-items: center;
+    font-family: var(--fm); font-size: 11px; color: var(--text-3); letter-spacing: 0.06em;
+  }
+  .crumb b { color: var(--text); font-weight: 500; }
+  .crumb .sep { color: var(--text-4); }
+  .top .right {
+    display: inline-flex; gap: 10px; align-items: center;
+  }
+  .ask {
+    background: var(--surface);
+    border: 1px solid var(--line-2);
+    border-radius: 999px;
+    padding: 8px 14px;
+    display: inline-flex; align-items: center; gap: 10px;
+    color: var(--text-3);
+    font-size: 12.5px;
+    min-width: 360px;
+    white-space: nowrap;
+  }
+  .ask .dia { color: var(--emerald); }
+  .ask .k { font-family: var(--fm); font-size: 9.5px; padding: 1px 7px; background: var(--void-2); border-radius: 4px; color: var(--text-3); margin-left: auto; letter-spacing: 0.08em; }
+  .icon-btn {
+    width: 34px; height: 34px; border-radius: 999px;
+    background: transparent; border: 1px solid var(--line);
+    color: var(--text-2); cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: all 200ms var(--ease);
+    position: relative;
+  }
+  .icon-btn:hover { border-color: var(--line-2); color: var(--text); }
+  .icon-btn .dot-n {
+    position: absolute; top: 7px; right: 8px;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--emerald);
+    box-shadow: 0 0 6px var(--emerald);
+  }
+
+  /* HERO HEADER — cinematic */
+  .hero-h {
+    display: grid; grid-template-columns: 1fr auto;
+    gap: 40px; align-items: end;
+    position: relative;
+    padding: 56px 56px 36px 56px;
+  }
+  .hero-h::before {
+    content: ''; position: absolute; inset: -20px -40px -20px -40px; z-index: -1;
+    background:
+      radial-gradient(ellipse 700px 240px at 28% 100%, rgba(78,222,163,0.10), transparent 70%),
+      radial-gradient(ellipse 500px 200px at 80% 0%, rgba(124,168,255,0.06), transparent 70%);
+    pointer-events: none;
+  }
+    margin-bottom: 36px;
+  }
+  .hero-h .eb {
+    font-family: var(--fm); font-size: 10.5px; color: var(--text-3);
+    letter-spacing: 0.16em; text-transform: uppercase;
+    display: inline-flex; align-items: center; gap: 10px;
+    margin-bottom: 14px;
+  }
+  .hero-h .eb .live-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--emerald);
+    box-shadow: 0 0 0 3px rgba(78,222,163,0.18), 0 0 10px var(--emerald);
+    animation: pulseDot 2.4s ease-in-out infinite;
+  }
+  @keyframes pulseDot { 0%,100% { box-shadow: 0 0 0 3px rgba(78,222,163,0.18), 0 0 10px var(--emerald); } 50% { box-shadow: 0 0 0 6px rgba(78,222,163,0.06), 0 0 16px var(--emerald); } }
+  .hero-h h1 {
+    font-family: var(--fd);
+    font-size: 42px; font-weight: 300;
+    letter-spacing: -0.035em;
+    line-height: 1.08;
+    margin: 0;
+    max-width: 760px;
+  }
+  .hero-h h1 .em { font-style: italic; font-weight: 400; }
+  .hero-h h1 .accent { color: var(--emerald); }
+  .hero-h h1 b { font-weight: 600; }
+  .hero-h .when {
+    font-family: var(--fm); font-size: 10.5px; color: var(--text-3);
+    text-align: right; line-height: 1.7; letter-spacing: 0.06em;
+  }
+  .hero-h .when b { color: var(--text); font-weight: 500; }
+
+  /* RANGE SELECTOR */
+  .range-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 18px;
+  }
+  .range {
+    display: inline-flex; gap: 0;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 999px;
+    padding: 3px;
+  }
+  .range button {
+    font-family: var(--fm); font-size: 10.5px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-3); background: transparent; border: 0;
+    padding: 6px 14px; border-radius: 999px; cursor: pointer;
+    transition: all 200ms var(--ease);
+  }
+  .range button:hover { color: var(--text); }
+  .range button.on { background: var(--surface-3); color: var(--text); }
+  .actions {
+    display: inline-flex; gap: 8px;
+  }
+  .chip {
+    font-family: var(--fm); font-size: 10.5px; color: var(--text-2);
+    padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px;
+    background: transparent; cursor: pointer;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    transition: all 200ms var(--ease);
+    display: inline-flex; gap: 6px; align-items: center;
+  }
+  .chip:hover { border-color: var(--line-2); color: var(--text); }
+  .chip.emerald { color: var(--emerald); border-color: rgba(78,222,163,0.25); }
+  .chip.emerald:hover { background: var(--emerald-soft); }
+
+  /* KPI ROW */
+  .kpis {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 14px; margin-bottom: 14px;
+  }
+  .kpi {
+    background: linear-gradient(180deg, var(--surface-2) 0%, rgba(19,24,31,0.4) 100%);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px 20px 18px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 300ms var(--ease), border-color 300ms var(--ease);
+  }
+  .kpi::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--line-2), transparent);
+  }
+  .kpi:hover { transform: translateY(-1px); border-color: var(--line-2); }
+  .kpi .lbl {
+    font-family: var(--fm); font-size: 10px; color: var(--text-3);
+    letter-spacing: 0.14em; text-transform: uppercase;
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 14px;
+  }
+  .kpi .lbl .ind {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--emerald); box-shadow: 0 0 6px var(--emerald);
+  }
+  .kpi .lbl .ind.a { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+  .kpi .lbl .ind.b { background: var(--blue); box-shadow: 0 0 6px var(--blue); }
+  .kpi .lbl .ind.r { background: var(--rose); box-shadow: 0 0 6px var(--rose); }
+  .kpi .v {
+    font-family: var(--fd);
+    font-size: 34px; font-weight: 400;
+    letter-spacing: -0.035em; line-height: 1;
+    color: var(--text);
+    display: flex; align-items: baseline; gap: 4px;
+  }
+  .kpi .v .cur { font-size: 16px; color: var(--text-3); margin-right: 2px; letter-spacing: -0.01em; }
+  .kpi .v .un { font-size: 14px; color: var(--text-3); letter-spacing: -0.005em; }
+  .kpi .d {
+    font-family: var(--fm); font-size: 11px;
+    color: var(--emerald);
+    display: inline-flex; gap: 6px; align-items: center;
+    margin-top: 8px;
+  }
+  .kpi .d.dn { color: var(--amber); }
+  .kpi .d.rr { color: var(--rose); }
+  .kpi .d .arr { font-family: var(--fb); }
+  .kpi .ftn {
+    font-size: 12px; color: var(--text-2);
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px solid var(--line);
+    line-height: 1.5;
+  }
+  .kpi .ftn b { color: var(--text); font-weight: 500; }
+  .kpi svg.spark { display: block; margin-top: 12px; width: 100%; }
+
+  /* MAIN GRID */
+  .grid {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 14px;
+    margin-top: 14px;
+  }
+
+  /* CARD — atmospheric plane, not a box */
+  .card {
+    background:
+      radial-gradient(ellipse 600px 220px at 0% 0%, rgba(78,222,163,0.025), transparent 50%),
+      linear-gradient(180deg, rgba(255,255,255,0.018) 0%, rgba(255,255,255,0) 60%),
+      linear-gradient(180deg, rgba(19,24,31,0.55) 0%, rgba(14,18,23,0.35) 100%);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-top-color: rgba(255,255,255,0.07);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .card-h {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .card-h .t {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .card-h .t .ic { color: var(--emerald); }
+  .card-h .t h3 {
+    font-family: var(--fd);
+    font-size: 14px; font-weight: 500;
+    letter-spacing: -0.01em;
+    margin: 0; color: var(--text);
+  }
+  .card-h .t .sub {
+    font-family: var(--fm); font-size: 10px; color: var(--text-3);
+    letter-spacing: 0.08em; margin-left: 6px;
+  }
+  .card-h .seg {
+    display: inline-flex; gap: 4px;
+  }
+  .card-h .seg button {
+    font-family: var(--fm); font-size: 10px; color: var(--text-3);
+    background: transparent; border: 0; padding: 4px 10px;
+    border-radius: 999px; cursor: pointer; letter-spacing: 0.08em; text-transform: uppercase;
+    transition: all 200ms var(--ease);
+  }
+  .card-h .seg button.on { background: var(--surface-3); color: var(--text); }
+  .card-h .more { color: var(--text-3); cursor: pointer; font-size: 14px; }
+  .card-b { padding: 18px 22px 20px; }
+
+  /* HERO CHART */
+  .chart-wrap { position: relative; padding: 0 22px 22px; }
+  .chart-meta {
+    display: flex; justify-content: space-between; padding: 0 22px 14px;
+    font-family: var(--fm); font-size: 10.5px; color: var(--text-3);
+    letter-spacing: 0.04em;
+  }
+  .chart-meta b { color: var(--text); font-weight: 500; }
+  .chart-meta .key {
+    display: inline-flex; gap: 18px;
+  }
+  .chart-meta .key span { display: inline-flex; gap: 6px; align-items: center; }
+  .chart-meta .key .sw { width: 8px; height: 2px; border-radius: 2px; }
+
+  /* INSIGHTS / SIGNALS — right column */
+  .signal {
+    display: grid; grid-template-columns: 18px 1fr;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+    align-items: start;
+  }
+  .signal:last-of-type { border-bottom: 0; padding-bottom: 4px; }
+  .signal:first-of-type { padding-top: 2px; }
+  .signal .pip {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--emerald);
+    box-shadow: 0 0 0 3px rgba(78,222,163,0.14), 0 0 10px var(--emerald);
+    margin-top: 5px;
+  }
+  .signal .pip.a { background: var(--amber); box-shadow: 0 0 0 3px rgba(255,176,121,0.14), 0 0 10px var(--amber); }
+  .signal .pip.b { background: var(--blue); box-shadow: 0 0 0 3px rgba(124,168,255,0.14), 0 0 10px var(--blue); }
+  .signal .pip.r { background: var(--rose); box-shadow: 0 0 0 3px rgba(255,138,168,0.14), 0 0 10px var(--rose); }
+  .signal .title {
+    font-size: 13.5px; color: var(--text);
+    letter-spacing: -0.005em; line-height: 1.35;
+  }
+  .signal .title b { font-weight: 600; }
+  .signal .meta-r {
+    font-family: var(--fm); font-size: 10px;
+    color: var(--text-3);
+    margin-top: 5px;
+    display: inline-flex; gap: 10px; letter-spacing: 0.06em;
+  }
+  .signal .meta-r .when { color: var(--text-3); }
+  .signal .meta-r .by { color: var(--emerald); }
+  .signal .acts { margin-top: 10px; display: inline-flex; gap: 8px; }
+  .signal .acts button {
+    font-family: var(--fd); font-size: 11px; font-weight: 500;
+    padding: 5px 11px; border-radius: 999px;
+    border: 1px solid var(--line-2); background: transparent;
+    color: var(--text-2); cursor: pointer;
+    transition: all 200ms var(--ease);
+    letter-spacing: -0.005em;
+  }
+  .signal .acts button.prime {
+    background: var(--text); color: var(--void);
+    border-color: var(--text);
+  }
+  .signal .acts button:hover { color: var(--text); border-color: var(--line-3); }
+  .signal .acts button.prime:hover { background: var(--emerald); color: var(--void); border-color: var(--emerald); }
+
+  /* OPERATIONS TABLE */
+  .table {
+    width: 100%; border-collapse: collapse;
+  }
+  .table thead th {
+    font-family: var(--fm); font-size: 9.5px;
+    color: var(--text-3); letter-spacing: 0.14em; text-transform: uppercase;
+    text-align: left; font-weight: 500;
+    padding: 0 0 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .table thead th:last-child, .table tbody td:last-child { text-align: right; }
+  .table thead th.r { text-align: right; }
+  .table tbody td {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 13px;
+    vertical-align: middle;
+  }
+  .table tbody tr:last-child td { border-bottom: 0; }
+  .table .name { display: flex; align-items: center; gap: 12px; color: var(--text); }
+  .table .name .av-sq {
+    width: 30px; height: 30px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--fd); font-weight: 600; font-size: 11px;
+    color: var(--text);
+    background: var(--surface-3);
+    border: 1px solid var(--line);
+  }
+  .table .name .av-sq.e { background: linear-gradient(135deg, rgba(78,222,163,0.18), rgba(78,222,163,0.04)); color: var(--emerald); border-color: rgba(78,222,163,0.18); }
+  .table .name .av-sq.b { background: linear-gradient(135deg, rgba(124,168,255,0.18), rgba(124,168,255,0.04)); color: var(--blue); border-color: rgba(124,168,255,0.18); }
+  .table .name .av-sq.a { background: linear-gradient(135deg, rgba(255,176,121,0.18), rgba(255,176,121,0.04)); color: var(--amber); border-color: rgba(255,176,121,0.18); }
+  .table .name .nm-c .pri { font-weight: 500; font-size: 13px; }
+  .table .name .nm-c .sec { font-family: var(--fm); font-size: 10.5px; color: var(--text-3); margin-top: 2px; letter-spacing: 0.04em; }
+  .table .num { font-family: var(--fd); font-weight: 500; color: var(--text); font-variant-numeric: tabular-nums; }
+  .table .num .cur { font-size: 11px; color: var(--text-3); margin-right: 2px; }
+  .table .mute { color: var(--text-2); font-size: 12.5px; }
+  .pill-s {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 9px; border-radius: 999px;
+    font-family: var(--fm); font-size: 10px;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .pill-s.ok { background: var(--emerald-soft); color: var(--emerald); }
+  .pill-s.warn { background: var(--amber-soft); color: var(--amber); }
+  .pill-s.bad { background: var(--rose-soft); color: var(--rose); }
+  .pill-s.muted { background: var(--surface-3); color: var(--text-2); }
+  .pill-s.info { background: var(--blue-soft); color: var(--blue); }
+  .pill-s::before {
+    content: ''; width: 5px; height: 5px; border-radius: 50%;
+    background: currentColor;
+  }
+
+  /* SECONDARY ROW: graph + heatmap */
+  .row-2 {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1fr;
+    gap: 14px; margin-top: 14px;
+  }
+  .heatmap {
+    display: grid;
+    grid-template-columns: repeat(24, 1fr);
+    gap: 3px;
+    margin-top: 8px;
+  }
+  .heatmap .cell {
+    aspect-ratio: 1 / 1;
+    border-radius: 2px;
+    background: var(--surface-3);
+  }
+  .heatmap-foot {
+    display: flex; justify-content: space-between;
+    margin-top: 14px;
+    font-family: var(--fm); font-size: 10px; color: var(--text-3);
+    letter-spacing: 0.06em;
+  }
+  .heatmap-legend {
+    display: inline-flex; gap: 4px; align-items: center;
+  }
+  .heatmap-legend .sw { width: 10px; height: 10px; border-radius: 2px; background: var(--surface-3); }
+
+  /* PARTY LIST */
+  .party-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+    align-items: center;
+  }
+  .party-row:last-child { border-bottom: 0; padding-bottom: 0; }
+  .party-row .nm { font-size: 13px; color: var(--text); font-weight: 500; }
+  .party-row .nm small {
+    font-family: var(--fm); font-size: 10px; color: var(--text-3);
+    letter-spacing: 0.06em; display: block; margin-top: 3px;
+  }
+  .party-row .bar {
+    width: 90px; height: 5px; border-radius: 999px;
+    background: var(--surface-3);
+    position: relative; overflow: hidden;
+  }
+  .party-row .bar > div {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--emerald), var(--emerald-2));
+  }
+  .party-row .bar > div.warn { background: linear-gradient(90deg, var(--amber), #FFC9A8); }
+  .party-row .bar > div.bad { background: linear-gradient(90deg, var(--rose), #FFB1C5); }
+  .party-row .num { font-family: var(--fd); font-weight: 500; font-size: 13px; color: var(--text); font-variant-numeric: tabular-nums; min-width: 78px; text-align: right; }
+  .party-row .num small { font-family: var(--fm); font-size: 10px; color: var(--text-3); letter-spacing: 0.06em; display: block; margin-top: 3px; }
+
+  /* FOOT */
+  .ftbar {
+    margin-top: 30px;
+    padding: 20px 0;
+    border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--fm); font-size: 10.5px; color: var(--text-3);
+    letter-spacing: 0.06em;
+  }
+  .ftbar .l b { color: var(--text); font-weight: 500; }
+  .ftbar .r { display: inline-flex; gap: 22px; }
+  .ftbar .r span { display: inline-flex; gap: 6px; align-items: center; }
+  .ftbar .r .ind { width: 5px; height: 5px; border-radius: 50%; background: var(--emerald); box-shadow: 0 0 6px var(--emerald); }
+
+  /* nowrap precision polish */
+  .kpi .lbl > span:first-child,
+  .kpi .d,
+  .chip,
+  .card-h .t h3,
+  .card-h .t .sub,
+  .signal .acts button,
+  .pill-s,
+  .ftbar .r span,
+  .hero-h .eb,
+  .crumb,
+  .workspace .ws-name,
+  .workspace .ws-sub,
+  .nav-item > span:not(.glyph) { white-space: nowrap; }
+
+  @media (max-width: 1180px) {
+    aside.rail { display: none; }
+    .app { grid-template-columns: 1fr; }
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+    .grid, .row-2 { grid-template-columns: 1fr; }
+    .ask { min-width: 0; }
+  }
+</style>
+<style id="light-mode">
+  body[data-mode="light"] {
+    --void: #F7F6F2;
+    --void-2: #FBFAF7;
+    --surface: #FFFFFF;
+    --surface-2: #FBFAF7;
+    --surface-3: #F2F1ED;
+    --surface-4: #E7E5DF;
+    --line: rgba(10,22,40,0.08);
+    --line-2: rgba(10,22,40,0.12);
+    --line-3: rgba(10,22,40,0.20);
+    --text: #0A1628;
+    --text-2: rgba(10,22,40,0.62);
+    --text-3: rgba(10,22,40,0.42);
+    --text-4: rgba(10,22,40,0.26);
+    --emerald: #00A572;
+    --emerald-2: #00C786;
+    --emerald-soft: rgba(0,165,114,0.10);
+    --emerald-mute: rgba(0,165,114,0.22);
+    --blue: #3B6BFF;
+    --amber: #D97706;
+    --rose: #D14545;
+  }
+  body[data-mode="light"]::before {
+    background:
+      radial-gradient(ellipse 1200px 900px at 18% -10%, rgba(0,165,114,0.06), transparent 55%),
+      radial-gradient(ellipse 800px 800px at 110% 110%, rgba(59,107,255,0.05), transparent 55%);
+  }
+  body[data-mode="light"]::after { mix-blend-mode: multiply; opacity: 0.18; }
+  body[data-mode="light"] .meridian { opacity: 0.35; }
+  body[data-mode="light"] .card {
+    background:
+      radial-gradient(ellipse 600px 220px at 0% 0%, rgba(0,165,114,0.04), transparent 50%),
+      linear-gradient(180deg, #FFFFFF 0%, #FBFAF7 100%);
+    border-color: rgba(10,22,40,0.06);
+    box-shadow: 0 1px 3px rgba(10,22,40,0.03);
+  }
+  body[data-mode="light"] aside.rail {
+    background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0.4));
+  }
+  body[data-mode="light"] .theme-toggle { color: #D97706; }
+</style>
+</head>
+<body>
+
+<!-- Meridian arcs · orbital sweep -->
+<div class="meridian" aria-hidden="true">
+  <svg viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <linearGradient id="arcG" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%"  stop-color="rgba(78,222,163,0)"/>
+        <stop offset="50%" stop-color="rgba(78,222,163,0.30)"/>
+        <stop offset="100%" stop-color="rgba(78,222,163,0)"/>
+      </linearGradient>
+      <linearGradient id="arcG2" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%"  stop-color="rgba(124,168,255,0)"/>
+        <stop offset="50%" stop-color="rgba(124,168,255,0.22)"/>
+        <stop offset="100%" stop-color="rgba(124,168,255,0)"/>
+      </linearGradient>
+    </defs>
+    <path d="M -200 220 Q 800 -120 1800 320" fill="none" stroke="url(#arcG)" stroke-width="1"/>
+    <path d="M -200 720 Q 800 420 1800 880" fill="none" stroke="url(#arcG2)" stroke-width="1"/>
+    <path d="M -200 480 Q 800 200 1800 560" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+    <circle cx="320" cy="178" r="2" fill="rgba(78,222,163,0.7)"/>
+    <circle cx="1180" cy="262" r="2" fill="rgba(255,255,255,0.6)"/>
+    <circle cx="720" cy="498" r="1.5" fill="rgba(124,168,255,0.6)"/>
+  </svg>
+</div>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="rail">
+    <div class="brand">
+      <div class="dot-mark"><div class="ring"></div><div class="core"></div></div>
+      <span class="wm"><span class="dot">.</span>atlas</span>
+    </div>
+
+    <div class="workspace">
+      <div class="ws-mono">C</div>
+      <div>
+        <div class="ws-name">Comfort Industries</div>
+        <div class="ws-sub">PVT · PANIPAT</div>
+      </div>
+      <div class="ws-caret">⌄</div>
+    </div>
+
+    <div class="rail-section">Operate</div>
+    <div class="nav-item active" data-page="today">
+      <span class="glyph">◆</span><span>Today</span><span class="badge live">LIVE</span>
+    </div>
+    <div class="nav-item" data-page="orders">
+      <span class="glyph">◇</span><span>Orders</span><span class="badge">74</span>
+    </div>
+    <div class="nav-item" data-page="parties">
+      <span class="glyph">○</span><span>Parties</span>
+    </div>
+    <div class="nav-item" data-page="inventory">
+      <span class="glyph">▢</span><span>Inventory</span><span class="badge warn">8</span>
+    </div>
+    <div class="nav-item" data-page="dispatch">
+      <span class="glyph">→</span><span>Dispatch</span>
+    </div>
+    <div class="nav-item" data-page="create-pi">
+      <span class="glyph">+</span><span>Create PI</span><span class="badge live">NEW</span>
+    </div>
+
+    <div class="rail-section">Sense</div>
+    <div class="nav-item" data-page="cash">
+      <span class="glyph">◔</span><span>Cash &amp; finance</span>
+    </div>
+    <div class="nav-item" data-page="receivables">
+      <span class="glyph">⋮</span><span>Receivables</span><span class="badge warn">3</span>
+    </div>
+    <div class="nav-item" data-page="intel">
+      <span class="glyph">◈</span><span>Intelligence</span>
+    </div>
+    <div class="nav-item" data-page="reports">
+      <span class="glyph">≡</span><span>Reports</span>
+    </div>
+
+    <div class="rail-section">Studio</div>
+    <div class="nav-item" data-page="workflows">
+      <span class="glyph">◇</span><span>Workflows</span>
+    </div>
+    <div class="nav-item" data-page="settings">
+      <span class="glyph">⚙</span><span>Settings</span>
+    </div>
+
+    <div class="rail-foot">
+      <div class="user">
+        <div class="av">AA</div>
+        <div>
+          <div class="user-n">Abhi Arora</div>
+          <div class="user-r">OPERATOR · OWNER</div>
+        </div>
+        <span style="color: var(--text-3); font-size: 12px;">⋯</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="col">
+
+    <!-- TOPBAR -->
+    <div class="top">
+      <div class="crumb">
+        <b>atlas</b> <span class="sep">/</span> Operate <span class="sep">/</span> <b>Today</b>
+      </div>
+      <div class="right">
+        <div class="ask">
+          <span class="dia">◇</span>
+          <span>Ask atlas — "what slipped this week?"</span>
+          <span class="k">⌘ K</span>
+        </div>
+        <button class="icon-btn" title="Inbox">⌘
+          <span class="dot-n"></span>
+        </button>
+        <button class="icon-btn" title="Notes">≡</button>
+        <button class="icon-btn theme-toggle" id="themeToggle" title="Toggle theme (T)">☽</button>
+      </div>
+    </div>
+
+    <section class="page" data-page="today">
+    <!-- HERO -->
+    <div class="hero-h">
+      <div>
+        <div class="eb"><span class="live-dot"></span>Morning brief · Mon, 11 May · 09:14 IST</div>
+        <h1>Good morning, Abhi. <span class="em">Three things</span> matter before <span class="accent">11 AM</span>.</h1>
+      </div>
+      <div class="when">
+        WEEK · <b>19 OF 52</b><br/>
+        SIGNAL CONFIDENCE · <b>94.2%</b><br/>
+        LAST SYNC · <b>14s ago</b>
+      </div>
+    </div>
+
+    <!-- RANGE BAR -->
+    <div class="range-bar">
+      <div class="range">
+        <button>D</button>
+        <button class="on">W</button>
+        <button>M</button>
+        <button>Q</button>
+        <button>YTD</button>
+      </div>
+      <div class="actions">
+        <button class="chip">⤓ EXPORT</button>
+        <button class="chip">⌖ COMPARE</button>
+        <button class="chip emerald">◆ ASK ATLAS</button>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpis">
+      <div class="kpi">
+        <div class="lbl"><span>Cash on hand</span><span class="ind"></span></div>
+        <div class="v"><span class="cur">₹</span>62.4<span class="un">L</span></div>
+        <div class="d"><span class="arr">↑</span>+12.4% vs. last Mon</div>
+        <svg class="spark" height="32" viewBox="0 0 200 32" preserveAspectRatio="none">
+          <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(78,222,163,0.35)"/><stop offset="100%" stop-color="rgba(78,222,163,0)"/></linearGradient></defs>
+          <path d="M0,24 L20,22 L40,23 L60,18 L80,15 L100,13 L120,14 L140,10 L160,8 L180,6 L200,4 L200,32 L0,32 Z" fill="url(#g1)"/>
+          <path d="M0,24 L20,22 L40,23 L60,18 L80,15 L100,13 L120,14 L140,10 L160,8 L180,6 L200,4" stroke="rgb(78,222,163)" stroke-width="1.5" fill="none"/>
+          <circle cx="200" cy="4" r="2.6" fill="rgb(78,222,163)"/>
+        </svg>
+      </div>
+
+      <div class="kpi">
+        <div class="lbl"><span>Receivables</span><span class="ind a"></span></div>
+        <div class="v"><span class="cur">₹</span>1.18<span class="un">Cr</span></div>
+        <div class="d dn"><span class="arr">↑</span>+4 days · 2 parties slipping</div>
+        <svg class="spark" height="32" viewBox="0 0 200 32" preserveAspectRatio="none">
+          <defs><linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(255,176,121,0.35)"/><stop offset="100%" stop-color="rgba(255,176,121,0)"/></linearGradient></defs>
+          <path d="M0,12 L20,14 L40,11 L60,15 L80,18 L100,16 L120,20 L140,22 L160,23 L180,25 L200,26 L200,32 L0,32 Z" fill="url(#g2)"/>
+          <path d="M0,12 L20,14 L40,11 L60,15 L80,18 L100,16 L120,20 L140,22 L160,23 L180,25 L200,26" stroke="rgb(255,176,121)" stroke-width="1.5" fill="none"/>
+          <circle cx="200" cy="26" r="2.6" fill="rgb(255,176,121)"/>
+        </svg>
+      </div>
+
+      <div class="kpi">
+        <div class="lbl"><span>Orders · in motion</span><span class="ind b"></span></div>
+        <div class="v">312</div>
+        <div class="d"><span class="arr">↑</span>+24 since 6 AM</div>
+        <svg class="spark" height="32" viewBox="0 0 200 32" preserveAspectRatio="none">
+          <defs><linearGradient id="g3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(124,168,255,0.32)"/><stop offset="100%" stop-color="rgba(124,168,255,0)"/></linearGradient></defs>
+          <path d="M0,22 L20,18 L40,20 L60,15 L80,16 L100,11 L120,12 L140,9 L160,10 L180,7 L200,5 L200,32 L0,32 Z" fill="url(#g3)"/>
+          <path d="M0,22 L20,18 L40,20 L60,15 L80,16 L100,11 L120,12 L140,9 L160,10 L180,7 L200,5" stroke="rgb(124,168,255)" stroke-width="1.5" fill="none"/>
+          <circle cx="200" cy="5" r="2.6" fill="rgb(124,168,255)"/>
+        </svg>
+      </div>
+
+      <div class="kpi">
+        <div class="lbl"><span>Margin · trailing 30d</span><span class="ind r"></span></div>
+        <div class="v">23.1<span class="un">%</span></div>
+        <div class="d rr"><span class="arr">↓</span>−1.4 pts · Wire Mat HD</div>
+        <svg class="spark" height="32" viewBox="0 0 200 32" preserveAspectRatio="none">
+          <defs><linearGradient id="g4" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(255,138,168,0.30)"/><stop offset="100%" stop-color="rgba(255,138,168,0)"/></linearGradient></defs>
+          <path d="M0,8 L20,9 L40,10 L60,8 L80,12 L100,14 L120,13 L140,16 L160,15 L180,17 L200,19 L200,32 L0,32 Z" fill="url(#g4)"/>
+          <path d="M0,8 L20,9 L40,10 L60,8 L80,12 L100,14 L120,13 L140,16 L160,15 L180,17 L200,19" stroke="rgb(255,138,168)" stroke-width="1.5" fill="none"/>
+          <circle cx="200" cy="19" r="2.6" fill="rgb(255,138,168)"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- HERO CHART + SIGNALS -->
+    <div class="grid">
+
+      <!-- LEFT: HERO CHART -->
+      <div class="card">
+        <div class="card-h">
+          <div class="t">
+            <span class="ic">◆</span>
+            <h3>Cash flow · the trace</h3>
+            <span class="sub">LAST 28 DAYS</span>
+          </div>
+          <div class="seg">
+            <button>FLOW</button>
+            <button class="on">NET</button>
+            <button>FORECAST</button>
+          </div>
+        </div>
+        <div class="chart-meta">
+          <div><b>₹62.4L</b> · today · <span style="color:var(--emerald);">+12.4%</span> vs. 30d avg</div>
+          <div class="key">
+            <span><span class="sw" style="background:var(--emerald);"></span>Inflow</span>
+            <span><span class="sw" style="background:var(--rose);opacity:0.8;"></span>Outflow</span>
+            <span><span class="sw" style="background:var(--text-3);border-top:1px dashed var(--text-3);height:0;"></span>Forecast</span>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <svg viewBox="0 0 720 220" preserveAspectRatio="none" style="width:100%; height:220px; display:block;">
+            <defs>
+              <linearGradient id="inflow" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="rgba(78,222,163,0.32)"/>
+                <stop offset="100%" stop-color="rgba(78,222,163,0)"/>
+              </linearGradient>
+              <linearGradient id="outflow" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="rgba(255,138,168,0.24)"/>
+                <stop offset="100%" stop-color="rgba(255,138,168,0)"/>
+              </linearGradient>
+            </defs>
+
+            <!-- grid lines -->
+            <g stroke="rgba(255,255,255,0.04)" stroke-width="1">
+              <line x1="0" y1="40" x2="720" y2="40"/>
+              <line x1="0" y1="100" x2="720" y2="100"/>
+              <line x1="0" y1="160" x2="720" y2="160"/>
+            </g>
+            <g font-family="JetBrains Mono" font-size="9" fill="rgba(242,244,246,0.32)" letter-spacing="0.05em">
+              <text x="0" y="36">₹80L</text>
+              <text x="0" y="96">₹40L</text>
+              <text x="0" y="156">₹0</text>
+            </g>
+
+            <!-- inflow area + line -->
+            <path d="M30,170 L65,160 L100,150 L135,140 L170,130 L205,135 L240,120 L275,115 L310,100 L345,110 L380,90 L415,85 L450,75 L485,80 L520,60 L555,55 L590,50 L625,40 L660,45 L660,200 L30,200 Z" fill="url(#inflow)"/>
+            <path d="M30,170 L65,160 L100,150 L135,140 L170,130 L205,135 L240,120 L275,115 L310,100 L345,110 L380,90 L415,85 L450,75 L485,80 L520,60 L555,55 L590,50 L625,40 L660,45" stroke="rgb(78,222,163)" stroke-width="1.6" fill="none"/>
+
+            <!-- outflow area + line -->
+            <path d="M30,180 L65,178 L100,170 L135,175 L170,165 L205,170 L240,160 L275,165 L310,150 L345,155 L380,145 L415,140 L450,130 L485,135 L520,120 L555,125 L590,110 L625,105 L660,100 L660,200 L30,200 Z" fill="url(#outflow)"/>
+            <path d="M30,180 L65,178 L100,170 L135,175 L170,165 L205,170 L240,160 L275,165 L310,150 L345,155 L380,145 L415,140 L450,130 L485,135 L520,120 L555,125 L590,110 L625,105 L660,100" stroke="rgba(255,138,168,0.7)" stroke-width="1.4" fill="none"/>
+
+            <!-- forecast dashed -->
+            <path d="M660,45 L685,38 L710,30" stroke="rgba(78,222,163,0.55)" stroke-width="1.4" fill="none" stroke-dasharray="3 3"/>
+
+            <!-- annotation at peak -->
+            <g>
+              <line x1="555" y1="55" x2="555" y2="22" stroke="rgba(124,168,255,0.4)" stroke-width="1" stroke-dasharray="2 2"/>
+              <circle cx="555" cy="55" r="4" fill="rgb(78,222,163)"/>
+              <circle cx="555" cy="55" r="9" fill="rgba(78,222,163,0.25)"/>
+              <rect x="488" y="6" width="138" height="20" rx="4" fill="rgba(19,24,31,0.95)" stroke="rgba(255,255,255,0.12)"/>
+              <text x="498" y="20" font-family="Inter" font-size="10.5" fill="rgb(78,222,163)" font-weight="600">▲ Goyal · ₹9.42L cleared</text>
+            </g>
+            <!-- today marker -->
+            <g>
+              <line x1="660" y1="0" x2="660" y2="200" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+              <text x="664" y="14" font-family="JetBrains Mono" font-size="9.5" fill="rgba(242,244,246,0.5)" letter-spacing="0.06em">TODAY</text>
+            </g>
+
+            <!-- x labels -->
+            <g font-family="JetBrains Mono" font-size="9" fill="rgba(242,244,246,0.32)" letter-spacing="0.06em">
+              <text x="65" y="214">13 APR</text>
+              <text x="240" y="214">20 APR</text>
+              <text x="415" y="214">27 APR</text>
+              <text x="590" y="214">04 MAY</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <!-- RIGHT: PRIORITY SIGNALS -->
+      <div class="card">
+        <div class="card-h">
+          <div class="t">
+            <span class="ic">◇</span>
+            <h3>Priority signals</h3>
+            <span class="sub">3 OF 312 · RANKED BY ATLAS</span>
+          </div>
+          <span class="more">⋯</span>
+        </div>
+        <div class="card-b">
+
+          <div class="signal">
+            <span class="pip a"></span>
+            <div>
+              <div class="title">Two parties just slipped past <b>45 days</b>. <span style="color:var(--text-2);">Vinod Trading and Sai Industries — together ₹18.4L, and both broke their reorder rhythm.</span></div>
+              <div class="meta-r">
+                <span class="when">since 06:00</span>
+                <span class="by">◇ drafted by atlas</span>
+              </div>
+              <div class="acts">
+                <button class="prime">Send reminders</button>
+                <button>Open file</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="signal">
+            <span class="pip"></span>
+            <div>
+              <div class="title">Goyal Carpets cleared <b>₹9.42L</b>. <span style="color:var(--text-2);">Right on the 27-day cadence — atlas auto-issued the receipt and reconciled.</span></div>
+              <div class="meta-r">
+                <span class="when">08:42</span>
+                <span class="by">◇ auto-actioned</span>
+              </div>
+              <div class="acts">
+                <button>View trail</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="signal">
+            <span class="pip b"></span>
+            <div>
+              <div class="title">Wire Mat HD-018 will fall below par in <b>11 days</b>. <span style="color:var(--text-2);">Monsoon window opens 7 Jun. Atlas staged a PO of 240 units — your signal to release.</span></div>
+              <div class="meta-r">
+                <span class="when">07:55</span>
+                <span class="by">◇ drafted by atlas</span>
+              </div>
+              <div class="acts">
+                <button class="prime">Release PO</button>
+                <button>Adjust</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="signal">
+            <span class="pip r"></span>
+            <div>
+              <div class="title">Margin on Foot Mat dropped <b>1.4 points</b>. <span style="color:var(--text-2);">Raw price moved 3.2% in two suppliers. One alternate quote matches your floor.</span></div>
+              <div class="meta-r">
+                <span class="when">yesterday</span>
+                <span class="by">◇ context attached</span>
+              </div>
+              <div class="acts">
+                <button>Open quote</button>
+                <button>Defer</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 2: ACTIVITY · HEATMAP · PARTIES -->
+    <div class="row-2">
+      <!-- ORDERS TABLE -->
+      <div class="card" style="grid-column: span 1;">
+        <div class="card-h">
+          <div class="t">
+            <span class="ic">◇</span>
+            <h3>Orders in motion</h3>
+            <span class="sub">312 · LIVE</span>
+          </div>
+          <div class="seg">
+            <button class="on">ALL</button>
+            <button>OPEN</button>
+            <button>HOLD</button>
+          </div>
+        </div>
+        <div class="card-b" style="padding-top: 6px;">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Party</th>
+                <th>Stage</th>
+                <th class="r">Value</th>
+                <th class="r">ETA</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="name"><div class="av-sq e">GC</div><div class="nm-c"><div class="pri">Goyal Carpets</div><div class="sec">PANIPAT · #ORD-2118</div></div></div></td>
+                <td><span class="pill-s ok">DISPATCHED</span></td>
+                <td class="num r"><span class="cur">₹</span>9.42<small style="color:var(--text-3);font-size:11px;"> L</small></td>
+                <td class="mute r">today</td>
+              </tr>
+              <tr>
+                <td><div class="name"><div class="av-sq b">VT</div><div class="nm-c"><div class="pri">Vinod Trading</div><div class="sec">DELHI · #ORD-2116</div></div></div></td>
+                <td><span class="pill-s warn">PICKING</span></td>
+                <td class="num r"><span class="cur">₹</span>11.20<small style="color:var(--text-3);font-size:11px;"> L</small></td>
+                <td class="mute r">tomorrow</td>
+              </tr>
+              <tr>
+                <td><div class="name"><div class="av-sq a">SI</div><div class="nm-c"><div class="pri">Sai Industries</div><div class="sec">PUNE · #ORD-2114</div></div></div></td>
+                <td><span class="pill-s bad">ON HOLD</span></td>
+                <td class="num r"><span class="cur">₹</span>7.18<small style="color:var(--text-3);font-size:11px;"> L</small></td>
+                <td class="mute r">credit review</td>
+              </tr>
+              <tr>
+                <td><div class="name"><div class="av-sq e">RM</div><div class="nm-c"><div class="pri">Rajesh Mats</div><div class="sec">JAIPUR · #ORD-2113</div></div></div></td>
+                <td><span class="pill-s info">CONFIRMED</span></td>
+                <td class="num r"><span class="cur">₹</span>4.86<small style="color:var(--text-3);font-size:11px;"> L</small></td>
+                <td class="mute r">14 May</td>
+              </tr>
+              <tr>
+                <td><div class="name"><div class="av-sq b">KB</div><div class="nm-c"><div class="pri">Khanna Bros.</div><div class="sec">LUDHIANA · #ORD-2111</div></div></div></td>
+                <td><span class="pill-s ok">DELIVERED</span></td>
+                <td class="num r"><span class="cur">₹</span>3.40<small style="color:var(--text-3);font-size:11px;"> L</small></td>
+                <td class="mute r">2 days ago</td>
+              </tr>
+              <tr>
+                <td><div class="name"><div class="av-sq a">TN</div><div class="nm-c"><div class="pri">TEFNO Foam</div><div class="sec">SUPPLIER · #PO-0814</div></div></div></td>
+                <td><span class="pill-s muted">DRAFT</span></td>
+                <td class="num r"><span class="cur">₹</span>2.95<small style="color:var(--text-3);font-size:11px;"> L</small></td>
+                <td class="mute r">await sign-off</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ACTIVITY HEATMAP -->
+      <div class="card">
+        <div class="card-h">
+          <div class="t">
+            <span class="ic">◔</span>
+            <h3>Operating rhythm</h3>
+            <span class="sub">12 WK · ORDERS/DAY</span>
+          </div>
+          <span class="more">⋯</span>
+        </div>
+        <div class="card-b">
+          <div class="heatmap" id="heatmap"></div>
+          <div class="heatmap-foot">
+            <span>JAN</span><span>FEB</span><span>MAR</span><span>APR</span><span>MAY</span>
+          </div>
+          <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; font-family: var(--fm); font-size: 10.5px; color: var(--text-3); letter-spacing: 0.06em;">
+            <span>PEAK · <b style="color:var(--text);font-weight:500;">FRI · 47 orders</b></span>
+            <span class="heatmap-legend">
+              less
+              <span class="sw" style="background:rgba(78,222,163,0.10);"></span>
+              <span class="sw" style="background:rgba(78,222,163,0.28);"></span>
+              <span class="sw" style="background:rgba(78,222,163,0.50);"></span>
+              <span class="sw" style="background:rgba(78,222,163,0.75);"></span>
+              <span class="sw" style="background:var(--emerald);"></span>
+              more
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOP PARTIES -->
+      <div class="card">
+        <div class="card-h">
+          <div class="t">
+            <span class="ic">○</span>
+            <h3>Top parties</h3>
+            <span class="sub">BY 90-DAY VOLUME</span>
+          </div>
+          <span class="more">⋯</span>
+        </div>
+        <div class="card-b">
+          <div class="party-row">
+            <div class="nm">Goyal Carpets<small>PANIPAT · 92% on-time</small></div>
+            <div class="bar"><div style="width: 92%;"></div></div>
+            <div class="num">₹68.4L<small>+18%</small></div>
+          </div>
+          <div class="party-row">
+            <div class="nm">Khanna Bros.<small>LUDHIANA · 88% on-time</small></div>
+            <div class="bar"><div style="width: 78%;"></div></div>
+            <div class="num">₹52.1L<small>+8%</small></div>
+          </div>
+          <div class="party-row">
+            <div class="nm">Rajesh Mats<small>JAIPUR · 84% on-time</small></div>
+            <div class="bar"><div style="width: 62%;"></div></div>
+            <div class="num">₹41.2L<small>+4%</small></div>
+          </div>
+          <div class="party-row">
+            <div class="nm">Vinod Trading<small>DELHI · slipping · 48d</small></div>
+            <div class="bar"><div class="warn" style="width: 48%;"></div></div>
+            <div class="num">₹38.6L<small style="color:var(--amber);">−6%</small></div>
+          </div>
+          <div class="party-row">
+            <div class="nm">Sai Industries<small>PUNE · slipping · 52d</small></div>
+            <div class="bar"><div class="bad" style="width: 36%;"></div></div>
+            <div class="num">₹27.9L<small style="color:var(--rose);">−14%</small></div>
+          </div>
+          <div class="party-row">
+            <div class="nm">Pune Auto Mats<small>PUNE · steady</small></div>
+            <div class="bar"><div style="width: 30%;"></div></div>
+            <div class="num">₹22.4L<small>+2%</small></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    </section>
+
+    <!-- ORDERS PAGE -->
+    <section class="page" data-page="orders" hidden>
+      <div class="hero-h">
+        <div>
+          <div class="eb"><span class="live-dot"></span>Order book · 312 in motion</div>
+          <h1>Everything <span class="em">moving</span>, every <span class="accent">stage</span>.</h1>
+        </div>
+        <div class="when">OPEN · <b>74</b><br/>PICKING · <b>38</b><br/>DISPATCHED · <b>200</b></div>
+      </div>
+      <div class="range-bar">
+        <div class="range"><button>ALL</button><button class="on">OPEN</button><button>PICKING</button><button>DISPATCHED</button><button>HOLD</button></div>
+        <div class="actions"><button class="chip">+ NEW ORDER</button><button class="chip">⤓ EXPORT</button><button class="chip emerald">◆ ASK ATLAS</button></div>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><div class="lbl"><span>Open value</span><span class="ind"></span></div><div class="v"><span class="cur">₹</span>1.84<span class="un">Cr</span></div><div class="d"><span class="arr">↑</span>+8.2% week-on-week</div></div>
+        <div class="kpi"><div class="lbl"><span>Avg lead time</span><span class="ind b"></span></div><div class="v">4.2<span class="un">d</span></div><div class="d"><span class="arr">↓</span>−0.6d this month</div></div>
+        <div class="kpi"><div class="lbl"><span>On-time rate</span><span class="ind"></span></div><div class="v">91.4<span class="un">%</span></div><div class="d"><span class="arr">↑</span>+2.1 pts</div></div>
+        <div class="kpi"><div class="lbl"><span>On hold</span><span class="ind r"></span></div><div class="v">6</div><div class="d rr"><span class="arr">↑</span>3 awaiting credit</div></div>
+      </div>
+      <div class="card" style="margin-top:14px;">
+        <div class="card-h"><div class="t"><span class="ic">◇</span><h3>Order book</h3><span class="sub">SORTED · LATEST</span></div><div class="seg"><button class="on">CARDS</button><button>TABLE</button></div></div>
+        <div class="card-b" style="padding-top:6px;">
+          <table class="table"><thead><tr><th>Order</th><th>Party</th><th>Stage</th><th class="r">Value</th><th class="r">ETA</th></tr></thead><tbody>
+            <tr><td class="mute" style="font-family:var(--fm);">#ORD-2118</td><td><div class="name"><div class="av-sq e">GC</div><div class="nm-c"><div class="pri">Goyal Carpets</div><div class="sec">PANIPAT · 6 SKU</div></div></div></td><td><span class="pill-s ok">DISPATCHED</span></td><td class="num r"><span class="cur">₹</span>9.42 L</td><td class="mute r">today</td></tr>
+            <tr><td class="mute" style="font-family:var(--fm);">#ORD-2117</td><td><div class="name"><div class="av-sq b">VT</div><div class="nm-c"><div class="pri">Vinod Trading</div><div class="sec">DELHI · 4 SKU</div></div></div></td><td><span class="pill-s warn">PICKING</span></td><td class="num r"><span class="cur">₹</span>11.20 L</td><td class="mute r">tomorrow</td></tr>
+            <tr><td class="mute" style="font-family:var(--fm);">#ORD-2116</td><td><div class="name"><div class="av-sq a">SI</div><div class="nm-c"><div class="pri">Sai Industries</div><div class="sec">PUNE · 8 SKU</div></div></div></td><td><span class="pill-s bad">ON HOLD</span></td><td class="num r"><span class="cur">₹</span>7.18 L</td><td class="mute r">credit review</td></tr>
+            <tr><td class="mute" style="font-family:var(--fm);">#ORD-2115</td><td><div class="name"><div class="av-sq e">RM</div><div class="nm-c"><div class="pri">Rajesh Mats</div><div class="sec">JAIPUR · 3 SKU</div></div></div></td><td><span class="pill-s info">CONFIRMED</span></td><td class="num r"><span class="cur">₹</span>4.86 L</td><td class="mute r">14 May</td></tr>
+            <tr><td class="mute" style="font-family:var(--fm);">#ORD-2114</td><td><div class="name"><div class="av-sq b">KB</div><div class="nm-c"><div class="pri">Khanna Bros.</div><div class="sec">LUDHIANA · 12 SKU</div></div></div></td><td><span class="pill-s warn">PICKING</span></td><td class="num r"><span class="cur">₹</span>14.20 L</td><td class="mute r">12 May</td></tr>
+            <tr><td class="mute" style="font-family:var(--fm);">#ORD-2113</td><td><div class="name"><div class="av-sq e">PA</div><div class="nm-c"><div class="pri">Pune Auto Mats</div><div class="sec">PUNE · 2 SKU</div></div></div></td><td><span class="pill-s ok">DISPATCHED</span></td><td class="num r"><span class="cur">₹</span>3.40 L</td><td class="mute r">delivered</td></tr>
+            <tr><td class="mute" style="font-family:var(--fm);">#ORD-2112</td><td><div class="name"><div class="av-sq a">TN</div><div class="nm-c"><div class="pri">TEFNO Foam</div><div class="sec">SUPPLIER · #PO-0814</div></div></div></td><td><span class="pill-s muted">DRAFT</span></td><td class="num r"><span class="cur">₹</span>2.95 L</td><td class="mute r">await sign-off</td></tr>
+          </tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- PARTIES PAGE -->
+    <section class="page" data-page="parties" hidden>
+      <div class="hero-h">
+        <div><div class="eb"><span class="live-dot"></span>Parties · 218 active · 14 supplier</div><h1>The people you <span class="em">trade with</span>, ranked by <span class="accent">rhythm</span>.</h1></div>
+        <div class="when">CUSTOMERS · <b>204</b><br/>SUPPLIERS · <b>14</b><br/>WATCHLIST · <b>5</b></div>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><div class="lbl"><span>90-day GMV</span><span class="ind"></span></div><div class="v"><span class="cur">₹</span>4.62<span class="un">Cr</span></div><div class="d"><span class="arr">↑</span>+14.2%</div></div>
+        <div class="kpi"><div class="lbl"><span>Top 10 share</span><span class="ind b"></span></div><div class="v">62.4<span class="un">%</span></div><div class="d"><span class="arr">↓</span>−1.8 pts</div></div>
+        <div class="kpi"><div class="lbl"><span>New parties</span><span class="ind"></span></div><div class="v">8</div><div class="d"><span class="arr">↑</span>this month</div></div>
+        <div class="kpi"><div class="lbl"><span>Watchlist</span><span class="ind a"></span></div><div class="v">5</div><div class="d dn"><span class="arr">→</span>2 slipped this week</div></div>
+      </div>
+      <div class="row-2" style="grid-template-columns:1.5fr 1fr;">
+        <div class="card">
+          <div class="card-h"><div class="t"><span class="ic">○</span><h3>All parties</h3><span class="sub">BY 90-DAY VOLUME</span></div><div class="seg"><button class="on">ALL</button><button>CUSTOMERS</button><button>SUPPLIERS</button></div></div>
+          <div class="card-b">
+            <div class="party-row"><div class="nm">Goyal Carpets<small>PANIPAT · 92% on-time · 41 orders</small></div><div class="bar"><div style="width:92%;"></div></div><div class="num">₹68.4L<small>+18%</small></div></div>
+            <div class="party-row"><div class="nm">Khanna Bros.<small>LUDHIANA · 88% on-time · 33 orders</small></div><div class="bar"><div style="width:78%;"></div></div><div class="num">₹52.1L<small>+8%</small></div></div>
+            <div class="party-row"><div class="nm">Rajesh Mats<small>JAIPUR · 84% on-time · 28 orders</small></div><div class="bar"><div style="width:62%;"></div></div><div class="num">₹41.2L<small>+4%</small></div></div>
+            <div class="party-row"><div class="nm">Vinod Trading<small>DELHI · slipping · 48d aging</small></div><div class="bar"><div class="warn" style="width:48%;"></div></div><div class="num">₹38.6L<small style="color:var(--amber);">−6%</small></div></div>
+            <div class="party-row"><div class="nm">Sai Industries<small>PUNE · slipping · 52d aging</small></div><div class="bar"><div class="bad" style="width:36%;"></div></div><div class="num">₹27.9L<small style="color:var(--rose);">−14%</small></div></div>
+            <div class="party-row"><div class="nm">Pune Auto Mats<small>PUNE · steady · 18 orders</small></div><div class="bar"><div style="width:30%;"></div></div><div class="num">₹22.4L<small>+2%</small></div></div>
+            <div class="party-row"><div class="nm">Bombay Hospitality<small>MUMBAI · new · 6 orders</small></div><div class="bar"><div style="width:18%;"></div></div><div class="num">₹12.8L<small>new</small></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h"><div class="t"><span class="ic">◇</span><h3>Watchlist</h3><span class="sub">ATLAS · 5 SLIPS</span></div><span class="more">⋯</span></div>
+          <div class="card-b">
+            <div class="signal"><span class="pip a"></span><div><div class="title">Vinod Trading · <b>48 days</b> past due. <span style="color:var(--text-2);">First slip in 7 months. Owner WhatsApp seen 2h ago.</span></div><div class="acts"><button class="prime">Send reminder</button><button>Open file</button></div></div></div>
+            <div class="signal"><span class="pip r"></span><div><div class="title">Sai Industries · <b>52 days</b> past due. <span style="color:var(--text-2);">Credit limit hit. Hold all open POs.</span></div><div class="acts"><button class="prime">Place on hold</button><button>Call</button></div></div></div>
+            <div class="signal"><span class="pip b"></span><div><div class="title">Pune Auto Mats · <b>cadence break</b>. <span style="color:var(--text-2);">No PO in 21 days · normal cycle is 14d.</span></div><div class="acts"><button>Reach out</button></div></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INVENTORY PAGE -->
+    <section class="page" data-page="inventory" hidden>
+      <div class="hero-h">
+        <div><div class="eb"><span class="live-dot"></span>Inventory · 4 warehouses · 348 SKU</div><h1>What's <span class="em">on the floor</span>, what's <span class="accent">about to run dry</span>.</h1></div>
+        <div class="when">SKU · <b>348</b><br/>BELOW PAR · <b>8</b><br/>SLOW · <b>22</b></div>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><div class="lbl"><span>Stock value</span><span class="ind"></span></div><div class="v"><span class="cur">₹</span>3.18<span class="un">Cr</span></div><div class="d"><span class="arr">↑</span>+₹14L · monsoon build</div></div>
+        <div class="kpi"><div class="lbl"><span>Days of cover</span><span class="ind b"></span></div><div class="v">42<span class="un">d</span></div><div class="d"><span class="arr">→</span>healthy band</div></div>
+        <div class="kpi"><div class="lbl"><span>Below par</span><span class="ind a"></span></div><div class="v">8</div><div class="d dn"><span class="arr">↑</span>Wire Mat HD-018 leads</div></div>
+        <div class="kpi"><div class="lbl"><span>Slow movers</span><span class="ind r"></span></div><div class="v">22</div><div class="d rr"><span class="arr">→</span>₹38L locked</div></div>
+      </div>
+      <div class="card" style="margin-top:14px;">
+        <div class="card-h"><div class="t"><span class="ic">▢</span><h3>SKU status</h3><span class="sub">348 ACTIVE</span></div><div class="seg"><button class="on">CRITICAL</button><button>LOW</button><button>HEALTHY</button><button>SLOW</button></div></div>
+        <div class="card-b" style="padding-top:6px;">
+          <table class="table"><thead><tr><th>SKU</th><th>Warehouse</th><th class="r">On hand</th><th class="r">Par</th><th>Status</th><th class="r">Cover</th></tr></thead><tbody>
+            <tr><td><div class="name"><div class="av-sq a">WM</div><div class="nm-c"><div class="pri">Wire Mat HD-018</div><div class="sec">HEAVY DUTY · 1.5M × 0.9M</div></div></div></td><td class="mute">PANIPAT · WH-A</td><td class="num r">142</td><td class="num r" style="color:var(--text-3);">240</td><td><span class="pill-s warn">11 DAYS</span></td><td class="mute r">11d</td></tr>
+            <tr><td><div class="name"><div class="av-sq a">FM</div><div class="nm-c"><div class="pri">Foot Mat FM-204</div><div class="sec">RUBBER · 0.6M × 0.4M</div></div></div></td><td class="mute">DELHI · WH-B</td><td class="num r">88</td><td class="num r" style="color:var(--text-3);">180</td><td><span class="pill-s warn">14 DAYS</span></td><td class="mute r">14d</td></tr>
+            <tr><td><div class="name"><div class="av-sq e">TF</div><div class="nm-c"><div class="pri">Turf TF-090</div><div class="sec">SPORT · 2M × 1M</div></div></div></td><td class="mute">PUNE · WH-C</td><td class="num r">312</td><td class="num r" style="color:var(--text-3);">200</td><td><span class="pill-s ok">HEALTHY</span></td><td class="mute r">38d</td></tr>
+            <tr><td><div class="name"><div class="av-sq b">GR</div><div class="nm-c"><div class="pri">Grass GR-115</div><div class="sec">DECOR · 0.5M × 0.5M</div></div></div></td><td class="mute">PANIPAT · WH-A</td><td class="num r">428</td><td class="num r" style="color:var(--text-3);">300</td><td><span class="pill-s ok">HEALTHY</span></td><td class="mute r">52d</td></tr>
+            <tr><td><div class="name"><div class="av-sq a">CS</div><div class="nm-c"><div class="pri">Car Set CS-008</div><div class="sec">PREMIUM · 5-PC</div></div></div></td><td class="mute">DELHI · WH-B</td><td class="num r">18</td><td class="num r" style="color:var(--text-3);">40</td><td><span class="pill-s bad">5 DAYS</span></td><td class="mute r">5d</td></tr>
+            <tr><td><div class="name"><div class="av-sq b">MG</div><div class="nm-c"><div class="pri">Monograss MG-302</div><div class="sec">ARTIFICIAL · ROLL</div></div></div></td><td class="mute">PUNE · WH-C</td><td class="num r">2,184</td><td class="num r" style="color:var(--text-3);">600</td><td><span class="pill-s muted">SLOW · 84D</span></td><td class="mute r">240d</td></tr>
+          </tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- DISPATCH PAGE -->
+    <section class="page" data-page="dispatch" hidden>
+      <div class="hero-h">
+        <div><div class="eb"><span class="live-dot"></span>Dispatch · 6 vehicles · 14 routes today</div><h1>Wheels <span class="em">turning</span>, e-way bills <span class="accent">clean</span>.</h1></div>
+        <div class="when">LOADING · <b>3</b><br/>EN ROUTE · <b>8</b><br/>DELIVERED · <b>11</b></div>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><div class="lbl"><span>Vehicles active</span><span class="ind"></span></div><div class="v">6<span class="un"> / 8</span></div><div class="d"><span class="arr">→</span>2 in service</div></div>
+        <div class="kpi"><div class="lbl"><span>Capacity used</span><span class="ind b"></span></div><div class="v">81<span class="un">%</span></div><div class="d"><span class="arr">↑</span>+6 pts</div></div>
+        <div class="kpi"><div class="lbl"><span>Avg drop time</span><span class="ind"></span></div><div class="v">38<span class="un">min</span></div><div class="d"><span class="arr">↓</span>−4 min</div></div>
+        <div class="kpi"><div class="lbl"><span>E-way bills</span><span class="ind a"></span></div><div class="v">14</div><div class="d"><span class="arr">→</span>1 expiring · 2h</div></div>
+      </div>
+      <div class="row-2" style="grid-template-columns:repeat(3,1fr);">
+        <div class="card"><div class="card-h"><div class="t"><span class="ic">◇</span><h3>Loading</h3><span class="sub">3 LIVE</span></div></div><div class="card-b">
+          <div class="party-row"><div class="nm">DL-1C-AT-4421<small>DRIVER · RAM SINGH · WH-A</small></div><span class="pill-s warn">73% LOAD</span><div class="num">9 stops<small>panipat → delhi</small></div></div>
+          <div class="party-row"><div class="nm">HR-26-BG-2810<small>DRIVER · SURESH · WH-B</small></div><span class="pill-s warn">58% LOAD</span><div class="num">6 stops<small>delhi → ncr</small></div></div>
+          <div class="party-row"><div class="nm">MH-12-CK-9914<small>DRIVER · DESHMUKH · WH-C</small></div><span class="pill-s muted">12% LOAD</span><div class="num">4 stops<small>pune → mumbai</small></div></div>
+        </div></div>
+        <div class="card"><div class="card-h"><div class="t"><span class="ic">→</span><h3>En route</h3><span class="sub">8 LIVE</span></div></div><div class="card-b">
+          <div class="party-row"><div class="nm">PB-08-AT-1102<small>JALANDHAR · ETA 2.4h</small></div><span class="pill-s ok">ON TIME</span><div class="num">4 / 7<small>stops done</small></div></div>
+          <div class="party-row"><div class="nm">UP-14-DL-0844<small>NOIDA · ETA 48m</small></div><span class="pill-s ok">ON TIME</span><div class="num">2 / 3<small>stops done</small></div></div>
+          <div class="party-row"><div class="nm">RJ-19-PA-3211<small>JAIPUR · ETA 5.8h</small></div><span class="pill-s warn">42m LATE</span><div class="num">1 / 5<small>stops done</small></div></div>
+          <div class="party-row"><div class="nm">DL-9C-CV-7780<small>GHAZIABAD · ETA 32m</small></div><span class="pill-s ok">ON TIME</span><div class="num">3 / 4<small>stops done</small></div></div>
+        </div></div>
+        <div class="card"><div class="card-h"><div class="t"><span class="ic">○</span><h3>Delivered today</h3><span class="sub">11 DROPS</span></div></div><div class="card-b">
+          <div class="party-row"><div class="nm">Goyal Carpets<small>PANIPAT · POD signed</small></div><span class="pill-s ok">CLEAN</span><div class="num">8:42a<small>9.42L</small></div></div>
+          <div class="party-row"><div class="nm">Pune Auto Mats<small>PUNE · POD signed</small></div><span class="pill-s ok">CLEAN</span><div class="num">10:18a<small>3.40L</small></div></div>
+          <div class="party-row"><div class="nm">Khanna Bros.<small>LUDHIANA · partial</small></div><span class="pill-s warn">SHORT 2</span><div class="num">11:04a<small>12.10L</small></div></div>
+          <div class="party-row"><div class="nm">Bombay Hospitality<small>MUMBAI · POD signed</small></div><span class="pill-s ok">CLEAN</span><div class="num">11:38a<small>5.20L</small></div></div>
+        </div></div>
+      </div>
+    </section>
+
+    <!-- CREATE PI PAGE -->
+    <section class="page" data-page="create-pi" hidden>
+      <div class="hero-h">
+        <div>
+          <div class="eb"><span class="live-dot"></span>Operate · create PI · draft</div>
+          <h1>One <span class="em">proforma invoice</span>, <span class="accent">many lines</span>.</h1>
+        </div>
+        <div class="when">WORKSPACE · <b>COMFORT INDUSTRIES</b><br/>SHEET · <b>MASTERS</b><br/>STATUS · <b>NOT YET WIRED</b></div>
+      </div>
+
+      <div class="card" style="padding: 48px; text-align: left;">
+        <div style="display:flex; flex-direction:column; gap:18px; max-width: 640px;">
+          <div class="eb" style="color: var(--em);">
+            <span class="live-dot"></span>this is where we build it together
+          </div>
+          <h2 style="font-family: var(--fd); font-size: 28px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.15; margin: 0;">
+            The <span style="font-style: italic; font-weight: 500;">form lives here</span>. Right now it is intentionally <span style="color: var(--em);">empty</span>.
+          </h2>
+          <p style="color: var(--text-2); font-size: 14px; line-height: 1.6; margin: 0;">
+            Once the Apps Script endpoint is deployed against the Masters sheet, this page will host the multi-line PI form: party search, sales POC, REF # auto-suggest, line-items table with all six dropdowns wired to the real vocabularies, and live totals beneath. Submit writes N rows to the sheet under one REF #.
+          </p>
+          <div style="display:flex; gap:10px; margin-top:8px;">
+            <span class="chip emerald">phase 1 · next</span>
+            <span class="chip">apps script</span>
+            <span class="chip">multi-line</span>
+            <span class="chip">live totals</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CASH PAGE -->
+    <section class="page" data-page="cash" hidden>
+      <div class="hero-h">
+        <div><div class="eb"><span class="live-dot"></span>Cash &amp; finance · synced 14s ago</div><h1>The <span class="em">money flow</span>, <span class="accent">all of it</span>.</h1></div>
+        <div class="when">CASH · <b>₹62.4L</b><br/>BANK · <b>₹38.2L</b><br/>RUNWAY · <b>4.2 mo</b></div>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><div class="lbl"><span>Net cash 30d</span><span class="ind"></span></div><div class="v"><span class="cur">+₹</span>22.4<span class="un">L</span></div><div class="d"><span class="arr">↑</span>strongest month YTD</div></div>
+        <div class="kpi"><div class="lbl"><span>Inflow 30d</span><span class="ind"></span></div><div class="v"><span class="cur">₹</span>1.42<span class="un">Cr</span></div><div class="d"><span class="arr">↑</span>+18.2%</div></div>
+        <div class="kpi"><div class="lbl"><span>Outflow 30d</span><span class="ind r"></span></div><div class="v"><span class="cur">₹</span>1.20<span class="un">Cr</span></div><div class="d rr"><span class="arr">↑</span>+12.4%</div></div>
+        <div class="kpi"><div class="lbl"><span>Runway</span><span class="ind b"></span></div><div class="v">4.2<span class="un">mo</span></div><div class="d"><span class="arr">→</span>at current burn</div></div>
+      </div>
+      <div class="grid">
+        <div class="card"><div class="card-h"><div class="t"><span class="ic">◆</span><h3>Bank accounts</h3><span class="sub">4 LINKED</span></div></div><div class="card-b">
+          <div class="party-row"><div class="nm">HDFC Current<small>00428 · OPERATIONS</small></div><div class="bar"><div style="width:78%;"></div></div><div class="num">₹38.2L<small>+₹4.8L week</small></div></div>
+          <div class="party-row"><div class="nm">ICICI Sweep<small>11244 · RESERVE</small></div><div class="bar"><div style="width:52%;"></div></div><div class="num">₹24.2L<small>+₹2.1L week</small></div></div>
+          <div class="party-row"><div class="nm">SBI Working<small>88421 · VENDOR</small></div><div class="bar"><div class="warn" style="width:18%;"></div></div><div class="num">₹8.4L<small>−₹3.2L week</small></div></div>
+          <div class="party-row"><div class="nm">Cash on hand<small>PANIPAT OFFICE</small></div><div class="bar"><div style="width:8%;"></div></div><div class="num">₹1.2L<small>flat</small></div></div>
+        </div></div>
+        <div class="card"><div class="card-h"><div class="t"><span class="ic">◇</span><h3>Outflow mix · 30d</h3><span class="sub">₹1.20 CR</span></div></div><div class="card-b">
+          <div class="party-row"><div class="nm">Raw material<small>TEFNO · KISAN · 4 others</small></div><div class="bar"><div style="width:62%;"></div></div><div class="num">₹74.4L<small>62%</small></div></div>
+          <div class="party-row"><div class="nm">Payroll<small>34 staff · monthly</small></div><div class="bar"><div style="width:18%;"></div></div><div class="num">₹21.6L<small>18%</small></div></div>
+          <div class="party-row"><div class="nm">Logistics<small>vehicles · 3PL</small></div><div class="bar"><div style="width:11%;"></div></div><div class="num">₹13.2L<small>11%</small></div></div>
+          <div class="party-row"><div class="nm">GST &amp; tax<small>monthly · advance</small></div><div class="bar"><div class="warn" style="width:6%;"></div></div><div class="num">₹7.2L<small>6%</small></div></div>
+          <div class="party-row"><div class="nm">Other<small>rent · utilities · misc</small></div><div class="bar"><div style="width:3%;"></div></div><div class="num">₹3.6L<small>3%</small></div></div>
+        </div></div>
+      </div>
+    </section>
+
+    <!-- RECEIVABLES PAGE -->
+    <section class="page" data-page="receivables" hidden>
+      <div class="hero-h">
+        <div><div class="eb"><span class="live-dot"></span>Receivables · ₹1.18 Cr outstanding</div><h1>Who <span class="em">owes you</span>, and how <span class="accent">long</span>.</h1></div>
+        <div class="when">PARTIES · <b>42</b><br/>OVERDUE · <b>14</b><br/>OVER 60D · <b>5</b></div>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><div class="lbl"><span>Total receivables</span><span class="ind a"></span></div><div class="v"><span class="cur">₹</span>1.18<span class="un">Cr</span></div><div class="d dn"><span class="arr">↑</span>+₹14L vs. month avg</div></div>
+        <div class="kpi"><div class="lbl"><span>Avg DSO</span><span class="ind a"></span></div><div class="v">38<span class="un">d</span></div><div class="d dn"><span class="arr">↑</span>+4d this quarter</div></div>
+        <div class="kpi"><div class="lbl"><span>Over 60 days</span><span class="ind r"></span></div><div class="v"><span class="cur">₹</span>32.4<span class="un">L</span></div><div class="d rr"><span class="arr">→</span>2 parties · 5 invoices</div></div>
+        <div class="kpi"><div class="lbl"><span>Collected 7d</span><span class="ind"></span></div><div class="v"><span class="cur">₹</span>24.8<span class="un">L</span></div><div class="d"><span class="arr">↑</span>+₹6L vs. prior</div></div>
+      </div>
+      <div class="card" style="margin-top:14px;">
+        <div class="card-h"><div class="t"><span class="ic">⋮</span><h3>Aging book</h3><span class="sub">42 PARTIES</span></div><div class="seg"><button>0-30</button><button class="on">31-60</button><button>61-90</button><button>90+</button></div></div>
+        <div class="card-b" style="padding-top:6px;">
+          <table class="table"><thead><tr><th>Party</th><th>Invoice</th><th class="r">Amount</th><th class="r">Aged</th><th>Status</th></tr></thead><tbody>
+            <tr><td><div class="name"><div class="av-sq r" style="background:linear-gradient(135deg,rgba(255,138,168,0.18),rgba(255,138,168,0.04));color:var(--rose);border-color:rgba(255,138,168,0.18);">SI</div><div class="nm-c"><div class="pri">Sai Industries</div><div class="sec">PUNE · 3 invoices</div></div></div></td><td class="mute" style="font-family:var(--fm);">INV-1882</td><td class="num r"><span class="cur">₹</span>11.4 L</td><td class="num r" style="color:var(--rose);">52d</td><td><span class="pill-s bad">CREDIT HOLD</span></td></tr>
+            <tr><td><div class="name"><div class="av-sq a">VT</div><div class="nm-c"><div class="pri">Vinod Trading</div><div class="sec">DELHI · 2 invoices</div></div></div></td><td class="mute" style="font-family:var(--fm);">INV-1875</td><td class="num r"><span class="cur">₹</span>7.0 L</td><td class="num r" style="color:var(--amber);">48d</td><td><span class="pill-s warn">REMIND</span></td></tr>
+            <tr><td><div class="name"><div class="av-sq a">BH</div><div class="nm-c"><div class="pri">Bombay Hospitality</div><div class="sec">MUMBAI · 1 invoice</div></div></div></td><td class="mute" style="font-family:var(--fm);">INV-1854</td><td class="num r"><span class="cur">₹</span>5.2 L</td><td class="num r" style="color:var(--amber);">42d</td><td><span class="pill-s warn">PROMISE 14M</span></td></tr>
+            <tr><td><div class="name"><div class="av-sq b">RM</div><div class="nm-c"><div class="pri">Rajesh Mats</div><div class="sec">JAIPUR · 1 invoice</div></div></div></td><td class="mute" style="font-family:var(--fm);">INV-1812</td><td class="num r"><span class="cur">₹</span>4.8 L</td><td class="num r" style="color:var(--text-3);">38d</td><td><span class="pill-s info">DUE SOON</span></td></tr>
+            <tr><td><div class="name"><div class="av-sq e">KB</div><div class="nm-c"><div class="pri">Khanna Bros.</div><div class="sec">LUDHIANA · 1 invoice</div></div></div></td><td class="mute" style="font-family:var(--fm);">INV-1799</td><td class="num r"><span class="cur">₹</span>4.0 L</td><td class="num r" style="color:var(--text-3);">34d</td><td><span class="pill-s ok">ON CADENCE</span></td></tr>
+          </tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- INTELLIGENCE PAGE -->
+    <section class="page" data-page="intel" hidden>
+      <div class="hero-h">
+        <div><div class="eb"><span class="live-dot"></span>Intelligence · 312 signals · last 24h</div><h1>What atlas is <span class="em">noticing</span>, ranked by <span class="accent">consequence</span>.</h1></div>
+        <div class="when">SIGNALS · <b>312</b><br/>ACTED ON · <b>184</b><br/>QUEUED · <b>26</b></div>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><div class="lbl"><span>Confidence</span><span class="ind"></span></div><div class="v">94.2<span class="un">%</span></div><div class="d"><span class="arr">↑</span>+1.4 pts vs. month</div></div>
+        <div class="kpi"><div class="lbl"><span>Anomalies</span><span class="ind a"></span></div><div class="v">7</div><div class="d dn"><span class="arr">→</span>2 new · 5 watched</div></div>
+        <div class="kpi"><div class="lbl"><span>Auto-actioned</span><span class="ind b"></span></div><div class="v">42</div><div class="d"><span class="arr">↑</span>+12 today</div></div>
+        <div class="kpi"><div class="lbl"><span>Savings drafted</span><span class="ind"></span></div><div class="v"><span class="cur">₹</span>2.8<span class="un">L</span></div><div class="d"><span class="arr">↑</span>3 quotes vs. floor</div></div>
+      </div>
+      <div class="card" style="margin-top:14px;">
+        <div class="card-h"><div class="t"><span class="ic">◈</span><h3>Signal feed</h3><span class="sub">RANKED · UNRESOLVED FIRST</span></div><div class="seg"><button class="on">ALL</button><button>RISK</button><button>OPPORTUNITY</button><button>AUTOMATED</button></div></div>
+        <div class="card-b">
+          <div class="signal"><span class="pip a"></span><div><div class="title">Margin on Foot Mat FM-204 dropped <b>1.4 points</b>. <span style="color:var(--text-2);">TEFNO raised raw 3.2% on 6 May. Atlas found an alternate quote from Kisan Foam at your floor — 8.4% lower, same MOQ.</span></div><div class="meta-r"><span class="when">2h ago</span><span class="by">◇ ATLAS · 92% confidence</span></div><div class="acts"><button class="prime">Open quote</button><button>Defer</button></div></div></div>
+          <div class="signal"><span class="pip b"></span><div><div class="title">Wire Mat HD-018 demand spiked <b>+18%</b> in 11 days. <span style="color:var(--text-2);">Monsoon window opens 7 Jun · staged PO of 240u draws cover to 32d.</span></div><div class="meta-r"><span class="when">07:55</span><span class="by">◇ DRAFTED · awaiting release</span></div><div class="acts"><button class="prime">Release PO</button><button>Adjust</button></div></div></div>
+          <div class="signal"><span class="pip r"></span><div><div class="title">Two parties slipped past <b>45 days</b>. <span style="color:var(--text-2);">Vinod and Sai · ₹18.4L combined. WhatsApp draft prepared in your tone.</span></div><div class="meta-r"><span class="when">06:00</span><span class="by">◇ DRAFTED · awaiting send</span></div><div class="acts"><button class="prime">Send all</button><button>Edit</button></div></div></div>
+          <div class="signal"><span class="pip"></span><div><div class="title">Goyal Carpets cleared <b>₹9.42L</b> on time. <span style="color:var(--text-2);">28th consecutive on-cadence payment. Atlas auto-issued receipt + reconciled.</span></div><div class="meta-r"><span class="when">08:42</span><span class="by">◇ AUTO-ACTIONED</span></div><div class="acts"><button>View trail</button></div></div></div>
+          <div class="signal"><span class="pip b"></span><div><div class="title">Monograss MG-302 is <b>240 days</b> of cover. <span style="color:var(--text-2);">₹6.4L locked. Two buyers from Q3 last year never reordered — atlas drafted outreach.</span></div><div class="meta-r"><span class="when">yesterday</span><span class="by">◇ DRAFTED · ASYNC</span></div><div class="acts"><button>Open thread</button></div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- REPORTS PAGE -->
+    <section class="page" data-page="reports" hidden>
+      <div class="hero-h">
+        <div><div class="eb"><span class="live-dot"></span>Reports · 22 scheduled · 4 owners</div><h1>Numbers, <span class="em">on time</span>, in the <span class="accent">right hands</span>.</h1></div>
+        <div class="when">SCHEDULED · <b>22</b><br/>SUBSCRIBED · <b>14</b><br/>ARCHIVED · <b>148</b></div>
+      </div>
+      <div class="row-2" style="grid-template-columns:1.5fr 1fr;">
+        <div class="card"><div class="card-h"><div class="t"><span class="ic">≡</span><h3>Scheduled</h3><span class="sub">NEXT 7 DAYS</span></div><div class="seg"><button class="on">ALL</button><button>DAILY</button><button>WEEKLY</button><button>MONTH-END</button></div></div><div class="card-b" style="padding-top:6px;">
+          <table class="table"><thead><tr><th>Report</th><th>Frequency</th><th>Recipients</th><th class="r">Next run</th></tr></thead><tbody>
+            <tr><td><div class="name"><div class="av-sq e">B</div><div class="nm-c"><div class="pri">Morning brief</div><div class="sec">KPI snapshot + signals</div></div></div></td><td class="mute">DAILY · 07:00</td><td class="mute">Abhi, Priya, Ravi</td><td class="mute r">tomorrow · 07:00</td></tr>
+            <tr><td><div class="name"><div class="av-sq b">R</div><div class="nm-c"><div class="pri">Receivables aging</div><div class="sec">aging buckets · slips</div></div></div></td><td class="mute">WEEKLY · MON</td><td class="mute">Abhi, Priya</td><td class="mute r">Mon · 09:00</td></tr>
+            <tr><td><div class="name"><div class="av-sq a">S</div><div class="nm-c"><div class="pri">Stock cover</div><div class="sec">SKU below par · slow</div></div></div></td><td class="mute">WEEKLY · WED</td><td class="mute">Priya, Ravi</td><td class="mute r">Wed · 08:00</td></tr>
+            <tr><td><div class="name"><div class="av-sq e">P</div><div class="nm-c"><div class="pri">P&amp;L · monthly</div><div class="sec">revenue · cost · margin</div></div></div></td><td class="mute">MONTH-END</td><td class="mute">Abhi, CA</td><td class="mute r">31 May · 19:00</td></tr>
+            <tr><td><div class="name"><div class="av-sq b">D</div><div class="nm-c"><div class="pri">Dispatch summary</div><div class="sec">vehicles · drops · short</div></div></div></td><td class="mute">DAILY · 18:00</td><td class="mute">Ravi</td><td class="mute r">today · 18:00</td></tr>
+          </tbody></table>
+        </div></div>
+        <div class="card"><div class="card-h"><div class="t"><span class="ic">◇</span><h3>Build new</h3><span class="sub">START HERE</span></div></div><div class="card-b">
+          <div class="signal"><span class="pip"></span><div><div class="title"><b>Start with a question.</b> <span style="color:var(--text-2);">Atlas turns it into a report, schedules it, and routes it.</span></div><div class="acts"><button class="prime">Ask atlas</button></div></div></div>
+          <div class="signal"><span class="pip b"></span><div><div class="title">Templates <span style="color:var(--text-2);">— cash flow, party scorecard, GSTR-1, stock velocity, party tier review.</span></div><div class="acts"><button>Browse</button></div></div></div>
+          <div class="signal"><span class="pip a"></span><div><div class="title">From scratch <span style="color:var(--text-2);">— pick fields, set frequency, choose recipients.</span></div><div class="acts"><button>Open builder</button></div></div></div>
+        </div></div>
+      </div>
+    </section>
+
+    <!-- WORKFLOWS PAGE -->
+    <section class="page" data-page="workflows" hidden>
+      <div class="hero-h">
+        <div><div class="eb"><span class="live-dot"></span>Workflows · 14 playbooks · 3 in progress</div><h1>The <span class="em">runbooks</span> that keep things <span class="accent">precise</span>.</h1></div>
+        <div class="when">PLAYBOOKS · <b>14</b><br/>ACTIVE · <b>3</b><br/>COMPLETED · <b>184</b></div>
+      </div>
+      <div class="row-2" style="grid-template-columns:1fr 1.5fr;">
+        <div class="card"><div class="card-h"><div class="t"><span class="ic">◇</span><h3>Playbooks</h3><span class="sub">14 LIBRARY</span></div><span class="more">+</span></div><div class="card-b">
+          <div class="party-row"><div class="nm">Month-end close<small>~22 MIN · 5 STEPS</small></div><span class="pill-s warn">IN PROGRESS</span><div class="num">2/5<small>steps done</small></div></div>
+          <div class="party-row"><div class="nm">Quarterly receivables review<small>~45 MIN · 3 STEPS</small></div><span class="pill-s muted">QUEUED</span><div class="num">0/3<small>steps done</small></div></div>
+          <div class="party-row"><div class="nm">Stock rebalance<small>~30 MIN · 3 STEPS</small></div><span class="pill-s muted">DRAFT</span><div class="num">0/3<small>steps done</small></div></div>
+          <div class="party-row"><div class="nm">Vendor onboarding<small>~15 MIN · 4 STEPS</small></div><span class="pill-s ok">READY</span><div class="num">0/4<small>steps done</small></div></div>
+          <div class="party-row"><div class="nm">GSTR-1 filing<small>~25 MIN · 6 STEPS</small></div><span class="pill-s ok">READY</span><div class="num">0/6<small>steps done</small></div></div>
+          <div class="party-row"><div class="nm">Annual party tier review<small>~60 MIN · 4 STEPS</small></div><span class="pill-s muted">YEARLY</span><div class="num">0/4<small>steps done</small></div></div>
+        </div></div>
+        <div class="card"><div class="card-h"><div class="t"><span class="ic">◔</span><h3>Month-end close · in progress</h3><span class="sub">~22 MIN</span></div><button class="chip emerald">RESUME →</button></div><div class="card-b">
+          <div class="signal"><span class="pip"></span><div><div class="title"><b>1. Reconcile receipts.</b> <span style="color:var(--text-2);">14 entries · ₹18.4L · auto-matched.</span></div><div class="meta-r"><span class="by">✓ DONE · 9:14am</span></div></div></div>
+          <div class="signal"><span class="pip"></span><div><div class="title"><b>2. Issue invoices for the week.</b> <span style="color:var(--text-2);">22 invoices generated · 0 errors.</span></div><div class="meta-r"><span class="by">✓ DONE · 9:38am</span></div></div></div>
+          <div class="signal"><span class="pip a"></span><div><div class="title"><b>3. Lock approvals.</b> <span style="color:var(--text-2);">4 pending — review and sign off.</span></div><div class="meta-r"><span class="by">◇ NOW · waiting on you</span></div><div class="acts"><button class="prime">Open queue</button></div></div></div>
+          <div class="signal"><span class="pip b"></span><div><div class="title">4. Verify stock counts. <span style="color:var(--text-2);">8 SKUs · physical match.</span></div><div class="meta-r"><span class="by">pending · ~6 min</span></div></div></div>
+          <div class="signal"><span class="pip b"></span><div><div class="title">5. Generate P&amp;L brief. <span style="color:var(--text-2);">Auto-emailed to stakeholders.</span></div><div class="meta-r"><span class="by">pending · ~3 min</span></div></div></div>
+        </div></div>
+      </div>
+    </section>
+
+    <!-- SETTINGS PAGE -->
+    <section class="page" data-page="settings" hidden>
+      <div class="hero-h">
+        <div><div class="eb"><span class="live-dot"></span>Settings · workspace · Comfort Industries</div><h1>The <span class="em">wiring</span> behind the <span class="accent">surface</span>.</h1></div>
+        <div class="when">PLAN · <b>OPERATOR</b><br/>SEATS · <b>6 / 10</b><br/>BILLING · <b>NEXT 28 MAY</b></div>
+      </div>
+      <div class="row-2" style="grid-template-columns:1fr 1fr 1fr;">
+        <div class="card"><div class="card-h"><div class="t"><span class="ic">○</span><h3>Team</h3><span class="sub">6 SEATS</span></div><span class="more">+</span></div><div class="card-b">
+          <div class="party-row"><div class="nm">Abhi Arora<small>OWNER · all access</small></div><span class="pill-s ok">ACTIVE</span><div class="num" style="font-family:var(--fm);font-size:11px;">2h ago<small>online</small></div></div>
+          <div class="party-row"><div class="nm">Priya Sharma<small>FINANCE · cash + receivables</small></div><span class="pill-s ok">ACTIVE</span><div class="num" style="font-family:var(--fm);font-size:11px;">14m ago<small>online</small></div></div>
+          <div class="party-row"><div class="nm">Ravi Kumar<small>OPERATIONS · orders + dispatch</small></div><span class="pill-s ok">ACTIVE</span><div class="num" style="font-family:var(--fm);font-size:11px;">just now<small>online</small></div></div>
+          <div class="party-row"><div class="nm">Suresh Yadav<small>WAREHOUSE A · stock only</small></div><span class="pill-s muted">IDLE</span><div class="num" style="font-family:var(--fm);font-size:11px;">yesterday<small>offline</small></div></div>
+          <div class="party-row"><div class="nm">CA · Mehra &amp; Co.<small>EXTERNAL · view + export</small></div><span class="pill-s info">GUEST</span><div class="num" style="font-family:var(--fm);font-size:11px;">3d ago<small>offline</small></div></div>
+        </div></div>
+        <div class="card"><div class="card-h"><div class="t"><span class="ic">◇</span><h3>Integrations</h3><span class="sub">8 LINKED</span></div></div><div class="card-b">
+          <div class="party-row"><div class="nm">Tally ERP<small>SYNC EVERY 5 MIN</small></div><span class="pill-s ok">HEALTHY</span><div class="num" style="font-family:var(--fm);font-size:11px;">14s ago<small>last sync</small></div></div>
+          <div class="party-row"><div class="nm">HDFC Bank<small>BANK FEED · OAUTH</small></div><span class="pill-s ok">HEALTHY</span><div class="num" style="font-family:var(--fm);font-size:11px;">2m ago<small>last sync</small></div></div>
+          <div class="party-row"><div class="nm">ICICI Sweep<small>BANK FEED · OAUTH</small></div><span class="pill-s ok">HEALTHY</span><div class="num" style="font-family:var(--fm);font-size:11px;">2m ago<small>last sync</small></div></div>
+          <div class="party-row"><div class="nm">GSTN<small>RETURNS · ONCE A MONTH</small></div><span class="pill-s warn">RECONNECT</span><div class="num" style="font-family:var(--fm);font-size:11px;">8d ago<small>otp needed</small></div></div>
+          <div class="party-row"><div class="nm">WhatsApp Business<small>OUTREACH · DRAFTS</small></div><span class="pill-s ok">HEALTHY</span><div class="num" style="font-family:var(--fm);font-size:11px;">just now<small>active</small></div></div>
+          <div class="party-row"><div class="nm">Shiprocket<small>3PL · DISPATCH</small></div><span class="pill-s ok">HEALTHY</span><div class="num" style="font-family:var(--fm);font-size:11px;">12m ago<small>last sync</small></div></div>
+        </div></div>
+        <div class="card"><div class="card-h"><div class="t"><span class="ic">⚙</span><h3>Preferences</h3><span class="sub">WORKSPACE</span></div></div><div class="card-b">
+          <div class="party-row"><div class="nm">Currency<small>DISPLAY</small></div><span class="pill-s muted">INR · ₹</span><div class="num" style="font-family:var(--fm);font-size:11px;">lakhs/cr</div></div>
+          <div class="party-row"><div class="nm">Time zone<small>SCHEDULING</small></div><span class="pill-s muted">IST</span><div class="num" style="font-family:var(--fm);font-size:11px;">+05:30</div></div>
+          <div class="party-row"><div class="nm">Theme<small>OPERATING SURFACE</small></div><span class="pill-s info">DARK</span><div class="num" style="font-family:var(--fm);font-size:11px;">auto · sunset</div></div>
+          <div class="party-row"><div class="nm">Atlas auto-action<small>SIGNALS WITH 90%+ CONFIDENCE</small></div><span class="pill-s ok">ON</span><div class="num" style="font-family:var(--fm);font-size:11px;">audit-logged</div></div>
+          <div class="party-row"><div class="nm">Plan<small>OPERATOR · ₹14,400/mo</small></div><span class="pill-s ok">ACTIVE</span><div class="num" style="font-family:var(--fm);font-size:11px;">28 May<small>next bill</small></div></div>
+        </div></div>
+      </div>
+    </section>
+
+    <!-- FOOTER STRIP -->
+    <div class="ftbar">
+      <div class="l"><b>atlas</b> · v3.4 · operating Comfort Industries since Mar 2024</div>
+      <div class="r">
+        <span><span class="ind"></span>all systems · green</span>
+        <span>signal latency <b style="color:var(--text);font-weight:500;">42ms</b></span>
+        <span>audit · 4.7k events today</span>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  // ── Routing ──────────────────────────────────────────────
+  const pageTitleMap = {
+    today:'Today', orders:'Orders', parties:'Parties', inventory:'Inventory',
+    dispatch:'Dispatch', cash:'Cash & finance', receivables:'Receivables',
+    intel:'Intelligence', reports:'Reports', workflows:'Workflows', settings:'Settings'
+  };
+  const sectionMap = {
+    today:'Operate', orders:'Operate', parties:'Operate', inventory:'Operate', dispatch:'Operate',
+    cash:'Sense', receivables:'Sense', intel:'Sense', reports:'Sense',
+    workflows:'Studio', settings:'Studio'
+  };
+  function setPage(p) {
+    const pages = document.querySelectorAll('section.page');
+    pages.forEach(s => { s.hidden = s.getAttribute('data-page') !== p; });
+    document.querySelectorAll('.nav-item').forEach(n => {
+      n.classList.toggle('active', n.getAttribute('data-page') === p);
+    });
+    const crumb = document.querySelector('.crumb');
+    if (crumb && pageTitleMap[p]) {
+      crumb.innerHTML = `<b>atlas</b> <span class="sep">/</span> ${sectionMap[p]||'Operate'} <span class="sep">/</span> <b>${pageTitleMap[p]}</b>`;
+    }
+    history.replaceState(null, '', '#'+p);
+    window.scrollTo({top:0, behavior:'instant'});
+  }
+  document.querySelectorAll('.nav-item[data-page]').forEach(n => {
+    n.style.cursor = 'pointer';
+    n.addEventListener('click', () => setPage(n.getAttribute('data-page')));
+  });
+  window.addEventListener('hashchange', () => {
+    const p = location.hash.slice(1);
+    if (p && pageTitleMap[p]) setPage(p);
+  });
+  // initial
+  (function(){ const p = location.hash.slice(1); if (p && pageTitleMap[p]) setPage(p); })();
+
+  // build heatmap: 7 rows (days) × 24 cols (12 weeks)
+  // We'll instead do 7 rows × 24 cols as days of recent 12 weeks segmented
+  // The CSS grid uses 24 columns and we want 7 rows -> we'll add 7*24 cells, but use grid-auto-flow: row default
+  // Actually .heatmap is grid with 24 cols, so cells flow row-by-row. To mimic a calendar we want each column to be a day-of-week stack. Simpler: keep flowing 24×7 grid.
+  const hm = document.getElementById('heatmap');
+  const intensities = [0.10, 0.28, 0.50, 0.75, 1.0];
+  // weight: weekday mid-high, weekends sparse, recent weeks slightly stronger
+  for (let row = 0; row < 7; row++) {
+    for (let col = 0; col < 24; col++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      // weekend = row 5,6
+      const isWeekend = (row === 5 || row === 6);
+      let weight = isWeekend ? 0.15 : 0.55;
+      // recent weeks (col 18-23) bump up
+      if (col > 18) weight += 0.15;
+      // mid Apr-May bumps
+      if (col > 14 && col < 22 && !isWeekend) weight += 0.18;
+      // some quiet weeks
+      if (col >= 6 && col <= 9 && !isWeekend) weight -= 0.20;
+      // random jitter
+      weight += (Math.random() - 0.5) * 0.25;
+      weight = Math.max(0, Math.min(1, weight));
+      const idx = Math.round(weight * (intensities.length - 1));
+      const alpha = intensities[idx];
+      if (alpha < 0.15) {
+        cell.style.background = 'rgba(255,255,255,0.04)';
+      } else {
+        cell.style.background = `rgba(78,222,163,${alpha})`;
+      }
+      // last column most-recent — give a dot indicator
+      if (col === 23 && row === 0) {
+        cell.style.outline = '1px solid rgba(78,222,163,0.6)';
+        cell.style.outlineOffset = '1px';
+      }
+      hm.appendChild(cell);
+    }
+  }
+</script>
+<script>
+  // Theme toggle — T key + button
+  (function(){
+    const saved = localStorage.getItem('atlas-mode') || 'dark';
+    document.body.dataset.mode = saved;
+    const btn = document.getElementById('themeToggle');
+    function set(m){
+      document.body.dataset.mode = m;
+      localStorage.setItem('atlas-mode', m);
+      if (btn) btn.textContent = m === 'dark' ? '☽' : '☼';
+    }
+    set(saved);
+    if (btn) btn.addEventListener('click', () => set(document.body.dataset.mode === 'dark' ? 'light' : 'dark'));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 't' || e.key === 'T') {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        set(document.body.dataset.mode === 'dark' ? 'light' : 'dark');
+      }
+    });
+  })();
+</script>
+
+</body>
+</html>
