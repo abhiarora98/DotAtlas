@@ -2136,8 +2136,12 @@
 
   // ---------- derived per line ----------
   // Parse a dimension token like "4ft", "0.61M", "30 CM", "12in", "2mtr" → meters.
+  // Per business convention: 2ft = 0.61 m, 4ft = 1.22 m (rounded values),
+  // not the precise 0.3048 × ft. Other ft values use the precise multiplier.
   function dimToMeters(s){
     const t = String(s || '').trim().toUpperCase().replace(/\s+/g, '');
+    if (t === '2FT') return 0.61;
+    if (t === '4FT') return 1.22;
     let m;
     if ((m = t.match(/^(\d+(?:\.\d+)?)MTR$/))) return parseFloat(m[1]);
     if ((m = t.match(/^(\d+(?:\.\d+)?)CM$/)))  return parseFloat(m[1]) / 100;
@@ -2150,7 +2154,7 @@
     if (PIECE_CATS.has(line.category)) return 1;
     const w = dimToMeters(line.width);
     const l = dimToMeters(line.length);
-    if (w !== null && l !== null) return w * l * 10.7639; // sq.m → sq.ft
+    if (w !== null && l !== null) return w * l * 10.76; // sq.m → sq.ft (business convention)
     return 1;
   }
   function derived(line){
