@@ -983,6 +983,93 @@
     .pi-grid { grid-template-columns: 1fr 1fr; }
   }
 
+  /* Add new party modal */
+  .ap-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(5, 9, 18, 0.72);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 28px;
+    animation: ap-fade 200ms var(--ease);
+  }
+  @keyframes ap-fade { from { opacity: 0; } to { opacity: 1; } }
+  .ap-modal {
+    width: 100%; max-width: 620px;
+    background: var(--surface);
+    border: 1px solid var(--line-2);
+    border-radius: 12px;
+    box-shadow:
+      0 16px 48px rgba(0,0,0,0.4),
+      0 0 0 1px var(--line);
+    overflow: hidden;
+    animation: ap-rise 240ms var(--ease);
+  }
+  @keyframes ap-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .ap-head {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    padding: 22px 26px 16px;
+    border-bottom: 1px solid var(--line);
+    background:
+      radial-gradient(ellipse 600px 200px at 20% 100%, rgba(78,222,163,0.07), transparent 70%);
+  }
+  .ap-head h2 {
+    margin: 0;
+    font-family: var(--fd); font-size: 22px; font-weight: 600;
+    letter-spacing: -0.02em; line-height: 1.2;
+    color: var(--text);
+    max-width: 480px;
+  }
+  .ap-close {
+    background: transparent; border: 1px solid var(--line);
+    color: var(--text-2); border-radius: 6px;
+    width: 30px; height: 30px;
+    cursor: pointer; font-size: 18px; line-height: 1;
+    transition: all 200ms var(--ease);
+  }
+  .ap-close:hover { border-color: var(--rose); color: var(--rose); }
+  .ap-body { padding: 22px 26px 24px; display: flex; flex-direction: column; gap: 14px; }
+  .ap-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .ap-req { color: var(--rose); font-weight: 700; }
+  .ap-auto {
+    font-family: var(--fm); font-size: 9.5px;
+    color: var(--text-3); letter-spacing: 0.14em;
+    background: var(--surface-2);
+    padding: 1px 6px; border-radius: 3px;
+    margin-left: 6px;
+  }
+  .ap-hint {
+    font-family: var(--fm); font-size: 10.5px;
+    color: var(--text-3); letter-spacing: 0.04em;
+    margin-top: 2px; display: block;
+  }
+  .ap-status {
+    min-height: 0;
+    padding: 0;
+    font-size: 12.5px; font-family: var(--fm); letter-spacing: 0.02em;
+  }
+  .ap-status:empty { display: none; }
+  .ap-status.ok    { padding: 10px 12px; border-radius: 6px; background: rgba(78,222,163,0.10); color: #6FFBBE; border: 1px solid var(--emerald); }
+  .ap-status.warn  { padding: 10px 12px; border-radius: 6px; background: rgba(245,158,11,0.06); color: var(--amber); border: 1px solid rgba(245,158,11,0.3); }
+  .ap-status.err   { padding: 10px 12px; border-radius: 6px; background: rgba(255,138,138,0.06); color: var(--rose); border: 1px solid rgba(255,138,138,0.3); }
+  .ap-actions { display: flex; gap: 10px; margin-top: 4px; }
+  .ap-actions .pi-btn { flex: 1; }
+  .ap-foot {
+    margin-top: 6px; padding-top: 12px;
+    border-top: 1px solid var(--line);
+    color: var(--text-3); font-size: 11.5px;
+    line-height: 1.5;
+  }
+  body[data-mode="light"] .ap-overlay { background: rgba(11, 18, 32, 0.40); }
+  body[data-mode="light"] .ap-modal {
+    border-color: var(--line-2);
+    box-shadow:
+      0 24px 60px rgba(11,18,32,0.18),
+      0 0 0 1px var(--line);
+  }
+  body[data-mode="light"] .ap-head { background: var(--surface); }
+  body[data-mode="light"] .ap-status.ok { background: rgba(44,91,255,0.06); color: var(--emerald); border-color: var(--emerald); }
+
   /* Party typeahead (custom, only shows on type) */
   .pi-party-wrap { position: relative; }
   .pi-typeahead {
@@ -1659,7 +1746,13 @@
       </div>
       <div class="row-2" style="grid-template-columns:1.5fr 1fr;">
         <div class="card">
-          <div class="card-h"><div class="t"><span class="ic">○</span><h3>All parties</h3><span class="sub">BY 90-DAY VOLUME</span></div><div class="seg"><button class="on">ALL</button><button>CUSTOMERS</button><button>SUPPLIERS</button></div></div>
+          <div class="card-h">
+            <div class="t"><span class="ic">○</span><h3>All parties</h3><span class="sub">BY 90-DAY VOLUME · <span id="parties-custom-count">0 added</span></span></div>
+            <div style="display:flex; gap:10px; align-items:center;">
+              <div class="seg"><button class="on">ALL</button><button>CUSTOMERS</button><button>SUPPLIERS</button></div>
+              <button class="pi-btn prime" id="parties-add-btn" style="padding: 7px 14px; flex: none; font-size: 10.5px;">+ New party</button>
+            </div>
+          </div>
           <div class="card-b">
             <div class="party-row"><div class="nm">Goyal Carpets<small>PANIPAT · 92% on-time · 41 orders</small></div><div class="bar"><div style="width:92%;"></div></div><div class="num">₹68.4L<small>+18%</small></div></div>
             <div class="party-row"><div class="nm">Khanna Bros.<small>LUDHIANA · 88% on-time · 33 orders</small></div><div class="bar"><div style="width:78%;"></div></div><div class="num">₹52.1L<small>+8%</small></div></div>
@@ -2892,6 +2985,245 @@
     // persist on any input
     document.querySelector('[data-page="create-pi"]').addEventListener('input', saveDraft);
     document.querySelector('[data-page="create-pi"]').addEventListener('change', saveDraft);
+  }
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+
+<!-- Add new party modal -->
+<div class="ap-overlay" id="ap-overlay" hidden>
+  <div class="ap-modal" role="dialog" aria-labelledby="ap-title" aria-modal="true">
+    <div class="ap-head">
+      <div>
+        <div class="eb" style="margin-bottom: 6px;"><span class="live-dot"></span>Parties · new entry</div>
+        <h2 id="ap-title">Add a <span style="font-style: italic; font-weight: 500;">new party</span> to <span style="color: var(--emerald);">Comfort Industries</span>.</h2>
+      </div>
+      <button class="ap-close" id="ap-close" aria-label="Close">×</button>
+    </div>
+    <div class="ap-body">
+      <div class="pi-field">
+        <label for="ap-name">Party Name <span class="ap-req">*</span></label>
+        <input class="pi-input" id="ap-name" placeholder="e.g. M/S KARAN ENTERPRISES" autocomplete="off">
+      </div>
+
+      <div class="ap-row-2">
+        <div class="pi-field">
+          <label for="ap-code">Party Code <span class="ap-req">*</span></label>
+          <input class="pi-input mono" id="ap-code" placeholder="e.g. RU0663" autocomplete="off" maxlength="12">
+        </div>
+        <div class="pi-field">
+          <label for="ap-poc">Sales POC</label>
+          <select class="pi-select" id="ap-poc"></select>
+        </div>
+      </div>
+
+      <div class="ap-row-2">
+        <div class="pi-field">
+          <label for="ap-gst">GST Invoice (GSTIN)</label>
+          <input class="pi-input mono" id="ap-gst" placeholder="15-char GSTIN" autocomplete="off" maxlength="15" style="text-transform: uppercase;">
+          <span class="ap-hint" id="ap-gst-hint">Two-letter state prefix auto-fills the State field.</span>
+        </div>
+        <div class="pi-field">
+          <label for="ap-state">State <span class="ap-auto">auto</span></label>
+          <input class="pi-input" id="ap-state" placeholder="Auto-fills from GST" readonly>
+        </div>
+      </div>
+
+      <div class="ap-row-2">
+        <div class="pi-field">
+          <label for="ap-phone">Phone <span class="ap-req">*</span></label>
+          <input class="pi-input mono" id="ap-phone" placeholder="10-digit mobile" autocomplete="off" inputmode="tel" maxlength="15">
+        </div>
+        <div class="pi-field">
+          <label for="ap-city">City</label>
+          <input class="pi-input" id="ap-city" placeholder="optional" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="ap-status" id="ap-status"></div>
+
+      <div class="ap-actions">
+        <button class="pi-btn" id="ap-cancel">Cancel</button>
+        <button class="pi-btn prime" id="ap-submit">Add party →</button>
+      </div>
+      <div class="ap-foot">
+        Saved to your browser only for now. Once Apps Script is wired, new parties will write to a Parties sheet too.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const V = window.PI_VOCAB;
+  if (!V) return;
+
+  // GSTIN 2-digit state code → state name
+  const GST_STATE_MAP = {
+    '01':'Jammu & Kashmir','02':'Himachal Pradesh','03':'Punjab','04':'Chandigarh',
+    '05':'Uttarakhand','06':'Haryana','07':'Delhi','08':'Rajasthan',
+    '09':'Uttar Pradesh','10':'Bihar','11':'Sikkim','12':'Arunachal Pradesh',
+    '13':'Nagaland','14':'Manipur','15':'Mizoram','16':'Tripura',
+    '17':'Meghalaya','18':'Assam','19':'West Bengal','20':'Jharkhand',
+    '21':'Odisha','22':'Chhattisgarh','23':'Madhya Pradesh','24':'Gujarat',
+    '25':'Daman & Diu','26':'Dadra & Nagar Haveli','27':'Maharashtra',
+    '28':'Andhra Pradesh (old)','29':'Karnataka','30':'Goa',
+    '31':'Lakshadweep','32':'Kerala','33':'Tamil Nadu','34':'Puducherry',
+    '35':'Andaman & Nicobar','36':'Telangana','37':'Andhra Pradesh','38':'Ladakh',
+  };
+
+  const $ = (id) => document.getElementById(id);
+
+  // Merge any locally-added parties so they appear in the Create PI typeahead.
+  function loadCustom(){
+    try {
+      const raw = localStorage.getItem('atlas-custom-parties');
+      return raw ? JSON.parse(raw) : [];
+    } catch(e){ return []; }
+  }
+  function saveCustom(list){
+    localStorage.setItem('atlas-custom-parties', JSON.stringify(list));
+  }
+  function mergeCustomIntoVocab(){
+    const custom = loadCustom();
+    const existingNames = new Set(V.parties.map(p => p.name.toLowerCase()));
+    for (const p of custom){
+      if (!existingNames.has(p.name.toLowerCase())){
+        V.parties.push({ name: p.name, code: p.code || '' });
+      }
+    }
+    // sort alphabetically for stable order
+    V.parties.sort((a, b) => a.name.localeCompare(b.name));
+  }
+  function refreshCustomCount(){
+    const count = loadCustom().length;
+    const el = $('parties-custom-count');
+    if (el) el.textContent = count + ' added';
+  }
+
+  // POC select
+  function populatePoc(){
+    const sel = $('ap-poc');
+    if (!sel || sel.options.length) return;
+    sel.appendChild(document.createElement('option')).textContent = '—';
+    for (const p of V.pocs){
+      const o = document.createElement('option');
+      o.value = p; o.textContent = p;
+      sel.appendChild(o);
+    }
+  }
+
+  function setStatus(kind, msg){
+    const s = $('ap-status');
+    s.className = 'ap-status' + (kind ? ' ' + kind : '');
+    s.textContent = msg || '';
+  }
+
+  function openModal(){
+    populatePoc();
+    setStatus('', '');
+    ['ap-name','ap-code','ap-poc','ap-gst','ap-state','ap-phone','ap-city'].forEach(id => {
+      const e = $(id); if (e) e.value = '';
+    });
+    $('ap-overlay').hidden = false;
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => $('ap-name').focus(), 30);
+  }
+  function closeModal(){
+    $('ap-overlay').hidden = true;
+    document.body.style.overflow = '';
+  }
+
+  function gstInput(){
+    const v = $('ap-gst').value.toUpperCase().replace(/\s+/g, '');
+    $('ap-gst').value = v;
+    const prefix = v.slice(0, 2);
+    const state = GST_STATE_MAP[prefix];
+    if (state){
+      $('ap-state').value = state;
+      $('ap-gst-hint').textContent = 'State → ' + state;
+      $('ap-gst-hint').style.color = 'var(--emerald)';
+    } else {
+      $('ap-state').value = '';
+      $('ap-gst-hint').textContent = 'Two-letter state prefix auto-fills the State field.';
+      $('ap-gst-hint').style.color = '';
+    }
+  }
+
+  function submit(){
+    const name  = $('ap-name').value.trim();
+    const code  = $('ap-code').value.trim();
+    const poc   = $('ap-poc').value;
+    const gst   = $('ap-gst').value.trim();
+    const state = $('ap-state').value.trim();
+    const phone = $('ap-phone').value.trim();
+    const city  = $('ap-city').value.trim();
+
+    if (!name)  { setStatus('err', 'Party name is required.'); $('ap-name').focus();  return; }
+    if (!code)  { setStatus('err', 'Party code is required.'); $('ap-code').focus();  return; }
+    if (!phone) { setStatus('err', 'Phone is required.');      $('ap-phone').focus(); return; }
+    if (gst && gst.length !== 15) { setStatus('warn', 'GSTIN should be 15 characters. Saved anyway.'); }
+
+    // Check duplicate by name or code
+    const existing = V.parties.find(p =>
+      p.name.toLowerCase() === name.toLowerCase() ||
+      (p.code && code && p.code.toLowerCase() === code.toLowerCase())
+    );
+    if (existing){
+      setStatus('err', 'A party already exists with this name or code: ' + (existing.name || existing.code));
+      return;
+    }
+
+    const entry = { name, code, poc, gst, state, phone, city, createdAt: new Date().toISOString() };
+    const list = loadCustom();
+    list.push(entry);
+    saveCustom(list);
+
+    // Update vocab so the new party shows up in Create PI typeahead immediately.
+    V.parties.push({ name, code });
+    V.parties.sort((a, b) => a.name.localeCompare(b.name));
+
+    refreshCustomCount();
+    setStatus('ok', 'Added ' + name + '. It will now appear in Create PI suggestions.');
+    setTimeout(closeModal, 900);
+  }
+
+  function init(){
+    mergeCustomIntoVocab();
+    refreshCustomCount();
+
+    const addBtn = $('parties-add-btn');
+    if (addBtn) addBtn.addEventListener('click', openModal);
+
+    $('ap-close').addEventListener('click', closeModal);
+    $('ap-cancel').addEventListener('click', closeModal);
+    $('ap-overlay').addEventListener('click', (e) => {
+      if (e.target.id === 'ap-overlay') closeModal();
+    });
+    $('ap-submit').addEventListener('click', submit);
+
+    $('ap-gst').addEventListener('input', gstInput);
+
+    // Enter inside the modal advances to next; on the last field, submits.
+    const order = ['ap-name','ap-code','ap-poc','ap-gst','ap-phone','ap-city'];
+    document.querySelector('.ap-modal').addEventListener('keydown', (e) => {
+      if (e.key === 'Escape'){ e.preventDefault(); closeModal(); return; }
+      if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey){
+        if (e.target.tagName === 'BUTTON') return;
+        e.preventDefault();
+        const i = order.indexOf(e.target.id);
+        if (i >= 0 && i < order.length - 1){
+          const next = $(order[i + 1]); if (next) next.focus();
+        } else {
+          submit();
+        }
+      }
+    });
   }
 
   if (document.readyState === 'loading'){
