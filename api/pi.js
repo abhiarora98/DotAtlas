@@ -90,17 +90,20 @@ async function handlePi(sheets, spreadsheetId, payload, res) {
   const rows = payload.rows || [];
   if (!rows.length) return res.status(400).json({ ok: false, error: 'Payload has no rows' });
 
-  // Read column A to determine the next No.
+  // Read column A and find the max No. so we can append after it.
+  // Tolerates a header row (Number("No.") is NaN, gets skipped) and works
+  // when the sheet has no headers at all.
   const colA = await sheets.spreadsheets.values.get({
     spreadsheetId,
     range: PI_SHEET + '!A:A',
   });
   const vals = colA.data.values || [];
-  let nextNo = 1;
-  for (let i = vals.length - 1; i >= 1; i--) {
-    const n = Number(vals[i][0]);
-    if (!isNaN(n) && n > 0) { nextNo = n + 1; break; }
+  let maxNo = 0;
+  for (const row of vals) {
+    const n = Number(row && row[0]);
+    if (!isNaN(n) && n > maxNo) maxNo = n;
   }
+  const nextNo = maxNo + 1;
 
   const values = rows.map((r, i) => [
     nextNo + i,                          // A  No.
