@@ -747,9 +747,6 @@
   body[data-mode="light"] .pi-input[readonly] {
     background: var(--surface-2); color: var(--text-3);
   }
-  body[data-mode="light"] table.pi-table th { color: var(--text-3); border-bottom-color: var(--line); }
-  body[data-mode="light"] table.pi-table td { border-bottom-color: var(--line); }
-  body[data-mode="light"] table.pi-table tr.pi-row:hover { background: var(--surface-2); }
   body[data-mode="light"] .pi-empty-lines {
     border-color: var(--line-2); color: var(--text-3); background: var(--surface-2);
   }
@@ -855,44 +852,7 @@
   .pi-input.num { font-family: var(--fm); text-align: right; font-variant-numeric: tabular-nums; }
 
   /* line items table */
-  .pi-lines-wrap {
-    overflow-x: auto;
-    margin: 0 -22px -20px -22px;
-    padding: 0 22px 20px 22px;
-  }
-  table.pi-table {
-    width: 100%; border-collapse: collapse;
-    font-size: 12.5px;
-  }
-  table.pi-table th {
-    text-align: left;
-    font-family: var(--fm); font-size: 10px; letter-spacing: 0.14em;
-    color: var(--text-3); text-transform: uppercase; font-weight: 500;
-    padding: 0 8px 12px 8px;
-    border-bottom: 1px solid var(--line);
-    white-space: nowrap;
-  }
-  table.pi-table th.num { text-align: right; }
-  table.pi-table td {
-    padding: 8px 6px;
-    border-bottom: 1px solid var(--line);
-    vertical-align: middle;
-  }
-  table.pi-table tr.pi-row { transition: background 200ms var(--ease); }
-  table.pi-table tr.pi-row:hover { background: rgba(255,255,255,0.018); }
-  table.pi-table td.idx {
-    font-family: var(--fm); color: var(--text-3); font-size: 11px; width: 28px;
-    letter-spacing: 0.06em; padding-left: 4px;
-  }
-  table.pi-table td .pi-input, table.pi-table td .pi-select {
-    padding: 6px 8px; font-size: 12.5px; min-width: 88px;
-  }
-  table.pi-table td.num { white-space: nowrap; }
-  table.pi-table td.num .v {
-    font-family: var(--fm); font-variant-numeric: tabular-nums;
-    color: var(--text); font-size: 12.5px;
-  }
-  table.pi-table td.num .v.muted { color: var(--text-3); }
+  .pi-lines-wrap { width: 100%; }
   .pi-remove {
     background: transparent; border: 1px solid var(--line);
     color: var(--text-3); border-radius: 6px; width: 26px; height: 26px;
@@ -917,6 +877,59 @@
     border: 1px dashed var(--line); border-radius: 8px;
     margin-top: 4px;
   }
+  /* line item cards (two-row layout) */
+  .pi-lines { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
+  .pi-line-card {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    padding: 14px 16px 16px;
+    transition: border-color 200ms var(--ease);
+  }
+  .pi-line-card:hover { border-color: rgba(124,168,255,0.18); }
+  body[data-mode="light"] .pi-line-card { background: var(--surface); }
+  body[data-mode="light"] .pi-line-card:hover { background: var(--surface-2); }
+  .pi-line-top {
+    display: grid;
+    grid-template-columns: 36px 1fr 36px;
+    gap: 14px;
+    align-items: end;
+  }
+  .pi-line-idx {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 36px;
+    border-radius: 6px;
+    background: var(--surface-2);
+    color: var(--text-3);
+    font-family: var(--fm); font-size: 11px; letter-spacing: 0.04em;
+  }
+  .pi-line-bot {
+    margin-top: 12px;
+    padding-left: 50px;  /* align under top grid */
+  }
+  .pi-line-grid { display: grid; gap: 10px; }
+  .pi-line-grid.grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .pi-line-grid.grid-9 { grid-template-columns: repeat(9, minmax(0, 1fr)); }
+  @media (max-width: 1400px) { .pi-line-grid.grid-9 { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+  @media (max-width: 980px)  {
+    .pi-line-grid.grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .pi-line-grid.grid-9 { grid-template-columns: repeat(3, 1fr); }
+    .pi-line-bot { padding-left: 0; }
+  }
+  .pi-field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+  .pi-field > label {
+    font-family: var(--fm); font-size: 9.5px; letter-spacing: 0.10em;
+    color: var(--text-3); text-transform: uppercase;
+  }
+  .pi-field .pi-input, .pi-field .pi-combo, .pi-field select.pi-select { width: 100%; }
+  .pi-field .pi-derived {
+    font-family: var(--fd); font-variant-numeric: tabular-nums;
+    font-size: 13px; color: var(--text);
+    padding: 8px 0;
+    text-align: right;
+  }
+  .pi-field .pi-derived.muted { color: var(--text-3); }
+  .pi-line-top .pi-remove { height: 36px; width: 36px; }
 
   /* totals card */
   .pi-totals .kr {
@@ -1917,28 +1930,7 @@
         </div>
         <div class="card-b">
           <div class="pi-lines-wrap">
-            <table class="pi-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Category</th>
-                  <th>Model</th>
-                  <th>Backing</th>
-                  <th>Colour</th>
-                  <th>Width</th>
-                  <th>Length</th>
-                  <th class="num">Qty</th>
-                  <th class="num">Actual ₹</th>
-                  <th class="num">Bill ₹</th>
-                  <th class="num">Freight</th>
-                  <th class="num">Units</th>
-                  <th class="num">Taxable</th>
-                  <th class="num">Total inc GST</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody id="pi-lines"></tbody>
-            </table>
+            <div id="pi-lines" class="pi-lines"></div>
             <div id="pi-empty-lines" class="pi-empty-lines">No lines yet. Add the first one →</div>
           </div>
           <button class="pi-add-line" id="pi-add-line">+ add line</button>
@@ -2547,126 +2539,155 @@
     $('pi-eb-ref').textContent = state.ref || '—';
   }
 
+  function field(labelText, control){
+    return el('div', { class: 'pi-field' },
+      el('label', {}, labelText),
+      control,
+    );
+  }
+
   function renderLines(){
-    const tbody = $('pi-lines');
-    tbody.innerHTML = '';
+    const host = $('pi-lines');
+    host.innerHTML = '';
     $('pi-empty-lines').style.display = state.lines.length ? 'none' : 'block';
 
     state.lines.forEach((line, i) => {
       const d = derived(line);
-      const tr = el('tr', { class: 'pi-row' });
+      const spec = specOf(line.category);
+      const card = el('div', { class: 'pi-line-card' });
 
-      tr.appendChild(el('td', { class: 'idx' }, String(i+1).padStart(2, '0')));
+      // ===== TOP ROW: idx + 4 product fields + remove button =====
+      const top = el('div', { class: 'pi-line-top' });
+      top.appendChild(el('span', { class: 'pi-line-idx' }, String(i+1).padStart(2, '0')));
 
-      // === CATEGORY (drives every dependent dropdown below) ===
-      tr.appendChild(el('td', {}, comboBox(line.category, CATEGORIES_ORDERED, 'category',
-        e => {
-          const nextCat = e.target.value;
-          line.category = nextCat;
-          // Clear dependent fields whose current value isn't valid for the new category.
-          const inList = (val, list) => !val || (list && list.includes(val));
-          if (!inList(line.model,   modelsFor(nextCat)))   line.model = '';
-          if (!inList(line.backing, backingsFor(nextCat))) line.backing = '';
-          if (!inList(line.colour,  coloursFor(nextCat)))  line.colour = '';
-          if (!inList(line.width,   widthsFor(nextCat)))   line.width = '';
-          if (!inList(line.length,  lengthsFor(nextCat)))  line.length = '';
-          // Only re-render the whole table if the value actually changed (avoid losing focus on every keystroke).
-          if (e.type === 'change') { renderLines(); renderTotals(); }
-          else renderTotals();
-        })));
+      const topGrid = el('div', { class: 'pi-line-grid grid-4' });
 
-      // === MODEL ===
-      tr.appendChild(el('td', {}, comboBox(line.model, modelsFor(line.category), 'model',
+      // CATEGORY (drives every dependent dropdown)
+      topGrid.appendChild(field('Category', comboBox(line.category, CATEGORIES_ORDERED, 'category', e => {
+        const nextCat = e.target.value;
+        line.category = nextCat;
+        const inList = (val, list) => !val || (list && list.includes(val));
+        if (!inList(line.model,   modelsFor(nextCat)))   line.model = '';
+        if (!inList(line.backing, backingsFor(nextCat))) line.backing = '';
+        if (!inList(line.colour,  coloursFor(nextCat)))  line.colour = '';
+        if (!inList(line.width,   widthsFor(nextCat)))   line.width = '';
+        if (!inList(line.length,  lengthsFor(nextCat)))  line.length = '';
+        if (e.type === 'change') { renderLines(); renderTotals(); }
+        else renderTotals();
+      })));
+
+      // MODEL
+      topGrid.appendChild(field('Model', comboBox(line.model, modelsFor(line.category), 'model',
         e => { line.model = e.target.value; renderTotals(); })));
 
-      // === BACKING — disabled "n/a" when category has no backings ===
+      // BACKING (disabled "n/a" when category has no backings)
       const backingsList = backingsFor(line.category);
-      const spec = specOf(line.category);
       const backingDisabled = !!(spec && spec.backings && spec.backings.length === 0);
       if (backingDisabled){
         const naInp = el('input', { class: 'pi-input pi-combo', value: 'n/a', disabled: 'disabled' });
         line.backing = '';
-        tr.appendChild(el('td', {}, naInp));
+        topGrid.appendChild(field('Backing', naInp));
       } else {
-        tr.appendChild(el('td', {}, comboBox(line.backing, backingsList, 'backing',
+        topGrid.appendChild(field('Backing', comboBox(line.backing, backingsList, 'backing',
           e => { line.backing = e.target.value; renderTotals(); })));
       }
 
-      // === COLOUR ===
-      tr.appendChild(el('td', {}, comboBox(line.colour, coloursFor(line.category), 'colour',
+      // COLOUR
+      topGrid.appendChild(field('Colour', comboBox(line.colour, coloursFor(line.category), 'colour',
         e => { line.colour = e.target.value; renderTotals(); })));
 
-      // === WIDTH ===
+      top.appendChild(topGrid);
+
+      const rm = el('button', { class: 'pi-remove', title: 'Remove line',
+        onclick: () => { state.lines.splice(i, 1); renderLines(); renderTotals(); } }, '×');
+      top.appendChild(rm);
+
+      card.appendChild(top);
+
+      // ===== BOTTOM ROW: dims + rates + derived totals =====
+      const bot = el('div', { class: 'pi-line-bot' });
+      const botGrid = el('div', { class: 'pi-line-grid grid-9' });
+
+      // WIDTH
       const widthsList = widthsFor(line.category);
       const widthDisabled = !!(spec && spec.widths && spec.widths.length === 0);
       if (widthDisabled){
         const naInp = el('input', { class: 'pi-input pi-combo', value: 'n/a', disabled: 'disabled' });
         line.width = '';
-        tr.appendChild(el('td', {}, naInp));
+        botGrid.appendChild(field('Width', naInp));
       } else {
-        tr.appendChild(el('td', {}, comboBox(line.width, widthsList, 'W',
-          e => {
-            line.width = e.target.value;
-            if (e.type === 'change') { renderLines(); renderTotals(); }
-            else { renderTotals(); refreshDerivedRow(tr, line); }
-          })));
+        botGrid.appendChild(field('Width', comboBox(line.width, widthsList, 'W', e => {
+          line.width = e.target.value;
+          if (e.type === 'change') { renderLines(); renderTotals(); }
+          else { renderTotals(); refreshDerivedCard(card, line); }
+        })));
       }
 
-      // === LENGTH ===
+      // LENGTH
       const lengthsList = lengthsFor(line.category);
       const lengthDisabled = !!(spec && spec.lengths && spec.lengths.length === 0);
       if (lengthDisabled){
         const naInp = el('input', { class: 'pi-input pi-combo', value: 'n/a', disabled: 'disabled' });
         line.length = '';
-        tr.appendChild(el('td', {}, naInp));
+        botGrid.appendChild(field('Length', naInp));
       } else {
-        tr.appendChild(el('td', {}, comboBox(line.length, lengthsList, 'L',
-          e => {
-            line.length = e.target.value;
-            if (e.type === 'change') { renderLines(); renderTotals(); }
-            else { renderTotals(); refreshDerivedRow(tr, line); }
-          })));
+        botGrid.appendChild(field('Length', comboBox(line.length, lengthsList, 'L', e => {
+          line.length = e.target.value;
+          if (e.type === 'change') { renderLines(); renderTotals(); }
+          else { renderTotals(); refreshDerivedCard(card, line); }
+        })));
       }
 
+      // QTY
       const qtyInp = el('input', { class: 'pi-input num', type: 'number', min: '0', step: '1', value: line.qty,
-        oninput: e => { line.qty = e.target.value; renderTotals(); refreshDerivedRow(tr, line); }});
-      tr.appendChild(el('td', { class: 'num' }, qtyInp));
+        oninput: e => { line.qty = e.target.value; renderTotals(); refreshDerivedCard(card, line); }});
+      botGrid.appendChild(field('Qty', qtyInp));
 
+      // ACTUAL RATE
       const arInp = el('input', { class: 'pi-input num', type: 'number', min: '0', step: '0.01', value: line.actualRate, placeholder: '0',
         oninput: e => {
           line.actualRate = e.target.value;
           if (!line.billRate) line.billRate = e.target.value;
-          renderTotals(); refreshDerivedRow(tr, line);
+          renderTotals(); refreshDerivedCard(card, line);
           if (!line.billRate) renderLines();
         }});
-      tr.appendChild(el('td', { class: 'num' }, arInp));
+      botGrid.appendChild(field('Actual ₹', arInp));
 
+      // BILL RATE
       const brInp = el('input', { class: 'pi-input num', type: 'number', min: '0', step: '0.01', value: line.billRate, placeholder: line.actualRate || '0',
-        oninput: e => { line.billRate = e.target.value; renderTotals(); refreshDerivedRow(tr, line); }});
-      tr.appendChild(el('td', { class: 'num' }, brInp));
+        oninput: e => { line.billRate = e.target.value; renderTotals(); refreshDerivedCard(card, line); }});
+      botGrid.appendChild(field('Bill ₹', brInp));
 
+      // FREIGHT
       const frInp = el('input', { class: 'pi-input num', type: 'number', min: '0', step: '1', value: line.freight, placeholder: '0',
-        oninput: e => { line.freight = e.target.value; renderTotals(); refreshDerivedRow(tr, line); }});
-      tr.appendChild(el('td', { class: 'num' }, frInp));
+        oninput: e => { line.freight = e.target.value; renderTotals(); refreshDerivedCard(card, line); }});
+      botGrid.appendChild(field('Freight', frInp));
 
-      tr.appendChild(el('td', { class: 'num' }, el('span', { class: 'v ' + (d.units === 1 ? 'muted' : ''), 'data-c': 'units' }, num(d.units, 2))));
-      tr.appendChild(el('td', { class: 'num' }, el('span', { class: 'v', 'data-c': 'taxable' }, inr(d.taxable))));
-      tr.appendChild(el('td', { class: 'num' }, el('span', { class: 'v', 'data-c': 'total' }, inr(d.total))));
+      // UNITS (derived)
+      botGrid.appendChild(field('Units',
+        el('span', { class: 'pi-derived ' + (d.units === 1 ? 'muted' : ''), 'data-c': 'units' }, num(d.units, 2))));
 
-      const rm = el('button', { class: 'pi-remove', title: 'Remove line',
-        onclick: () => { state.lines.splice(i, 1); renderLines(); renderTotals(); } }, '×');
-      tr.appendChild(el('td', {}, rm));
+      // TAXABLE (derived)
+      botGrid.appendChild(field('Taxable',
+        el('span', { class: 'pi-derived', 'data-c': 'taxable' }, inr(d.taxable))));
 
-      tbody.appendChild(tr);
+      // TOTAL inc GST (derived)
+      botGrid.appendChild(field('Total inc GST',
+        el('span', { class: 'pi-derived', 'data-c': 'total' }, inr(d.total))));
+
+      bot.appendChild(botGrid);
+      card.appendChild(bot);
+
+      host.appendChild(card);
     });
 
     $('pi-line-count').textContent = state.lines.length;
   }
 
-  function refreshDerivedRow(tr, line){
+  function refreshDerivedCard(card, line){
     const d = derived(line);
     const set = (key, val) => {
-      const cell = tr.querySelector('[data-c="' + key + '"]');
+      const cell = card.querySelector('[data-c="' + key + '"]');
       if (cell) cell.textContent = val;
     };
     set('units', num(d.units, 2));
@@ -2981,8 +3002,8 @@
       .filter(el => !el.disabled && el.offsetParent !== null && el.type !== 'hidden');
   }
   function focusFirstOfLastLine(){
-    const rows = document.querySelectorAll('#pi-lines tr.pi-row');
-    const last = rows[rows.length - 1];
+    const cards = document.querySelectorAll('#pi-lines .pi-line-card');
+    const last = cards[cards.length - 1];
     if (!last) return;
     const first = last.querySelector('input:not([disabled]), select:not([disabled])');
     if (first){ first.focus(); if (first.select) try { first.select(); } catch(e){} }
