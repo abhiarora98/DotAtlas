@@ -1262,6 +1262,9 @@
     <div class="nav-item" data-page="create-pi">
       <span class="glyph">+</span><span>Create PI</span><span class="badge live">NEW</span>
     </div>
+    <div class="nav-item" data-page="pi-history">
+      <span class="glyph">≡</span><span>PI History</span>
+    </div>
 
     <div class="rail-section">Sense</div>
     <div class="nav-item" data-page="cash">
@@ -1985,6 +1988,37 @@
       </div>
     </section>
 
+    <!-- PI HISTORY PAGE -->
+    <section class="page" data-page="pi-history" hidden>
+      <div class="hero-h">
+        <div>
+          <div class="eb"><span class="live-dot"></span>PI History · <span id="ph-status">syncing…</span></div>
+          <h1>Every <span class="em">PI</span> you've <span class="accent">created</span>.</h1>
+        </div>
+        <div class="when" id="ph-when">
+          PIS · <b id="ph-stat-pis">—</b><br/>LINES · <b id="ph-stat-lines">—</b><br/>VALUE · <b id="ph-stat-value">—</b>
+        </div>
+      </div>
+      <div class="range-bar">
+        <div class="range" id="ph-filter-bar">
+          <input type="text" id="ph-search" class="pi-input" placeholder="Search REF# or party…" style="min-width: 280px;" />
+        </div>
+        <div class="actions">
+          <button class="chip" id="ph-refresh">↻ REFRESH</button>
+        </div>
+      </div>
+      <div class="card" style="margin-top:14px;">
+        <div class="card-h">
+          <div class="t"><span class="ic">≡</span><h3>All PIs</h3><span class="sub">NEWEST FIRST</span></div>
+        </div>
+        <div class="card-b" style="padding-top:6px;">
+          <div id="ph-list-host">
+            <div class="mute" style="padding:20px; text-align:center; color:var(--text-3);">Loading…</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- CASH PAGE -->
     <section class="page" data-page="cash" hidden>
       <div class="hero-h">
@@ -2162,11 +2196,13 @@
   // ── Routing ──────────────────────────────────────────────
   const pageTitleMap = {
     today:'Today', orders:'Orders', parties:'Parties', inventory:'Inventory',
-    dispatch:'Dispatch', cash:'Cash & finance', receivables:'Receivables',
+    dispatch:'Dispatch', 'create-pi':'Create PI', 'pi-history':'PI History',
+    cash:'Cash & finance', receivables:'Receivables',
     intel:'Intelligence', reports:'Reports', workflows:'Workflows', settings:'Settings'
   };
   const sectionMap = {
     today:'Operate', orders:'Operate', parties:'Operate', inventory:'Operate', dispatch:'Operate',
+    'create-pi':'Operate', 'pi-history':'Operate',
     cash:'Sense', receivables:'Sense', intel:'Sense', reports:'Sense',
     workflows:'Studio', settings:'Studio'
   };
@@ -2182,6 +2218,9 @@
     }
     history.replaceState(null, '', '#'+p);
     window.scrollTo({top:0, behavior:'instant'});
+    if (p === 'pi-history' && typeof window.atlasLoadHistory === 'function') {
+      window.atlasLoadHistory();
+    }
   }
   document.querySelectorAll('.nav-item[data-page]').forEach(n => {
     n.style.cursor = 'pointer';
@@ -3331,6 +3370,196 @@
   } else {
     init();
   }
+})();
+</script>
+
+<style>
+  /* PI History styles */
+  .ph-row { cursor: pointer; transition: background 200ms var(--ease); }
+  .ph-row:hover { background: rgba(255,255,255,0.018); }
+  body[data-mode="light"] .ph-row:hover { background: var(--surface-2); }
+  .ph-row .chev { display: inline-block; transition: transform 200ms var(--ease); color: var(--text-3); }
+  .ph-row.open .chev { transform: rotate(90deg); color: var(--emerald); }
+  .ph-details td { padding: 0 !important; background: rgba(255,255,255,0.012); }
+  body[data-mode="light"] .ph-details td { background: var(--surface-2); }
+  .ph-details-inner { padding: 14px 22px 18px; }
+  .ph-details-inner table { width: 100%; border-collapse: collapse; }
+  .ph-details-inner th { text-align: left; padding: 6px 10px; font-family: var(--fm); font-size: 10.5px; letter-spacing: 0.06em; color: var(--text-3); border-bottom: 1px solid var(--line); }
+  .ph-details-inner td { padding: 8px 10px; font-size: 12.5px; color: var(--text); border-bottom: 1px solid var(--line); }
+  .ph-details-inner tr:last-child td { border-bottom: 0; }
+  .ph-details-inner .num { font-family: var(--fd); font-variant-numeric: tabular-nums; text-align: right; }
+  .ph-details-inner th.num { text-align: right; }
+  .ph-empty { padding: 40px 20px; text-align: center; color: var(--text-3); font-size: 13px; }
+  #ph-search { background: var(--surface); border: 1px solid var(--line); color: var(--text); padding: 8px 12px; border-radius: 6px; font-size: 13px; }
+  #ph-search:focus { outline: none; border-color: var(--emerald); }
+</style>
+
+<script>
+(function(){
+  const inr = n => '₹' + Math.round(Number(n) || 0).toLocaleString('en-IN');
+  const compact = n => {
+    n = Number(n) || 0;
+    if (n >= 1e7) return (n/1e7).toFixed(2).replace(/\.?0+$/, '') + ' Cr';
+    if (n >= 1e5) return (n/1e5).toFixed(2).replace(/\.?0+$/, '') + ' L';
+    if (n >= 1e3) return (n/1e3).toFixed(1).replace(/\.?0+$/, '') + ' K';
+    return String(n);
+  };
+  const escapeHtml = s => String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const initials = name => {
+    const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return '··';
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
+  };
+  const avClass = name => {
+    const code = String(name || '').charCodeAt(0) || 0;
+    return ['e','b','a'][code % 3];
+  };
+
+  let cachedPis = null;
+  let lastFetchAt = 0;
+
+  function endpoint(){
+    return (window.ATLAS_APPS_SCRIPT_URL ||
+            localStorage.getItem('atlas-apps-script-url') || '/api/pi').trim();
+  }
+
+  async function fetchHistory(){
+    const url = endpoint();
+    const res = await fetch(url, {
+      method: 'POST',
+      body: JSON.stringify({ kind: 'list' }),
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    });
+    const j = await res.json();
+    if (!j.ok) throw new Error(j.error || 'list failed');
+    return j.pis || [];
+  }
+
+  function setStatus(text){
+    const el = document.getElementById('ph-status');
+    if (el) el.textContent = text;
+  }
+
+  function renderStats(pis){
+    const totalPis = pis.length;
+    const totalLines = pis.reduce((a, p) => a + (p.lines || 0), 0);
+    const totalValue = pis.reduce((a, p) => a + (p.totalIncGst || 0), 0);
+    document.getElementById('ph-stat-pis').textContent = totalPis;
+    document.getElementById('ph-stat-lines').textContent = totalLines;
+    document.getElementById('ph-stat-value').textContent = '₹' + compact(totalValue);
+  }
+
+  function renderList(pis){
+    const host = document.getElementById('ph-list-host');
+    if (!pis.length){
+      host.innerHTML = '<div class="ph-empty">No PIs yet. Create one from the <b>Create PI</b> tab.</div>';
+      return;
+    }
+    const rows = pis.map((p, idx) => {
+      const av = avClass(p.party);
+      const inits = initials(p.party);
+      const linesTxt = p.lines + (p.lines === 1 ? ' line' : ' lines');
+      const itemRows = (p.items || []).map(it => {
+        const dims = [it.width, it.length].filter(Boolean).join(' × ');
+        const desc = [it.category, it.model, it.backing, it.colour].filter(Boolean).join(' · ');
+        return '<tr>' +
+          '<td>' + escapeHtml(it.no) + '</td>' +
+          '<td>' + escapeHtml(desc || '—') + '</td>' +
+          '<td>' + escapeHtml(dims || '—') + '</td>' +
+          '<td class="num">' + escapeHtml(it.qty) + '</td>' +
+          '<td class="num">' + (it.billRate ? inr(it.billRate) : '—') + '</td>' +
+          '<td class="num">' + inr(it.total) + '</td>' +
+          '<td>' + escapeHtml(it.dispatchStatus || 'Pending') + '</td>' +
+        '</tr>';
+      }).join('');
+      return (
+        '<tr class="ph-row" data-idx="' + idx + '">' +
+          '<td class="mute" style="font-family:var(--fm);"><span class="chev">›</span> ' + escapeHtml(p.ref) + '</td>' +
+          '<td><div class="name"><div class="av-sq ' + av + '">' + escapeHtml(inits) + '</div>' +
+            '<div class="nm-c"><div class="pri">' + escapeHtml(p.party) + '</div>' +
+            '<div class="sec">' + escapeHtml((p.partyCode || '') + (p.state ? ' · ' + p.state : '')) + '</div></div></div></td>' +
+          '<td class="mute">' + escapeHtml(p.date || '—') + '</td>' +
+          '<td class="mute">' + escapeHtml(p.poc || '—') + '</td>' +
+          '<td class="mute r">' + linesTxt + '</td>' +
+          '<td class="num r"><span class="cur">₹</span>' + compact(p.totalIncGst) + '</td>' +
+        '</tr>' +
+        '<tr class="ph-details" data-idx="' + idx + '" hidden><td colspan="6"><div class="ph-details-inner">' +
+          '<table><thead><tr>' +
+            '<th>No.</th><th>Description</th><th>Dims</th>' +
+            '<th class="num">Qty</th><th class="num">Bill Rate</th><th class="num">Total (inc GST)</th>' +
+            '<th>Status</th>' +
+          '</tr></thead><tbody>' + itemRows + '</tbody></table>' +
+        '</div></td></tr>'
+      );
+    }).join('');
+
+    host.innerHTML =
+      '<table class="table">' +
+        '<thead><tr>' +
+          '<th>REF#</th><th>Party</th><th>Date</th><th>POC</th>' +
+          '<th class="r">Lines</th><th class="r">Total</th>' +
+        '</tr></thead>' +
+        '<tbody>' + rows + '</tbody>' +
+      '</table>';
+
+    host.querySelectorAll('tr.ph-row').forEach(tr => {
+      tr.addEventListener('click', () => {
+        const idx = tr.getAttribute('data-idx');
+        const det = host.querySelector('tr.ph-details[data-idx="' + idx + '"]');
+        const open = !det.hidden;
+        det.hidden = open;
+        tr.classList.toggle('open', !open);
+      });
+    });
+  }
+
+  function applyFilter(){
+    if (!cachedPis) return;
+    const q = (document.getElementById('ph-search').value || '').trim().toLowerCase();
+    if (!q) { renderList(cachedPis); return; }
+    const filtered = cachedPis.filter(p =>
+      (p.ref || '').toLowerCase().includes(q) ||
+      (p.party || '').toLowerCase().includes(q) ||
+      (p.partyCode || '').toLowerCase().includes(q)
+    );
+    renderList(filtered);
+  }
+
+  window.atlasLoadHistory = async function(force){
+    // Cache for 30 sec to avoid re-fetching on every tab switch.
+    if (!force && cachedPis && (Date.now() - lastFetchAt) < 30000) {
+      renderStats(cachedPis);
+      applyFilter();
+      return;
+    }
+    setStatus('syncing…');
+    document.getElementById('ph-list-host').innerHTML =
+      '<div class="ph-empty">Loading…</div>';
+    try {
+      const pis = await fetchHistory();
+      cachedPis = pis;
+      lastFetchAt = Date.now();
+      setStatus(pis.length + ' PI' + (pis.length === 1 ? '' : 's'));
+      renderStats(pis);
+      applyFilter();
+    } catch (err) {
+      console.error('[atlas] history fetch failed:', err);
+      setStatus('failed');
+      document.getElementById('ph-list-host').innerHTML =
+        '<div class="ph-empty">Failed to load: ' + escapeHtml(err.message || err) + '</div>';
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const s = document.getElementById('ph-search');
+    if (s) s.addEventListener('input', applyFilter);
+    const r = document.getElementById('ph-refresh');
+    if (r) r.addEventListener('click', () => window.atlasLoadHistory(true));
+    // If user lands directly on #pi-history, fetch immediately.
+    if (location.hash === '#pi-history') window.atlasLoadHistory();
+  });
 })();
 </script>
 

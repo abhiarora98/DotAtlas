@@ -65,6 +65,7 @@ module.exports = async (req, res) => {
 
     if (kind === 'pi')    return await handlePi(sheets, spreadsheetId, payload, res);
     if (kind === 'party') return await handleParty(sheets, spreadsheetId, payload, res);
+    if (kind === 'list')  return await handleList(sheets, spreadsheetId, payload, res);
 
     return res.status(400).json({ ok: false, error: 'Unknown kind: ' + kind });
   } catch (err) {
@@ -173,6 +174,71 @@ async function handlePi(sheets, spreadsheetId, payload, res) {
     firstNo: nextNo,
     ref: payload.header && payload.header.ref,
   });
+}
+
+async function handleList(sheets, spreadsheetId, _payload, res) {
+  const resp = await sheets.spreadsheets.values.get({
+    spreadsheetId,
+    range: PI_SHEET + '!A:AE',
+  });
+  const all = resp.data.values || [];
+  if (all.length === 0) return res.status(200).json({ ok: true, pis: [] });
+
+  // Skip the header row if column A of row 0 isn't a number (i.e. it's "No.")
+  const first = all[0] || [];
+  const startIdx = (isNaN(Number(first[0])) || first[0] === '') ? 1 : 0;
+  const dataRows = all.slice(startIdx);
+
+  // Group rows by REF# (column E, index 4). A single PI = one REF# spanning N rows.
+  const groups = new Map();
+  for (const r of dataRows) {
+    const ref = (r[4] || '').toString().trim();
+    if (!ref) continue;
+    if (!groups.has(ref)) groups.set(ref, []);
+    groups.get(ref).push(r);
+  }
+
+  const pis = [];
+  for (const [ref, items] of groups) {
+    const f = items[0];
+    pis.push({
+      ref,
+      partyCode: f[1] || '',
+      party:     f[2] || '',
+      poc:       f[3] || '',
+      date:      f[5] || '',
+      state:     f[29] || '',
+      referenceId: f[30] || '',
+      lines:     items.length,
+      totalQty:  items.reduce((a, r) => a + (Number(r[7])  || 0), 0),
+      totalIncGst: items.reduce((a, r) => a + (Number(r[20]) || 0), 0),
+      firstNo: Number(f[0]) || 0,
+      items: items.map(r => ({
+        no:         r[0]  || '',
+        oNo:        r[6]  || '',
+        qty:        Number(r[7])  || 0,
+        category:   r[8]  || '',
+        model:      r[9]  || '',
+        backing:    r[10] || '',
+        colour:     r[11] || '',
+        width:      r[12] || '',
+        length:     r[13] || '',
+        units:      Number(r[14]) || 0,
+        actualRate: Number(r[15]) || 0,
+        billRate:   Number(r[16]) || 0,
+        freight:    Number(r[17]) || 0,
+        td:         Number(r[18]) || 0,
+        taxable:    Number(r[19]) || 0,
+        total:      Number(r[20]) || 0,
+        dispatchStatus: r[27] || '',
+      })),
+    });
+  }
+
+  // Newest first by the No. of the PI's first line (column A is sequential).
+  pis.sort((a, b) => b.firstNo - a.firstNo);
+
+  return res.status(200).json({ ok: true, count: pis.length, pis });
 }
 
 async function handleParty(sheets, spreadsheetId, payload, res) {
