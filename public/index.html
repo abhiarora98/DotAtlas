@@ -1992,22 +1992,16 @@
         </div>
       </div>
       <div class="range-bar">
-        <div class="range" id="ph-filter-bar">
-          <input type="text" id="ph-search" class="pi-input" placeholder="Search REF# or party…" style="min-width: 280px;" />
+        <div class="range" id="ph-search-row">
+          <input type="text" id="ph-search" class="pi-input" placeholder="Search by REF#, party, or category…" />
         </div>
         <div class="actions">
           <button class="chip" id="ph-refresh">↻ REFRESH</button>
         </div>
       </div>
-      <div class="card" style="margin-top:14px;">
-        <div class="card-h">
-          <div class="t"><span class="ic">≡</span><h3>All PIs</h3><span class="sub">NEWEST FIRST</span></div>
-        </div>
-        <div class="card-b" style="padding-top:6px;">
-          <div id="ph-list-host">
-            <div class="mute" style="padding:20px; text-align:center; color:var(--text-3);">Loading…</div>
-          </div>
-        </div>
+      <div class="ph-filters" id="ph-cat-filters"></div>
+      <div id="ph-list-host" style="margin-top: 6px;">
+        <div class="ph-empty">Loading…</div>
       </div>
     </section>
 
@@ -3395,32 +3389,147 @@
 </script>
 
 <style>
-  /* PI History styles */
-  .ph-row { cursor: pointer; transition: background 200ms var(--ease); }
-  .ph-row:hover { background: rgba(255,255,255,0.018); }
-  body[data-mode="light"] .ph-row:hover { background: var(--surface-2); }
-  .ph-row .chev { display: inline-block; transition: transform 200ms var(--ease); color: var(--text-3); }
-  .ph-row.open .chev { transform: rotate(90deg); color: var(--emerald); }
-  .ph-details td { padding: 0 !important; background: rgba(255,255,255,0.012); }
-  body[data-mode="light"] .ph-details td { background: var(--surface-2); }
-  .ph-details-inner { padding: 14px 22px 18px; }
-  .ph-details-inner table { width: 100%; border-collapse: collapse; }
-  .ph-details-inner th { text-align: left; padding: 6px 10px; font-family: var(--fm); font-size: 10.5px; letter-spacing: 0.06em; color: var(--text-3); border-bottom: 1px solid var(--line); }
-  .ph-details-inner td { padding: 8px 10px; font-size: 12.5px; color: var(--text); border-bottom: 1px solid var(--line); }
-  .ph-details-inner tr:last-child td { border-bottom: 0; }
-  .ph-details-inner .num { font-family: var(--fd); font-variant-numeric: tabular-nums; text-align: right; }
-  .ph-details-inner th.num { text-align: right; }
+  /* PI History */
   .ph-empty { padding: 40px 20px; text-align: center; color: var(--text-3); font-size: 13px; }
-  #ph-search { background: var(--surface); border: 1px solid var(--line); color: var(--text); padding: 8px 12px; border-radius: 6px; font-size: 13px; }
+  #ph-search { background: var(--surface); border: 1px solid var(--line); color: var(--text); padding: 8px 12px; border-radius: 6px; font-size: 13px; min-width: 280px; }
   #ph-search:focus { outline: none; border-color: var(--emerald); }
+
+  /* category filter pill bar (at top of page) */
+  .ph-filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 6px; }
+  .ph-filter-pill {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 5px 11px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--surface);
+    font-family: var(--fm); font-size: 11px; letter-spacing: 0.04em;
+    color: var(--text-2); cursor: pointer; transition: all 180ms var(--ease);
+    white-space: nowrap;
+  }
+  .ph-filter-pill:hover { color: var(--text); border-color: var(--text-3); }
+  .ph-filter-pill.active { color: var(--text); background: var(--surface-2); border-color: var(--text-3); }
+  .ph-filter-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-3); }
+  .ph-filter-pill .count { color: var(--text-3); font-variant-numeric: tabular-nums; }
+
+  /* section per status group */
+  .ph-section { border: 1px solid var(--line); border-radius: 10px; margin-top: 16px; overflow: hidden; background: var(--surface); }
+  .ph-section-h {
+    display: flex; align-items: baseline; gap: 12px;
+    padding: 14px 18px;
+    font-family: var(--fd); font-size: 13.5px; color: var(--text);
+    border-bottom: 1px solid var(--line);
+  }
+  .ph-section-h .ph-section-sub { color: var(--text-3); font-size: 12px; }
+  .ph-section-h .ph-section-bar {
+    flex: 1; height: 3px; border-radius: 2px; background: transparent;
+  }
+
+  /* main table */
+  table.ph-table { width: 100%; border-collapse: collapse; }
+  table.ph-table thead th {
+    text-align: left;
+    font-family: var(--fm); font-size: 10px; letter-spacing: 0.10em;
+    color: var(--text-3); text-transform: uppercase; font-weight: 500;
+    padding: 10px 14px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--line);
+  }
+  table.ph-table thead th.r { text-align: right; }
+  table.ph-table tbody td {
+    padding: 13px 14px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+    font-size: 13px;
+    color: var(--text);
+  }
+  table.ph-table tbody td.r { text-align: right; }
+  table.ph-table tbody tr.ph-row { cursor: pointer; transition: background 180ms var(--ease); }
+  table.ph-table tbody tr.ph-row:hover { background: rgba(124,168,255,0.04); }
+  body[data-mode="light"] table.ph-table tbody tr.ph-row:hover { background: var(--surface-2); }
+  table.ph-table tbody tr.ph-row .chev { display: inline-block; color: var(--text-3); transition: transform 180ms var(--ease); width: 14px; }
+  table.ph-table tbody tr.ph-row.open .chev { transform: rotate(90deg); color: var(--emerald); }
+  table.ph-table tbody tr.ph-row.open { background: rgba(78,222,163,0.03); }
+  body[data-mode="light"] table.ph-table tbody tr.ph-row.open { background: rgba(78,222,163,0.06); }
+  table.ph-table tbody tr:last-child > td { border-bottom: 0; }
+
+  .ph-date { font-family: var(--fd); font-variant-numeric: tabular-nums; color: var(--text-2); }
+  .ph-days {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 3px 10px; border-radius: 999px;
+    font-family: var(--fm); font-size: 11px; letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+  .ph-days.fresh { background: var(--emerald-soft); color: var(--emerald); }
+  .ph-days.aging { background: var(--amber-soft); color: var(--amber); }
+  .ph-days.old { background: var(--rose-soft); color: var(--rose); }
+  .ph-party-name { font-weight: 500; letter-spacing: 0.01em; text-transform: uppercase; font-size: 12.5px; color: var(--text); }
+  .ph-cats { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+  .ph-cat-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 9px; border-radius: 999px;
+    font-size: 11px; font-family: var(--fm); letter-spacing: 0.03em;
+    background: var(--surface-2); color: var(--text-2); border: 1px solid var(--line);
+  }
+  .ph-cat-pill .cdot { width: 6px; height: 6px; border-radius: 50%; }
+  .ph-cat-pill.green  { color: var(--emerald); border-color: rgba(78,222,163,0.25); background: var(--emerald-soft); }
+  .ph-cat-pill.green  .cdot { background: var(--emerald); }
+  .ph-cat-pill.blue   { color: var(--blue);    border-color: rgba(124,168,255,0.25); background: var(--blue-soft); }
+  .ph-cat-pill.blue   .cdot { background: var(--blue); }
+  .ph-cat-pill.amber  { color: var(--amber);   border-color: rgba(255,176,121,0.30); background: var(--amber-soft); }
+  .ph-cat-pill.amber  .cdot { background: var(--amber); }
+  .ph-cat-pill.purple { color: #b78bff;        border-color: rgba(183,139,255,0.30); background: rgba(183,139,255,0.10); }
+  .ph-cat-pill.purple .cdot { background: #b78bff; }
+  .ph-cat-pill.gray   { color: var(--text-2); }
+  .ph-cat-pill.gray   .cdot { background: var(--text-3); }
+
+  .ph-poc {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 32px; padding: 3px 8px;
+    border-radius: 6px;
+    background: var(--blue-soft); color: var(--blue);
+    font-family: var(--fm); font-size: 11px; letter-spacing: 0.06em; font-weight: 500;
+  }
+  .ph-value { font-family: var(--fd); font-variant-numeric: tabular-nums; font-weight: 500; color: var(--text); }
+  .ph-value .cur { color: var(--text-3); margin-right: 2px; }
+
+  .ph-status-cell { display: flex; align-items: center; gap: 8px; }
   .ph-action {
     background: var(--surface); border: 1px solid var(--line); color: var(--text-2);
-    padding: 5px 10px; border-radius: 5px; font-family: var(--fm); font-size: 10.5px;
+    padding: 4px 10px; border-radius: 5px; font-family: var(--fm); font-size: 10.5px;
     letter-spacing: 0.06em; cursor: pointer; transition: all 180ms var(--ease);
     white-space: nowrap;
   }
   .ph-action:hover:not(:disabled) { border-color: var(--emerald); color: var(--emerald); background: var(--emerald-soft); }
   .ph-action:disabled { opacity: 0.5; cursor: wait; }
+
+  /* expanded line items */
+  tr.ph-details > td { padding: 0 !important; background: var(--surface-2) !important; border-bottom: 1px solid var(--line); }
+  body[data-mode="light"] tr.ph-details > td { background: var(--surface-2) !important; }
+  .ph-details-inner { padding: 14px 22px 18px 36px; }
+  .ph-detail-meta {
+    display: flex; gap: 14px; align-items: baseline;
+    font-family: var(--fm); font-size: 10.5px; letter-spacing: 0.10em;
+    color: var(--text-3); text-transform: uppercase;
+    padding-bottom: 12px;
+  }
+  .ph-detail-meta b { color: var(--text); font-family: var(--fd); font-variant-numeric: tabular-nums; }
+  table.ph-items { width: 100%; border-collapse: collapse; }
+  table.ph-items th {
+    text-align: left; padding: 8px 12px;
+    font-family: var(--fm); font-size: 10px; letter-spacing: 0.08em;
+    color: var(--text-3); text-transform: uppercase;
+    border-bottom: 1px solid var(--line);
+  }
+  table.ph-items th.r { text-align: right; }
+  table.ph-items td {
+    padding: 9px 12px;
+    font-size: 12.5px;
+    color: var(--text);
+    border-bottom: 1px solid var(--line);
+  }
+  table.ph-items td.r { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--fd); }
+  table.ph-items tr:last-child td { border-bottom: 0; }
+  table.ph-items td.ph-it-idx { color: var(--text-3); font-family: var(--fm); font-size: 11px; width: 28px; }
+  table.ph-items td.ph-it-model { font-weight: 500; }
+  table.ph-items td.ph-it-mute  { color: var(--text-2); }
 </style>
 
 <script>
@@ -3471,6 +3580,54 @@
     if (el) el.textContent = text;
   }
 
+  // ---- helpers ----
+  function daysSince(s){
+    if (!s) return null;
+    const str = String(s).trim();
+    let d;
+    if (/^\d{4}-\d{1,2}-\d{1,2}/.test(str)) d = new Date(str);
+    else if (/^\d{1,2}\/\d{1,2}\/\d{4}/.test(str)){
+      const [dd, mm, yyyy] = str.split('/');
+      d = new Date(Number(yyyy), Number(mm)-1, Number(dd));
+    } else d = new Date(str);
+    if (!d || isNaN(d.getTime())) return null;
+    return Math.floor((Date.now() - d.getTime()) / 86400000);
+  }
+  function fmtDate(s){
+    if (!s) return '—';
+    const str = String(s).trim();
+    if (/^\d{4}-\d{1,2}-\d{1,2}/.test(str)){
+      const [y, m, d] = str.slice(0, 10).split('-');
+      return d.padStart(2,'0') + '/' + m.padStart(2,'0') + '/' + y;
+    }
+    return str;
+  }
+  function daysClass(d){ if (d == null) return 'aging'; if (d <= 7) return 'fresh'; if (d <= 30) return 'aging'; return 'old'; }
+  function catColor(cat){
+    const c = String(cat || '').toLowerCase();
+    if (/grass|turf|rolls/.test(c))         return 'green';
+    if (/tefno/.test(c))                    return 'purple';
+    if (/car/.test(c))                      return 'amber';
+    if (/cushion|footmat|foot.?mat/.test(c)) return 'blue';
+    return 'gray';
+  }
+  function pocChip(poc){
+    const s = (poc || '').trim();
+    if (!s) return '<span class="ph-poc">—</span>';
+    const inits = s.length <= 3 ? s.toUpperCase() : s.split(/\s+/).map(w => w[0]).join('').slice(0,3).toUpperCase();
+    return '<span class="ph-poc">' + escapeHtml(inits) + '</span>';
+  }
+  function statusPillCls(status){
+    const s = String(status || '').trim();
+    if (/^ready/i.test(s))      return 'ok';
+    if (/^dispatched$/i.test(s)) return 'info';
+    if (/^pending$/i.test(s))   return 'warn';
+    return 'muted';
+  }
+
+  // active category filter (null = All)
+  let activeCat = null;
+
   function renderStats(pis){
     const totalPis = pis.length;
     const totalLines = pis.reduce((a, p) => a + (p.lines || 0), 0);
@@ -3480,78 +3637,156 @@
     document.getElementById('ph-stat-value').textContent = '₹' + compact(totalValue);
   }
 
+  function renderCatFilters(pis){
+    // Count distinct PIs per category. A PI containing category C is counted
+    // once for C even if it has multiple lines of C.
+    const counts = new Map();
+    pis.forEach(p => {
+      const uniq = new Set((p.items || []).map(it => (it.category || '').trim()).filter(Boolean));
+      uniq.forEach(c => counts.set(c, (counts.get(c) || 0) + 1));
+    });
+    const entries = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+    const host = document.getElementById('ph-cat-filters');
+    const allCls = activeCat == null ? 'active' : '';
+    const allPill = '<span class="ph-filter-pill ' + allCls + '" data-cat="">All <span class="count">' + pis.length + '</span></span>';
+    const pills = entries.map(([cat, n]) => {
+      const color = catColor(cat);
+      const active = activeCat === cat ? ' active' : '';
+      return '<span class="ph-filter-pill ' + active + '" data-cat="' + escapeHtml(cat) + '">' +
+        '<span class="dot" style="background:' + ({green:'#4ede9f',blue:'#7ca8ff',amber:'#ffb079',purple:'#b78bff',gray:'#888'}[color]) + '"></span>' +
+        escapeHtml(cat) + ' <span class="count">' + n + '</span></span>';
+    }).join('');
+    host.innerHTML = allPill + pills;
+    host.querySelectorAll('.ph-filter-pill').forEach(p => {
+      p.addEventListener('click', () => {
+        const c = p.getAttribute('data-cat');
+        activeCat = c || null;
+        renderCatFilters(cachedPis || []);
+        applyFilter();
+      });
+    });
+  }
+
   function renderList(pis){
     const host = document.getElementById('ph-list-host');
     if (!pis.length){
-      host.innerHTML = '<div class="ph-empty">No PIs yet. Create one from the <b>Create PI</b> tab.</div>';
+      host.innerHTML = '<div class="ph-empty">No PIs match. Try clearing filters or creating one from <b>Create PI</b>.</div>';
       return;
     }
-    const rows = pis.map((p, idx) => {
-      const av = avClass(p.party);
-      const inits = initials(p.party);
-      const linesTxt = p.lines + (p.lines === 1 ? ' line' : ' lines');
-      const status = (p.status || 'Pending').trim();
-      const isR2D = /^ready/i.test(status);
-      const isPending = /^pending$/i.test(status);
-      const isDispatched = /^dispatched$/i.test(status);
-      const pillCls = isR2D ? 'ok' : isDispatched ? 'info' : isPending ? 'warn' : 'muted';
-      const nextStatus = isPending ? 'Ready to Dispatch' : (isR2D ? 'Pending' : '');
-      const nextLabel = isPending ? 'Mark R2D →' : (isR2D ? '↶ Mark Pending' : '');
-      const actionBtn = nextStatus
-        ? '<button class="ph-action" data-ref="' + escapeHtml(p.ref) + '" data-next="' + escapeHtml(nextStatus) + '">' + escapeHtml(nextLabel) + '</button>'
-        : '';
-      const itemRows = (p.items || []).map(it => {
-        const dims = [it.width, it.length].filter(Boolean).join(' × ');
-        const desc = [it.category, it.model, it.backing, it.colour].filter(Boolean).join(' · ');
-        return '<tr>' +
-          '<td>' + escapeHtml(it.no) + '</td>' +
-          '<td>' + escapeHtml(desc || '—') + '</td>' +
-          '<td>' + escapeHtml(dims || '—') + '</td>' +
-          '<td class="num">' + escapeHtml(it.qty) + '</td>' +
-          '<td class="num">' + (it.billRate ? inr(it.billRate) : '—') + '</td>' +
-          '<td class="num">' + inr(it.total) + '</td>' +
-          '<td>' + escapeHtml(it.dispatchStatus || 'Pending') + '</td>' +
-        '</tr>';
-      }).join('');
+    // Group by status. Order: Pending, Ready to Dispatch, Dispatched, then anything else.
+    const order = ['Pending', 'Ready to Dispatch', 'Dispatched'];
+    const groups = new Map();
+    pis.forEach(p => {
+      const s = (p.status || 'Pending').trim();
+      if (!groups.has(s)) groups.set(s, []);
+      groups.get(s).push(p);
+    });
+    const keys = [...groups.keys()].sort((a, b) => {
+      const ai = order.indexOf(a), bi = order.indexOf(b);
+      return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+    });
+
+    const sections = keys.map(status => {
+      const list = groups.get(status);
+      const total = list.reduce((a, p) => a + (p.totalIncGst || 0), 0);
+      const cls = statusPillCls(status);
+      const barColor = cls === 'ok' ? 'var(--emerald)' : cls === 'warn' ? 'var(--amber)' : cls === 'info' ? 'var(--blue)' : 'var(--text-3)';
+      const rows = list.map((p, idx) => renderRow(p, status + ':' + idx)).join('');
       return (
-        '<tr class="ph-row" data-idx="' + idx + '">' +
-          '<td class="mute" style="font-family:var(--fm);"><span class="chev">›</span> ' + escapeHtml(p.ref) + '</td>' +
-          '<td><div class="name"><div class="av-sq ' + av + '">' + escapeHtml(inits) + '</div>' +
-            '<div class="nm-c"><div class="pri">' + escapeHtml(p.party) + '</div>' +
-            '<div class="sec">' + escapeHtml((p.partyCode || '') + (p.state ? ' · ' + p.state : '')) + '</div></div></div></td>' +
-          '<td class="mute">' + escapeHtml(p.date || '—') + '</td>' +
-          '<td class="mute">' + escapeHtml(p.poc || '—') + '</td>' +
-          '<td class="mute r">' + linesTxt + '</td>' +
-          '<td class="num r"><span class="cur">₹</span>' + compact(p.totalIncGst) + '</td>' +
-          '<td><span class="pill-s ' + pillCls + '">' + escapeHtml(status) + '</span></td>' +
-          '<td class="r">' + actionBtn + '</td>' +
-        '</tr>' +
-        '<tr class="ph-details" data-idx="' + idx + '" hidden><td colspan="8"><div class="ph-details-inner">' +
-          '<table><thead><tr>' +
-            '<th>No.</th><th>Description</th><th>Dims</th>' +
-            '<th class="num">Qty</th><th class="num">Bill Rate</th><th class="num">Total (inc GST)</th>' +
-            '<th>Status</th>' +
-          '</tr></thead><tbody>' + itemRows + '</tbody></table>' +
-        '</div></td></tr>'
+        '<div class="ph-section">' +
+          '<div class="ph-section-h" style="border-left: 3px solid ' + barColor + ';">' +
+            '<b>' + escapeHtml(status) + '</b>' +
+            '<span class="ph-section-sub">(' + list.length + ')</span>' +
+            '<span class="ph-section-sub">· ₹' + compact(total) + '</span>' +
+          '</div>' +
+          '<table class="ph-table">' +
+            '<thead><tr>' +
+              '<th style="width:24px;"></th>' +
+              '<th>Date</th><th>Days</th><th>Party</th><th>Categories</th>' +
+              '<th class="r">Qty</th><th>POC</th><th class="r">Value</th>' +
+              '<th>Status</th>' +
+            '</tr></thead>' +
+            '<tbody>' + rows + '</tbody>' +
+          '</table>' +
+        '</div>'
       );
     }).join('');
 
-    host.innerHTML =
-      '<table class="table">' +
-        '<thead><tr>' +
-          '<th>REF#</th><th>Party</th><th>Date</th><th>POC</th>' +
-          '<th class="r">Lines</th><th class="r">Total</th>' +
-          '<th>Status</th><th></th>' +
-        '</tr></thead>' +
-        '<tbody>' + rows + '</tbody>' +
-      '</table>';
+    host.innerHTML = sections;
+    attachRowHandlers(host);
+  }
 
+  function renderRow(p, rowKey){
+    const d = daysSince(p.date);
+    const dCls = daysClass(d);
+    const dLabel = d == null ? '—' : (d + 'd');
+    const uniqCats = [...new Set((p.items || []).map(it => (it.category || '').trim()).filter(Boolean))];
+    const catPills = uniqCats.map(c => {
+      return '<span class="ph-cat-pill ' + catColor(c) + '"><span class="cdot"></span>' + escapeHtml(c) + '</span>';
+    }).join(' ');
+    const status = (p.status || 'Pending').trim();
+    const pillCls = statusPillCls(status);
+    const isR2D = /^ready/i.test(status);
+    const isPending = /^pending$/i.test(status);
+    const nextStatus = isPending ? 'Ready to Dispatch' : (isR2D ? 'Pending' : '');
+    const nextLabel = isPending ? 'Mark R2D' : (isR2D ? 'Mark Pending' : '');
+    const actionBtn = nextStatus
+      ? '<button class="ph-action" data-ref="' + escapeHtml(p.ref) + '" data-next="' + escapeHtml(nextStatus) + '">' + escapeHtml(nextLabel) + '</button>'
+      : '';
+
+    const itemRows = (p.items || []).map((it, i) => {
+      const dims = (it.width || '—');
+      const lens = (it.length || '—');
+      return '<tr>' +
+        '<td class="ph-it-idx">' + (i + 1) + '</td>' +
+        '<td class="ph-it-model">' + escapeHtml(it.model || '—') + '</td>' +
+        '<td class="ph-it-mute">' + escapeHtml(it.backing || '—') + '</td>' +
+        '<td>' + escapeHtml(it.colour || '—') + '</td>' +
+        '<td class="ph-it-mute">' + escapeHtml(dims) + '</td>' +
+        '<td class="ph-it-mute">' + escapeHtml(lens) + '</td>' +
+        '<td class="r"><b>' + escapeHtml(String(it.qty || 0)) + '</b></td>' +
+        '<td class="r">' + (it.billRate ? inr(it.billRate) : '—') + '</td>' +
+        '<td class="r"><b>' + inr(it.total) + '</b></td>' +
+      '</tr>';
+    }).join('');
+
+    return (
+      '<tr class="ph-row" data-key="' + escapeHtml(rowKey) + '">' +
+        '<td><span class="chev">›</span></td>' +
+        '<td class="ph-date">' + escapeHtml(fmtDate(p.date)) + '</td>' +
+        '<td><span class="ph-days ' + dCls + '">' + escapeHtml(dLabel) + '</span></td>' +
+        '<td><div class="ph-party-name">' + escapeHtml(p.party || '—') + '</div>' +
+            '<div style="color:var(--text-3); font-family:var(--fm); font-size:10.5px; margin-top:2px;">' +
+            escapeHtml((p.partyCode || '') + (p.ref ? ' · ' + p.ref : '')) + '</div></td>' +
+        '<td><div class="ph-cats">' + (catPills || '<span class="ph-cat-pill gray"><span class="cdot"></span>—</span>') + '</div></td>' +
+        '<td class="r"><b>' + (p.totalQty || 0) + '</b></td>' +
+        '<td>' + pocChip(p.poc) + '</td>' +
+        '<td class="r"><span class="ph-value"><span class="cur">₹</span>' + compact(p.totalIncGst) + '</span></td>' +
+        '<td><div class="ph-status-cell"><span class="pill-s ' + pillCls + '">' + escapeHtml(status) + '</span>' + actionBtn + '</div></td>' +
+      '</tr>' +
+      '<tr class="ph-details" data-key="' + escapeHtml(rowKey) + '" hidden><td colspan="9"><div class="ph-details-inner">' +
+        '<div class="ph-detail-meta">' +
+          '<span><b>' + (p.lines || 0) + '</b> line ' + (p.lines === 1 ? 'item' : 'items') + '</span>' +
+          '<span>· ₹<b>' + compact(p.totalIncGst) + '</b> total</span>' +
+          '<span>· PI Date <b>' + escapeHtml(fmtDate(p.date)) + '</b></span>' +
+          (p.referenceId ? '<span>· Ref ID <b>' + escapeHtml(p.referenceId) + '</b></span>' : '') +
+        '</div>' +
+        '<table class="ph-items"><thead><tr>' +
+          '<th>#</th><th>Model</th><th>Backing</th><th>Colour</th>' +
+          '<th>Width</th><th>Length</th>' +
+          '<th class="r">Qty</th><th class="r">Rate</th><th class="r">Value</th>' +
+        '</tr></thead><tbody>' + itemRows + '</tbody></table>' +
+      '</div></td></tr>'
+    );
+  }
+
+  function attachRowHandlers(host){
     host.querySelectorAll('tr.ph-row').forEach(tr => {
       tr.addEventListener('click', (ev) => {
-        // Don't toggle when clicking an action button inside the row.
         if (ev.target.closest('.ph-action')) return;
-        const idx = tr.getAttribute('data-idx');
-        const det = host.querySelector('tr.ph-details[data-idx="' + idx + '"]');
+        const key = tr.getAttribute('data-key');
+        const det = host.querySelector('tr.ph-details[data-key="' + key + '"]');
+        if (!det) return;
         const open = !det.hidden;
         det.hidden = open;
         tr.classList.toggle('open', !open);
@@ -3564,7 +3799,7 @@
         const next = btn.getAttribute('data-next');
         const orig = btn.textContent;
         btn.disabled = true;
-        btn.textContent = 'Updating…';
+        btn.textContent = '…';
         try {
           const res = await fetch(endpoint(), {
             method: 'POST',
@@ -3573,7 +3808,6 @@
           });
           const j = await res.json();
           if (!j.ok) throw new Error(j.error || 'update failed');
-          // Optimistic local update; then refresh from server next render.
           const target = (cachedPis || []).find(p => p.ref === ref);
           if (target) target.status = next;
           renderStats(cachedPis || []);
@@ -3591,19 +3825,26 @@
   function applyFilter(){
     if (!cachedPis) return;
     const q = (document.getElementById('ph-search').value || '').trim().toLowerCase();
-    if (!q) { renderList(cachedPis); return; }
-    const filtered = cachedPis.filter(p =>
-      (p.ref || '').toLowerCase().includes(q) ||
-      (p.party || '').toLowerCase().includes(q) ||
-      (p.partyCode || '').toLowerCase().includes(q)
-    );
-    renderList(filtered);
+    let pis = cachedPis;
+    if (activeCat){
+      pis = pis.filter(p => (p.items || []).some(it => (it.category || '').trim() === activeCat));
+    }
+    if (q){
+      pis = pis.filter(p =>
+        (p.ref || '').toLowerCase().includes(q) ||
+        (p.party || '').toLowerCase().includes(q) ||
+        (p.partyCode || '').toLowerCase().includes(q) ||
+        (p.items || []).some(it => (it.category || '').toLowerCase().includes(q))
+      );
+    }
+    renderList(pis);
   }
 
   window.atlasLoadHistory = async function(force){
     // Cache for 30 sec to avoid re-fetching on every tab switch.
     if (!force && cachedPis && (Date.now() - lastFetchAt) < 30000) {
       renderStats(cachedPis);
+      renderCatFilters(cachedPis);
       applyFilter();
       return;
     }
@@ -3616,6 +3857,7 @@
       lastFetchAt = Date.now();
       setStatus(pis.length + ' PI' + (pis.length === 1 ? '' : 's'));
       renderStats(pis);
+      renderCatFilters(pis);
       applyFilter();
     } catch (err) {
       console.error('[atlas] history fetch failed:', err);
