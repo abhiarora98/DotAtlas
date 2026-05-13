@@ -16,8 +16,10 @@
 
 const { google } = require('googleapis');
 
-const PI_SHEET     = 'Comfort_atlas';
-const PARTIES_SHEET = 'Parties';
+// Tab names inside the spreadsheet. Override via env vars when your tab is
+// named something other than the defaults.
+const PI_SHEET      = process.env.PI_SHEET_NAME      || 'Comfort_atlas';
+const PARTIES_SHEET = process.env.PARTIES_SHEET_NAME || 'Parties';
 
 module.exports = async (req, res) => {
   // Same-origin requests don't need CORS, but be permissive in case
