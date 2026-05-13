@@ -21,6 +21,15 @@ const { google } = require('googleapis');
 const PI_SHEET      = process.env.PI_SHEET_NAME      || 'Comfort_atlas';
 const PARTIES_SHEET = process.env.PARTIES_SHEET_NAME || 'Parties';
 
+const PI_HEADERS = [
+  'No.', 'Party Code', 'PARTY NAME', 'SALES POC', 'REF #', 'PI Date', 'ONo',
+  'Qty', 'Category', 'Model', 'Backing', 'Colour', 'Width', 'Length',
+  'Units (sq.ft./pc)', 'Actual Rate', 'Bill Rate (Custom)', 'Freight', 'TD',
+  'Taxable Value', 'Total (inc GST)', 'Dispatch Approved', 'Approval Date',
+  'Total Received', 'Invoice No.', 'Dispatch Date', 'Remarks',
+  'Dispatch Status', 'Month', 'STATE', 'REFRENCE ID',
+];
+
 module.exports = async (req, res) => {
   // Same-origin requests don't need CORS, but be permissive in case
   // someone runs the dashboard from a different host during testing.
@@ -104,6 +113,17 @@ async function handlePi(sheets, spreadsheetId, payload, res) {
     if (!isNaN(n) && n > maxNo) maxNo = n;
   }
   const nextNo = maxNo + 1;
+
+  // Self-bootstrap: if the sheet is empty, write the header row first so
+  // fresh deployments don't need any manual setup.
+  if (vals.length === 0) {
+    await sheets.spreadsheets.values.update({
+      spreadsheetId,
+      range: PI_SHEET + '!A1:AE1',
+      valueInputOption: 'USER_ENTERED',
+      requestBody: { values: [PI_HEADERS] },
+    });
+  }
 
   const values = rows.map((r, i) => [
     nextNo + i,                          // A  No.
