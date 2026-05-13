@@ -3392,6 +3392,14 @@
   .ph-empty { padding: 40px 20px; text-align: center; color: var(--text-3); font-size: 13px; }
   #ph-search { background: var(--surface); border: 1px solid var(--line); color: var(--text); padding: 8px 12px; border-radius: 6px; font-size: 13px; }
   #ph-search:focus { outline: none; border-color: var(--emerald); }
+  .ph-action {
+    background: var(--surface); border: 1px solid var(--line); color: var(--text-2);
+    padding: 5px 10px; border-radius: 5px; font-family: var(--fm); font-size: 10.5px;
+    letter-spacing: 0.06em; cursor: pointer; transition: all 180ms var(--ease);
+    white-space: nowrap;
+  }
+  .ph-action:hover:not(:disabled) { border-color: var(--emerald); color: var(--emerald); background: var(--emerald-soft); }
+  .ph-action:disabled { opacity: 0.5; cursor: wait; }
 </style>
 
 <script>
@@ -3461,6 +3469,16 @@
       const av = avClass(p.party);
       const inits = initials(p.party);
       const linesTxt = p.lines + (p.lines === 1 ? ' line' : ' lines');
+      const status = (p.status || 'Pending').trim();
+      const isR2D = /^ready/i.test(status);
+      const isPending = /^pending$/i.test(status);
+      const isDispatched = /^dispatched$/i.test(status);
+      const pillCls = isR2D ? 'ok' : isDispatched ? 'info' : isPending ? 'warn' : 'muted';
+      const nextStatus = isPending ? 'Ready to Dispatch' : (isR2D ? 'Pending' : '');
+      const nextLabel = isPending ? 'Mark R2D →' : (isR2D ? '↶ Mark Pending' : '');
+      const actionBtn = nextStatus
+        ? '<button class="ph-action" data-ref="' + escapeHtml(p.ref) + '" data-next="' + escapeHtml(nextStatus) + '">' + escapeHtml(nextLabel) + '</button>'
+        : '';
       const itemRows = (p.items || []).map(it => {
         const dims = [it.width, it.length].filter(Boolean).join(' × ');
         const desc = [it.category, it.model, it.backing, it.colour].filter(Boolean).join(' · ');
@@ -3484,8 +3502,10 @@
           '<td class="mute">' + escapeHtml(p.poc || '—') + '</td>' +
           '<td class="mute r">' + linesTxt + '</td>' +
           '<td class="num r"><span class="cur">₹</span>' + compact(p.totalIncGst) + '</td>' +
+          '<td><span class="pill-s ' + pillCls + '">' + escapeHtml(status) + '</span></td>' +
+          '<td class="r">' + actionBtn + '</td>' +
         '</tr>' +
-        '<tr class="ph-details" data-idx="' + idx + '" hidden><td colspan="6"><div class="ph-details-inner">' +
+        '<tr class="ph-details" data-idx="' + idx + '" hidden><td colspan="8"><div class="ph-details-inner">' +
           '<table><thead><tr>' +
             '<th>No.</th><th>Description</th><th>Dims</th>' +
             '<th class="num">Qty</th><th class="num">Bill Rate</th><th class="num">Total (inc GST)</th>' +
@@ -3500,17 +3520,49 @@
         '<thead><tr>' +
           '<th>REF#</th><th>Party</th><th>Date</th><th>POC</th>' +
           '<th class="r">Lines</th><th class="r">Total</th>' +
+          '<th>Status</th><th></th>' +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody>' +
       '</table>';
 
     host.querySelectorAll('tr.ph-row').forEach(tr => {
-      tr.addEventListener('click', () => {
+      tr.addEventListener('click', (ev) => {
+        // Don't toggle when clicking an action button inside the row.
+        if (ev.target.closest('.ph-action')) return;
         const idx = tr.getAttribute('data-idx');
         const det = host.querySelector('tr.ph-details[data-idx="' + idx + '"]');
         const open = !det.hidden;
         det.hidden = open;
         tr.classList.toggle('open', !open);
+      });
+    });
+    host.querySelectorAll('.ph-action').forEach(btn => {
+      btn.addEventListener('click', async (ev) => {
+        ev.stopPropagation();
+        const ref = btn.getAttribute('data-ref');
+        const next = btn.getAttribute('data-next');
+        const orig = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Updating…';
+        try {
+          const res = await fetch(endpoint(), {
+            method: 'POST',
+            body: JSON.stringify({ kind: 'updateStatus', ref, status: next }),
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          });
+          const j = await res.json();
+          if (!j.ok) throw new Error(j.error || 'update failed');
+          // Optimistic local update; then refresh from server next render.
+          const target = (cachedPis || []).find(p => p.ref === ref);
+          if (target) target.status = next;
+          renderStats(cachedPis || []);
+          applyFilter();
+        } catch (err) {
+          console.error('[atlas] status update failed:', err);
+          btn.disabled = false;
+          btn.textContent = orig;
+          alert('Could not update status: ' + (err.message || err));
+        }
       });
     });
   }

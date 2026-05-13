@@ -63,9 +63,10 @@ module.exports = async (req, res) => {
       return res.status(500).json({ ok: false, error: 'SHEETS_SPREADSHEET_ID env var is missing' });
     }
 
-    if (kind === 'pi')    return await handlePi(sheets, spreadsheetId, payload, res);
-    if (kind === 'party') return await handleParty(sheets, spreadsheetId, payload, res);
-    if (kind === 'list')  return await handleList(sheets, spreadsheetId, payload, res);
+    if (kind === 'pi')           return await handlePi(sheets, spreadsheetId, payload, res);
+    if (kind === 'party')        return await handleParty(sheets, spreadsheetId, payload, res);
+    if (kind === 'list')         return await handleList(sheets, spreadsheetId, payload, res);
+    if (kind === 'updateStatus') return await handleUpdateStatus(sheets, spreadsheetId, payload, res);
 
     return res.status(400).json({ ok: false, error: 'Unknown kind: ' + kind });
   } catch (err) {
@@ -201,6 +202,10 @@ async function handleList(sheets, spreadsheetId, _payload, res) {
   const pis = [];
   for (const [ref, items] of groups) {
     const f = items[0];
+    // PI-level status: if all lines share the same dispatchStatus, use it;
+    // otherwise label it 'Mixed' so the UI can flag the inconsistency.
+    const statuses = new Set(items.map(r => (r[27] || 'Pending').trim()));
+    const piStatus = statuses.size === 1 ? [...statuses][0] : 'Mixed';
     pis.push({
       ref,
       partyCode: f[1] || '',
@@ -212,6 +217,7 @@ async function handleList(sheets, spreadsheetId, _payload, res) {
       lines:     items.length,
       totalQty:  items.reduce((a, r) => a + (Number(r[7])  || 0), 0),
       totalIncGst: items.reduce((a, r) => a + (Number(r[20]) || 0), 0),
+      status:    piStatus,
       firstNo: Number(f[0]) || 0,
       items: items.map(r => ({
         no:         r[0]  || '',
@@ -239,6 +245,40 @@ async function handleList(sheets, spreadsheetId, _payload, res) {
   pis.sort((a, b) => b.firstNo - a.firstNo);
 
   return res.status(200).json({ ok: true, count: pis.length, pis });
+}
+
+async function handleUpdateStatus(sheets, spreadsheetId, payload, res) {
+  const ref = (payload.ref || '').toString().trim();
+  const status = (payload.status || '').toString().trim();
+  if (!ref)    return res.status(400).json({ ok: false, error: 'ref is required' });
+  if (!status) return res.status(400).json({ ok: false, error: 'status is required' });
+
+  // Find all rows whose column E (REF #) matches; collect their sheet-row numbers.
+  const colE = await sheets.spreadsheets.values.get({
+    spreadsheetId,
+    range: PI_SHEET + '!E:E',
+  });
+  const vals = colE.data.values || [];
+  const rowNums = [];
+  for (let i = 0; i < vals.length; i++) {
+    const cell = (vals[i] && vals[i][0] || '').toString().trim();
+    if (cell === ref) rowNums.push(i + 1); // sheet rows are 1-indexed
+  }
+  if (!rowNums.length) return res.status(404).json({ ok: false, error: 'No rows match REF# ' + ref });
+
+  // Batch-update column AB on each matching row.
+  await sheets.spreadsheets.values.batchUpdate({
+    spreadsheetId,
+    requestBody: {
+      valueInputOption: 'USER_ENTERED',
+      data: rowNums.map(n => ({
+        range: PI_SHEET + '!AB' + n,
+        values: [[status]],
+      })),
+    },
+  });
+
+  return res.status(200).json({ ok: true, ref, status, updated: rowNums.length });
 }
 
 async function handleParty(sheets, spreadsheetId, payload, res) {
