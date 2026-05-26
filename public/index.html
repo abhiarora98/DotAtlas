@@ -739,11 +739,26 @@
   }
   .table.ledger .detail-inner { padding: 14px 22px 16px 64px; }
   .table.ledger .detail-inner .inv-row {
-    display: grid; grid-template-columns: 76px 80px 1fr 120px 90px 80px;
-    gap: 14px; padding: 8px 0;
+    display: grid; grid-template-columns: 64px 80px 92px 1fr;
+    gap: 14px; padding: 7px 0;
     font-family: var(--fm); font-size: 11.5px; color: var(--text-2);
     border-bottom: 1px dashed var(--line);
     letter-spacing: 0.02em; align-items: baseline;
+  }
+  .table.ledger .detail-inner .vdate { color: var(--text); }
+  .table.ledger .detail-inner .inv-summary {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px solid var(--line);
+    display: flex; gap: 28px; flex-wrap: wrap;
+    font-family: var(--fm); font-size: 11px; color: var(--text-2);
+    letter-spacing: 0.04em;
+  }
+  .table.ledger .detail-inner .inv-summary .ks {
+    color: var(--text-3); letter-spacing: 0.12em; margin-right: 6px; font-size: 10px;
+  }
+  .table.ledger .detail-inner .inv-summary b {
+    color: var(--text); font-family: var(--fd); font-weight: 500;
+    font-size: 13px; letter-spacing: -0.01em;
   }
   .table.ledger .detail-inner .inv-row:last-of-type { border-bottom: 0; }
   .table.ledger .detail-inner .vt   { color: var(--text-3); font-size: 9.5px; letter-spacing: 0.12em; }
@@ -2204,13 +2219,13 @@
     <section class="page" data-page="receivables" hidden>
       <div class="hero-h">
         <div>
-          <div class="eb"><span class="live-dot"></span>Receivables · ₹3.53 Cr outstanding · 142 parties</div>
+          <div class="eb"><span class="live-dot"></span>Receivables · ₹1.68 Cr in-period · 108 parties</div>
           <h1>Who <span class="em">owes you</span>, and how <span class="accent">long</span>.</h1>
         </div>
         <div class="when">
-          CHASE TODAY · <b class="amt">₹47.2L</b><br/>
-          PROMISES DUE · <b>4</b><br/>
-          NEW OVERDUE · <b>3</b>
+          PARTIES ON BOOK · <b>108</b><br/>
+          OVERDUE &gt;30D · <b class="amt">₹69.0 L</b><br/>
+          OVER 60D · <b>₹0</b>
         </div>
       </div>
 
@@ -2218,42 +2233,42 @@
       <div class="kpis">
         <div class="kpi">
           <div class="lbl"><span>Total receivables</span><span class="ind"></span></div>
-          <div class="v"><span class="cur">₹</span>3.53<span class="un">Cr</span></div>
-          <div class="d"><span class="arr">↑</span>+₹18L vs. 30d avg</div>
+          <div class="v"><span class="cur">₹</span>1.68<span class="un">Cr</span></div>
+          <div class="d"><span class="arr">↑</span>+₹26.3 L since 01 Apr</div>
           <svg class="spark" viewBox="0 0 120 26" preserveAspectRatio="none">
-            <polyline fill="rgba(78,222,163,0.10)" stroke="none" points="0,26 0,18 12,17 24,19 36,14 48,15 60,11 72,13 84,9 96,10 108,7 120,6 120,26"/>
-            <polyline fill="none" stroke="var(--emerald)" stroke-width="1.4" points="0,18 12,17 24,19 36,14 48,15 60,11 72,13 84,9 96,10 108,7 120,6"/>
+            <polyline fill="none" stroke="var(--emerald)" stroke-width="1.4" points="0.0,24.0 4.44,23.09 8.89,13.58 13.33,19.2 17.78,17.3 22.22,16.62 26.67,18.12 31.11,19.52 35.56,14.16 40.0,8.62 44.44,10.53 48.89,8.81 53.33,7.84 57.78,12.9 62.22,7.98 66.67,12.35 71.11,8.27 75.56,7.16 80.0,2.0 84.44,4.02 88.89,3.62 93.33,7.01 97.78,15.29 102.22,16.12 106.67,11.54 111.11,12.14 115.56,11.47 120.0,9.97"/>
           </svg>
         </div>
         <div class="kpi">
           <div class="lbl"><span>Overdue · &gt;30d</span><span class="ind a"></span></div>
-          <div class="v"><span class="cur">₹</span>1.61<span class="un">Cr</span></div>
-          <div class="d dn"><span class="arr">↑</span>58 parties · 124 invoices</div>
-          <svg class="spark" viewBox="0 0 120 26" preserveAspectRatio="none">
-            <polyline fill="none" stroke="var(--amber)" stroke-width="1.4" points="0,22 12,21 24,21 36,18 48,17 60,15 72,15 84,13 96,12 108,10 120,9"/>
-          </svg>
+          <div class="v"><span class="cur">₹</span>69.0<span class="un">L</span></div>
+          <div class="d dn"><span class="arr">→</span>43 parties · 67 open invoices</div>
         </div>
         <div class="kpi">
           <div class="lbl"><span>Avg DSO</span><span class="ind a"></span></div>
-          <div class="v">34<span class="un">d</span></div>
-          <div class="d dn"><span class="arr">↑</span>+3d vs. last quarter</div>
-          <svg class="spark" viewBox="0 0 120 26" preserveAspectRatio="none">
-            <polyline fill="none" stroke="var(--amber)" stroke-width="1.4" points="0,18 12,17 24,17 36,15 48,16 60,14 72,13 84,11 96,12 108,10 120,9"/>
-          </svg>
+          <div class="v">42<span class="un">d</span></div>
+          <div class="d"><span class="arr">→</span>weighted across 108 parties</div>
         </div>
         <div class="kpi">
           <div class="lbl"><span>Collected · 7d</span><span class="ind"></span></div>
-          <div class="v"><span class="cur">₹</span>62<span class="un">L</span></div>
-          <div class="d"><span class="arr">↑</span>+₹14L vs. prior 7d</div>
+          <div class="v"><span class="cur">₹</span>72.6<span class="un">L</span></div>
+          <div class="d dn"><span class="arr">↓</span>−₹12.0 L vs. prior 7d</div>
           <svg class="spark" viewBox="0 0 120 26" preserveAspectRatio="none">
             <g fill="var(--emerald)" opacity="0.85">
-              <rect x="2"   y="14" width="12" height="12" rx="1"/>
-              <rect x="18"  y="18" width="12" height="8"  rx="1"/>
-              <rect x="34"  y="10" width="12" height="16" rx="1"/>
-              <rect x="50"  y="16" width="12" height="10" rx="1"/>
-              <rect x="66"  y="6"  width="12" height="20" rx="1"/>
-              <rect x="82"  y="12" width="12" height="14" rx="1"/>
-              <rect x="98"  y="3"  width="12" height="23" rx="1"/>
+              <rect x="2" y="12" width="6" height="14" rx="1"/>
+              <rect x="10" y="13" width="6" height="13" rx="1"/>
+              <rect x="18" y="18" width="6" height="8" rx="1"/>
+              <rect x="26" y="18" width="6" height="8" rx="1"/>
+              <rect x="34" y="24" width="6" height="2" rx="1"/>
+              <rect x="42" y="14" width="6" height="12" rx="1"/>
+              <rect x="50" y="19" width="6" height="7" rx="1"/>
+              <rect x="58" y="16" width="6" height="10" rx="1"/>
+              <rect x="66" y="4" width="6" height="22" rx="1"/>
+              <rect x="74" y="18" width="6" height="8" rx="1"/>
+              <rect x="82" y="22" width="6" height="4" rx="1"/>
+              <rect x="90" y="24" width="6" height="2" rx="1"/>
+              <rect x="98" y="19" width="6" height="7" rx="1"/>
+              <rect x="106" y="24" width="6" height="2" rx="1"/>
             </g>
           </svg>
         </div>
@@ -2262,67 +2277,29 @@
       <!-- AGING STRIP -->
       <div class="card mt-14">
         <div class="card-h">
-          <div class="t"><span class="ic">⊜</span><h3>Aging</h3><span class="sub">SUNDRY DEBTORS · 26 MAY</span></div>
+          <div class="t"><span class="ic">⊜</span><h3>Aging</h3><span class="sub">SUNDRY DEBTORS · IN-PERIOD · 26 MAY</span></div>
         </div>
         <div class="card-b">
           <div class="aging-band">
-            <div class="ab-seg" style="flex: 192;">
-              <div class="ab-amt">₹1.92 Cr</div>
-              <div class="ab-lab">0–30 days · 54% · 84 parties</div>
-            </div>
-            <div class="ab-seg warn" style="flex: 84;">
-              <div class="ab-amt">₹84.0 L</div>
-              <div class="ab-lab">31–60 days · 24% · 36 parties</div>
-            </div>
-            <div class="ab-seg amber" style="flex: 47;">
-              <div class="ab-amt">₹47.0 L</div>
-              <div class="ab-lab">61–90 days · 13% · 14 parties</div>
-            </div>
-            <div class="ab-seg bad" style="flex: 30;">
-              <div class="ab-amt">₹30.0 L</div>
-              <div class="ab-lab">90+ days · 9% · 8 parties</div>
-            </div>
+            <div class="ab-seg" style="flex: 17746981;"><div class="ab-amt">₹1.77 Cr</div><div class="ab-lab">0–30 days · 86 parties</div></div><div class="ab-seg warn" style="flex: 8000000;"><div class="ab-amt">₹69.0 L</div><div class="ab-lab">31–60 days · 43 parties</div></div><div class="ab-seg amber" style="flex: 8000000;"><div class="ab-amt">₹0</div><div class="ab-lab">61–90 days · 0 parties</div></div><div class="ab-seg bad" style="flex: 8000000;"><div class="ab-amt">₹0</div><div class="ab-lab">90+ days · 0 parties</div></div>
           </div>
         </div>
       </div>
 
-      <!-- CONCENTRATION + PROMISES -->
-      <div class="row-2" style="grid-template-columns: 1fr 1fr; margin-top:14px;">
-        <div class="card">
-          <div class="card-h">
-            <div class="t"><span class="ic">▣</span><h3>Concentration</h3><span class="sub">TOP 5 = 28% OF BOOK</span></div>
-          </div>
-          <div class="card-b">
-            <div class="conc-row"><div class="nm">Sunny Synthetic</div><div class="bar"><div style="width:100%;background:var(--rose);"></div></div><div class="v">₹37.9L</div></div>
-            <div class="conc-row"><div class="nm">Shantinath Enterprise</div><div class="bar"><div style="width:69%;background:var(--amber);"></div></div><div class="v">₹26.0L</div></div>
-            <div class="conc-row"><div class="nm">BM Distributor</div><div class="bar"><div style="width:60%;background:var(--blue);"></div></div><div class="v">₹22.7L</div></div>
-            <div class="conc-row"><div class="nm">JSG Infotech</div><div class="bar"><div style="width:45%;"></div></div><div class="v">₹16.9L</div></div>
-            <div class="conc-row"><div class="nm">Navchetan Enterprises</div><div class="bar"><div style="width:34%;"></div></div><div class="v">₹12.9L</div></div>
-          </div>
+      <!-- CONCENTRATION -->
+      <div class="card mt-14">
+        <div class="card-h">
+          <div class="t"><span class="ic">▣</span><h3>Concentration</h3><span class="sub">TOP 5 = 42% OF BOOK · ₹71.2 L</span></div>
         </div>
-
-        <div class="card">
-          <div class="card-h">
-            <div class="t"><span class="ic">⊞</span><h3>Promised this week</h3><span class="sub">₹38.6L EXPECTED</span></div>
-          </div>
-          <div class="card-b" style="padding-top:14px;">
-            <div class="promise-cal">
-              <div class="pc-day today"><div class="pc-dow">TUE</div><div class="pc-num">26</div><div class="pc-amt">₹8.1L</div></div>
-              <div class="pc-day"><div class="pc-dow">WED</div><div class="pc-num">27</div><div class="pc-amt">₹9.4L</div></div>
-              <div class="pc-day"><div class="pc-dow">THU</div><div class="pc-num">28</div><div class="pc-amt warn">₹11.2L</div></div>
-              <div class="pc-day"><div class="pc-dow">FRI</div><div class="pc-num">29</div><div class="pc-amt">₹4.0L</div></div>
-              <div class="pc-day empty"><div class="pc-dow">SAT</div><div class="pc-num">30</div><div class="pc-amt">—</div></div>
-              <div class="pc-day empty"><div class="pc-dow">SUN</div><div class="pc-num">31</div><div class="pc-amt">—</div></div>
-              <div class="pc-day"><div class="pc-dow">MON</div><div class="pc-num">01</div><div class="pc-amt">₹5.9L</div></div>
-            </div>
-          </div>
+        <div class="card-b">
+          <div class="conc-row"><div class="nm">Sunny Synthetic</div><div class="bar"><div style="width:100%;background:var(--rose);"></div></div><div class="v">₹29.7 L</div></div><div class="conc-row"><div class="nm">JSG Infotech Private Limited</div><div class="bar"><div style="width:57%;background:var(--amber);"></div></div><div class="v">₹17.0 L</div></div><div class="conc-row"><div class="nm">Shantinath Enterprise</div><div class="bar"><div style="width:28%;background:var(--blue);"></div></div><div class="v">₹8.3 L</div></div><div class="conc-row"><div class="nm">BM Distributor</div><div class="bar"><div style="width:28%;background:var(--emerald);"></div></div><div class="v">₹8.2 L</div></div><div class="conc-row"><div class="nm">Karnani Handloom Hub</div><div class="bar"><div style="width:27%;background:var(--emerald);"></div></div><div class="v">₹8.1 L</div></div>
         </div>
       </div>
 
       <!-- PARTY LEDGER -->
       <div class="card mt-14">
         <div class="card-h">
-          <div class="t"><span class="ic">≡</span><h3>Party ledger</h3><span class="sub">142 ON BOOK · TALLY · LIVE</span></div>
+          <div class="t"><span class="ic">≡</span><h3>Party ledger</h3><span class="sub">108 ON BOOK · TALLY · IN-PERIOD</span></div>
           <div class="seg" data-sortgrp="ledger">
             <button class="on" data-sort="outstanding">OUTSTANDING</button>
             <button data-sort="aged">AGED</button>
@@ -2332,14 +2309,13 @@
         </div>
         <div class="ledger-tools">
           <div class="chips">
-            <button class="chip on">All <span class="cnt">142</span></button>
-            <button class="chip">Overdue <span class="cnt">58</span></button>
-            <button class="chip">60+ days <span class="cnt">22</span></button>
-            <button class="chip">Credit hold <span class="cnt">3</span></button>
-            <button class="chip">Promised <span class="cnt">4</span></button>
-            <button class="chip">No activity 30d <span class="cnt">11</span></button>
+            <button class="chip on">All <span class="cnt">108</span></button>
+            <button class="chip">Overdue <span class="cnt">43</span></button>
+            <button class="chip">60+ days <span class="cnt">0</span></button>
+            <button class="chip">High risk <span class="cnt">0</span></button>
+            <button class="chip">No activity 30d <span class="cnt">42</span></button>
           </div>
-          <input class="search" placeholder="Search party, GSTIN, invoice…"/>
+          <input class="search" placeholder="Search party, voucher…"/>
         </div>
         <div class="card-b" style="padding-top:6px;">
           <table class="table ledger">
@@ -2353,217 +2329,448 @@
               <th class="r">Outstanding</th>
             </tr></thead>
             <tbody>
-
-              <tr class="party-r">
+              <tr class="party-r" data-risk="watch" data-oldest="35" data-dso="44" data-out="2971693" data-lastr="11">
                 <td><div class="name">
                   <span class="chev">›</span>
-                  <div class="av-sq" style="background:linear-gradient(135deg,rgba(255,138,168,0.18),rgba(255,138,168,0.04));color:var(--rose);border-color:rgba(255,138,168,0.18);">SS</div>
-                  <div class="nm-c"><div class="pri">Sunny Synthetic</div><div class="sec">PANIPAT · 28 INVOICES · 06ABCFS…</div></div>
+                  <div class="av-sq a" >SS</div>
+                  <div class="nm-c"><div class="pri">Sunny Synthetic</div><div class="sec">28 INVOICES · LAST RECEIPT 15 MAY</div></div>
                 </div></td>
-                <td><div class="mini-bar"><span class="s0" style="width:18%;"></span><span class="s1" style="width:22%;"></span><span class="s2" style="width:30%;"></span><span class="s3" style="width:30%;"></span></div></td>
-                <td class="num r" style="color:var(--rose);">76d</td>
-                <td class="num r">58d</td>
-                <td class="mute r" style="font-family:var(--fm);font-size:11px;">12 Apr</td>
-                <td><span class="risk-cluster"><span class="risk-dot r"></span><span class="risk-lbl">High</span></span></td>
-                <td class="num r"><span class="cur">₹</span>37.9 <span style="color:var(--text-3);font-size:11px;">L</span></td>
-              </tr>
-              <tr class="detail-r"><td colspan="7"><div class="detail-inner">
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-184</span><span class="vmeta">11 Mar · PO #4421</span><span class="vamt">₹14,02,150</span><span class="vage" style="color:var(--rose);">76d</span><span class="vmeta" style="text-align:right;">90+</span></div>
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-261</span><span class="vmeta">02 Apr · PO #4513</span><span class="vamt">₹9,28,400</span><span class="vage" style="color:var(--amber);">54d</span><span class="vmeta" style="text-align:right;">31–60</span></div>
-                <div class="inv-row"><span class="vt">RECEIPT</span><span class="vno">R-412</span><span class="vmeta">12 Apr · against S-184</span><span class="vamt cr">−₹3,00,000</span><span class="vage" style="color:var(--text-3);">part</span><span class="vmeta" style="text-align:right;color:var(--emerald);">cleared</span></div>
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-388</span><span class="vmeta">18 Apr · PO #4644</span><span class="vamt">₹11,40,290</span><span class="vage" style="color:var(--amber);">38d</span><span class="vmeta" style="text-align:right;">31–60</span></div>
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-512</span><span class="vmeta">06 May · PO #4781</span><span class="vamt">₹6,18,000</span><span class="vage" style="color:var(--text-3);">20d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
-              </div></td></tr>
-
-              <tr class="party-r">
-                <td><div class="name">
-                  <span class="chev">›</span>
-                  <div class="av-sq a">SE</div>
-                  <div class="nm-c"><div class="pri">Shantinath Enterprise</div><div class="sec">SURAT · 31 INVOICES</div></div>
-                </div></td>
-                <td><div class="mini-bar"><span class="s0" style="width:32%;"></span><span class="s1" style="width:38%;"></span><span class="s2" style="width:20%;"></span><span class="s3" style="width:10%;"></span></div></td>
-                <td class="num r" style="color:var(--amber);">62d</td>
-                <td class="num r">41d</td>
-                <td class="mute r" style="font-family:var(--fm);font-size:11px;">21 May</td>
-                <td><span class="risk-cluster"><span class="risk-dot w"></span><span class="risk-lbl">Watch</span></span></td>
-                <td class="num r"><span class="cur">₹</span>26.0 <span style="color:var(--text-3);font-size:11px;">L</span></td>
-              </tr>
-              <tr class="detail-r"><td colspan="7"><div class="detail-inner">
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-201</span><span class="vmeta">28 Mar · PO #4488</span><span class="vamt">₹8,40,200</span><span class="vage" style="color:var(--amber);">59d</span><span class="vmeta" style="text-align:right;">31–60</span></div>
-                <div class="inv-row"><span class="vt">RECEIPT</span><span class="vno">R-498</span><span class="vmeta">21 May · against S-201</span><span class="vamt cr">−₹4,00,000</span><span class="vage" style="color:var(--text-3);">part</span><span class="vmeta" style="text-align:right;color:var(--emerald);">cleared</span></div>
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-401</span><span class="vmeta">20 Apr · PO #4671</span><span class="vamt">₹12,60,000</span><span class="vage" style="color:var(--amber);">36d</span><span class="vmeta" style="text-align:right;">31–60</span></div>
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-577</span><span class="vmeta">14 May · PO #4810</span><span class="vamt">₹9,00,000</span><span class="vage" style="color:var(--text-3);">12d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
-              </div></td></tr>
-
-              <tr class="party-r">
-                <td><div class="name">
-                  <span class="chev">›</span>
-                  <div class="av-sq b">BM</div>
-                  <div class="nm-c"><div class="pri">BM Distributor</div><div class="sec">DELHI · 1 INVOICE · NEW</div></div>
-                </div></td>
-                <td><div class="mini-bar"><span class="s0" style="width:0%;"></span><span class="s1" style="width:100%;"></span><span class="s2" style="width:0;"></span><span class="s3" style="width:0;"></span></div></td>
-                <td class="num r" style="color:var(--amber);">42d</td>
-                <td class="num r">42d</td>
-                <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
-                <td><span class="risk-cluster"><span class="risk-dot b"></span><span class="risk-lbl">Review</span></span></td>
-                <td class="num r"><span class="cur">₹</span>22.7 <span style="color:var(--text-3);font-size:11px;">L</span></td>
-              </tr>
-              <tr class="detail-r"><td colspan="7"><div class="detail-inner">
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-298</span><span class="vmeta">14 Apr · PO #4592</span><span class="vamt">₹22,68,140</span><span class="vage" style="color:var(--amber);">42d</span><span class="vmeta" style="text-align:right;">31–60</span></div>
-              </div></td></tr>
-
-              <tr class="party-r">
-                <td><div class="name">
-                  <span class="chev">›</span>
-                  <div class="av-sq">JI</div>
-                  <div class="nm-c"><div class="pri">JSG Infotech Pvt Ltd</div><div class="sec">BANGALORE · 1 INVOICE</div></div>
-                </div></td>
-                <td><div class="mini-bar"><span class="s0" style="width:100%;"></span><span class="s1" style="width:0;"></span><span class="s2" style="width:0;"></span><span class="s3" style="width:0;"></span></div></td>
-                <td class="num r" style="color:var(--text-3);">14d</td>
-                <td class="num r">14d</td>
-                <td class="mute r" style="font-family:var(--fm);font-size:11px;">12 May</td>
-                <td><span class="risk-cluster"><span class="risk-dot"></span><span class="risk-lbl">Good</span></span></td>
-                <td class="num r"><span class="cur">₹</span>16.9 <span style="color:var(--text-3);font-size:11px;">L</span></td>
-              </tr>
-              <tr class="detail-r"><td colspan="7"><div class="detail-inner">
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-559</span><span class="vmeta">12 May · PO #4801</span><span class="vamt">₹16,96,368</span><span class="vage" style="color:var(--text-3);">14d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
-              </div></td></tr>
-
-              <tr class="party-r">
-                <td><div class="name">
-                  <span class="chev">›</span>
-                  <div class="av-sq a">NE</div>
-                  <div class="nm-c"><div class="pri">Navchetan Enterprises</div><div class="sec">JAIPUR · 12 INVOICES · PROMISED 28 MAY</div></div>
-                </div></td>
-                <td><div class="mini-bar"><span class="s0" style="width:30%;"></span><span class="s1" style="width:48%;"></span><span class="s2" style="width:22%;"></span><span class="s3" style="width:0;"></span></div></td>
-                <td class="num r" style="color:var(--amber);">58d</td>
-                <td class="num r">36d</td>
-                <td class="mute r" style="font-family:var(--fm);font-size:11px;">04 May</td>
-                <td><span class="risk-cluster"><span class="risk-dot w"></span><span class="risk-lbl">Promised</span></span></td>
-                <td class="num r"><span class="cur">₹</span>12.9 <span style="color:var(--text-3);font-size:11px;">L</span></td>
-              </tr>
-              <tr class="detail-r"><td colspan="7"><div class="detail-inner">
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-189</span><span class="vmeta">29 Mar · PO #4452</span><span class="vamt">₹3,80,400</span><span class="vage" style="color:var(--amber);">58d</span><span class="vmeta" style="text-align:right;">31–60</span></div>
-                <div class="inv-row"><span class="vt">RECEIPT</span><span class="vno">R-389</span><span class="vmeta">04 May · against S-189</span><span class="vamt cr">−₹2,00,000</span><span class="vage" style="color:var(--text-3);">part</span><span class="vmeta" style="text-align:right;color:var(--emerald);">cleared</span></div>
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-265</span><span class="vmeta">03 Apr · PO #4528</span><span class="vamt">₹2,94,100</span><span class="vage" style="color:var(--amber);">53d</span><span class="vmeta" style="text-align:right;">31–60</span></div>
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-401</span><span class="vmeta">19 Apr · PO #4669</span><span class="vamt">₹3,10,000</span><span class="vage" style="color:var(--amber);">37d</span><span class="vmeta" style="text-align:right;">31–60</span></div>
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-490</span><span class="vmeta">28 Apr · PO #4742</span><span class="vamt">₹2,80,000</span><span class="vage" style="color:var(--text-3);">28d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-578</span><span class="vmeta">14 May · PO #4818</span><span class="vamt">₹2,84,910</span><span class="vage" style="color:var(--text-3);">12d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
-              </div></td></tr>
-
-              <tr class="party-r">
-                <td><div class="name">
-                  <span class="chev">›</span>
-                  <div class="av-sq e">AF</div>
-                  <div class="nm-c"><div class="pri">Autofurnish Limited</div><div class="sec">GURUGRAM · 6 INVOICES</div></div>
-                </div></td>
-                <td><div class="mini-bar"><span class="s0" style="width:72%;"></span><span class="s1" style="width:28%;"></span><span class="s2" style="width:0;"></span><span class="s3" style="width:0;"></span></div></td>
-                <td class="num r" style="color:var(--text-3);">28d</td>
-                <td class="num r">22d</td>
-                <td class="mute r" style="font-family:var(--fm);font-size:11px;">18 May</td>
-                <td><span class="risk-cluster"><span class="risk-dot"></span><span class="risk-lbl">On cadence</span></span></td>
-                <td class="num r"><span class="cur">₹</span>11.9 <span style="color:var(--text-3);font-size:11px;">L</span></td>
-              </tr>
-              <tr class="detail-r"><td colspan="7"><div class="detail-inner">
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-432</span><span class="vmeta">24 Apr · PO #4698</span><span class="vamt">₹4,82,420</span><span class="vage" style="color:var(--amber);">32d</span><span class="vmeta" style="text-align:right;">31–60</span></div>
-                <div class="inv-row"><span class="vt">RECEIPT</span><span class="vno">R-471</span><span class="vmeta">18 May · against S-432</span><span class="vamt cr">−₹3,00,000</span><span class="vage" style="color:var(--text-3);">part</span><span class="vmeta" style="text-align:right;color:var(--emerald);">cleared</span></div>
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-489</span><span class="vmeta">28 Apr · PO #4741</span><span class="vamt">₹3,18,000</span><span class="vage" style="color:var(--text-3);">28d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-543</span><span class="vmeta">10 May · PO #4789</span><span class="vamt">₹3,87,000</span><span class="vage" style="color:var(--text-3);">16d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-602</span><span class="vmeta">21 May · PO #4841</span><span class="vamt">₹3,00,000</span><span class="vage" style="color:var(--text-3);">5d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
-              </div></td></tr>
-
-              <tr class="party-r">
-                <td><div class="name">
-                  <span class="chev">›</span>
-                  <div class="av-sq">HL</div>
-                  <div class="nm-c"><div class="pri">Home Life Trading</div><div class="sec">MUMBAI · 2 INVOICES</div></div>
-                </div></td>
-                <td><div class="mini-bar"><span class="s0" style="width:40%;"></span><span class="s1" style="width:60%;"></span><span class="s2" style="width:0;"></span><span class="s3" style="width:0;"></span></div></td>
-                <td class="num r" style="color:var(--text-3);">34d</td>
-                <td class="num r">28d</td>
-                <td class="mute r" style="font-family:var(--fm);font-size:11px;">09 May</td>
-                <td><span class="risk-cluster"><span class="risk-dot"></span><span class="risk-lbl">Good</span></span></td>
-                <td class="num r"><span class="cur">₹</span>11.2 <span style="color:var(--text-3);font-size:11px;">L</span></td>
-              </tr>
-              <tr class="detail-r"><td colspan="7"><div class="detail-inner">
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-345</span><span class="vmeta">12 Apr · PO #4576</span><span class="vamt">₹7,02,242</span><span class="vage" style="color:var(--amber);">44d</span><span class="vmeta" style="text-align:right;">31–60</span></div>
-                <div class="inv-row"><span class="vt">RECEIPT</span><span class="vno">R-422</span><span class="vmeta">09 May · against S-345</span><span class="vamt cr">−₹3,00,000</span><span class="vage" style="color:var(--text-3);">part</span><span class="vmeta" style="text-align:right;color:var(--emerald);">cleared</span></div>
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-498</span><span class="vmeta">02 May · PO #4761</span><span class="vamt">₹4,14,200</span><span class="vage" style="color:var(--text-3);">24d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
-              </div></td></tr>
-
-              <tr class="party-r">
-                <td><div class="name">
-                  <span class="chev">›</span>
-                  <div class="av-sq a">LT</div>
-                  <div class="nm-c"><div class="pri">Lexicon Trading</div><div class="sec">AHMEDABAD · 12 INVOICES</div></div>
-                </div></td>
-                <td><div class="mini-bar"><span class="s0" style="width:25%;"></span><span class="s1" style="width:40%;"></span><span class="s2" style="width:25%;"></span><span class="s3" style="width:10%;"></span></div></td>
-                <td class="num r" style="color:var(--amber);">71d</td>
+                <td><div class="mini-bar"><span class="s0" style="width:54.7%;"></span><span class="s1" style="width:45.3%;"></span><span class="s2" style="width:0.0%;"></span><span class="s3" style="width:0.0%;"></span></div></td>
+                <td class="num r" style="color:var(--amber);">35d</td>
                 <td class="num r">44d</td>
-                <td class="mute r" style="font-family:var(--fm);font-size:11px;">02 May</td>
+                <td class="mute r" style="font-family:var(--fm);font-size:11px;">15 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot w"></span><span class="risk-lbl">Watch</span></span></td>
-                <td class="num r"><span class="cur">₹</span>10.3 <span style="color:var(--text-3);font-size:11px;">L</span></td>
+                <td class="num r">₹29.7 L</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner">
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-152</span><span class="vmeta">16 Mar · PO #4404</span><span class="vamt">₹2,40,000</span><span class="vage" style="color:var(--rose);">71d</span><span class="vmeta" style="text-align:right;">61–90</span></div>
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-208</span><span class="vmeta">05 Apr · PO #4536</span><span class="vamt">₹1,90,137</span><span class="vage" style="color:var(--amber);">51d</span><span class="vmeta" style="text-align:right;">31–60</span></div>
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-301</span><span class="vmeta">14 Apr · PO #4591</span><span class="vamt">₹2,10,000</span><span class="vage" style="color:var(--amber);">42d</span><span class="vmeta" style="text-align:right;">31–60</span></div>
-                <div class="inv-row"><span class="vt">RECEIPT</span><span class="vno">R-455</span><span class="vmeta">02 May · against S-152</span><span class="vamt cr">−₹1,50,000</span><span class="vage" style="color:var(--text-3);">part</span><span class="vmeta" style="text-align:right;color:var(--emerald);">cleared</span></div>
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-411</span><span class="vmeta">22 Apr · PO #4680</span><span class="vamt">₹1,76,500</span><span class="vage" style="color:var(--amber);">34d</span><span class="vmeta" style="text-align:right;">31–60</span></div>
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-571</span><span class="vmeta">13 May · PO #4814</span><span class="vamt">₹2,15,000</span><span class="vage" style="color:var(--text-3);">13d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
+                <div class="inv-row"><span class="vdate">02 Apr</span><span class="vt">RECEIPT</span><span class="vno">Vch 20</span><span class="vamt cr">−₹52,232</span></div>
+                <div class="inv-row"><span class="vdate">05 Apr</span><span class="vt">SALES</span><span class="vno">Vch 50</span><span class="vamt">₹1,77,742</span></div>
+                <div class="inv-row"><span class="vdate">05 Apr</span><span class="vt">SALES</span><span class="vno">Vch 51</span><span class="vamt">₹1,48,118</span></div>
+                <div class="inv-row"><span class="vdate">07 Apr</span><span class="vt">SALES</span><span class="vno">Vch 63</span><span class="vamt">₹29,624</span></div>
+                <div class="inv-row"><span class="vdate">09 Apr</span><span class="vt">SALES</span><span class="vno">Vch 81</span><span class="vamt">₹59,247</span></div>
+                <div class="inv-row"><span class="vdate">16 Apr</span><span class="vt">SALES</span><span class="vno">Vch 161</span><span class="vamt">₹2,13,290</span></div>
+                <div class="inv-row"><span class="vdate">17 Apr</span><span class="vt">SALES</span><span class="vno">Vch 166</span><span class="vamt">₹29,624</span></div>
+                <div class="inv-row"><span class="vdate">20 Apr</span><span class="vt">RECEIPT</span><span class="vno">Vch 223</span><span class="vamt cr">−₹3,55,182</span></div>
+                <div class="inv-row"><span class="vdate">20 Apr</span><span class="vt">SALES</span><span class="vno">Vch 194</span><span class="vamt">₹11,849</span></div>
+                <div class="inv-row"><span class="vdate">21 Apr</span><span class="vt">SALES</span><span class="vno">Vch 213</span><span class="vamt">₹3,01,875</span></div>
+                <div class="inv-row"><span class="vdate">22 Apr</span><span class="vt">SALES</span><span class="vno">Vch 214</span><span class="vamt">₹1,62,787</span></div>
+                <div class="inv-row"><span class="vdate">23 Apr</span><span class="vt">SALES</span><span class="vno">Vch 224</span><span class="vamt">₹3,01,875</span></div>
+                <div class="inv-row"><span class="vdate">23 Apr</span><span class="vt">SALES</span><span class="vno">Vch 225</span><span class="vamt">₹3,73,257</span></div>
+                <div class="inv-row"><span class="vdate">23 Apr</span><span class="vt">SALES</span><span class="vno">Vch 229</span><span class="vamt">₹1,80,561</span></div>
+                <div class="inv-row"><span class="vdate">25 Apr</span><span class="vt">SALES</span><span class="vno">Vch 258</span><span class="vamt">₹1,50,938</span></div>
+                <div class="inv-row"><span class="vdate">30 Apr</span><span class="vt">SALES</span><span class="vno">Vch 316</span><span class="vamt">₹88,871</span></div>
+                <div class="inv-row"><span class="vdate">05 May</span><span class="vt">SALES</span><span class="vno">Vch 362</span><span class="vamt">₹1,65,892</span></div>
+                <div class="inv-row"><span class="vdate">06 May</span><span class="vt">SALES</span><span class="vno">Vch 372</span><span class="vamt">₹19,198</span></div>
+                <div class="inv-row"><span class="vdate">07 May</span><span class="vt">SALES</span><span class="vno">Vch 381</span><span class="vamt">₹1,18,494</span></div>
+                <div class="inv-row"><span class="vdate">07 May</span><span class="vt">SALES</span><span class="vno">Vch 382</span><span class="vamt">₹3,64,370</span></div>
+                <div class="inv-row"><span class="vdate">07 May</span><span class="vt">SALES</span><span class="vno">Vch 389</span><span class="vamt">₹1,77,742</span></div>
+                <div class="inv-row"><span class="vdate">08 May</span><span class="vt">SALES</span><span class="vno">Vch 400</span><span class="vamt">₹1,36,269</span></div>
+                <div class="inv-row"><span class="vdate">08 May</span><span class="vt">SALES</span><span class="vno">Vch 405</span><span class="vamt">₹1,93,701</span></div>
+                <div class="inv-row"><span class="vdate">09 May</span><span class="vt">SALES</span><span class="vno">Vch 416</span><span class="vamt">₹38,395</span></div>
+                <div class="inv-row"><span class="vdate">09 May</span><span class="vt">SALES</span><span class="vno">Vch 423</span><span class="vamt">₹2,962</span></div>
+                <div class="inv-row"><span class="vdate">13 May</span><span class="vt">SALES</span><span class="vno">Vch 465</span><span class="vamt">₹96,600</span></div>
+                <div class="inv-row"><span class="vdate">15 May</span><span class="vt">RECEIPT</span><span class="vno">Vch 546</span><span class="vamt cr">−₹4,14,731</span></div>
+                <div class="inv-row"><span class="vdate">15 May</span><span class="vt">SALES</span><span class="vno">Vch 492</span><span class="vamt">₹60,375</span></div>
+                <div class="inv-row"><span class="vdate">15 May</span><span class="vt">SALES</span><span class="vno">Vch 496</span><span class="vamt">₹1,50,938</span></div>
+                <div class="inv-row"><span class="vdate">19 May</span><span class="vt">SALES</span><span class="vno">Vch 566</span><span class="vamt">₹36,225</span></div>
+                <div class="inv-row"><span class="vdate">22 May</span><span class="vt">SALES</span><span class="vno">Vch 622</span><span class="vamt">₹3,019</span></div>
+                <div class="inv-summary"><span><span class="ks">BILLED</span> ₹37,93,838</span><span><span class="ks">RECEIVED</span> ₹8,22,145</span><span><span class="ks">OUTSTANDING</span> <b>₹29,71,693</b></span></div>
               </div></td></tr>
-
-              <tr class="party-r">
+              <tr class="party-r" data-risk="watch" data-oldest="39" data-dso="56" data-out="1696368" data-lastr="9999">
                 <td><div class="name">
                   <span class="chev">›</span>
-                  <div class="av-sq">RB</div>
-                  <div class="nm-c"><div class="pri">Rathi Brothers</div><div class="sec">LUDHIANA · 5 INVOICES</div></div>
+                  <div class="av-sq a" >JI</div>
+                  <div class="nm-c"><div class="pri">JSG Infotech Private Limited</div><div class="sec">1 INVOICE · LAST RECEIPT —</div></div>
                 </div></td>
-                <td><div class="mini-bar"><span class="s0" style="width:60%;"></span><span class="s1" style="width:40%;"></span><span class="s2" style="width:0;"></span><span class="s3" style="width:0;"></span></div></td>
-                <td class="num r" style="color:var(--text-3);">26d</td>
-                <td class="num r">19d</td>
+                <td><div class="mini-bar"><span class="s0" style="width:0.0%;"></span><span class="s1" style="width:100.0%;"></span><span class="s2" style="width:0.0%;"></span><span class="s3" style="width:0.0%;"></span></div></td>
+                <td class="num r" style="color:var(--amber);">39d</td>
+                <td class="num r">56d</td>
+                <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
+                <td><span class="risk-cluster"><span class="risk-dot w"></span><span class="risk-lbl">Watch</span></span></td>
+                <td class="num r">₹17.0 L</td>
+              </tr>
+              <tr class="detail-r"><td colspan="7"><div class="detail-inner">
+                <div class="inv-row"><span class="vdate">17 Apr</span><span class="vt">SALES</span><span class="vno">Vch 170</span><span class="vamt">₹16,96,368</span></div>
+                <div class="inv-summary"><span><span class="ks">BILLED</span> ₹16,96,368</span><span><span class="ks">RECEIVED</span> ₹0</span><span><span class="ks">OUTSTANDING</span> <b>₹16,96,368</b></span></div>
+              </div></td></tr>
+              <tr class="party-r" data-risk="good" data-oldest="18" data-dso="18" data-out="825214" data-lastr="12">
+                <td><div class="name">
+                  <span class="chev">›</span>
+                  <div class="av-sq" >SE</div>
+                  <div class="nm-c"><div class="pri">Shantinath Enterprise</div><div class="sec">31 INVOICES · LAST RECEIPT 14 MAY</div></div>
+                </div></td>
+                <td><div class="mini-bar"><span class="s0" style="width:100.0%;"></span><span class="s1" style="width:0.0%;"></span><span class="s2" style="width:0.0%;"></span><span class="s3" style="width:0.0%;"></span></div></td>
+                <td class="num r" style="color:var(--text-3);">18d</td>
+                <td class="num r">18d</td>
+                <td class="mute r" style="font-family:var(--fm);font-size:11px;">14 May</td>
+                <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Good</span></span></td>
+                <td class="num r">₹8.3 L</td>
+              </tr>
+              <tr class="detail-r"><td colspan="7"><div class="detail-inner">
+                <div class="inv-row"><span class="vdate">01 Apr</span><span class="vt">SALES</span><span class="vno">Vch 14</span><span class="vamt">₹45,184</span></div>
+                <div class="inv-row"><span class="vdate">01 Apr</span><span class="vt">SALES</span><span class="vno">Vch 2</span><span class="vamt">₹1,09,204</span></div>
+                <div class="inv-row"><span class="vdate">01 Apr</span><span class="vt">SALES</span><span class="vno">Vch 5</span><span class="vamt">₹35,589</span></div>
+                <div class="inv-row"><span class="vdate">06 Apr</span><span class="vt">SALES</span><span class="vno">Vch 52</span><span class="vamt">₹1,14,288</span></div>
+                <div class="inv-row"><span class="vdate">08 Apr</span><span class="vt">RECEIPT</span><span class="vno">Vch 85</span><span class="vamt cr">−₹3,00,000</span></div>
+                <div class="inv-row"><span class="vdate">09 Apr</span><span class="vt">SALES</span><span class="vno">Vch 80</span><span class="vamt">₹1,37,271</span></div>
+                <div class="inv-row"><span class="vdate">09 Apr</span><span class="vt">SALES</span><span class="vno">Vch 87</span><span class="vamt">₹75,699</span></div>
+                <div class="inv-row"><span class="vdate">09 Apr</span><span class="vt">SALES</span><span class="vno">Vch 88</span><span class="vamt">₹39,703</span></div>
+                <div class="inv-row"><span class="vdate">11 Apr</span><span class="vt">SALES</span><span class="vno">Vch 95</span><span class="vamt">₹40,072</span></div>
+                <div class="inv-row"><span class="vdate">11 Apr</span><span class="vt">SALES</span><span class="vno">Vch 97</span><span class="vamt">₹1,09,768</span></div>
+                <div class="inv-row"><span class="vdate">13 Apr</span><span class="vt">SALES</span><span class="vno">Vch 113</span><span class="vamt">₹1,27,100</span></div>
+                <div class="inv-row"><span class="vdate">13 Apr</span><span class="vt">SALES</span><span class="vno">Vch 123</span><span class="vamt">₹1,27,100</span></div>
+                <div class="inv-row"><span class="vdate">15 Apr</span><span class="vt">SALES</span><span class="vno">Vch 141</span><span class="vamt">₹49,959</span></div>
+                <div class="inv-row"><span class="vdate">17 Apr</span><span class="vt">SALES</span><span class="vno">Vch 164</span><span class="vamt">₹1,34,319</span></div>
+                <div class="inv-row"><span class="vdate">17 Apr</span><span class="vt">SALES</span><span class="vno">Vch 172</span><span class="vamt">₹1,70,371</span></div>
+                <div class="inv-row"><span class="vdate">23 Apr</span><span class="vt">RECEIPT</span><span class="vno">Vch 278</span><span class="vamt cr">−₹3,20,000</span></div>
+                <div class="inv-row"><span class="vdate">23 Apr</span><span class="vt">RECEIPT</span><span class="vno">Vch 279</span><span class="vamt cr">−₹2,80,000</span></div>
+                <div class="inv-row"><span class="vdate">27 Apr</span><span class="vt">SALES</span><span class="vno">Vch 274</span><span class="vamt">₹87,452</span></div>
+                <div class="inv-row"><span class="vdate">28 Apr</span><span class="vt">SALES</span><span class="vno">Vch 276</span><span class="vamt">₹67,698</span></div>
+                <div class="inv-row"><span class="vdate">01 May</span><span class="vt">RECEIPT</span><span class="vno">Vch 367</span><span class="vamt cr">−₹6,00,000</span></div>
+                <div class="inv-row"><span class="vdate">03 May</span><span class="vt">SALES</span><span class="vno">Vch 340</span><span class="vamt">₹1,15,059</span></div>
+                <div class="inv-row"><span class="vdate">04 May</span><span class="vt">SALES</span><span class="vno">Vch 355</span><span class="vamt">₹42,818</span></div>
+                <div class="inv-row"><span class="vdate">04 May</span><span class="vt">SALES</span><span class="vno">Vch 356</span><span class="vamt">₹34,255</span></div>
+                <div class="inv-row"><span class="vdate">05 May</span><span class="vt">SALES</span><span class="vno">Vch 357</span><span class="vamt">₹82,782</span></div>
+                <div class="inv-row"><span class="vdate">06 May</span><span class="vt">RECEIPT</span><span class="vno">Vch 427</span><span class="vamt cr">−₹25,000</span></div>
+                <div class="inv-row"><span class="vdate">08 May</span><span class="vt">SALES</span><span class="vno">Vch 391</span><span class="vamt">₹52,110</span></div>
+                <div class="inv-row"><span class="vdate">08 May</span><span class="vt">SALES</span><span class="vno">Vch 407</span><span class="vamt">₹57,091</span></div>
+                <div class="inv-row"><span class="vdate">11 May</span><span class="vt">SALES</span><span class="vno">Vch 444</span><span class="vamt">₹1,25,365</span></div>
+                <div class="inv-row"><span class="vdate">12 May</span><span class="vt">SALES</span><span class="vno">Vch 446</span><span class="vamt">₹41,273</span></div>
+                <div class="inv-row"><span class="vdate">13 May</span><span class="vt">SALES</span><span class="vno">Vch 458</span><span class="vamt">₹28,865</span></div>
+                <div class="inv-row"><span class="vdate">13 May</span><span class="vt">SALES</span><span class="vno">Vch 459</span><span class="vamt">₹44,665</span></div>
+                <div class="inv-row"><span class="vdate">13 May</span><span class="vt">SALES</span><span class="vno">Vch 477</span><span class="vamt">₹1,92,179</span></div>
+                <div class="inv-row"><span class="vdate">14 May</span><span class="vt">RECEIPT</span><span class="vno">Vch 529</span><span class="vamt cr">−₹2,50,000</span></div>
+                <div class="inv-row"><span class="vdate">15 May</span><span class="vt">SALES</span><span class="vno">Vch 490</span><span class="vamt">₹52,613</span></div>
+                <div class="inv-row"><span class="vdate">16 May</span><span class="vt">SALES</span><span class="vno">Vch 508</span><span class="vamt">₹1,05,731</span></div>
+                <div class="inv-row"><span class="vdate">22 May</span><span class="vt">SALES</span><span class="vno">Vch 631</span><span class="vamt">₹51,867</span></div>
+                <div class="inv-row"><span class="vdate">24 May</span><span class="vt">SALES</span><span class="vno">Vch 653</span><span class="vamt">₹1,02,764</span></div>
+                <div class="inv-summary"><span><span class="ks">BILLED</span> ₹26,00,214</span><span><span class="ks">RECEIVED</span> ₹17,75,000</span><span><span class="ks">OUTSTANDING</span> <b>₹8,25,214</b></span></div>
+              </div></td></tr>
+              <tr class="party-r" data-risk="good" data-oldest="25" data-dso="20" data-out="818140" data-lastr="4">
+                <td><div class="name">
+                  <span class="chev">›</span>
+                  <div class="av-sq" >BD</div>
+                  <div class="nm-c"><div class="pri">BM Distributor</div><div class="sec">1 INVOICE · LAST RECEIPT 22 MAY</div></div>
+                </div></td>
+                <td><div class="mini-bar"><span class="s0" style="width:100.0%;"></span><span class="s1" style="width:0.0%;"></span><span class="s2" style="width:0.0%;"></span><span class="s3" style="width:0.0%;"></span></div></td>
+                <td class="num r" style="color:var(--text-3);">25d</td>
+                <td class="num r">20d</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">22 May</td>
-                <td><span class="risk-cluster"><span class="risk-dot"></span><span class="risk-lbl">Good</span></span></td>
-                <td class="num r"><span class="cur">₹</span>9.0 <span style="color:var(--text-3);font-size:11px;">L</span></td>
+                <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Good</span></span></td>
+                <td class="num r">₹8.2 L</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner">
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-460</span><span class="vmeta">25 Apr · PO #4708</span><span class="vamt">₹2,40,589</span><span class="vage" style="color:var(--amber);">31d</span><span class="vmeta" style="text-align:right;">31–60</span></div>
-                <div class="inv-row"><span class="vt">RECEIPT</span><span class="vno">R-512</span><span class="vmeta">22 May · against S-460</span><span class="vamt cr">−₹2,00,000</span><span class="vage" style="color:var(--text-3);">part</span><span class="vmeta" style="text-align:right;color:var(--emerald);">cleared</span></div>
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-535</span><span class="vmeta">09 May · PO #4786</span><span class="vamt">₹2,15,000</span><span class="vage" style="color:var(--text-3);">17d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-590</span><span class="vmeta">17 May · PO #4825</span><span class="vamt">₹2,44,000</span><span class="vage" style="color:var(--text-3);">9d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-625</span><span class="vmeta">22 May · PO #4847</span><span class="vamt">₹2,00,000</span><span class="vage" style="color:var(--text-3);">4d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
+                <div class="inv-row"><span class="vdate">01 Apr</span><span class="vt">RECEIPT</span><span class="vno">Vch 1</span><span class="vamt cr">−₹1,00,000</span></div>
+                <div class="inv-row"><span class="vdate">04 Apr</span><span class="vt">RECEIPT</span><span class="vno">Vch 56</span><span class="vamt cr">−₹1,00,000</span></div>
+                <div class="inv-row"><span class="vdate">08 Apr</span><span class="vt">RECEIPT</span><span class="vno">Vch 88</span><span class="vamt cr">−₹1,00,000</span></div>
+                <div class="inv-row"><span class="vdate">11 Apr</span><span class="vt">RECEIPT</span><span class="vno">Vch 124</span><span class="vamt cr">−₹1,00,000</span></div>
+                <div class="inv-row"><span class="vdate">16 Apr</span><span class="vt">RECEIPT</span><span class="vno">Vch 194</span><span class="vamt cr">−₹2,00,000</span></div>
+                <div class="inv-row"><span class="vdate">20 Apr</span><span class="vt">RECEIPT</span><span class="vno">Vch 224</span><span class="vamt cr">−₹1,00,000</span></div>
+                <div class="inv-row"><span class="vdate">24 Apr</span><span class="vt">RECEIPT</span><span class="vno">Vch 292</span><span class="vamt cr">−₹1,50,000</span></div>
+                <div class="inv-row"><span class="vdate">27 Apr</span><span class="vt">RECEIPT</span><span class="vno">Vch 320</span><span class="vamt cr">−₹1,00,000</span></div>
+                <div class="inv-row"><span class="vdate">30 Apr</span><span class="vt">RECEIPT</span><span class="vno">Vch 359</span><span class="vamt cr">−₹1,00,000</span></div>
+                <div class="inv-row"><span class="vdate">01 May</span><span class="vt">SALES</span><span class="vno">Vch 325</span><span class="vamt">₹22,68,140</span></div>
+                <div class="inv-row"><span class="vdate">11 May</span><span class="vt">RECEIPT</span><span class="vno">Vch 497</span><span class="vamt cr">−₹1,00,000</span></div>
+                <div class="inv-row"><span class="vdate">12 May</span><span class="vt">RECEIPT</span><span class="vno">Vch 507</span><span class="vamt cr">−₹1,00,000</span></div>
+                <div class="inv-row"><span class="vdate">20 May</span><span class="vt">RECEIPT</span><span class="vno">Vch 624</span><span class="vamt cr">−₹50,000</span></div>
+                <div class="inv-row"><span class="vdate">22 May</span><span class="vt">RECEIPT</span><span class="vno">Vch 675</span><span class="vamt cr">−₹1,50,000</span></div>
+                <div class="inv-summary"><span><span class="ks">BILLED</span> ₹22,68,140</span><span><span class="ks">RECEIVED</span> ₹14,50,000</span><span><span class="ks">OUTSTANDING</span> <b>₹8,18,140</b></span></div>
               </div></td></tr>
-
-              <tr class="party-r">
+              <tr class="party-r" data-risk="good" data-oldest="11" data-dso="56" data-out="813367" data-lastr="9999">
                 <td><div class="name">
                   <span class="chev">›</span>
-                  <div class="av-sq b">KH</div>
-                  <div class="nm-c"><div class="pri">Karnani Handloom Hub</div><div class="sec">KOLKATA · 6 INVOICES · PROMISED 14:00</div></div>
+                  <div class="av-sq" >KH</div>
+                  <div class="nm-c"><div class="pri">Karnani Handloom Hub</div><div class="sec">6 INVOICES · LAST RECEIPT —</div></div>
                 </div></td>
-                <td><div class="mini-bar"><span class="s0" style="width:38%;"></span><span class="s1" style="width:62%;"></span><span class="s2" style="width:0;"></span><span class="s3" style="width:0;"></span></div></td>
-                <td class="num r" style="color:var(--amber);">52d</td>
-                <td class="num r">38d</td>
-                <td class="mute r" style="font-family:var(--fm);font-size:11px;">11 May</td>
-                <td><span class="risk-cluster"><span class="risk-dot w"></span><span class="risk-lbl">Promised</span></span></td>
-                <td class="num r"><span class="cur">₹</span>8.1 <span style="color:var(--text-3);font-size:11px;">L</span></td>
+                <td><div class="mini-bar"><span class="s0" style="width:100.0%;"></span><span class="s1" style="width:0.0%;"></span><span class="s2" style="width:0.0%;"></span><span class="s3" style="width:0.0%;"></span></div></td>
+                <td class="num r" style="color:var(--text-3);">11d</td>
+                <td class="num r">56d</td>
+                <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
+                <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Good</span></span></td>
+                <td class="num r">₹8.1 L</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner">
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-220</span><span class="vmeta">04 Apr · PO #4533</span><span class="vamt">₹1,82,367</span><span class="vage" style="color:var(--amber);">52d</span><span class="vmeta" style="text-align:right;">31–60</span></div>
-                <div class="inv-row"><span class="vt">RECEIPT</span><span class="vno">R-468</span><span class="vmeta">11 May · against S-220</span><span class="vamt cr">−₹1,20,000</span><span class="vage" style="color:var(--text-3);">part</span><span class="vmeta" style="text-align:right;color:var(--emerald);">cleared</span></div>
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-308</span><span class="vmeta">18 Apr · PO #4647</span><span class="vamt">₹1,68,000</span><span class="vage" style="color:var(--amber);">38d</span><span class="vmeta" style="text-align:right;">31–60</span></div>
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-405</span><span class="vmeta">27 Apr · PO #4732</span><span class="vamt">₹1,30,000</span><span class="vage" style="color:var(--text-3);">29d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-528</span><span class="vmeta">09 May · PO #4785</span><span class="vamt">₹1,90,000</span><span class="vage" style="color:var(--text-3);">17d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
-                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-588</span><span class="vmeta">16 May · PO #4821</span><span class="vamt">₹1,30,000</span><span class="vage" style="color:var(--text-3);">10d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
+                <div class="inv-row"><span class="vdate">15 May</span><span class="vt">SALES</span><span class="vno">Vch 487</span><span class="vamt">₹3,86,508</span></div>
+                <div class="inv-row"><span class="vdate">15 May</span><span class="vt">SALES</span><span class="vno">Vch 495</span><span class="vamt">₹94,235</span></div>
+                <div class="inv-row"><span class="vdate">15 May</span><span class="vt">SALES</span><span class="vno">Vch 504</span><span class="vamt">₹1,14,203</span></div>
+                <div class="inv-row"><span class="vdate">19 May</span><span class="vt">SALES</span><span class="vno">Vch 567</span><span class="vamt">₹1,52,449</span></div>
+                <div class="inv-row"><span class="vdate">19 May</span><span class="vt">SALES</span><span class="vno">Vch 575</span><span class="vamt">₹43,594</span></div>
+                <div class="inv-row"><span class="vdate">20 May</span><span class="vt">SALES</span><span class="vno">Vch 592</span><span class="vamt">₹22,378</span></div>
+                <div class="inv-summary"><span><span class="ks">BILLED</span> ₹8,13,367</span><span><span class="ks">RECEIVED</span> ₹0</span><span><span class="ks">OUTSTANDING</span> <b>₹8,13,367</b></span></div>
               </div></td></tr>
-
+              <tr class="party-r" data-risk="watch" data-oldest="32" data-dso="31" data-out="694607" data-lastr="17">
+                <td><div class="name">
+                  <span class="chev">›</span>
+                  <div class="av-sq a" >SE</div>
+                  <div class="nm-c"><div class="pri">Service Easy Technology Private Limited</div><div class="sec">3 INVOICES · LAST RECEIPT 09 MAY</div></div>
+                </div></td>
+                <td><div class="mini-bar"><span class="s0" style="width:93.1%;"></span><span class="s1" style="width:6.9%;"></span><span class="s2" style="width:0.0%;"></span><span class="s3" style="width:0.0%;"></span></div></td>
+                <td class="num r" style="color:var(--amber);">32d</td>
+                <td class="num r">31d</td>
+                <td class="mute r" style="font-family:var(--fm);font-size:11px;">09 May</td>
+                <td><span class="risk-cluster"><span class="risk-dot w"></span><span class="risk-lbl">Watch</span></span></td>
+                <td class="num r">₹6.9 L</td>
+              </tr>
+              <tr class="detail-r"><td colspan="7"><div class="detail-inner">
+                <div class="inv-row"><span class="vdate">08 Apr</span><span class="vt">CREDIT NOTE</span><span class="vno">Vch 1</span><span class="vamt cr">−₹1,062</span></div>
+                <div class="inv-row"><span class="vdate">24 Apr</span><span class="vt">SALES</span><span class="vno">Vch 247</span><span class="vamt">₹6,01,800</span></div>
+                <div class="inv-row"><span class="vdate">09 May</span><span class="vt">RECEIPT</span><span class="vno">Vch 472</span><span class="vamt cr">−₹5,14,893</span></div>
+                <div class="inv-row"><span class="vdate">13 May</span><span class="vt">SALES</span><span class="vno">Vch 461</span><span class="vamt">₹6,08,762</span></div>
+                <div class="inv-row"><span class="vdate">19 May</span><span class="vt">CREDIT NOTE</span><span class="vno">Vch 5</span><span class="vamt cr">−₹38,940</span></div>
+                <div class="inv-row"><span class="vdate">20 May</span><span class="vt">SALES</span><span class="vno">Vch 583</span><span class="vamt">₹38,940</span></div>
+                <div class="inv-summary"><span><span class="ks">BILLED</span> ₹12,49,502</span><span><span class="ks">RECEIVED</span> ₹5,54,895</span><span><span class="ks">OUTSTANDING</span> <b>₹6,94,607</b></span></div>
+              </div></td></tr>
+              <tr class="party-r" data-risk="watch" data-oldest="55" data-dso="56" data-out="635230" data-lastr="9999">
+                <td><div class="name">
+                  <span class="chev">›</span>
+                  <div class="av-sq a" >SE</div>
+                  <div class="nm-c"><div class="pri">Sham Emporium Pvt Ltd</div><div class="sec">25 INVOICES · LAST RECEIPT —</div></div>
+                </div></td>
+                <td><div class="mini-bar"><span class="s0" style="width:47.5%;"></span><span class="s1" style="width:52.5%;"></span><span class="s2" style="width:0.0%;"></span><span class="s3" style="width:0.0%;"></span></div></td>
+                <td class="num r" style="color:var(--amber);">55d</td>
+                <td class="num r">56d</td>
+                <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
+                <td><span class="risk-cluster"><span class="risk-dot w"></span><span class="risk-lbl">Watch</span></span></td>
+                <td class="num r">₹6.4 L</td>
+              </tr>
+              <tr class="detail-r"><td colspan="7"><div class="detail-inner">
+                <div class="inv-row"><span class="vdate">01 Apr</span><span class="vt">SALES</span><span class="vno">Vch 6</span><span class="vamt">₹21,190</span></div>
+                <div class="inv-row"><span class="vdate">11 Apr</span><span class="vt">SALES</span><span class="vno">Vch 108</span><span class="vamt">₹50,377</span></div>
+                <div class="inv-row"><span class="vdate">13 Apr</span><span class="vt">SALES</span><span class="vno">Vch 121</span><span class="vamt">₹21,608</span></div>
+                <div class="inv-row"><span class="vdate">14 Apr</span><span class="vt">SALES</span><span class="vno">Vch 128</span><span class="vamt">₹14,816</span></div>
+                <div class="inv-row"><span class="vdate">16 Apr</span><span class="vt">SALES</span><span class="vno">Vch 151</span><span class="vamt">₹10,068</span></div>
+                <div class="inv-row"><span class="vdate">17 Apr</span><span class="vt">SALES</span><span class="vno">Vch 163</span><span class="vamt">₹1,22,729</span></div>
+                <div class="inv-row"><span class="vdate">18 Apr</span><span class="vt">SALES</span><span class="vno">Vch 177</span><span class="vamt">₹45,849</span></div>
+                <div class="inv-row"><span class="vdate">20 Apr</span><span class="vt">SALES</span><span class="vno">Vch 193</span><span class="vamt">₹10,688</span></div>
+                <div class="inv-row"><span class="vdate">24 Apr</span><span class="vt">SALES</span><span class="vno">Vch 236</span><span class="vamt">₹29,767</span></div>
+                <div class="inv-row"><span class="vdate">25 Apr</span><span class="vt">SALES</span><span class="vno">Vch 257</span><span class="vamt">₹6,195</span></div>
+                <div class="inv-row"><span class="vdate">29 Apr</span><span class="vt">SALES</span><span class="vno">Vch 300</span><span class="vamt">₹39,602</span></div>
+                <div class="inv-row"><span class="vdate">01 May</span><span class="vt">SALES</span><span class="vno">Vch 319</span><span class="vamt">₹13,941</span></div>
+                <div class="inv-row"><span class="vdate">04 May</span><span class="vt">SALES</span><span class="vno">Vch 341</span><span class="vamt">₹12,314</span></div>
+                <div class="inv-row"><span class="vdate">04 May</span><span class="vt">SALES</span><span class="vno">Vch 342</span><span class="vamt">₹18,398</span></div>
+                <div class="inv-row"><span class="vdate">05 May</span><span class="vt">SALES</span><span class="vno">Vch 365</span><span class="vamt">₹5,344</span></div>
+                <div class="inv-row"><span class="vdate">12 May</span><span class="vt">SALES</span><span class="vno">Vch 448</span><span class="vamt">₹11,152</span></div>
+                <div class="inv-row"><span class="vdate">12 May</span><span class="vt">SALES</span><span class="vno">Vch 452</span><span class="vamt">₹10,688</span></div>
+                <div class="inv-row"><span class="vdate">14 May</span><span class="vt">SALES</span><span class="vno">Vch 481</span><span class="vamt">₹10,409</span></div>
+                <div class="inv-row"><span class="vdate">15 May</span><span class="vt">SALES</span><span class="vno">Vch 498</span><span class="vamt">₹10,409</span></div>
+                <div class="inv-row"><span class="vdate">18 May</span><span class="vt">SALES</span><span class="vno">Vch 545</span><span class="vamt">₹26,022</span></div>
+                <div class="inv-row"><span class="vdate">18 May</span><span class="vt">SALES</span><span class="vno">Vch 546</span><span class="vamt">₹41,125</span></div>
+                <div class="inv-row"><span class="vdate">18 May</span><span class="vt">SALES</span><span class="vno">Vch 547</span><span class="vamt">₹13,708</span></div>
+                <div class="inv-row"><span class="vdate">22 May</span><span class="vt">SALES</span><span class="vno">Vch 623</span><span class="vamt">₹68,420</span></div>
+                <div class="inv-row"><span class="vdate">25 May</span><span class="vt">SALES</span><span class="vno">Vch 659</span><span class="vamt">₹6,854</span></div>
+                <div class="inv-row"><span class="vdate">25 May</span><span class="vt">SALES</span><span class="vno">Vch 671</span><span class="vamt">₹13,557</span></div>
+                <div class="inv-summary"><span><span class="ks">BILLED</span> ₹6,35,230</span><span><span class="ks">RECEIVED</span> ₹0</span><span><span class="ks">OUTSTANDING</span> <b>₹6,35,230</b></span></div>
+              </div></td></tr>
+              <tr class="party-r" data-risk="watch" data-oldest="52" data-dso="56" data-out="503903" data-lastr="9999">
+                <td><div class="name">
+                  <span class="chev">›</span>
+                  <div class="av-sq a" >CE</div>
+                  <div class="nm-c"><div class="pri">Carpet Emporium</div><div class="sec">2 INVOICES · LAST RECEIPT —</div></div>
+                </div></td>
+                <td><div class="mini-bar"><span class="s0" style="width:56.2%;"></span><span class="s1" style="width:43.8%;"></span><span class="s2" style="width:0.0%;"></span><span class="s3" style="width:0.0%;"></span></div></td>
+                <td class="num r" style="color:var(--amber);">52d</td>
+                <td class="num r">56d</td>
+                <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
+                <td><span class="risk-cluster"><span class="risk-dot w"></span><span class="risk-lbl">Watch</span></span></td>
+                <td class="num r">₹5.0 L</td>
+              </tr>
+              <tr class="detail-r"><td colspan="7"><div class="detail-inner">
+                <div class="inv-row"><span class="vdate">04 Apr</span><span class="vt">SALES</span><span class="vno">Vch 34</span><span class="vamt">₹2,20,632</span></div>
+                <div class="inv-row"><span class="vdate">14 May</span><span class="vt">SALES</span><span class="vno">Vch 482</span><span class="vamt">₹2,83,271</span></div>
+                <div class="inv-summary"><span><span class="ks">BILLED</span> ₹5,03,903</span><span><span class="ks">RECEIVED</span> ₹0</span><span><span class="ks">OUTSTANDING</span> <b>₹5,03,903</b></span></div>
+              </div></td></tr>
+              <tr class="party-r" data-risk="watch" data-oldest="50" data-dso="56" data-out="497292" data-lastr="9999">
+                <td><div class="name">
+                  <span class="chev">›</span>
+                  <div class="av-sq a" >SE</div>
+                  <div class="nm-c"><div class="pri">Sanjay Enterprises(Bihar)</div><div class="sec">1 INVOICE · LAST RECEIPT —</div></div>
+                </div></td>
+                <td><div class="mini-bar"><span class="s0" style="width:0.0%;"></span><span class="s1" style="width:100.0%;"></span><span class="s2" style="width:0.0%;"></span><span class="s3" style="width:0.0%;"></span></div></td>
+                <td class="num r" style="color:var(--amber);">50d</td>
+                <td class="num r">56d</td>
+                <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
+                <td><span class="risk-cluster"><span class="risk-dot w"></span><span class="risk-lbl">Watch</span></span></td>
+                <td class="num r">₹5.0 L</td>
+              </tr>
+              <tr class="detail-r"><td colspan="7"><div class="detail-inner">
+                <div class="inv-row"><span class="vdate">06 Apr</span><span class="vt">SALES</span><span class="vno">Vch 53</span><span class="vamt">₹4,97,292</span></div>
+                <div class="inv-summary"><span><span class="ks">BILLED</span> ₹4,97,292</span><span><span class="ks">RECEIVED</span> ₹0</span><span><span class="ks">OUTSTANDING</span> <b>₹4,97,292</b></span></div>
+              </div></td></tr>
+              <tr class="party-r" data-risk="good" data-oldest="18" data-dso="21" data-out="479751" data-lastr="4">
+                <td><div class="name">
+                  <span class="chev">›</span>
+                  <div class="av-sq" >NE</div>
+                  <div class="nm-c"><div class="pri">Navchetan Enterprises</div><div class="sec">12 INVOICES · LAST RECEIPT 22 MAY</div></div>
+                </div></td>
+                <td><div class="mini-bar"><span class="s0" style="width:100.0%;"></span><span class="s1" style="width:0.0%;"></span><span class="s2" style="width:0.0%;"></span><span class="s3" style="width:0.0%;"></span></div></td>
+                <td class="num r" style="color:var(--text-3);">18d</td>
+                <td class="num r">21d</td>
+                <td class="mute r" style="font-family:var(--fm);font-size:11px;">22 May</td>
+                <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Good</span></span></td>
+                <td class="num r">₹4.8 L</td>
+              </tr>
+              <tr class="detail-r"><td colspan="7"><div class="detail-inner">
+                <div class="inv-row"><span class="vdate">14 Apr</span><span class="vt">RECEIPT</span><span class="vno">Vch 161</span><span class="vamt cr">−₹1,02,369</span></div>
+                <div class="inv-row"><span class="vdate">20 Apr</span><span class="vt">SALES</span><span class="vno">Vch 198</span><span class="vamt">₹1,74,257</span></div>
+                <div class="inv-row"><span class="vdate">25 Apr</span><span class="vt">SALES</span><span class="vno">Vch 255</span><span class="vamt">₹1,31,412</span></div>
+                <div class="inv-row"><span class="vdate">02 May</span><span class="vt">RECEIPT</span><span class="vno">Vch 378</span><span class="vamt cr">−₹1,74,257</span></div>
+                <div class="inv-row"><span class="vdate">02 May</span><span class="vt">RECEIPT</span><span class="vno">Vch 379</span><span class="vamt cr">−₹1,31,412</span></div>
+                <div class="inv-row"><span class="vdate">02 May</span><span class="vt">SALES</span><span class="vno">Vch 332</span><span class="vamt">₹91,636</span></div>
+                <div class="inv-row"><span class="vdate">05 May</span><span class="vt">SALES</span><span class="vno">Vch 358</span><span class="vamt">₹3,15,985</span></div>
+                <div class="inv-row"><span class="vdate">08 May</span><span class="vt">SALES</span><span class="vno">Vch 397</span><span class="vamt">₹1,10,386</span></div>
+                <div class="inv-row"><span class="vdate">09 May</span><span class="vt">DEBIT NOTE</span><span class="vno">Vch DN-03</span><span class="vamt">₹4,647</span></div>
+                <div class="inv-row"><span class="vdate">09 May</span><span class="vt">RECEIPT</span><span class="vno">Vch 470</span><span class="vamt cr">−₹91,636</span></div>
+                <div class="inv-row"><span class="vdate">09 May</span><span class="vt">SALES</span><span class="vno">Vch 421</span><span class="vamt">₹69,703</span></div>
+                <div class="inv-row"><span class="vdate">09 May</span><span class="vt">SALES</span><span class="vno">Vch 425</span><span class="vamt">₹39,031</span></div>
+                <div class="inv-row"><span class="vdate">09 May</span><span class="vt">SALES</span><span class="vno">Vch 426</span><span class="vamt">₹47,584</span></div>
+                <div class="inv-row"><span class="vdate">15 May</span><span class="vt">SALES</span><span class="vno">Vch 488</span><span class="vamt">₹1,26,394</span></div>
+                <div class="inv-row"><span class="vdate">19 May</span><span class="vt">SALES</span><span class="vno">Vch 565</span><span class="vamt">₹91,450</span></div>
+                <div class="inv-row"><span class="vdate">22 May</span><span class="vt">RECEIPT</span><span class="vno">Vch 674</span><span class="vamt cr">−₹3,15,985</span></div>
+                <div class="inv-row"><span class="vdate">22 May</span><span class="vt">SALES</span><span class="vno">Vch 627</span><span class="vamt">₹92,925</span></div>
+                <div class="inv-summary"><span><span class="ks">BILLED</span> ₹12,95,410</span><span><span class="ks">RECEIVED</span> ₹8,15,659</span><span><span class="ks">OUTSTANDING</span> <b>₹4,79,751</b></span></div>
+              </div></td></tr>
+              <tr class="party-r" data-risk="watch" data-oldest="46" data-dso="33" data-out="370470" data-lastr="15">
+                <td><div class="name">
+                  <span class="chev">›</span>
+                  <div class="av-sq a" >JJ</div>
+                  <div class="nm-c"><div class="pri">JM Jain LLP</div><div class="sec">15 INVOICES · LAST RECEIPT 11 MAY</div></div>
+                </div></td>
+                <td><div class="mini-bar"><span class="s0" style="width:42.0%;"></span><span class="s1" style="width:58.0%;"></span><span class="s2" style="width:0.0%;"></span><span class="s3" style="width:0.0%;"></span></div></td>
+                <td class="num r" style="color:var(--amber);">46d</td>
+                <td class="num r">33d</td>
+                <td class="mute r" style="font-family:var(--fm);font-size:11px;">11 May</td>
+                <td><span class="risk-cluster"><span class="risk-dot w"></span><span class="risk-lbl">Watch</span></span></td>
+                <td class="num r">₹3.7 L</td>
+              </tr>
+              <tr class="detail-r"><td colspan="7"><div class="detail-inner">
+                <div class="inv-row"><span class="vdate">04 Apr</span><span class="vt">RECEIPT</span><span class="vno">Vch 50</span><span class="vamt cr">−₹1,32,424</span></div>
+                <div class="inv-row"><span class="vdate">05 Apr</span><span class="vt">SALES</span><span class="vno">Vch 45</span><span class="vamt">₹88,210</span></div>
+                <div class="inv-row"><span class="vdate">10 Apr</span><span class="vt">SALES</span><span class="vno">Vch 91</span><span class="vamt">₹2,03,686</span></div>
+                <div class="inv-row"><span class="vdate">14 Apr</span><span class="vt">SALES</span><span class="vno">Vch 129</span><span class="vamt">₹15,393</span></div>
+                <div class="inv-row"><span class="vdate">21 Apr</span><span class="vt">SALES</span><span class="vno">Vch 204</span><span class="vamt">₹15,627</span></div>
+                <div class="inv-row"><span class="vdate">21 Apr</span><span class="vt">SALES</span><span class="vno">Vch 205</span><span class="vamt">₹94,953</span></div>
+                <div class="inv-row"><span class="vdate">11 May</span><span class="vt">RECEIPT</span><span class="vno">Vch 490</span><span class="vamt cr">−₹19,727</span></div>
+                <div class="inv-row"><span class="vdate">11 May</span><span class="vt">RECEIPT</span><span class="vno">Vch 496</span><span class="vamt cr">−₹1,06,620</span></div>
+                <div class="inv-row"><span class="vdate">12 May</span><span class="vt">SALES</span><span class="vno">Vch 449</span><span class="vamt">₹17,730</span></div>
+                <div class="inv-row"><span class="vdate">17 May</span><span class="vt">SALES</span><span class="vno">Vch 542</span><span class="vamt">₹12,158</span></div>
+                <div class="inv-row"><span class="vdate">19 May</span><span class="vt">SALES</span><span class="vno">Vch 572</span><span class="vamt">₹25,695</span></div>
+                <div class="inv-row"><span class="vdate">20 May</span><span class="vt">SALES</span><span class="vno">Vch 591</span><span class="vamt">₹13,096</span></div>
+                <div class="inv-row"><span class="vdate">21 May</span><span class="vt">SALES</span><span class="vno">Vch 612</span><span class="vamt">₹20,648</span></div>
+                <div class="inv-row"><span class="vdate">21 May</span><span class="vt">SALES</span><span class="vno">Vch 613</span><span class="vamt">₹36,174</span></div>
+                <div class="inv-row"><span class="vdate">21 May</span><span class="vt">SALES</span><span class="vno">Vch 614</span><span class="vamt">₹20,966</span></div>
+                <div class="inv-row"><span class="vdate">21 May</span><span class="vt">SALES</span><span class="vno">Vch 615</span><span class="vamt">₹27,524</span></div>
+                <div class="inv-row"><span class="vdate">21 May</span><span class="vt">SALES</span><span class="vno">Vch 616</span><span class="vamt">₹20,695</span></div>
+                <div class="inv-row"><span class="vdate">23 May</span><span class="vt">SALES</span><span class="vno">Vch 640</span><span class="vamt">₹16,687</span></div>
+                <div class="inv-summary"><span><span class="ks">BILLED</span> ₹6,29,242</span><span><span class="ks">RECEIVED</span> ₹2,58,772</span><span><span class="ks">OUTSTANDING</span> <b>₹3,70,470</b></span></div>
+              </div></td></tr>
+              <tr class="party-r" data-risk="good" data-oldest="26" data-dso="56" data-out="357255" data-lastr="9999">
+                <td><div class="name">
+                  <span class="chev">›</span>
+                  <div class="av-sq" >DM</div>
+                  <div class="nm-c"><div class="pri">Dogra Mat House</div><div class="sec">1 INVOICE · LAST RECEIPT —</div></div>
+                </div></td>
+                <td><div class="mini-bar"><span class="s0" style="width:100.0%;"></span><span class="s1" style="width:0.0%;"></span><span class="s2" style="width:0.0%;"></span><span class="s3" style="width:0.0%;"></span></div></td>
+                <td class="num r" style="color:var(--text-3);">26d</td>
+                <td class="num r">56d</td>
+                <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
+                <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Good</span></span></td>
+                <td class="num r">₹3.6 L</td>
+              </tr>
+              <tr class="detail-r"><td colspan="7"><div class="detail-inner">
+                <div class="inv-row"><span class="vdate">30 Apr</span><span class="vt">SALES</span><span class="vno">Vch 313</span><span class="vamt">₹3,57,255</span></div>
+                <div class="inv-summary"><span><span class="ks">BILLED</span> ₹3,57,255</span><span><span class="ks">RECEIVED</span> ₹0</span><span><span class="ks">OUTSTANDING</span> <b>₹3,57,255</b></span></div>
+              </div></td></tr>
+              <tr class="party-r" data-risk="good" data-oldest="1" data-dso="56" data-out="351955" data-lastr="9999">
+                <td><div class="name">
+                  <span class="chev">›</span>
+                  <div class="av-sq" >SS</div>
+                  <div class="nm-c"><div class="pri">Shri Shyam Traders(jaipur)</div><div class="sec">2 INVOICES · LAST RECEIPT —</div></div>
+                </div></td>
+                <td><div class="mini-bar"><span class="s0" style="width:100.0%;"></span><span class="s1" style="width:0.0%;"></span><span class="s2" style="width:0.0%;"></span><span class="s3" style="width:0.0%;"></span></div></td>
+                <td class="num r" style="color:var(--text-3);">1d</td>
+                <td class="num r">56d</td>
+                <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
+                <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Good</span></span></td>
+                <td class="num r">₹3.5 L</td>
+              </tr>
+              <tr class="detail-r"><td colspan="7"><div class="detail-inner">
+                <div class="inv-row"><span class="vdate">25 May</span><span class="vt">SALES</span><span class="vno">Vch 661</span><span class="vamt">₹2,31,285</span></div>
+                <div class="inv-row"><span class="vdate">26 May</span><span class="vt">SALES</span><span class="vno">Vch 672</span><span class="vamt">₹1,20,670</span></div>
+                <div class="inv-summary"><span><span class="ks">BILLED</span> ₹3,51,955</span><span><span class="ks">RECEIVED</span> ₹0</span><span><span class="ks">OUTSTANDING</span> <b>₹3,51,955</b></span></div>
+              </div></td></tr>
+              <tr class="party-r" data-risk="good" data-oldest="10" data-dso="26" data-out="346072" data-lastr="6">
+                <td><div class="name">
+                  <span class="chev">›</span>
+                  <div class="av-sq" >RM</div>
+                  <div class="nm-c"><div class="pri">Rajasthan Minerals</div><div class="sec">13 INVOICES · LAST RECEIPT 20 MAY</div></div>
+                </div></td>
+                <td><div class="mini-bar"><span class="s0" style="width:100.0%;"></span><span class="s1" style="width:0.0%;"></span><span class="s2" style="width:0.0%;"></span><span class="s3" style="width:0.0%;"></span></div></td>
+                <td class="num r" style="color:var(--text-3);">10d</td>
+                <td class="num r">26d</td>
+                <td class="mute r" style="font-family:var(--fm);font-size:11px;">20 May</td>
+                <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Good</span></span></td>
+                <td class="num r">₹3.5 L</td>
+              </tr>
+              <tr class="detail-r"><td colspan="7"><div class="detail-inner">
+                <div class="inv-row"><span class="vdate">09 Apr</span><span class="vt">SALES</span><span class="vno">Vch 79</span><span class="vamt">₹21,164</span></div>
+                <div class="inv-row"><span class="vdate">14 Apr</span><span class="vt">SALES</span><span class="vno">Vch 137</span><span class="vamt">₹58,015</span></div>
+                <div class="inv-row"><span class="vdate">14 Apr</span><span class="vt">SALES</span><span class="vno">Vch 138</span><span class="vamt">₹30,873</span></div>
+                <div class="inv-row"><span class="vdate">16 Apr</span><span class="vt">RECEIPT</span><span class="vno">Vch 191</span><span class="vamt cr">−₹21,164</span></div>
+                <div class="inv-row"><span class="vdate">16 Apr</span><span class="vt">RECEIPT</span><span class="vno">Vch 192</span><span class="vamt cr">−₹58,015</span></div>
+                <div class="inv-row"><span class="vdate">24 Apr</span><span class="vt">RECEIPT</span><span class="vno">Vch 289</span><span class="vamt cr">−₹30,873</span></div>
+                <div class="inv-row"><span class="vdate">25 Apr</span><span class="vt">SALES</span><span class="vno">Vch 263</span><span class="vamt">₹30,136</span></div>
+                <div class="inv-row"><span class="vdate">01 May</span><span class="vt">RECEIPT</span><span class="vno">Vch 370</span><span class="vamt cr">−₹30,136</span></div>
+                <div class="inv-row"><span class="vdate">08 May</span><span class="vt">SALES</span><span class="vno">Vch 403</span><span class="vamt">₹50,751</span></div>
+                <div class="inv-row"><span class="vdate">12 May</span><span class="vt">RECEIPT</span><span class="vno">Vch 510</span><span class="vamt cr">−₹20,751</span></div>
+                <div class="inv-row"><span class="vdate">12 May</span><span class="vt">RECEIPT</span><span class="vno">Vch 511</span><span class="vamt cr">−₹30,000</span></div>
+                <div class="inv-row"><span class="vdate">12 May</span><span class="vt">SALES</span><span class="vno">Vch 454</span><span class="vamt">₹37,188</span></div>
+                <div class="inv-row"><span class="vdate">16 May</span><span class="vt">SALES</span><span class="vno">Vch 507</span><span class="vamt">₹70,119</span></div>
+                <div class="inv-row"><span class="vdate">16 May</span><span class="vt">SALES</span><span class="vno">Vch 509</span><span class="vamt">₹68,969</span></div>
+                <div class="inv-row"><span class="vdate">16 May</span><span class="vt">SALES</span><span class="vno">Vch 510</span><span class="vamt">₹18,696</span></div>
+                <div class="inv-row"><span class="vdate">16 May</span><span class="vt">SALES</span><span class="vno">Vch 511</span><span class="vamt">₹71,123</span></div>
+                <div class="inv-row"><span class="vdate">19 May</span><span class="vt">RECEIPT</span><span class="vno">Vch 634</span><span class="vamt cr">−₹18,696</span></div>
+                <div class="inv-row"><span class="vdate">19 May</span><span class="vt">RECEIPT</span><span class="vno">Vch 635</span><span class="vamt cr">−₹68,969</span></div>
+                <div class="inv-row"><span class="vdate">19 May</span><span class="vt">RECEIPT</span><span class="vno">Vch 636</span><span class="vamt cr">−₹71,123</span></div>
+                <div class="inv-row"><span class="vdate">20 May</span><span class="vt">RECEIPT</span><span class="vno">Vch 640</span><span class="vamt cr">−₹37,188</span></div>
+                <div class="inv-row"><span class="vdate">20 May</span><span class="vt">SALES</span><span class="vno">Vch 588</span><span class="vamt">₹43,677</span></div>
+                <div class="inv-row"><span class="vdate">20 May</span><span class="vt">SALES</span><span class="vno">Vch 589</span><span class="vamt">₹60,207</span></div>
+                <div class="inv-row"><span class="vdate">23 May</span><span class="vt">SALES</span><span class="vno">Vch 632</span><span class="vamt">₹1,72,069</span></div>
+                <div class="inv-summary"><span><span class="ks">BILLED</span> ₹7,32,987</span><span><span class="ks">RECEIVED</span> ₹3,86,915</span><span><span class="ks">OUTSTANDING</span> <b>₹3,46,072</b></span></div>
+              </div></td></tr>
+              <tr class="party-r" data-risk="watch" data-oldest="42" data-dso="29" data-out="314076" data-lastr="4">
+                <td><div class="name">
+                  <span class="chev">›</span>
+                  <div class="av-sq a" >QW</div>
+                  <div class="nm-c"><div class="pri">M/s Quality Weavers(NEW)</div><div class="sec">7 INVOICES · LAST RECEIPT 22 MAY</div></div>
+                </div></td>
+                <td><div class="mini-bar"><span class="s0" style="width:98.5%;"></span><span class="s1" style="width:1.5%;"></span><span class="s2" style="width:0.0%;"></span><span class="s3" style="width:0.0%;"></span></div></td>
+                <td class="num r" style="color:var(--amber);">42d</td>
+                <td class="num r">29d</td>
+                <td class="mute r" style="font-family:var(--fm);font-size:11px;">22 May</td>
+                <td><span class="risk-cluster"><span class="risk-dot w"></span><span class="risk-lbl">Watch</span></span></td>
+                <td class="num r">₹3.1 L</td>
+              </tr>
+              <tr class="detail-r"><td colspan="7"><div class="detail-inner">
+                <div class="inv-row"><span class="vdate">03 Apr</span><span class="vt">SALES</span><span class="vno">Vch 30</span><span class="vamt">₹26,373</span></div>
+                <div class="inv-row"><span class="vdate">07 Apr</span><span class="vt">SALES</span><span class="vno">Vch 64</span><span class="vamt">₹2,41,055</span></div>
+                <div class="inv-row"><span class="vdate">14 Apr</span><span class="vt">SALES</span><span class="vno">Vch 126</span><span class="vamt">₹37,297</span></div>
+                <div class="inv-row"><span class="vdate">20 Apr</span><span class="vt">RECEIPT</span><span class="vno">Vch 221</span><span class="vamt cr">−₹1,00,000</span></div>
+                <div class="inv-row"><span class="vdate">03 May</span><span class="vt">RECEIPT</span><span class="vno">Vch 390</span><span class="vamt cr">−₹1,00,000</span></div>
+                <div class="inv-row"><span class="vdate">11 May</span><span class="vt">SALES</span><span class="vno">Vch 438</span><span class="vamt">₹1,09,480</span></div>
+                <div class="inv-row"><span class="vdate">13 May</span><span class="vt">SALES</span><span class="vno">Vch 463</span><span class="vamt">₹36,167</span></div>
+                <div class="inv-row"><span class="vdate">22 May</span><span class="vt">RECEIPT</span><span class="vno">Vch 676</span><span class="vamt cr">−₹1,00,000</span></div>
+                <div class="inv-row"><span class="vdate">23 May</span><span class="vt">SALES</span><span class="vno">Vch 642</span><span class="vamt">₹1,58,099</span></div>
+                <div class="inv-row"><span class="vdate">23 May</span><span class="vt">SALES</span><span class="vno">Vch 651</span><span class="vamt">₹5,605</span></div>
+                <div class="inv-summary"><span><span class="ks">BILLED</span> ₹6,14,076</span><span><span class="ks">RECEIVED</span> ₹3,00,000</span><span><span class="ks">OUTSTANDING</span> <b>₹3,14,076</b></span></div>
+              </div></td></tr>
             </tbody>
           </table>
         </div>
         <div class="ledger-foot">
-          <div class="l">Showing <b>9</b> of <b>142</b> · click row for ledger · click an aging segment to filter</div>
+          <div class="l">Showing <b>15</b> of <b>108</b> · in-period view · pre-01 Apr opening balances not in source</div>
           <div class="r">
             <span class="exp-csv">Export CSV</span>
-            <span><span class="ind"></span>SYNCED · TALLY</span>
+            <span><span class="ind"></span>SOURCE · TALLY SUNDRY DEBTORS</span>
           </div>
         </div>
       </div>
@@ -2765,14 +2972,14 @@
 
     function passesChip(row){
       const oldest = +row.dataset.oldest;
-      const risk = row.dataset.risk;
+      const risk   = row.dataset.risk;
+      const lastR  = +row.dataset.lastr;
       switch(activeChip){
         case 'all':       return true;
         case 'overdue':   return oldest > 30;
         case '60+':       return oldest > 60;
-        case 'credit':    return risk === 'high';
-        case 'promised':  return risk === 'promised';
-        case 'noact':     return risk === 'review' || risk === 'watch';
+        case 'high':      return risk === 'high';
+        case 'noact':     return lastR > 30;
         default:          return true;
       }
     }
@@ -2806,8 +3013,7 @@
       'all': 'all',
       'overdue': 'overdue',
       '60+ days': '60+',
-      'credit hold': 'credit',
-      'promised': 'promised',
+      'high risk': 'high',
       'no activity 30d': 'noact'
     };
     if (chipsRoot) {
@@ -2829,7 +3035,7 @@
 
     // ── Sort by column (Outstanding / Aged / DSO / Risk) ───
     const sortGrp = document.querySelector('[data-sortgrp="ledger"]');
-    const riskOrder = { 'high': 4, 'watch': 3, 'review': 3, 'promised': 2, 'good': 1, 'on cadence': 1 };
+    const riskOrder = { 'high': 4, 'watch': 3, 'good': 2, 'paid': 1 };
     function readOutstanding(row){
       const t = row.children[row.children.length-1].textContent.replace(/[^\d.]/g,'');
       return parseFloat(t) || 0;
