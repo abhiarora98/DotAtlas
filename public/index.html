@@ -634,6 +634,172 @@
     .grid, .row-2 { grid-template-columns: 1fr; }
     .ask { min-width: 0; }
   }
+
+  /* === RECEIVABLES — nerve-center components === */
+  .mt-14 { margin-top: 14px; }
+
+  /* hero right-meta accent */
+  .hero-h .when b.amt { font-family: var(--fd); font-size: 13.5px; letter-spacing: -0.015em; }
+
+  /* kpi sparkline */
+  .kpi .spark { display: block; margin-top: 14px; width: 100%; height: 26px; }
+
+  /* aging band — a single horizontal visual you read in 0.4s */
+  .aging-band {
+    display: flex; height: 64px; width: 100%; gap: 4px;
+  }
+  .aging-band .ab-seg {
+    position: relative; padding: 10px 14px; min-width: 96px;
+    background: linear-gradient(180deg, rgba(78,222,163,0.10), rgba(78,222,163,0.025));
+    border: 1px solid rgba(78,222,163,0.22);
+    border-radius: 6px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    cursor: pointer; transition: all 200ms var(--ease);
+  }
+  .aging-band .ab-seg.warn  { background: linear-gradient(180deg, rgba(255,176,121,0.10), rgba(255,176,121,0.025)); border-color: rgba(255,176,121,0.28); }
+  .aging-band .ab-seg.amber { background: linear-gradient(180deg, rgba(255,176,121,0.20), rgba(255,176,121,0.06));  border-color: rgba(255,176,121,0.40); }
+  .aging-band .ab-seg.bad   { background: linear-gradient(180deg, rgba(255,138,168,0.20), rgba(255,138,168,0.04));  border-color: rgba(255,138,168,0.38); }
+  .aging-band .ab-seg:hover { transform: translateY(-1px); }
+  .aging-band .ab-amt {
+    font-family: var(--fd); font-size: 17px; font-weight: 500; color: var(--text);
+    letter-spacing: -0.015em; font-variant-numeric: tabular-nums;
+  }
+  .aging-band .ab-lab {
+    font-family: var(--fm); font-size: 10px; color: var(--text-2);
+    letter-spacing: 0.06em;
+  }
+
+  /* concentration rows */
+  .conc-row {
+    display: grid; grid-template-columns: 1fr 84px 64px;
+    gap: 12px; align-items: center;
+    padding: 10px 0; border-bottom: 1px solid var(--line);
+  }
+  .conc-row:last-child { border-bottom: 0; padding-bottom: 0; }
+  .conc-row .nm { font-size: 12.5px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .conc-row .bar { height: 4px; border-radius: 999px; background: var(--surface-3); position: relative; overflow: hidden; }
+  .conc-row .bar > div { position: absolute; left: 0; top: 0; bottom: 0; background: var(--emerald); border-radius: 999px; }
+  .conc-row .v { font-family: var(--fd); font-weight: 500; font-size: 12.5px; text-align: right; color: var(--text); font-variant-numeric: tabular-nums; }
+
+  /* promise calendar — next 7 days */
+  .promise-cal {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+  }
+  .promise-cal .pc-day {
+    border: 1px solid var(--line); border-radius: 6px;
+    padding: 10px 10px 10px;
+    display: flex; flex-direction: column; gap: 3px;
+    min-height: 84px;
+    cursor: pointer; transition: all 200ms var(--ease);
+  }
+  .promise-cal .pc-day:hover { border-color: var(--line-2); background: rgba(255,255,255,0.018); }
+  .promise-cal .pc-day .pc-dow { font-family: var(--fm); font-size: 9.5px; color: var(--text-3); letter-spacing: 0.12em; }
+  .promise-cal .pc-day .pc-num { font-family: var(--fd); font-size: 13px; color: var(--text-2); font-weight: 500; }
+  .promise-cal .pc-day .pc-amt { font-family: var(--fm); font-size: 10.5px; color: var(--emerald); margin-top: auto; letter-spacing: 0.02em; }
+  .promise-cal .pc-day .pc-amt.warn { color: var(--amber); }
+  .promise-cal .pc-day .pc-amt.bad  { color: var(--rose);  }
+  .promise-cal .pc-day.today { background: rgba(78,222,163,0.05); border-color: rgba(78,222,163,0.25); }
+  .promise-cal .pc-day.today .pc-num { color: var(--text); }
+  .promise-cal .pc-day.empty .pc-amt { color: var(--text-4); }
+
+  /* ledger filter tools row */
+  .ledger-tools {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 22px; border-bottom: 1px solid var(--line);
+    gap: 14px;
+  }
+  .ledger-tools .chips { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+  .ledger-tools .chips .chip { padding: 4px 10px; font-size: 10px; }
+  .ledger-tools .chips .chip.on { background: var(--text); color: var(--void); border-color: var(--text); }
+  .ledger-tools .chips .chip.on .cnt { color: var(--void); opacity: 0.55; }
+  .ledger-tools .chip .cnt { color: var(--text-3); margin-left: 6px; font-variant-numeric: tabular-nums; }
+  .ledger-tools .search {
+    background: transparent; border: 1px solid var(--line); border-radius: 999px;
+    padding: 6px 14px; color: var(--text-2); font-family: var(--fb); font-size: 12px;
+    min-width: 220px; outline: 0;
+  }
+  .ledger-tools .search::placeholder { color: var(--text-3); }
+  .ledger-tools .search:focus { border-color: var(--line-3); color: var(--text); }
+
+  /* party ledger table — expandable rows */
+  .table.ledger tr.party-r { cursor: pointer; }
+  .table.ledger tr.party-r:hover td { background: rgba(255,255,255,0.015); }
+  .table.ledger .chev {
+    display: inline-flex; width: 14px; justify-content: center; color: var(--text-3);
+    transition: transform 200ms var(--ease); font-family: var(--fm); font-size: 11px;
+    margin-right: -2px;
+  }
+  .table.ledger tr.party-r.open .chev { transform: rotate(90deg); color: var(--emerald); }
+  .table.ledger tr.detail-r { display: none; }
+  .table.ledger tr.detail-r.open { display: table-row; }
+  .table.ledger tr.detail-r > td {
+    padding: 0; border-bottom: 1px solid var(--line);
+    background: rgba(0,0,0,0.22);
+  }
+  .table.ledger .detail-inner { padding: 14px 22px 16px 64px; }
+  .table.ledger .detail-inner .inv-row {
+    display: grid; grid-template-columns: 76px 80px 1fr 120px 90px 80px;
+    gap: 14px; padding: 8px 0;
+    font-family: var(--fm); font-size: 11.5px; color: var(--text-2);
+    border-bottom: 1px dashed var(--line);
+    letter-spacing: 0.02em; align-items: baseline;
+  }
+  .table.ledger .detail-inner .inv-row:last-of-type { border-bottom: 0; }
+  .table.ledger .detail-inner .vt   { color: var(--text-3); font-size: 9.5px; letter-spacing: 0.12em; }
+  .table.ledger .detail-inner .vno  { color: var(--text); }
+  .table.ledger .detail-inner .vamt { text-align: right; color: var(--text); font-variant-numeric: tabular-nums; }
+  .table.ledger .detail-inner .vamt.cr { color: var(--emerald); }
+  .table.ledger .detail-inner .vage { text-align: right; color: var(--text-2); }
+  .table.ledger .detail-inner .vmeta { color: var(--text-3); }
+  .table.ledger .detail-inner .detail-acts {
+    margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line);
+    display: inline-flex; gap: 8px; flex-wrap: wrap;
+  }
+  .table.ledger .detail-inner .detail-acts button {
+    font-family: var(--fd); font-size: 11px; font-weight: 500;
+    padding: 5px 12px; border-radius: 999px; cursor: pointer;
+    background: transparent; border: 1px solid var(--line-2); color: var(--text-2);
+    transition: all 200ms var(--ease); letter-spacing: -0.005em;
+  }
+  .table.ledger .detail-inner .detail-acts button:hover { color: var(--text); border-color: var(--line-3); }
+  .table.ledger .detail-inner .detail-acts button.prime { background: var(--text); color: var(--void); border-color: var(--text); }
+  .table.ledger .detail-inner .detail-acts button.prime:hover { background: var(--emerald); color: var(--void); border-color: var(--emerald); }
+
+  /* mini-aging bar inside party row */
+  .mini-bar {
+    display: inline-flex; height: 5px; width: 96px;
+    border-radius: 999px; overflow: hidden; gap: 1px;
+    background: var(--surface-3);
+  }
+  .mini-bar > span { display: block; height: 100%; }
+  .mini-bar .s0 { background: var(--emerald); }
+  .mini-bar .s1 { background: var(--amber); opacity: 0.55; }
+  .mini-bar .s2 { background: var(--amber); }
+  .mini-bar .s3 { background: var(--rose); }
+
+  /* risk cluster — colored dot + label */
+  .risk-cluster { display: inline-flex; gap: 7px; align-items: center; }
+  .risk-cluster .risk-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--emerald); box-shadow: 0 0 6px var(--emerald);
+  }
+  .risk-cluster .risk-dot.w { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+  .risk-cluster .risk-dot.r { background: var(--rose);  box-shadow: 0 0 6px var(--rose);  }
+  .risk-cluster .risk-dot.b { background: var(--blue);  box-shadow: 0 0 6px var(--blue);  }
+  .risk-cluster .risk-lbl   { font-family: var(--fm); font-size: 10px; color: var(--text-2); letter-spacing: 0.08em; text-transform: uppercase; }
+
+  /* ledger footer */
+  .ledger-foot {
+    padding: 14px 22px; border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--fm); font-size: 10.5px; color: var(--text-3); letter-spacing: 0.06em;
+  }
+  .ledger-foot b { color: var(--text); font-weight: 500; }
+  .ledger-foot .r { display: inline-flex; gap: 22px; }
+  .ledger-foot .r span { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; transition: color 200ms var(--ease); }
+  .ledger-foot .r span:hover { color: var(--text-2); }
+  .ledger-foot .r .ind { width: 5px; height: 5px; border-radius: 50%; background: var(--emerald); box-shadow: 0 0 6px var(--emerald); }
 </style>
 <style id="light-mode">
   /* === LIGHT MODE: Linear / Apple Pro / premium finance === */
@@ -2037,25 +2203,400 @@
     <!-- RECEIVABLES PAGE -->
     <section class="page" data-page="receivables" hidden>
       <div class="hero-h">
-        <div><div class="eb"><span class="live-dot"></span>Receivables · ₹1.18 Cr outstanding</div><h1>Who <span class="em">owes you</span>, and how <span class="accent">long</span>.</h1></div>
-        <div class="when">PARTIES · <b>42</b><br/>OVERDUE · <b>14</b><br/>OVER 60D · <b>5</b></div>
+        <div>
+          <div class="eb"><span class="live-dot"></span>Receivables · ₹3.53 Cr outstanding · 142 parties</div>
+          <h1>Who <span class="em">owes you</span>, and how <span class="accent">long</span>.</h1>
+        </div>
+        <div class="when">
+          CHASE TODAY · <b class="amt">₹47.2L</b><br/>
+          PROMISES DUE · <b>4</b><br/>
+          NEW OVERDUE · <b>3</b>
+        </div>
       </div>
+
+      <!-- KPI ROW -->
       <div class="kpis">
-        <div class="kpi"><div class="lbl"><span>Total receivables</span><span class="ind a"></span></div><div class="v"><span class="cur">₹</span>1.18<span class="un">Cr</span></div><div class="d dn"><span class="arr">↑</span>+₹14L vs. month avg</div></div>
-        <div class="kpi"><div class="lbl"><span>Avg DSO</span><span class="ind a"></span></div><div class="v">38<span class="un">d</span></div><div class="d dn"><span class="arr">↑</span>+4d this quarter</div></div>
-        <div class="kpi"><div class="lbl"><span>Over 60 days</span><span class="ind r"></span></div><div class="v"><span class="cur">₹</span>32.4<span class="un">L</span></div><div class="d rr"><span class="arr">→</span>2 parties · 5 invoices</div></div>
-        <div class="kpi"><div class="lbl"><span>Collected 7d</span><span class="ind"></span></div><div class="v"><span class="cur">₹</span>24.8<span class="un">L</span></div><div class="d"><span class="arr">↑</span>+₹6L vs. prior</div></div>
+        <div class="kpi">
+          <div class="lbl"><span>Total receivables</span><span class="ind"></span></div>
+          <div class="v"><span class="cur">₹</span>3.53<span class="un">Cr</span></div>
+          <div class="d"><span class="arr">↑</span>+₹18L vs. 30d avg</div>
+          <svg class="spark" viewBox="0 0 120 26" preserveAspectRatio="none">
+            <polyline fill="rgba(78,222,163,0.10)" stroke="none" points="0,26 0,18 12,17 24,19 36,14 48,15 60,11 72,13 84,9 96,10 108,7 120,6 120,26"/>
+            <polyline fill="none" stroke="var(--emerald)" stroke-width="1.4" points="0,18 12,17 24,19 36,14 48,15 60,11 72,13 84,9 96,10 108,7 120,6"/>
+          </svg>
+        </div>
+        <div class="kpi">
+          <div class="lbl"><span>Overdue · &gt;30d</span><span class="ind a"></span></div>
+          <div class="v"><span class="cur">₹</span>1.61<span class="un">Cr</span></div>
+          <div class="d dn"><span class="arr">↑</span>58 parties · 124 invoices</div>
+          <svg class="spark" viewBox="0 0 120 26" preserveAspectRatio="none">
+            <polyline fill="none" stroke="var(--amber)" stroke-width="1.4" points="0,22 12,21 24,21 36,18 48,17 60,15 72,15 84,13 96,12 108,10 120,9"/>
+          </svg>
+        </div>
+        <div class="kpi">
+          <div class="lbl"><span>Avg DSO</span><span class="ind a"></span></div>
+          <div class="v">34<span class="un">d</span></div>
+          <div class="d dn"><span class="arr">↑</span>+3d vs. last quarter</div>
+          <svg class="spark" viewBox="0 0 120 26" preserveAspectRatio="none">
+            <polyline fill="none" stroke="var(--amber)" stroke-width="1.4" points="0,18 12,17 24,17 36,15 48,16 60,14 72,13 84,11 96,12 108,10 120,9"/>
+          </svg>
+        </div>
+        <div class="kpi">
+          <div class="lbl"><span>Collected · 7d</span><span class="ind"></span></div>
+          <div class="v"><span class="cur">₹</span>62<span class="un">L</span></div>
+          <div class="d"><span class="arr">↑</span>+₹14L vs. prior 7d</div>
+          <svg class="spark" viewBox="0 0 120 26" preserveAspectRatio="none">
+            <g fill="var(--emerald)" opacity="0.85">
+              <rect x="2"   y="14" width="12" height="12" rx="1"/>
+              <rect x="18"  y="18" width="12" height="8"  rx="1"/>
+              <rect x="34"  y="10" width="12" height="16" rx="1"/>
+              <rect x="50"  y="16" width="12" height="10" rx="1"/>
+              <rect x="66"  y="6"  width="12" height="20" rx="1"/>
+              <rect x="82"  y="12" width="12" height="14" rx="1"/>
+              <rect x="98"  y="3"  width="12" height="23" rx="1"/>
+            </g>
+          </svg>
+        </div>
       </div>
-      <div class="card" style="margin-top:14px;">
-        <div class="card-h"><div class="t"><span class="ic">⋮</span><h3>Aging book</h3><span class="sub">42 PARTIES</span></div><div class="seg"><button>0-30</button><button class="on">31-60</button><button>61-90</button><button>90+</button></div></div>
+
+      <!-- AGING STRIP -->
+      <div class="card mt-14">
+        <div class="card-h">
+          <div class="t"><span class="ic">⊜</span><h3>Aging</h3><span class="sub">SUNDRY DEBTORS · 26 MAY</span></div>
+          <div class="seg"><button class="on">ALL</button><button>DOMESTIC</button><button>EXPORT</button></div>
+        </div>
+        <div class="card-b">
+          <div class="aging-band">
+            <div class="ab-seg" style="flex: 192;">
+              <div class="ab-amt">₹1.92 Cr</div>
+              <div class="ab-lab">0–30 days · 54% · 84 parties</div>
+            </div>
+            <div class="ab-seg warn" style="flex: 84;">
+              <div class="ab-amt">₹84.0 L</div>
+              <div class="ab-lab">31–60 days · 24% · 36 parties</div>
+            </div>
+            <div class="ab-seg amber" style="flex: 47;">
+              <div class="ab-amt">₹47.0 L</div>
+              <div class="ab-lab">61–90 days · 13% · 14 parties</div>
+            </div>
+            <div class="ab-seg bad" style="flex: 30;">
+              <div class="ab-amt">₹30.0 L</div>
+              <div class="ab-lab">90+ days · 9% · 8 parties</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2-COL: SIGNALS + RIGHT RAIL -->
+      <div class="grid">
+        <div class="card">
+          <div class="card-h">
+            <div class="t"><span class="ic">◇</span><h3>Atlas is suggesting</h3><span class="sub">5 ACTIONS · ₹47.2L AT STAKE</span></div>
+            <div class="seg"><button class="on">ALL</button><button>REMIND</button><button>HOLD</button><button>PROMISES</button></div>
+          </div>
+          <div class="card-b">
+            <div class="signal">
+              <span class="pip r"></span>
+              <div>
+                <div class="title"><b>Sunny Synthetic crossed ₹37.9L · oldest invoice 76 days.</b>
+                  <span style="color:var(--text-2);"> Concentration jumped from 6.4% → 10.7% in 60 days. Atlas drafted a credit-hold note on further dispatches until ₹15L clears.</span></div>
+                <div class="meta-r"><span class="when">12m ago</span><span class="by">◇ ATLAS · 94%</span></div>
+                <div class="acts"><button class="prime">Place credit hold</button><button>Review ledger</button><button>Defer</button></div>
+              </div>
+            </div>
+            <div class="signal">
+              <span class="pip a"></span>
+              <div>
+                <div class="title"><b>4 reminders ready · total ₹21.4L.</b>
+                  <span style="color:var(--text-2);"> Drafted in your tone for Shantinath, Navchetan, Lexicon, JM Jain. WhatsApp + email + UPI link.</span></div>
+                <div class="meta-r"><span class="when">07:55</span><span class="by">◇ DRAFTED · awaiting send</span></div>
+                <div class="acts"><button class="prime">Send all</button><button>Review each</button></div>
+              </div>
+            </div>
+            <div class="signal">
+              <span class="pip a"></span>
+              <div>
+                <div class="title"><b>Karnani Handloom promise due today.</b>
+                  <span style="color:var(--text-2);"> Owner promised ₹8.1L by 14:00. UPI link sent at 09:12. No receipt yet.</span></div>
+                <div class="meta-r"><span class="when">today</span><span class="by">◇ TRACKED</span></div>
+                <div class="acts"><button class="prime">Nudge</button><button>Call log</button></div>
+              </div>
+            </div>
+            <div class="signal">
+              <span class="pip b"></span>
+              <div>
+                <div class="title"><b>BM Distributor: ₹22.7L on a single invoice, single party.</b>
+                  <span style="color:var(--text-2);"> First order · 42d aged · no prior cadence. Atlas suggests confirming PO terms before next dispatch.</span></div>
+                <div class="meta-r"><span class="when">yesterday</span><span class="by">◇ ATLAS · 88%</span></div>
+                <div class="acts"><button>Open party</button><button>Set tier</button></div>
+              </div>
+            </div>
+            <div class="signal">
+              <span class="pip"></span>
+              <div>
+                <div class="title"><b>Rathi Brothers cleared ₹9.0L on time.</b>
+                  <span style="color:var(--text-2);"> 12th consecutive on-cadence payment. Auto-reconciled · receipt R-621 issued in Tally.</span></div>
+                <div class="meta-r"><span class="when">08:42</span><span class="by">◇ AUTO-ACTIONED</span></div>
+                <div class="acts"><button>View trail</button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card">
+            <div class="card-h">
+              <div class="t"><span class="ic">▣</span><h3>Concentration</h3><span class="sub">TOP 5 = 28% OF BOOK</span></div>
+              <span class="more">›</span>
+            </div>
+            <div class="card-b">
+              <div class="conc-row"><div class="nm">Sunny Synthetic</div><div class="bar"><div style="width:100%;background:var(--rose);"></div></div><div class="v">₹37.9L</div></div>
+              <div class="conc-row"><div class="nm">Shantinath Enterprise</div><div class="bar"><div style="width:69%;background:var(--amber);"></div></div><div class="v">₹26.0L</div></div>
+              <div class="conc-row"><div class="nm">BM Distributor</div><div class="bar"><div style="width:60%;background:var(--blue);"></div></div><div class="v">₹22.7L</div></div>
+              <div class="conc-row"><div class="nm">JSG Infotech</div><div class="bar"><div style="width:45%;"></div></div><div class="v">₹16.9L</div></div>
+              <div class="conc-row"><div class="nm">Navchetan Enterprises</div><div class="bar"><div style="width:34%;"></div></div><div class="v">₹12.9L</div></div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:14px;">
+            <div class="card-h">
+              <div class="t"><span class="ic">⊞</span><h3>Promised this week</h3><span class="sub">₹38.6L EXPECTED</span></div>
+              <span class="more">›</span>
+            </div>
+            <div class="card-b" style="padding-top:14px;">
+              <div class="promise-cal">
+                <div class="pc-day today"><div class="pc-dow">TUE</div><div class="pc-num">26</div><div class="pc-amt">₹8.1L</div></div>
+                <div class="pc-day"><div class="pc-dow">WED</div><div class="pc-num">27</div><div class="pc-amt">₹9.4L</div></div>
+                <div class="pc-day"><div class="pc-dow">THU</div><div class="pc-num">28</div><div class="pc-amt warn">₹11.2L</div></div>
+                <div class="pc-day"><div class="pc-dow">FRI</div><div class="pc-num">29</div><div class="pc-amt">₹4.0L</div></div>
+                <div class="pc-day empty"><div class="pc-dow">SAT</div><div class="pc-num">30</div><div class="pc-amt">—</div></div>
+                <div class="pc-day empty"><div class="pc-dow">SUN</div><div class="pc-num">31</div><div class="pc-amt">—</div></div>
+                <div class="pc-day"><div class="pc-dow">MON</div><div class="pc-num">01</div><div class="pc-amt">₹5.9L</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PARTY LEDGER -->
+      <div class="card mt-14">
+        <div class="card-h">
+          <div class="t"><span class="ic">≡</span><h3>Party ledger</h3><span class="sub">142 ON BOOK · TALLY · LIVE</span></div>
+          <div class="seg">
+            <button class="on">OUTSTANDING</button>
+            <button>AGED</button>
+            <button>DSO</button>
+            <button>RISK</button>
+          </div>
+        </div>
+        <div class="ledger-tools">
+          <div class="chips">
+            <button class="chip on">All <span class="cnt">142</span></button>
+            <button class="chip">Overdue <span class="cnt">58</span></button>
+            <button class="chip">60+ days <span class="cnt">22</span></button>
+            <button class="chip">Credit hold <span class="cnt">3</span></button>
+            <button class="chip">Promised <span class="cnt">4</span></button>
+            <button class="chip">No activity 30d <span class="cnt">11</span></button>
+          </div>
+          <input class="search" placeholder="Search party, GSTIN, invoice…"/>
+        </div>
         <div class="card-b" style="padding-top:6px;">
-          <table class="table"><thead><tr><th>Party</th><th>Invoice</th><th class="r">Amount</th><th class="r">Aged</th><th>Status</th></tr></thead><tbody>
-            <tr><td><div class="name"><div class="av-sq r" style="background:linear-gradient(135deg,rgba(255,138,168,0.18),rgba(255,138,168,0.04));color:var(--rose);border-color:rgba(255,138,168,0.18);">SI</div><div class="nm-c"><div class="pri">Sai Industries</div><div class="sec">PUNE · 3 invoices</div></div></div></td><td class="mute" style="font-family:var(--fm);">INV-1882</td><td class="num r"><span class="cur">₹</span>11.4 L</td><td class="num r" style="color:var(--rose);">52d</td><td><span class="pill-s bad">CREDIT HOLD</span></td></tr>
-            <tr><td><div class="name"><div class="av-sq a">VT</div><div class="nm-c"><div class="pri">Vinod Trading</div><div class="sec">DELHI · 2 invoices</div></div></div></td><td class="mute" style="font-family:var(--fm);">INV-1875</td><td class="num r"><span class="cur">₹</span>7.0 L</td><td class="num r" style="color:var(--amber);">48d</td><td><span class="pill-s warn">REMIND</span></td></tr>
-            <tr><td><div class="name"><div class="av-sq a">BH</div><div class="nm-c"><div class="pri">Bombay Hospitality</div><div class="sec">MUMBAI · 1 invoice</div></div></div></td><td class="mute" style="font-family:var(--fm);">INV-1854</td><td class="num r"><span class="cur">₹</span>5.2 L</td><td class="num r" style="color:var(--amber);">42d</td><td><span class="pill-s warn">PROMISE 14M</span></td></tr>
-            <tr><td><div class="name"><div class="av-sq b">RM</div><div class="nm-c"><div class="pri">Rajesh Mats</div><div class="sec">JAIPUR · 1 invoice</div></div></div></td><td class="mute" style="font-family:var(--fm);">INV-1812</td><td class="num r"><span class="cur">₹</span>4.8 L</td><td class="num r" style="color:var(--text-3);">38d</td><td><span class="pill-s info">DUE SOON</span></td></tr>
-            <tr><td><div class="name"><div class="av-sq e">KB</div><div class="nm-c"><div class="pri">Khanna Bros.</div><div class="sec">LUDHIANA · 1 invoice</div></div></div></td><td class="mute" style="font-family:var(--fm);">INV-1799</td><td class="num r"><span class="cur">₹</span>4.0 L</td><td class="num r" style="color:var(--text-3);">34d</td><td><span class="pill-s ok">ON CADENCE</span></td></tr>
-          </tbody></table>
+          <table class="table ledger">
+            <thead><tr>
+              <th style="width:300px;">Party</th>
+              <th>Aging</th>
+              <th class="r">Oldest</th>
+              <th class="r">DSO</th>
+              <th class="r">Last receipt</th>
+              <th>Risk</th>
+              <th class="r">Outstanding</th>
+            </tr></thead>
+            <tbody>
+
+              <tr class="party-r">
+                <td><div class="name">
+                  <span class="chev">›</span>
+                  <div class="av-sq" style="background:linear-gradient(135deg,rgba(255,138,168,0.18),rgba(255,138,168,0.04));color:var(--rose);border-color:rgba(255,138,168,0.18);">SS</div>
+                  <div class="nm-c"><div class="pri">Sunny Synthetic</div><div class="sec">PANIPAT · 28 INVOICES · 06ABCFS…</div></div>
+                </div></td>
+                <td><div class="mini-bar"><span class="s0" style="width:18%;"></span><span class="s1" style="width:22%;"></span><span class="s2" style="width:30%;"></span><span class="s3" style="width:30%;"></span></div></td>
+                <td class="num r" style="color:var(--rose);">76d</td>
+                <td class="num r">58d</td>
+                <td class="mute r" style="font-family:var(--fm);font-size:11px;">12 Apr</td>
+                <td><span class="risk-cluster"><span class="risk-dot r"></span><span class="risk-lbl">High</span></span></td>
+                <td class="num r"><span class="cur">₹</span>37.9 <span style="color:var(--text-3);font-size:11px;">L</span></td>
+              </tr>
+              <tr class="detail-r"><td colspan="7"><div class="detail-inner">
+                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-184</span><span class="vmeta">11 Mar · PO #4421</span><span class="vamt">₹14,02,150</span><span class="vage" style="color:var(--rose);">76d</span><span class="vmeta" style="text-align:right;">90+</span></div>
+                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-261</span><span class="vmeta">02 Apr · PO #4513</span><span class="vamt">₹9,28,400</span><span class="vage" style="color:var(--amber);">54d</span><span class="vmeta" style="text-align:right;">31–60</span></div>
+                <div class="inv-row"><span class="vt">RECEIPT</span><span class="vno">R-412</span><span class="vmeta">12 Apr · against S-184</span><span class="vamt cr">−₹3,00,000</span><span class="vage" style="color:var(--text-3);">part</span><span class="vmeta" style="text-align:right;color:var(--emerald);">cleared</span></div>
+                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-388</span><span class="vmeta">18 Apr · PO #4644</span><span class="vamt">₹11,40,290</span><span class="vage" style="color:var(--amber);">38d</span><span class="vmeta" style="text-align:right;">31–60</span></div>
+                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-512</span><span class="vmeta">06 May · PO #4781</span><span class="vamt">₹6,18,000</span><span class="vage" style="color:var(--text-3);">20d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
+                <div class="detail-acts">
+                  <button class="prime">Place credit hold</button>
+                  <button>Send reminder</button>
+                  <button>Mark promise</button>
+                  <button>Statement (PDF)</button>
+                  <button>Open in Tally</button>
+                </div>
+              </div></td></tr>
+
+              <tr class="party-r">
+                <td><div class="name">
+                  <span class="chev">›</span>
+                  <div class="av-sq a">SE</div>
+                  <div class="nm-c"><div class="pri">Shantinath Enterprise</div><div class="sec">SURAT · 31 INVOICES</div></div>
+                </div></td>
+                <td><div class="mini-bar"><span class="s0" style="width:32%;"></span><span class="s1" style="width:38%;"></span><span class="s2" style="width:20%;"></span><span class="s3" style="width:10%;"></span></div></td>
+                <td class="num r" style="color:var(--amber);">62d</td>
+                <td class="num r">41d</td>
+                <td class="mute r" style="font-family:var(--fm);font-size:11px;">21 May</td>
+                <td><span class="risk-cluster"><span class="risk-dot w"></span><span class="risk-lbl">Watch</span></span></td>
+                <td class="num r"><span class="cur">₹</span>26.0 <span style="color:var(--text-3);font-size:11px;">L</span></td>
+              </tr>
+              <tr class="detail-r"><td colspan="7"><div class="detail-inner">
+                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-201</span><span class="vmeta">28 Mar · PO #4488</span><span class="vamt">₹8,40,200</span><span class="vage" style="color:var(--amber);">59d</span><span class="vmeta" style="text-align:right;">31–60</span></div>
+                <div class="inv-row"><span class="vt">RECEIPT</span><span class="vno">R-498</span><span class="vmeta">21 May · against S-201</span><span class="vamt cr">−₹4,00,000</span><span class="vage" style="color:var(--text-3);">part</span><span class="vmeta" style="text-align:right;color:var(--emerald);">cleared</span></div>
+                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-401</span><span class="vmeta">20 Apr · PO #4671</span><span class="vamt">₹12,60,000</span><span class="vage" style="color:var(--amber);">36d</span><span class="vmeta" style="text-align:right;">31–60</span></div>
+                <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-577</span><span class="vmeta">14 May · PO #4810</span><span class="vamt">₹9,00,000</span><span class="vage" style="color:var(--text-3);">12d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
+                <div class="detail-acts">
+                  <button class="prime">Send reminder</button>
+                  <button>Mark promise</button>
+                  <button>Statement (PDF)</button>
+                  <button>Open in Tally</button>
+                </div>
+              </div></td></tr>
+
+              <tr class="party-r">
+                <td><div class="name">
+                  <span class="chev">›</span>
+                  <div class="av-sq b">BM</div>
+                  <div class="nm-c"><div class="pri">BM Distributor</div><div class="sec">DELHI · 1 INVOICE · NEW</div></div>
+                </div></td>
+                <td><div class="mini-bar"><span class="s0" style="width:0%;"></span><span class="s1" style="width:100%;"></span><span class="s2" style="width:0;"></span><span class="s3" style="width:0;"></span></div></td>
+                <td class="num r" style="color:var(--amber);">42d</td>
+                <td class="num r">42d</td>
+                <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
+                <td><span class="risk-cluster"><span class="risk-dot b"></span><span class="risk-lbl">Review</span></span></td>
+                <td class="num r"><span class="cur">₹</span>22.7 <span style="color:var(--text-3);font-size:11px;">L</span></td>
+              </tr>
+              <tr class="detail-r"><td colspan="7"></td></tr>
+
+              <tr class="party-r">
+                <td><div class="name">
+                  <span class="chev">›</span>
+                  <div class="av-sq">JI</div>
+                  <div class="nm-c"><div class="pri">JSG Infotech Pvt Ltd</div><div class="sec">BANGALORE · 1 INVOICE</div></div>
+                </div></td>
+                <td><div class="mini-bar"><span class="s0" style="width:100%;"></span><span class="s1" style="width:0;"></span><span class="s2" style="width:0;"></span><span class="s3" style="width:0;"></span></div></td>
+                <td class="num r" style="color:var(--text-3);">14d</td>
+                <td class="num r">14d</td>
+                <td class="mute r" style="font-family:var(--fm);font-size:11px;">12 May</td>
+                <td><span class="risk-cluster"><span class="risk-dot"></span><span class="risk-lbl">Good</span></span></td>
+                <td class="num r"><span class="cur">₹</span>16.9 <span style="color:var(--text-3);font-size:11px;">L</span></td>
+              </tr>
+              <tr class="detail-r"><td colspan="7"></td></tr>
+
+              <tr class="party-r">
+                <td><div class="name">
+                  <span class="chev">›</span>
+                  <div class="av-sq a">NE</div>
+                  <div class="nm-c"><div class="pri">Navchetan Enterprises</div><div class="sec">JAIPUR · 12 INVOICES · PROMISED 28 MAY</div></div>
+                </div></td>
+                <td><div class="mini-bar"><span class="s0" style="width:30%;"></span><span class="s1" style="width:48%;"></span><span class="s2" style="width:22%;"></span><span class="s3" style="width:0;"></span></div></td>
+                <td class="num r" style="color:var(--amber);">58d</td>
+                <td class="num r">36d</td>
+                <td class="mute r" style="font-family:var(--fm);font-size:11px;">04 May</td>
+                <td><span class="risk-cluster"><span class="risk-dot w"></span><span class="risk-lbl">Promised</span></span></td>
+                <td class="num r"><span class="cur">₹</span>12.9 <span style="color:var(--text-3);font-size:11px;">L</span></td>
+              </tr>
+              <tr class="detail-r"><td colspan="7"></td></tr>
+
+              <tr class="party-r">
+                <td><div class="name">
+                  <span class="chev">›</span>
+                  <div class="av-sq e">AF</div>
+                  <div class="nm-c"><div class="pri">Autofurnish Limited</div><div class="sec">GURUGRAM · 6 INVOICES</div></div>
+                </div></td>
+                <td><div class="mini-bar"><span class="s0" style="width:72%;"></span><span class="s1" style="width:28%;"></span><span class="s2" style="width:0;"></span><span class="s3" style="width:0;"></span></div></td>
+                <td class="num r" style="color:var(--text-3);">28d</td>
+                <td class="num r">22d</td>
+                <td class="mute r" style="font-family:var(--fm);font-size:11px;">18 May</td>
+                <td><span class="risk-cluster"><span class="risk-dot"></span><span class="risk-lbl">On cadence</span></span></td>
+                <td class="num r"><span class="cur">₹</span>11.9 <span style="color:var(--text-3);font-size:11px;">L</span></td>
+              </tr>
+              <tr class="detail-r"><td colspan="7"></td></tr>
+
+              <tr class="party-r">
+                <td><div class="name">
+                  <span class="chev">›</span>
+                  <div class="av-sq">HL</div>
+                  <div class="nm-c"><div class="pri">Home Life Trading</div><div class="sec">MUMBAI · 2 INVOICES</div></div>
+                </div></td>
+                <td><div class="mini-bar"><span class="s0" style="width:40%;"></span><span class="s1" style="width:60%;"></span><span class="s2" style="width:0;"></span><span class="s3" style="width:0;"></span></div></td>
+                <td class="num r" style="color:var(--text-3);">34d</td>
+                <td class="num r">28d</td>
+                <td class="mute r" style="font-family:var(--fm);font-size:11px;">09 May</td>
+                <td><span class="risk-cluster"><span class="risk-dot"></span><span class="risk-lbl">Good</span></span></td>
+                <td class="num r"><span class="cur">₹</span>11.2 <span style="color:var(--text-3);font-size:11px;">L</span></td>
+              </tr>
+              <tr class="detail-r"><td colspan="7"></td></tr>
+
+              <tr class="party-r">
+                <td><div class="name">
+                  <span class="chev">›</span>
+                  <div class="av-sq a">LT</div>
+                  <div class="nm-c"><div class="pri">Lexicon Trading</div><div class="sec">AHMEDABAD · 12 INVOICES</div></div>
+                </div></td>
+                <td><div class="mini-bar"><span class="s0" style="width:25%;"></span><span class="s1" style="width:40%;"></span><span class="s2" style="width:25%;"></span><span class="s3" style="width:10%;"></span></div></td>
+                <td class="num r" style="color:var(--amber);">71d</td>
+                <td class="num r">44d</td>
+                <td class="mute r" style="font-family:var(--fm);font-size:11px;">02 May</td>
+                <td><span class="risk-cluster"><span class="risk-dot w"></span><span class="risk-lbl">Watch</span></span></td>
+                <td class="num r"><span class="cur">₹</span>10.3 <span style="color:var(--text-3);font-size:11px;">L</span></td>
+              </tr>
+              <tr class="detail-r"><td colspan="7"></td></tr>
+
+              <tr class="party-r">
+                <td><div class="name">
+                  <span class="chev">›</span>
+                  <div class="av-sq">RB</div>
+                  <div class="nm-c"><div class="pri">Rathi Brothers</div><div class="sec">LUDHIANA · 5 INVOICES</div></div>
+                </div></td>
+                <td><div class="mini-bar"><span class="s0" style="width:60%;"></span><span class="s1" style="width:40%;"></span><span class="s2" style="width:0;"></span><span class="s3" style="width:0;"></span></div></td>
+                <td class="num r" style="color:var(--text-3);">26d</td>
+                <td class="num r">19d</td>
+                <td class="mute r" style="font-family:var(--fm);font-size:11px;">22 May</td>
+                <td><span class="risk-cluster"><span class="risk-dot"></span><span class="risk-lbl">Good</span></span></td>
+                <td class="num r"><span class="cur">₹</span>9.0 <span style="color:var(--text-3);font-size:11px;">L</span></td>
+              </tr>
+              <tr class="detail-r"><td colspan="7"></td></tr>
+
+              <tr class="party-r">
+                <td><div class="name">
+                  <span class="chev">›</span>
+                  <div class="av-sq b">KH</div>
+                  <div class="nm-c"><div class="pri">Karnani Handloom Hub</div><div class="sec">KOLKATA · 6 INVOICES · PROMISED 14:00</div></div>
+                </div></td>
+                <td><div class="mini-bar"><span class="s0" style="width:38%;"></span><span class="s1" style="width:62%;"></span><span class="s2" style="width:0;"></span><span class="s3" style="width:0;"></span></div></td>
+                <td class="num r" style="color:var(--amber);">52d</td>
+                <td class="num r">38d</td>
+                <td class="mute r" style="font-family:var(--fm);font-size:11px;">11 May</td>
+                <td><span class="risk-cluster"><span class="risk-dot w"></span><span class="risk-lbl">Promised</span></span></td>
+                <td class="num r"><span class="cur">₹</span>8.1 <span style="color:var(--text-3);font-size:11px;">L</span></td>
+              </tr>
+              <tr class="detail-r"><td colspan="7"></td></tr>
+
+            </tbody>
+          </table>
+        </div>
+        <div class="ledger-foot">
+          <div class="l">Showing <b>9</b> of <b>142</b> · sorted by outstanding · click row to expand</div>
+          <div class="r">
+            <span>Export CSV</span>
+            <span>Statement run</span>
+            <span><span class="ind"></span>SYNCED · TALLY</span>
+          </div>
         </div>
       </div>
     </section>
@@ -2218,6 +2759,34 @@
   });
   // initial
   (function(){ const p = location.hash.slice(1); if (p && pageTitleMap[p]) setPage(p); })();
+
+  // ── Receivables: expandable party rows ─────────────────────
+  document.querySelectorAll('table.ledger tr.party-r').forEach(row => {
+    row.addEventListener('click', (e) => {
+      // ignore clicks on action buttons inside detail
+      if (e.target.closest('button, input')) return;
+      const detail = row.nextElementSibling;
+      if (!detail || !detail.classList.contains('detail-r')) return;
+      const isOpen = row.classList.toggle('open');
+      detail.classList.toggle('open', isOpen);
+    });
+  });
+  // chip group: single-select highlight
+  document.querySelectorAll('.ledger-tools .chips').forEach(grp => {
+    grp.addEventListener('click', e => {
+      const c = e.target.closest('.chip'); if (!c) return;
+      grp.querySelectorAll('.chip').forEach(x => x.classList.remove('on'));
+      c.classList.add('on');
+    });
+  });
+  // aging band segment → could later filter
+  document.querySelectorAll('.aging-band .ab-seg').forEach(s => {
+    s.addEventListener('click', () => {
+      document.querySelectorAll('.aging-band .ab-seg').forEach(x => x.style.outline = '');
+      s.style.outline = '1px solid var(--line-3)';
+      s.style.outlineOffset = '-1px';
+    });
+  });
 
   // build heatmap: 7 rows (days) × 24 cols (12 weeks)
   // We'll instead do 7 rows × 24 cols as days of recent 12 weeks segmented
