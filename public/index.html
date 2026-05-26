@@ -2263,7 +2263,6 @@
       <div class="card mt-14">
         <div class="card-h">
           <div class="t"><span class="ic">⊜</span><h3>Aging</h3><span class="sub">SUNDRY DEBTORS · 26 MAY</span></div>
-          <div class="seg"><button class="on">ALL</button><button>DOMESTIC</button><button>EXPORT</button></div>
         </div>
         <div class="card-b">
           <div class="aging-band">
@@ -2291,8 +2290,7 @@
       <div class="grid">
         <div class="card">
           <div class="card-h">
-            <div class="t"><span class="ic">◇</span><h3>Atlas is suggesting</h3><span class="sub">5 ACTIONS · ₹47.2L AT STAKE</span></div>
-            <div class="seg"><button class="on">ALL</button><button>REMIND</button><button>HOLD</button><button>PROMISES</button></div>
+            <div class="t"><span class="ic">◇</span><h3>Atlas is suggesting</h3><span class="sub">5 SIGNALS · ₹47.2L AT STAKE</span></div>
           </div>
           <div class="card-b">
             <div class="signal">
@@ -2301,7 +2299,6 @@
                 <div class="title"><b>Sunny Synthetic crossed ₹37.9L · oldest invoice 76 days.</b>
                   <span style="color:var(--text-2);"> Concentration jumped from 6.4% → 10.7% in 60 days. Atlas drafted a credit-hold note on further dispatches until ₹15L clears.</span></div>
                 <div class="meta-r"><span class="when">12m ago</span><span class="by">◇ ATLAS · 94%</span></div>
-                <div class="acts"><button class="prime">Place credit hold</button><button>Review ledger</button><button>Defer</button></div>
               </div>
             </div>
             <div class="signal">
@@ -2310,7 +2307,6 @@
                 <div class="title"><b>4 reminders ready · total ₹21.4L.</b>
                   <span style="color:var(--text-2);"> Drafted in your tone for Shantinath, Navchetan, Lexicon, JM Jain. WhatsApp + email + UPI link.</span></div>
                 <div class="meta-r"><span class="when">07:55</span><span class="by">◇ DRAFTED · awaiting send</span></div>
-                <div class="acts"><button class="prime">Send all</button><button>Review each</button></div>
               </div>
             </div>
             <div class="signal">
@@ -2319,7 +2315,6 @@
                 <div class="title"><b>Karnani Handloom promise due today.</b>
                   <span style="color:var(--text-2);"> Owner promised ₹8.1L by 14:00. UPI link sent at 09:12. No receipt yet.</span></div>
                 <div class="meta-r"><span class="when">today</span><span class="by">◇ TRACKED</span></div>
-                <div class="acts"><button class="prime">Nudge</button><button>Call log</button></div>
               </div>
             </div>
             <div class="signal">
@@ -2328,7 +2323,6 @@
                 <div class="title"><b>BM Distributor: ₹22.7L on a single invoice, single party.</b>
                   <span style="color:var(--text-2);"> First order · 42d aged · no prior cadence. Atlas suggests confirming PO terms before next dispatch.</span></div>
                 <div class="meta-r"><span class="when">yesterday</span><span class="by">◇ ATLAS · 88%</span></div>
-                <div class="acts"><button>Open party</button><button>Set tier</button></div>
               </div>
             </div>
             <div class="signal">
@@ -2337,7 +2331,6 @@
                 <div class="title"><b>Rathi Brothers cleared ₹9.0L on time.</b>
                   <span style="color:var(--text-2);"> 12th consecutive on-cadence payment. Auto-reconciled · receipt R-621 issued in Tally.</span></div>
                 <div class="meta-r"><span class="when">08:42</span><span class="by">◇ AUTO-ACTIONED</span></div>
-                <div class="acts"><button>View trail</button></div>
               </div>
             </div>
           </div>
@@ -2347,7 +2340,6 @@
           <div class="card">
             <div class="card-h">
               <div class="t"><span class="ic">▣</span><h3>Concentration</h3><span class="sub">TOP 5 = 28% OF BOOK</span></div>
-              <span class="more">›</span>
             </div>
             <div class="card-b">
               <div class="conc-row"><div class="nm">Sunny Synthetic</div><div class="bar"><div style="width:100%;background:var(--rose);"></div></div><div class="v">₹37.9L</div></div>
@@ -2361,7 +2353,6 @@
           <div class="card" style="margin-top:14px;">
             <div class="card-h">
               <div class="t"><span class="ic">⊞</span><h3>Promised this week</h3><span class="sub">₹38.6L EXPECTED</span></div>
-              <span class="more">›</span>
             </div>
             <div class="card-b" style="padding-top:14px;">
               <div class="promise-cal">
@@ -2382,11 +2373,11 @@
       <div class="card mt-14">
         <div class="card-h">
           <div class="t"><span class="ic">≡</span><h3>Party ledger</h3><span class="sub">142 ON BOOK · TALLY · LIVE</span></div>
-          <div class="seg">
-            <button class="on">OUTSTANDING</button>
-            <button>AGED</button>
-            <button>DSO</button>
-            <button>RISK</button>
+          <div class="seg" data-sortgrp="ledger">
+            <button class="on" data-sort="outstanding">OUTSTANDING</button>
+            <button data-sort="aged">AGED</button>
+            <button data-sort="dso">DSO</button>
+            <button data-sort="risk">RISK</button>
           </div>
         </div>
         <div class="ledger-tools">
@@ -2432,13 +2423,6 @@
                 <div class="inv-row"><span class="vt">RECEIPT</span><span class="vno">R-412</span><span class="vmeta">12 Apr · against S-184</span><span class="vamt cr">−₹3,00,000</span><span class="vage" style="color:var(--text-3);">part</span><span class="vmeta" style="text-align:right;color:var(--emerald);">cleared</span></div>
                 <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-388</span><span class="vmeta">18 Apr · PO #4644</span><span class="vamt">₹11,40,290</span><span class="vage" style="color:var(--amber);">38d</span><span class="vmeta" style="text-align:right;">31–60</span></div>
                 <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-512</span><span class="vmeta">06 May · PO #4781</span><span class="vamt">₹6,18,000</span><span class="vage" style="color:var(--text-3);">20d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
-                <div class="detail-acts">
-                  <button class="prime">Place credit hold</button>
-                  <button>Send reminder</button>
-                  <button>Mark promise</button>
-                  <button>Statement (PDF)</button>
-                  <button>Open in Tally</button>
-                </div>
               </div></td></tr>
 
               <tr class="party-r">
@@ -2459,12 +2443,6 @@
                 <div class="inv-row"><span class="vt">RECEIPT</span><span class="vno">R-498</span><span class="vmeta">21 May · against S-201</span><span class="vamt cr">−₹4,00,000</span><span class="vage" style="color:var(--text-3);">part</span><span class="vmeta" style="text-align:right;color:var(--emerald);">cleared</span></div>
                 <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-401</span><span class="vmeta">20 Apr · PO #4671</span><span class="vamt">₹12,60,000</span><span class="vage" style="color:var(--amber);">36d</span><span class="vmeta" style="text-align:right;">31–60</span></div>
                 <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-577</span><span class="vmeta">14 May · PO #4810</span><span class="vamt">₹9,00,000</span><span class="vage" style="color:var(--text-3);">12d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
-                <div class="detail-acts">
-                  <button class="prime">Send reminder</button>
-                  <button>Mark promise</button>
-                  <button>Statement (PDF)</button>
-                  <button>Open in Tally</button>
-                </div>
               </div></td></tr>
 
               <tr class="party-r">
@@ -2482,12 +2460,6 @@
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner">
                 <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-298</span><span class="vmeta">14 Apr · PO #4592</span><span class="vamt">₹22,68,140</span><span class="vage" style="color:var(--amber);">42d</span><span class="vmeta" style="text-align:right;">31–60</span></div>
-                <div class="detail-acts">
-                  <button class="prime">Confirm PO terms</button>
-                  <button>Send reminder</button>
-                  <button>Set credit limit</button>
-                  <button>Open in Tally</button>
-                </div>
               </div></td></tr>
 
               <tr class="party-r">
@@ -2505,11 +2477,6 @@
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner">
                 <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-559</span><span class="vmeta">12 May · PO #4801</span><span class="vamt">₹16,96,368</span><span class="vage" style="color:var(--text-3);">14d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
-                <div class="detail-acts">
-                  <button>Send statement</button>
-                  <button>Mark promise</button>
-                  <button>Open in Tally</button>
-                </div>
               </div></td></tr>
 
               <tr class="party-r">
@@ -2532,12 +2499,6 @@
                 <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-401</span><span class="vmeta">19 Apr · PO #4669</span><span class="vamt">₹3,10,000</span><span class="vage" style="color:var(--amber);">37d</span><span class="vmeta" style="text-align:right;">31–60</span></div>
                 <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-490</span><span class="vmeta">28 Apr · PO #4742</span><span class="vamt">₹2,80,000</span><span class="vage" style="color:var(--text-3);">28d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
                 <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-578</span><span class="vmeta">14 May · PO #4818</span><span class="vamt">₹2,84,910</span><span class="vage" style="color:var(--text-3);">12d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
-                <div class="detail-acts">
-                  <button class="prime">Confirm promise · 28 May</button>
-                  <button>Send reminder</button>
-                  <button>Statement (PDF)</button>
-                  <button>Open in Tally</button>
-                </div>
               </div></td></tr>
 
               <tr class="party-r">
@@ -2559,11 +2520,6 @@
                 <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-489</span><span class="vmeta">28 Apr · PO #4741</span><span class="vamt">₹3,18,000</span><span class="vage" style="color:var(--text-3);">28d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
                 <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-543</span><span class="vmeta">10 May · PO #4789</span><span class="vamt">₹3,87,000</span><span class="vage" style="color:var(--text-3);">16d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
                 <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-602</span><span class="vmeta">21 May · PO #4841</span><span class="vamt">₹3,00,000</span><span class="vage" style="color:var(--text-3);">5d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
-                <div class="detail-acts">
-                  <button>Send statement</button>
-                  <button>Schedule reminder</button>
-                  <button>Open in Tally</button>
-                </div>
               </div></td></tr>
 
               <tr class="party-r">
@@ -2583,11 +2539,6 @@
                 <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-345</span><span class="vmeta">12 Apr · PO #4576</span><span class="vamt">₹7,02,242</span><span class="vage" style="color:var(--amber);">44d</span><span class="vmeta" style="text-align:right;">31–60</span></div>
                 <div class="inv-row"><span class="vt">RECEIPT</span><span class="vno">R-422</span><span class="vmeta">09 May · against S-345</span><span class="vamt cr">−₹3,00,000</span><span class="vage" style="color:var(--text-3);">part</span><span class="vmeta" style="text-align:right;color:var(--emerald);">cleared</span></div>
                 <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-498</span><span class="vmeta">02 May · PO #4761</span><span class="vamt">₹4,14,200</span><span class="vage" style="color:var(--text-3);">24d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
-                <div class="detail-acts">
-                  <button>Send reminder</button>
-                  <button>Mark promise</button>
-                  <button>Open in Tally</button>
-                </div>
               </div></td></tr>
 
               <tr class="party-r">
@@ -2610,12 +2561,6 @@
                 <div class="inv-row"><span class="vt">RECEIPT</span><span class="vno">R-455</span><span class="vmeta">02 May · against S-152</span><span class="vamt cr">−₹1,50,000</span><span class="vage" style="color:var(--text-3);">part</span><span class="vmeta" style="text-align:right;color:var(--emerald);">cleared</span></div>
                 <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-411</span><span class="vmeta">22 Apr · PO #4680</span><span class="vamt">₹1,76,500</span><span class="vage" style="color:var(--amber);">34d</span><span class="vmeta" style="text-align:right;">31–60</span></div>
                 <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-571</span><span class="vmeta">13 May · PO #4814</span><span class="vamt">₹2,15,000</span><span class="vage" style="color:var(--text-3);">13d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
-                <div class="detail-acts">
-                  <button class="prime">Send reminder</button>
-                  <button>Watch + 7d</button>
-                  <button>Statement (PDF)</button>
-                  <button>Open in Tally</button>
-                </div>
               </div></td></tr>
 
               <tr class="party-r">
@@ -2637,11 +2582,6 @@
                 <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-535</span><span class="vmeta">09 May · PO #4786</span><span class="vamt">₹2,15,000</span><span class="vage" style="color:var(--text-3);">17d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
                 <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-590</span><span class="vmeta">17 May · PO #4825</span><span class="vamt">₹2,44,000</span><span class="vage" style="color:var(--text-3);">9d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
                 <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-625</span><span class="vmeta">22 May · PO #4847</span><span class="vamt">₹2,00,000</span><span class="vage" style="color:var(--text-3);">4d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
-                <div class="detail-acts">
-                  <button>Send statement</button>
-                  <button>Raise credit limit</button>
-                  <button>Open in Tally</button>
-                </div>
               </div></td></tr>
 
               <tr class="party-r">
@@ -2664,22 +2604,15 @@
                 <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-405</span><span class="vmeta">27 Apr · PO #4732</span><span class="vamt">₹1,30,000</span><span class="vage" style="color:var(--text-3);">29d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
                 <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-528</span><span class="vmeta">09 May · PO #4785</span><span class="vamt">₹1,90,000</span><span class="vage" style="color:var(--text-3);">17d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
                 <div class="inv-row"><span class="vt">SALES</span><span class="vno">S-588</span><span class="vmeta">16 May · PO #4821</span><span class="vamt">₹1,30,000</span><span class="vage" style="color:var(--text-3);">10d</span><span class="vmeta" style="text-align:right;">0–30</span></div>
-                <div class="detail-acts">
-                  <button class="prime">Confirm promise · 14:00</button>
-                  <button>Nudge</button>
-                  <button>Call log</button>
-                  <button>Open in Tally</button>
-                </div>
               </div></td></tr>
 
             </tbody>
           </table>
         </div>
         <div class="ledger-foot">
-          <div class="l">Showing <b>9</b> of <b>142</b> · sorted by outstanding · click row to expand</div>
+          <div class="l">Showing <b>9</b> of <b>142</b> · click row for ledger · click an aging segment to filter</div>
           <div class="r">
-            <span>Export CSV</span>
-            <span>Statement run</span>
+            <span class="exp-csv">Export CSV</span>
             <span><span class="ind"></span>SYNCED · TALLY</span>
           </div>
         </div>
@@ -2943,15 +2876,96 @@
         apply();
       });
     }
-  })();
-  // aging band segment → could later filter
-  document.querySelectorAll('.aging-band .ab-seg').forEach(s => {
-    s.addEventListener('click', () => {
-      document.querySelectorAll('.aging-band .ab-seg').forEach(x => x.style.outline = '');
-      s.style.outline = '1px solid var(--line-3)';
-      s.style.outlineOffset = '-1px';
+
+    // ── Sort by column (Outstanding / Aged / DSO / Risk) ───
+    const sortGrp = document.querySelector('[data-sortgrp="ledger"]');
+    const riskOrder = { 'high': 4, 'watch': 3, 'review': 3, 'promised': 2, 'good': 1, 'on cadence': 1 };
+    function readOutstanding(row){
+      const t = row.children[row.children.length-1].textContent.replace(/[^\d.]/g,'');
+      return parseFloat(t) || 0;
+    }
+    function readDSO(row){ return parseFloat(row.children[3].textContent) || 0; }
+    function sortBy(key){
+      const tbody = table.querySelector('tbody');
+      const pairs = [];
+      partyRows.forEach(p => pairs.push([p, p.nextElementSibling]));
+      const keyFn = {
+        outstanding: r => -readOutstanding(r),
+        aged:        r => -(+r.dataset.oldest),
+        dso:         r => -readDSO(r),
+        risk:        r => -(riskOrder[r.dataset.risk] || 0)
+      }[key];
+      pairs.sort((a,b) => keyFn(a[0]) - keyFn(b[0]));
+      pairs.forEach(([p,d]) => { tbody.appendChild(p); if (d) tbody.appendChild(d); });
+    }
+    if (sortGrp) {
+      sortGrp.addEventListener('click', e => {
+        const b = e.target.closest('button'); if (!b) return;
+        sortGrp.querySelectorAll('button').forEach(x => x.classList.remove('on'));
+        b.classList.add('on');
+        sortBy(b.dataset.sort);
+      });
+    }
+
+    // ── Export CSV (visible party rows only) ───────────────
+    const expBtn = document.querySelector('.ledger-foot .exp-csv');
+    if (expBtn) {
+      expBtn.style.cursor = 'pointer';
+      expBtn.addEventListener('click', () => {
+        const headers = ['Party','Meta','Oldest (d)','DSO (d)','Last receipt','Risk','Outstanding'];
+        const lines = [headers.join(',')];
+        partyRows.forEach(row => {
+          if (row.style.display === 'none') return;
+          const pri  = row.querySelector('.pri')?.textContent.trim() || '';
+          const sec2 = row.querySelector('.sec')?.textContent.trim() || '';
+          const aged = row.children[2].textContent.trim();
+          const dso  = row.children[3].textContent.trim();
+          const last = row.children[4].textContent.trim();
+          const risk = row.querySelector('.risk-lbl')?.textContent.trim() || '';
+          const out  = row.children[row.children.length-1].textContent.replace(/\s+/g,' ').trim();
+          const esc = s => '"' + String(s).replace(/"/g,'""') + '"';
+          lines.push([pri,sec2,aged,dso,last,risk,out].map(esc).join(','));
+        });
+        const blob = new Blob([lines.join('\n')], {type:'text/csv'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'receivables-' + new Date().toISOString().slice(0,10) + '.csv';
+        document.body.appendChild(a); a.click(); a.remove();
+        URL.revokeObjectURL(url);
+      });
+    }
+
+    // ── Aging band: click a segment to filter ledger ───────
+    document.querySelectorAll('.aging-band .ab-seg').forEach((seg, i) => {
+      const minAge = [0, 31, 61, 91];
+      const maxAge = [30, 60, 90, 9999];
+      seg.addEventListener('click', () => {
+        document.querySelectorAll('.aging-band .ab-seg').forEach(x => x.style.outline = '');
+        seg.style.outline = '1px solid var(--line-3)';
+        seg.style.outlineOffset = '-1px';
+        const lo = minAge[i], hi = maxAge[i];
+        partyRows.forEach(row => {
+          const oldest = +row.dataset.oldest;
+          const detail = row.nextElementSibling;
+          const visible = oldest >= lo && oldest <= hi;
+          row.style.display = visible ? '' : 'none';
+          if (detail) {
+            if (!visible) { detail.classList.remove('open'); row.classList.remove('open'); detail.style.display = 'none'; }
+            else { detail.style.display = ''; }
+          }
+        });
+        const shown = [...partyRows].filter(r => r.style.display !== 'none').length;
+        if (countEl) countEl.textContent = shown;
+        if (searchInp)  searchInp.value = '';
+        if (chipsRoot) {
+          chipsRoot.querySelectorAll('.chip').forEach(x => x.classList.remove('on'));
+          chipsRoot.querySelector('.chip').classList.add('on');
+        }
+        activeChip = 'all'; activeQuery = '';
+      });
     });
-  });
+  })();
 
   // build heatmap: 7 rows (days) × 24 cols (12 weeks)
   // We'll instead do 7 rows × 24 cols as days of recent 12 weeks segmented
