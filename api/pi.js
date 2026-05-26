@@ -30,7 +30,7 @@ const PI_HEADERS = [
   'Dispatch Status', 'Month', 'STATE', 'REFRENCE ID',
 ];
 
-module.exports = async (req, res) => {
+const handler = async (req, res) => {
   // Same-origin requests don't need CORS, but be permissive in case
   // someone runs the dashboard from a different host during testing.
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -96,6 +96,11 @@ async function getSheetsClient() {
   });
   return google.sheets({ version: 'v4', auth });
 }
+
+module.exports = handler;
+module.exports.getSheetsClient = getSheetsClient;
+module.exports.aggregatePIs = aggregatePIs;
+module.exports.PI_SHEET = PI_SHEET;
 
 async function handlePi(sheets, spreadsheetId, payload, res) {
   const rows = payload.rows || [];
@@ -177,20 +182,16 @@ async function handlePi(sheets, spreadsheetId, payload, res) {
   });
 }
 
-async function handleList(sheets, spreadsheetId, _payload, res) {
-  const resp = await sheets.spreadsheets.values.get({
-    spreadsheetId,
-    range: PI_SHEET + '!A:AE',
-  });
-  const all = resp.data.values || [];
-  if (all.length === 0) return res.status(200).json({ ok: true, pis: [] });
+// Pure: take raw sheet values (skipping any header) and return PIs grouped by
+// REF#. Exported so the WhatsApp handler can reuse the exact same aggregation
+// the dashboard relies on.
+function aggregatePIs(all) {
+  if (!all || all.length === 0) return [];
 
-  // Skip the header row if column A of row 0 isn't a number (i.e. it's "No.")
   const first = all[0] || [];
   const startIdx = (isNaN(Number(first[0])) || first[0] === '') ? 1 : 0;
   const dataRows = all.slice(startIdx);
 
-  // Group rows by REF# (column E, index 4). A single PI = one REF# spanning N rows.
   const groups = new Map();
   for (const r of dataRows) {
     const ref = (r[4] || '').toString().trim();
@@ -202,8 +203,6 @@ async function handleList(sheets, spreadsheetId, _payload, res) {
   const pis = [];
   for (const [ref, items] of groups) {
     const f = items[0];
-    // PI-level status: if all lines share the same dispatchStatus, use it;
-    // otherwise label it 'Mixed' so the UI can flag the inconsistency.
     const statuses = new Set(items.map(r => (r[27] || 'Pending').trim()));
     const piStatus = statuses.size === 1 ? [...statuses][0] : 'Mixed';
     pis.push({
@@ -217,6 +216,10 @@ async function handleList(sheets, spreadsheetId, _payload, res) {
       lines:     items.length,
       totalQty:  items.reduce((a, r) => a + (Number(r[7])  || 0), 0),
       totalIncGst: items.reduce((a, r) => a + (Number(r[20]) || 0), 0),
+      // Receivables: cumulative cash received against this PI lives on every
+      // row of the PI but is the same value, so take the first non-empty one.
+      totalReceived: items.reduce((acc, r) => acc || Number(r[23]) || 0, 0),
+      invoiceNo: items.map(r => (r[24] || '').toString().trim()).find(Boolean) || '',
       status:    piStatus,
       firstNo: Number(f[0]) || 0,
       items: items.map(r => ({
@@ -236,14 +239,23 @@ async function handleList(sheets, spreadsheetId, _payload, res) {
         td:         Number(r[18]) || 0,
         taxable:    Number(r[19]) || 0,
         total:      Number(r[20]) || 0,
+        totalReceived: Number(r[23]) || 0,
+        invoiceNo:  r[24] || '',
         dispatchStatus: r[27] || '',
       })),
     });
   }
 
-  // Newest first by the No. of the PI's first line (column A is sequential).
   pis.sort((a, b) => b.firstNo - a.firstNo);
+  return pis;
+}
 
+async function handleList(sheets, spreadsheetId, _payload, res) {
+  const resp = await sheets.spreadsheets.values.get({
+    spreadsheetId,
+    range: PI_SHEET + '!A:AE',
+  });
+  const pis = aggregatePIs(resp.data.values || []);
   return res.status(200).json({ ok: true, count: pis.length, pis });
 }
 
