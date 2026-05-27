@@ -586,7 +586,18 @@
   .table.ledger thead th[data-sort].sorted.asc::after { content: ' ↑'; }
   .table.ledger thead th[data-sort].sorted { color: var(--text); }
 
-  /* Center the inner columns — Aging mini-bar, Oldest, Last receipt
+  /* Last sale cell — days in colour, '(sold DD MMM)' as a muted
+     mono subtitle next to it. */
+  .table.ledger tbody td .ls-days {
+    font-family: var(--fm); font-weight: 500;
+  }
+  .table.ledger tbody td .ls-date {
+    font-family: var(--fm); font-size: 10px;
+    color: var(--text-3); letter-spacing: 0.04em;
+    margin-left: 4px; white-space: nowrap;
+  }
+
+  /* Center the inner columns — Aging mini-bar, Last sale, Last receipt
      and Risk all read better balanced. Party stays left, Outstanding
      stays right. */
   .table.ledger thead th:nth-child(2),
@@ -2917,8 +2928,8 @@
             <colgroup>
               <col class="col-party"/>
               <col style="width:180px;"/>
-              <col style="width:110px;"/>
-              <col style="width:140px;"/>
+              <col style="width:170px;"/>
+              <col style="width:130px;"/>
               <col style="width:120px;"/>
               <col style="width:150px;"/>
             </colgroup>
@@ -18916,24 +18927,32 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         const all = [].concat(p.fy25 || [], p.fy26 || []);
         const sales = all.filter(v => (v.t || '').toLowerCase() === 'sales');
         const td = row.children[2];
+        td.style.color = '';
         if (!sales.length) {
           row.dataset.lastsale = 9999;
-          td.textContent = '—';
-          td.style.color = 'var(--text-4)';
+          td.innerHTML = '<span style="color:var(--text-4);">—</span>';
           return;
         }
-        let latest = null;
+        let latest = null, latestStr = '';
         sales.forEach(v => {
           const d = parseVchDate(v.d);
-          if (d && (!latest || d > latest)) latest = d;
+          if (d && (!latest || d > latest)) { latest = d; latestStr = v.d; }
         });
-        if (!latest) { row.dataset.lastsale = 9999; td.textContent = '—'; td.style.color = 'var(--text-4)'; return; }
+        if (!latest) {
+          row.dataset.lastsale = 9999;
+          td.innerHTML = '<span style="color:var(--text-4);">—</span>';
+          return;
+        }
         const days = Math.max(0, Math.round((TODAY - latest) / 86400000));
         row.dataset.lastsale = days;
-        td.textContent = days + 'd';
-        td.style.color = days > 60 ? 'var(--rose)'
-                       : days > 30 ? 'var(--amber)'
-                       :             'var(--text-3)';
+        const daysColor = days > 60 ? 'var(--rose)'
+                        : days > 30 ? 'var(--amber)'
+                        :             'var(--text-2)';
+        // Trim a trailing "25" off FY 25-26 dates ("12 May 25" → "12 May")
+        const dateLabel = latestStr.replace(/\s+\d{2}$/, '');
+        td.innerHTML =
+          '<span class="ls-days" style="color:' + daysColor + ';">' + days + 'd</span> '
+        + '<span class="ls-date">(sold ' + dateLabel + ')</span>';
       });
     }
 
