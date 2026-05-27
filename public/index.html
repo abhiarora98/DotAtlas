@@ -19371,10 +19371,39 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     function renderFromCache(inner, pid) {
       const p = dataCache && dataCache[pid];
       if (p) renderDrawer(inner, p);
-      else inner.innerHTML = '';  // unknown party — leave empty
+      else inner.innerHTML = '';
     }
 
-    document.querySelectorAll('table.ledger tr.party-r').forEach(row => {
+    const partyRows = Array.from(document.querySelectorAll('table.ledger tr.party-r'));
+
+    // Pre-render every drawer in idle time after the JSON arrives.
+    // Click then just toggles a class — no rendering work during interaction.
+    function prerenderAll() {
+      if (!dataCache) return;
+      let i = 0;
+      function step(deadline) {
+        const hasBudget = () => deadline && deadline.timeRemaining
+          ? deadline.timeRemaining() > 4
+          : (i % 25 !== 0);
+        while (i < partyRows.length && hasBudget()) {
+          const row = partyRows[i++];
+          const detail = row.nextElementSibling;
+          const inner = detail && detail.querySelector('.detail-inner');
+          if (inner && inner.dataset.loaded !== '1') {
+            renderFromCache(inner, row.dataset.pid);
+          }
+        }
+        if (i < partyRows.length) {
+          if ('requestIdleCallback' in window) requestIdleCallback(step, { timeout: 2000 });
+          else setTimeout(step, 16);
+        }
+      }
+      if ('requestIdleCallback' in window) requestIdleCallback(step, { timeout: 2000 });
+      else setTimeout(step, 50);
+    }
+    loadData().then(prerenderAll);
+
+    partyRows.forEach(row => {
       row.addEventListener('click', (e) => {
         if (e.target.closest('button, input')) return;
         const detail = row.nextElementSibling;
@@ -19382,12 +19411,13 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         const isOpen = row.classList.toggle('open');
         detail.classList.toggle('open', isOpen);
         if (!isOpen) return;
+        // Drawer is already in the DOM thanks to the idle pre-render —
+        // CSS toggle is the only work here.
         const inner = detail.querySelector('.detail-inner');
         if (!inner || inner.dataset.loaded === '1') return;
-        // Fast path — data already fetched, render synchronously, no flash.
-        if (dataCache) { renderFromCache(inner, row.dataset.pid); return; }
-        // Slow path — fetch still in flight. Show nothing until it lands.
-        loadData().then(() => renderFromCache(inner, row.dataset.pid));
+        // Fallback: user beat the pre-renderer. Render this one now.
+        if (dataCache) renderFromCache(inner, row.dataset.pid);
+        else loadData().then(() => renderFromCache(inner, row.dataset.pid));
       });
     });
   })();
