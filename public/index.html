@@ -2925,7 +2925,7 @@
             <thead><tr>
               <th data-sort="party">Party</th>
               <th>Aging</th>
-              <th class="r" data-sort="oldest">Oldest</th>
+              <th data-sort="lastsale">Last sale</th>
               <th class="r" data-sort="lastreceipt">Last receipt</th>
               <th data-sort="risk">Risk</th>
               <th class="r" data-sort="outstanding">Outstanding</th>
@@ -18890,7 +18890,52 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       if ('requestIdleCallback' in window) requestIdleCallback(step, { timeout: 2000 });
       else setTimeout(step, 50);
     }
-    loadData().then(prerenderAll);
+    loadData().then(prerenderAll).then(computeLastSale);
+
+    // Days since each party's most recent Sales voucher (across FY 25-26
+    // and FY 26-27). Stamps both the data attribute (for sort/filter)
+    // and the cell text so the column reads "Xd" or "—".
+    function computeLastSale() {
+      if (!dataCache) return;
+      const TODAY = new Date(2026, 4, 26);  // 26 May 2026
+      const MONTHS = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+      function parseVchDate(d) {
+        // FY 25-26 vouchers: "12 May 25"; FY 26-27: "12 May" (year inferred)
+        const parts = d.trim().split(/\s+/);
+        const day = parseInt(parts[0]);
+        const month = MONTHS[parts[1]];
+        if (month == null || isNaN(day)) return null;
+        const year = parts[2]
+          ? 2000 + parseInt(parts[2])
+          : (month >= 3 ? 2026 : 2027);  // Apr-Dec → 2026; Jan-Mar → 2027 (FY 26-27)
+        return new Date(year, month, day);
+      }
+      partyRows.forEach(row => {
+        const p = dataCache[row.dataset.pid];
+        if (!p) return;
+        const all = [].concat(p.fy25 || [], p.fy26 || []);
+        const sales = all.filter(v => (v.t || '').toLowerCase() === 'sales');
+        const td = row.children[2];
+        if (!sales.length) {
+          row.dataset.lastsale = 9999;
+          td.textContent = '—';
+          td.style.color = 'var(--text-4)';
+          return;
+        }
+        let latest = null;
+        sales.forEach(v => {
+          const d = parseVchDate(v.d);
+          if (d && (!latest || d > latest)) latest = d;
+        });
+        if (!latest) { row.dataset.lastsale = 9999; td.textContent = '—'; td.style.color = 'var(--text-4)'; return; }
+        const days = Math.max(0, Math.round((TODAY - latest) / 86400000));
+        row.dataset.lastsale = days;
+        td.textContent = days + 'd';
+        td.style.color = days > 60 ? 'var(--rose)'
+                       : days > 30 ? 'var(--amber)'
+                       :             'var(--text-3)';
+      });
+    }
 
     partyRows.forEach(row => {
       row.addEventListener('click', (e) => {
@@ -19096,6 +19141,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       switch (key) {
         case 'outstanding':  return readOutstanding(r);
         case 'oldest':       return +r.dataset.oldest;
+        case 'lastsale':     return +r.dataset.lastsale;
         case 'risk':         return riskOrder[r.dataset.risk] || 0;
         case 'lastreceipt':  return -(+r.dataset.lastr);  /* recent first when desc */
         case 'party':        return (r.querySelector('.pri')?.textContent || '').toLowerCase();
