@@ -596,10 +596,22 @@
     letter-spacing: -0.018em; color: var(--text);
   }
 
-  /* Hide the WTD-age column (data stays in DOM for sorting) */
-  .table.ledger .col-hidden { display: none; }
-  .table.ledger thead th.col-hidden,
+  /* Hide the WTD-age column. visibility:collapse on the <col> is the
+     only cross-browser way; display:none on <col> is unreliable. */
+  .table.ledger col.col-hidden { visibility: collapse; }
+  .table.ledger thead th.col-hidden { display: none; }
   .table.ledger tbody td:nth-child(4) { display: none; }
+
+  /* Party column grows; minimum 420 px. The other columns are pinned
+     by the colgroup. Total fixed: 180+110+140+120+150 = 700 px. */
+  .table.ledger col.col-party { width: auto; min-width: 420px; }
+
+  /* Hover MUST NOT affect layout — only background changes are allowed.
+     Font-weight, padding, border, margin all stay identical. */
+  .table.ledger tr.party-r:hover td {
+    background: rgba(255,255,255,0.035);
+    /* explicit: no padding/margin/border/font changes here */
+  }
 
   /* Ledger card — lighter container, the rows are the product */
   .ledger-card { border: 1px solid var(--line); margin-top: 26px; }
@@ -945,7 +957,7 @@
 
   /* party ledger table — expandable rows */
   .table.ledger tr.party-r { cursor: pointer; }
-  .table.ledger tr.party-r:hover td { background: rgba(255,255,255,0.035); }
+  /* (hover override consolidated above with the layout-lock comment) */
   .table.ledger .chev {
     display: inline-flex; width: 14px; justify-content: center; color: var(--text-3);
     transition: transform 200ms var(--ease); font-family: var(--fm); font-size: 11px;
@@ -1333,15 +1345,9 @@
     opacity: 0.75;
   }
 
-  /* Custom tooltip — overrides the native title attribute we replaced
-     with data-tooltip. Multi-line with newlines preserved, premium card. */
-  .table.ledger tr.party-r[data-tooltip] { position: relative; }
-  .table.ledger tr.party-r[data-tooltip]:hover::after {
-    content: attr(data-tooltip);
-    position: absolute;
-    left: 64px;
-    top: 100%;
-    transform: translateY(6px);
+  /* Floating tooltip — single body-level element; never affects table layout. */
+  .tip-card {
+    position: fixed;
     background: var(--surface-2);
     color: var(--text);
     padding: 10px 14px;
@@ -1353,13 +1359,11 @@
     letter-spacing: 0.03em;
     white-space: pre;
     max-width: 320px;
-    z-index: 50;
+    z-index: 200;
     box-shadow: 0 12px 28px -10px rgba(0,0,0,0.55);
     pointer-events: none;
-    opacity: 0;
-    animation: tipFade 120ms 250ms var(--ease) forwards;  /* delay before show */
+    display: none;
   }
-  @keyframes tipFade { to { opacity: 1; } }
 
   /* Hide the aging mini-bar for parties without aged invoices —
      showing an empty bar reads as data, not absence. */
@@ -2907,13 +2911,13 @@
         <div class="card-b" style="padding-top:6px;">
           <table class="table ledger">
             <colgroup>
-              <col style="width:420px;"/>
-              <col style="width:140px;"/>
-              <col style="width:88px;"/>
+              <col class="col-party"/>
+              <col style="width:180px;"/>
+              <col style="width:110px;"/>
               <col class="col-hidden"/>
+              <col style="width:140px;"/>
               <col style="width:120px;"/>
-              <col style="width:118px;"/>
-              <col/>
+              <col style="width:150px;"/>
             </colgroup>
             <thead><tr>
               <th data-sort="party">Party</th>
@@ -20216,6 +20220,34 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       const verdict = (risk.charAt(0).toUpperCase() + risk.slice(1)) + ' risk';
       // Multi-line via real newlines — CSS white-space: pre preserves them.
       row.dataset.tooltip = verdict + '\n' + reasons.join('\n');
+    });
+
+    // Floating tooltip — single body-level element, never inside the table.
+    // Keeps the row layout perfectly stable on hover.
+    const tipEl = document.createElement('div');
+    tipEl.className = 'tip-card';
+    document.body.appendChild(tipEl);
+    let tipTimer = null;
+    partyRows.forEach(row => {
+      row.addEventListener('mouseenter', () => {
+        clearTimeout(tipTimer);
+        const text = row.dataset.tooltip;
+        if (!text) return;
+        tipTimer = setTimeout(() => {
+          tipEl.textContent = text;
+          tipEl.style.display = 'block';
+          const r = row.getBoundingClientRect();
+          // Place to the right of the row, vertically centred. Clamp to viewport.
+          const top = Math.max(8, Math.min(window.innerHeight - tipEl.offsetHeight - 8, r.top + r.height / 2 - tipEl.offsetHeight / 2));
+          const left = Math.min(window.innerWidth - tipEl.offsetWidth - 12, r.left + 100);
+          tipEl.style.top = top + 'px';
+          tipEl.style.left = left + 'px';
+        }, 280);
+      });
+      row.addEventListener('mouseleave', () => {
+        clearTimeout(tipTimer);
+        tipEl.style.display = 'none';
+      });
     });
     if (chipsRoot) {
       chipsRoot.addEventListener('click', e => {
