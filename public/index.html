@@ -562,38 +562,48 @@
   }
   .table tbody td:last-child { padding-right: 0; }
 
-  /* Receivables ledger — sticky column header strip + stronger surface,
-     for an operating-cockpit feel. */
+  /* Sticky column headers — light, no boxed feeling. Just a hairline. */
   .table.ledger thead th {
     position: sticky;
-    top: 49px;           /* sits flush under the sticky chip bar */
+    top: 49px;
     z-index: 2;
-    background: var(--surface-2);
-    color: var(--text-2);   /* readable while scrolling, still subtle */
-    font-size: 10px; font-weight: 600; letter-spacing: 0.16em;
+    background: var(--void);
+    color: var(--text-2);
+    font-size: 10px; font-weight: 600; letter-spacing: 0.14em;
     padding-top: 12px; padding-bottom: 12px;
-    border-bottom: 1px solid var(--line-2);
-    border-top: 1px solid var(--line);
-    box-shadow: 0 4px 10px -8px rgba(0,0,0,0.5);
+    border-bottom: 1px solid var(--line);
   }
-  /* Center the Risk column so badge sits under "RISK" header */
+  /* Click any column header to sort by it. Active sort gets a tiny arrow. */
+  .table.ledger thead th[data-sort] {
+    cursor: pointer; user-select: none;
+    transition: color 150ms var(--ease);
+  }
+  .table.ledger thead th[data-sort]:hover { color: var(--text); }
+  .table.ledger thead th[data-sort].sorted::after {
+    content: ' ↓'; margin-left: 4px; color: var(--text-2);
+    font-weight: 700;
+  }
+  .table.ledger thead th[data-sort].sorted.asc::after { content: ' ↑'; }
+  .table.ledger thead th[data-sort].sorted { color: var(--text); }
+
+  /* Center Risk column header + badge */
   .table.ledger thead th:nth-child(6),
   .table.ledger tbody td:nth-child(6) { text-align: center; }
 
-  /* Outstanding column — heaviest field, right-anchored */
+  /* Outstanding — heaviest column, right-anchored */
   .table.ledger tbody td:last-child {
-    font-family: var(--fd); font-weight: 600; font-size: 14px;
-    letter-spacing: -0.015em;
+    font-family: var(--fd); font-weight: 700; font-size: 14.5px;
+    letter-spacing: -0.018em; color: var(--text);
   }
 
-  /* Strengthen the ledger card itself — slightly heavier border so it
-     reads as a contained surface, not page background. */
-  .ledger-card {
-    border: 1px solid var(--line-2);
-  }
-  .ledger-card .card-h {
-    background: var(--surface-2);
-  }
+  /* Hide the WTD-age column (data stays in DOM for sorting) */
+  .table.ledger .col-hidden { display: none; }
+  .table.ledger thead th.col-hidden,
+  .table.ledger tbody td:nth-child(4) { display: none; }
+
+  /* Ledger card — lighter container, the rows are the product */
+  .ledger-card { border: 1px solid var(--line); margin-top: 26px; }
+  .ledger-card .card-h { background: transparent; }
   .table tbody tr:last-child td { border-bottom: 0; }
   .table .name { display: flex; align-items: center; gap: 12px; color: var(--text); }
   .table .name .av-sq {
@@ -913,13 +923,12 @@
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--line);
-    box-shadow: 0 6px 14px -10px rgba(0,0,0,0.55);  /* subtle anchor */
   }
-  /* Right side of the filter row: search + sort, on one baseline */
-  .ledger-tools-right {
-    display: inline-flex; gap: 12px; align-items: center;
+  /* Smaller, compact search input — controls fade into background */
+  .ledger-tools .search {
+    min-width: 160px; max-width: 220px;
+    padding: 5px 12px; font-size: 11.5px;
   }
-  .ledger-tools-right .search { min-width: 200px; }
   .ledger-tools {
     display: flex; align-items: center; justify-content: space-between;
     padding: 12px 22px; border-bottom: 1px solid var(--line);
@@ -1295,35 +1304,30 @@
   .mini-bar .s2 { background: var(--amber); }
   .mini-bar .s3 { background: var(--rose); }
 
-  /* Risk badge — pill with tinted background + leading dot.
-     Goal: blue / amber / red pop instantly during scanning. */
+  /* Risk badge — minimal: small dot + label. No pill. */
   .risk-cluster {
     display: inline-flex; gap: 7px; align-items: center;
-    padding: 4px 10px;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.04);
+    justify-content: center;
   }
   .risk-cluster .risk-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--blue); box-shadow: 0 0 7px var(--blue);
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--blue);
+    flex-shrink: 0;
   }
-  .risk-cluster .risk-dot.w { background: var(--amber); box-shadow: 0 0 7px var(--amber); }
-  .risk-cluster .risk-dot.r { background: var(--rose);  box-shadow: 0 0 7px var(--rose);  }
-  .risk-cluster .risk-lbl   {
-    font-family: var(--fm); font-size: 10px; font-weight: 600;
-    color: var(--text); letter-spacing: 0.08em; text-transform: uppercase;
+  .risk-cluster .risk-dot.w { background: var(--amber); }
+  .risk-cluster .risk-dot.r { background: var(--rose); }
+  .risk-cluster .risk-lbl {
+    font-family: var(--fm); font-size: 10.5px; font-weight: 500;
+    color: var(--text-2); letter-spacing: 0.06em; text-transform: uppercase;
   }
-  /* Per-row tint + per-risk label color so badges scan fast */
-  .table.ledger tr.party-r[data-risk="good"]    .risk-cluster { background: rgba(124,168,255,0.16); }
+  /* Label color matches the dot for fast scan */
   .table.ledger tr.party-r[data-risk="good"]    .risk-cluster .risk-lbl { color: var(--blue); }
-  .table.ledger tr.party-r[data-risk="watch"]   .risk-cluster { background: rgba(255,176,121,0.18); }
   .table.ledger tr.party-r[data-risk="watch"]   .risk-cluster .risk-lbl { color: var(--amber); }
-  .table.ledger tr.party-r[data-risk="high"]    .risk-cluster { background: rgba(255,138,168,0.18); }
   .table.ledger tr.party-r[data-risk="high"]    .risk-cluster .risk-lbl { color: var(--rose); }
-  .table.ledger tr.party-r[data-risk="advance"] .risk-cluster { background: rgba(124,168,255,0.08); }
-  .table.ledger tr.party-r[data-risk="advance"] .risk-cluster .risk-lbl { color: var(--blue); opacity: 0.8; }
-  .table.ledger tr.party-r[data-risk="paid"]    .risk-cluster { background: rgba(255,255,255,0.025); }
+  .table.ledger tr.party-r[data-risk="advance"] .risk-cluster .risk-lbl { color: var(--text-3); }
+  .table.ledger tr.party-r[data-risk="advance"] .risk-cluster .risk-dot { background: var(--text-3); }
   .table.ledger tr.party-r[data-risk="paid"]    .risk-cluster .risk-lbl { color: var(--text-3); }
+  .table.ledger tr.party-r[data-risk="paid"]    .risk-cluster .risk-dot { background: var(--text-4); }
 
   /* Negative outstanding (advances) — muted blue, lighter weight so
      they don't compete with on-book Dr amounts. */
@@ -2901,39 +2905,28 @@
             <button class="chip">Overdue <span class="cnt">166</span></button>
             <button class="chip">No receipt · 30d <span class="cnt">—</span></button>
             <button class="chip">Promised <span class="cnt">0</span></button>
-            <button class="chip">Follow-up due <span class="cnt">0</span></button>
-            <button class="chip">Hold <span class="cnt">0</span></button>
-            <button class="chip">Top 20</button>
           </div>
-          <div class="ledger-tools-right">
-            <input class="search" placeholder="Search party, voucher…"/>
-            <div class="seg" data-sortgrp="ledger">
-              <button class="on" data-sort="outstanding">OUTSTANDING</button>
-              <button data-sort="aged">AGED</button>
-              <button data-sort="dso">DSO</button>
-              <button data-sort="risk">RISK</button>
-            </div>
-          </div>
+          <input class="search" placeholder="Search…"/>
         </div>
         <div class="card-b" style="padding-top:6px;">
           <table class="table ledger">
             <colgroup>
-              <col style="width:380px;"/>
-              <col style="width:130px;"/>
-              <col style="width:78px;"/>
-              <col style="width:80px;"/>
-              <col style="width:108px;"/>
-              <col style="width:106px;"/>
+              <col style="width:420px;"/>
+              <col style="width:140px;"/>
+              <col style="width:88px;"/>
+              <col class="col-hidden"/>
+              <col style="width:120px;"/>
+              <col style="width:118px;"/>
               <col/>
             </colgroup>
             <thead><tr>
-              <th>Party</th>
+              <th data-sort="party">Party</th>
               <th>Aging</th>
-              <th class="r">Oldest</th>
-              <th class="r">Wtd-age</th>
-              <th class="r">Last receipt</th>
-              <th>Risk</th>
-              <th class="r">Outstanding</th>
+              <th class="r" data-sort="oldest">Oldest</th>
+              <th class="col-hidden">Wtd-age</th>
+              <th class="r" data-sort="lastreceipt">Last receipt</th>
+              <th data-sort="risk">Risk</th>
+              <th class="r" data-sort="outstanding">Outstanding</th>
             </tr></thead>
             <tbody>
               <tr class="party-r" data-pid="sunny-synthetic" data-risk="watch" data-oldest="40" data-dso="26" data-out="3379107" data-lastr="11">
@@ -20189,10 +20182,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       'all': 'all',
       'overdue': 'overdue',
       'no receipt · 30d': 'noreceipt',
-      'promised': 'promised',
-      'follow-up due': 'followup',
-      'hold': 'hold',
-      'top 20': 'top20'
+      'promised': 'promised'
     };
     buildTopN(20);
 
@@ -20248,50 +20238,55 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       });
     }
 
-    // ── Sort by column (Outstanding / Aged / DSO / Risk) ───
-    const sortGrp = document.querySelector('[data-sortgrp="ledger"]');
-    const riskOrder = { 'high': 4, 'watch': 3, 'good': 2, 'paid': 1 };
+    // ── Sort by clicking a column header ───────────────────
+    const sortHeaders = table.querySelectorAll('thead th[data-sort]');
+    const riskOrder = { 'high': 4, 'watch': 3, 'good': 2, 'advance': 1, 'paid': 0 };
     function readOutstanding(row){
       const t = row.children[row.children.length-1].textContent.replace(/[^\d.]/g,'');
       return parseFloat(t) || 0;
     }
-    function readDSO(row){ return parseFloat(row.children[3].textContent) || 0; }
-    // Sort direction toggles on repeat clicks of the same column.
-    // The active button shows ↓ for descending (high → low) and ↑ for
-    // ascending. Default: outstanding · descending.
+    // Default: outstanding · descending. Click a column header to switch
+    // sort key, click the same header again to flip direction.
     let sortKey = 'outstanding';
     let sortDir = 'desc';
+
+    function getSortValue(r, key) {
+      switch (key) {
+        case 'outstanding':  return readOutstanding(r);
+        case 'oldest':       return +r.dataset.oldest;
+        case 'risk':         return riskOrder[r.dataset.risk] || 0;
+        case 'lastreceipt':  return -(+r.dataset.lastr);  /* recent first when desc */
+        case 'party':        return (r.querySelector('.pri')?.textContent || '').toLowerCase();
+        default:             return 0;
+      }
+    }
     function applySort(){
       const tbody = table.querySelector('tbody');
       const pairs = [];
       partyRows.forEach(p => pairs.push([p, p.nextElementSibling]));
-      const sign = sortDir === 'desc' ? -1 : 1;
-      const keyFn = {
-        outstanding: r => sign * readOutstanding(r),
-        aged:        r => sign * (+r.dataset.oldest),
-        dso:         r => sign * readDSO(r),
-        risk:        r => sign * (riskOrder[r.dataset.risk] || 0)
-      }[sortKey];
-      pairs.sort((a,b) => keyFn(a[0]) - keyFn(b[0]));
+      pairs.sort((a, b) => {
+        const av = getSortValue(a[0], sortKey);
+        const bv = getSortValue(b[0], sortKey);
+        let cmp = (typeof av === 'string') ? av.localeCompare(bv) : av - bv;
+        return sortDir === 'desc' ? -cmp : cmp;
+      });
       pairs.forEach(([p,d]) => { tbody.appendChild(p); if (d) tbody.appendChild(d); });
-      // Update the visual ↓/↑ indicator on the active button
-      sortGrp.querySelectorAll('button').forEach(x => {
-        const label = x.dataset.label || (x.dataset.label = x.textContent.replace(/\s*[↓↑]\s*$/, ''));
-        const isActive = x.dataset.sort === sortKey;
-        x.classList.toggle('on', isActive);
-        x.textContent = label + (isActive ? (sortDir === 'desc' ? ' ↓' : ' ↑') : '');
+      // Update header arrows
+      sortHeaders.forEach(h => {
+        const active = h.dataset.sort === sortKey;
+        h.classList.toggle('sorted', active);
+        h.classList.toggle('asc', active && sortDir === 'asc');
       });
     }
-    if (sortGrp) {
-      sortGrp.addEventListener('click', e => {
-        const b = e.target.closest('button'); if (!b) return;
-        const key = b.dataset.sort;
+    sortHeaders.forEach(h => {
+      h.addEventListener('click', () => {
+        const key = h.dataset.sort;
         if (sortKey === key) sortDir = sortDir === 'desc' ? 'asc' : 'desc';
-        else { sortKey = key; sortDir = 'desc'; }
+        else { sortKey = key; sortDir = (key === 'party') ? 'asc' : 'desc'; }
         applySort();
       });
-      applySort();  // paint the default arrow
-    }
+    });
+    applySort();
 
     // ── Export CSV (visible party rows only) ───────────────
     const expBtn = document.querySelector('.ledger-foot .exp-csv');
