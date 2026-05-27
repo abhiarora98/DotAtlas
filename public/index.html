@@ -733,144 +733,158 @@
   .table.ledger tr.party-r.open .chev { transform: rotate(90deg); color: var(--emerald); }
   .table.ledger tr.detail-r { display: none; }
   .table.ledger tr.detail-r.open { display: table-row; }
+  /* === Receivables drawer — clean "paper" inset within the cockpit ===
+     Tally-style ledger that reads in 2 seconds. Self-contained palette
+     (does not consume CSS vars) so it stays the same in dark + light. */
   .table.ledger tr.detail-r > td {
-    padding: 0; border-bottom: 1px solid var(--line);
-    background: rgba(0,0,0,0.22);
+    padding: 0;
+    background: #F8F9FB;
+    color: #0B1220;
+    border-bottom: 1px solid rgba(0,0,0,0.10);
   }
-  .table.ledger .detail-inner { padding: 14px 22px 16px 64px; }
-  .table.ledger .detail-inner .inv-row {
-    display: grid; grid-template-columns: 64px 80px 92px 1fr;
-    gap: 14px; padding: 7px 0;
-    font-family: var(--fm); font-size: 11.5px; color: var(--text-2);
-    border-bottom: 1px dashed var(--line);
-    letter-spacing: 0.02em; align-items: baseline;
+  .table.ledger .detail-inner {
+    padding: 22px 28px 24px 64px;
   }
-  .table.ledger .detail-inner .vdate { color: var(--text); }
-  .table.ledger .detail-inner .vbal  {
-    display: none; text-align: right; color: var(--text-3);
-    font-variant-numeric: tabular-nums;
-  }
-  .table.ledger .detail-inner.show-bal .inv-row {
-    grid-template-columns: 64px 80px 92px 1fr 110px;
-  }
-  .table.ledger .detail-inner.show-bal .vbal { display: block; }
 
+  /* Voucher row — 5 columns: Date · Type · Voucher · Amount · Running Balance */
+  .table.ledger .detail-inner .inv-row {
+    display: grid;
+    grid-template-columns: 76px 110px 112px 1fr 130px;
+    gap: 18px; padding: 10px 12px;
+    font-family: var(--fm); font-size: 12px;
+    color: #4B5563; letter-spacing: 0.02em;
+    align-items: baseline;
+    border-radius: 4px;
+  }
+  /* Zebra striping — very subtle warm tint on alternating rows */
+  .table.ledger .detail-inner > .inv-row:nth-of-type(even),
+  .table.ledger .detail-inner .py-rows > .inv-row:nth-of-type(even) {
+    background: rgba(11,18,32,0.025);
+  }
+  .table.ledger .detail-inner .vdate { color: #4B5563; }
+  .table.ledger .detail-inner .vt {
+    color: #6B7280; font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  .table.ledger .detail-inner .vno  { color: #0B1220; }
+  /* Sales (Dr) — black; Receipts (Cr) — emerald */
+  .table.ledger .detail-inner .vamt {
+    text-align: right; color: #0B1220; font-weight: 500;
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+  .table.ledger .detail-inner .vamt.cr { color: #00A572; }
+  .table.ledger .detail-inner .vbal {
+    text-align: right; color: #6B7280;
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+
+  /* Opening / B/F rows — system-carried-forward, muted gray-blue,
+     visually framed off from the transaction stream. */
+  .table.ledger .detail-inner .inv-row.bf-row {
+    margin: 14px 0;
+    padding: 14px 16px;
+    background: #EEF2F7;
+    border: 1px solid #D8DEE8;
+    border-radius: 6px;
+  }
+  .table.ledger .detail-inner .inv-row.bf-row .vdate {
+    color: #6B7785; font-size: 11px;
+  }
+  .table.ledger .detail-inner .inv-row.bf-row .vt {
+    color: #4B5563; font-size: 9.5px; letter-spacing: 0.16em; font-weight: 600;
+  }
+  .table.ledger .detail-inner .inv-row.bf-row .vno {
+    color: #6B7785; font-style: italic; font-weight: 500;
+  }
+  .table.ledger .detail-inner .inv-row.bf-row .vamt {
+    color: #0B1220; font-family: var(--fd); font-weight: 600;
+    font-size: 14px; letter-spacing: -0.01em;
+  }
+  .table.ledger .detail-inner .inv-row.bf-row .vbal {
+    color: #0B1220; font-family: var(--fd); font-weight: 500;
+  }
+  /* FY 24-25 closing — slightly cooler tone to denote older period */
+  .table.ledger .detail-inner .inv-row.bf-row.bf24 {
+    background: #E8EEF6;
+    border-color: #C9D3E2;
+  }
+
+  /* Skeleton */
   .table.ledger .detail-inner .drawer-skeleton {
-    font-family: var(--fm); font-size: 11px; color: var(--text-3);
+    font-family: var(--fm); font-size: 11px; color: #6B7280;
     letter-spacing: 0.1em; text-transform: uppercase;
     padding: 18px 0; text-align: center;
   }
+
+  /* Sticky-feeling financial-snapshot footer */
   .table.ledger .detail-inner .inv-foot {
-    margin-top: 14px; padding-top: 12px;
-    border-top: 1px solid var(--line);
+    margin-top: 22px; padding-top: 18px;
+    border-top: 2px solid #D8DEE8;
     display: flex; align-items: center; justify-content: space-between;
-    gap: 14px; flex-wrap: wrap;
+    gap: 16px; flex-wrap: wrap;
   }
   .table.ledger .detail-inner .inv-summary {
-    display: flex; gap: 28px; flex-wrap: wrap;
-    font-family: var(--fm); font-size: 11px; color: var(--text-2);
-    letter-spacing: 0.04em;
+    display: flex; gap: 28px; flex-wrap: wrap; align-items: baseline;
+    font-family: var(--fm); font-size: 12px; color: #0B1220;
   }
   .table.ledger .detail-inner .inv-summary .ks {
-    color: var(--text-3); letter-spacing: 0.12em; margin-right: 6px; font-size: 10px;
+    color: #6B7280; letter-spacing: 0.14em; text-transform: uppercase;
+    margin-right: 6px; font-size: 9.5px; font-weight: 500;
   }
   .table.ledger .detail-inner .inv-summary b {
-    color: var(--text); font-family: var(--fd); font-weight: 600;
-    font-size: 15px; letter-spacing: -0.015em;
+    color: #0B1220; font-family: var(--fd); font-weight: 700;
+    font-size: 17px; letter-spacing: -0.02em;
   }
-  .table.ledger .detail-inner .bal-toggle {
-    font-family: var(--fm); font-size: 10px; color: var(--text-3);
-    background: transparent; border: 1px solid var(--line-2);
-    border-radius: 999px; padding: 5px 12px;
-    cursor: pointer; letter-spacing: 0.08em; text-transform: uppercase;
-    transition: all 200ms var(--ease); white-space: nowrap;
-  }
-  .table.ledger .detail-inner .bal-toggle:hover {
-    color: var(--text); border-color: var(--line-3);
-  }
-  .table.ledger .detail-inner.show-bal .bal-toggle {
-    background: var(--surface-3); color: var(--text); border-color: var(--line-3);
-  }
+  /* Outstanding state — drives the headline number's color */
+  .table.ledger .detail-inner.state-overdue .inv-summary b { color: #C73E5E; }
+  .table.ledger .detail-inner.state-paid    .inv-summary b { color: #00A572; }
+  .table.ledger .detail-inner.state-advance .inv-summary b { color: #00A572; }
+  .table.ledger .detail-inner.state-watch   .inv-summary b { color: #B45309; }
 
-  /* Drawer-action cluster: two pill toggles */
+  /* FY 25-26 toggle — lives in the light drawer */
   .table.ledger .detail-inner .drawer-actions {
     display: inline-flex; gap: 8px; align-items: center;
   }
   .table.ledger .detail-inner .py-toggle {
-    font-family: var(--fm); font-size: 10px; color: var(--text-3);
-    background: transparent; border: 1px solid var(--line-2);
-    border-radius: 999px; padding: 5px 12px; cursor: pointer;
+    font-family: var(--fm); font-size: 10.5px; color: #4B5563;
+    background: #FFFFFF; border: 1px solid #D8DEE8;
+    border-radius: 999px; padding: 6px 14px; cursor: pointer;
     letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap;
     transition: all 200ms var(--ease);
   }
   .table.ledger .detail-inner .py-toggle:hover {
-    color: var(--text); border-color: var(--line-3);
+    color: #0B1220; border-color: #98A0AE;
   }
   .table.ledger .detail-inner.show-py .py-toggle {
-    background: var(--surface-3); color: var(--text); border-color: var(--line-3);
+    background: #0B1220; color: #FFFFFF; border-color: #0B1220;
   }
 
-  /* Prior-year (FY 25-26) section — hidden by default */
+  /* Prior-year (FY 25-26) section — light card within the paper */
   .table.ledger .detail-inner .prior-year {
     display: none;
-    margin-bottom: 14px; padding: 12px 14px 4px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    background: rgba(0,0,0,0.18);
-    max-height: 360px; overflow-y: auto;
+    margin: 14px 0;
+    padding: 14px 16px 6px;
+    background: #FFFFFF;
+    border: 1px solid #E6E8EE;
+    border-radius: 6px;
+    max-height: 400px; overflow-y: auto;
   }
   .table.ledger .detail-inner.show-py .prior-year { display: block; }
   .table.ledger .detail-inner .prior-year .py-head {
-    font-family: var(--fm); font-size: 10px; color: var(--text-3);
-    letter-spacing: 0.12em; text-transform: uppercase;
-    padding-bottom: 8px; margin-bottom: 6px;
-    border-bottom: 1px solid var(--line);
+    font-family: var(--fm); font-size: 10px; color: #6B7280;
+    letter-spacing: 0.14em; text-transform: uppercase; font-weight: 500;
+    padding-bottom: 10px; margin-bottom: 8px;
+    border-bottom: 1px solid #E6E8EE;
   }
-  .table.ledger .detail-inner .prior-year .inv-row {
-    padding: 6px 0;
-  }
-  .table.ledger .detail-inner .prior-year .inv-row:last-child { border-bottom: 0; }
+  .table.ledger .detail-inner .prior-year .inv-row { padding: 8px 12px; }
 
-  /* Opening / B/F rows — read as system-carried-forward balances,
-     not transactions. Lifted with a subtle tint, hairline frame,
-     amount slightly bolder. */
-  .table.ledger .detail-inner .inv-row.bf-row {
-    margin: 10px 0;
-    padding: 11px 14px;
-    background: rgba(78,222,163,0.045);
-    border: 1px solid rgba(78,222,163,0.18);
-    border-radius: 6px;
+  /* Parent party-r stays in the dark cockpit; just give it a touch
+     more presence so the open state reads as "stronger than drawer". */
+  .table.ledger tr.party-r.open td {
+    background: rgba(255,255,255,0.04);
+    border-bottom-color: transparent;
   }
-  .table.ledger .detail-inner .inv-row.bf-row .vdate {
-    color: var(--text-3); font-size: 10.5px;
-  }
-  .table.ledger .detail-inner .inv-row.bf-row .vt {
-    color: var(--emerald); font-size: 9px; letter-spacing: 0.16em;
-  }
-  .table.ledger .detail-inner .inv-row.bf-row .vno {
-    color: var(--emerald); font-weight: 600;
-  }
-  .table.ledger .detail-inner .inv-row.bf-row .vamt {
-    color: var(--text); font-family: var(--fd); font-weight: 600;
-    font-size: 14px; letter-spacing: -0.01em;
-  }
-  .table.ledger .detail-inner .inv-row.bf-row .vbal {
-    color: var(--text-2); font-family: var(--fd); font-weight: 500;
-  }
-  /* FY 24-25 carry-forward — distinct blue tint */
-  .table.ledger .detail-inner .inv-row.bf-row.bf24 {
-    background: rgba(124,168,255,0.055);
-    border-color: rgba(124,168,255,0.22);
-  }
-  .table.ledger .detail-inner .inv-row.bf-row.bf24 .vt,
-  .table.ledger .detail-inner .inv-row.bf-row.bf24 .vno { color: var(--blue); }
-  .table.ledger .detail-inner .inv-row:last-of-type { border-bottom: 0; }
-  .table.ledger .detail-inner .vt   { color: var(--text-3); font-size: 9.5px; letter-spacing: 0.12em; }
-  .table.ledger .detail-inner .vno  { color: var(--text); }
-  .table.ledger .detail-inner .vamt { text-align: right; color: var(--text); font-variant-numeric: tabular-nums; }
-  .table.ledger .detail-inner .vamt.cr { color: var(--emerald); }
-  .table.ledger .detail-inner .vage { text-align: right; color: var(--text-2); }
-  .table.ledger .detail-inner .vmeta { color: var(--text-3); }
+  .table.ledger .detail-inner .vage { text-align: right; color: #4B5563; }
+  .table.ledger .detail-inner .vmeta { color: #6B7280; }
   .table.ledger .detail-inner .detail-acts {
     margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line);
     display: inline-flex; gap: 8px; flex-wrap: wrap;
@@ -19282,14 +19296,15 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const esc = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
 
     function vRow(t, opt) {
-      const dateLbl = opt.fy === 'fy25' ? t.d : t.d;
       const isDebit = t.dr > 0;
-      const amt = isDebit ? '₹'+inRupees(t.dr) : '−₹'+inRupees(t.cr);
+      // Sales / Debit-Note: black with explicit + prefix.
+      // Receipt / Credit-Note: emerald with − prefix.
+      const amt = isDebit ? '+ ₹'+inRupees(t.dr) : '− ₹'+inRupees(t.cr);
       const cls = isDebit ? 'vamt' : 'vamt cr';
       opt.running += (t.dr || 0) - (t.cr || 0);
-      const bal = (opt.running < 0 ? '−₹'+inRupees(Math.abs(opt.running)) : '₹'+inRupees(opt.running));
+      const bal = (opt.running < 0 ? '− ₹'+inRupees(Math.abs(opt.running)) : '₹'+inRupees(opt.running));
       return `<div class="inv-row">`
-           + `<span class="vdate">${esc(dateLbl)}</span>`
+           + `<span class="vdate">${esc(t.d)}</span>`
            + `<span class="vt">${esc((t.t||'').toUpperCase())}</span>`
            + `<span class="vno">Vch ${esc(t.v)}</span>`
            + `<span class="${cls}">${amt}</span>`
@@ -19300,23 +19315,24 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     function renderDrawer(inner, p) {
       const bf24 = p.bf24 || 0;
 
-      // FY 24-25 carry-forward — single line "Opening Balance (before Apr 2025)".
-      // Always shown when non-zero; older years roll up into this number.
+      // FY 24-25 → carry-forward only. Labelled with the exact
+      // finance term, since that's the row's source. Acts as the
+      // opening balance for FY 25-26.
       let bf24Html = '';
       if (Math.abs(bf24) > 0.5) {
-        const amt = bf24 >= 0 ? '₹'+inRupees(bf24) : '−₹'+inRupees(Math.abs(bf24));
+        const amt = bf24 >= 0 ? '+ ₹'+inRupees(bf24) : '− ₹'+inRupees(Math.abs(bf24));
         const cls = bf24 >= 0 ? 'vamt' : 'vamt cr';
         bf24Html = `<div class="inv-row bf-row bf24">`
-                 + `<span class="vdate">01 Apr 25</span>`
-                 + `<span class="vt">OPENING · BEFORE APR 2025</span>`
-                 + `<span class="vno">B/F</span>`
+                 + `<span class="vdate">1 Apr 25</span>`
+                 + `<span class="vt">FY 24-25 CLOSING</span>`
+                 + `<span class="vno">Opening Balance</span>`
                  + `<span class="${cls}">${amt}</span>`
-                 + `<span class="vbal">${amt}</span>`
+                 + `<span class="vbal">${amt.replace(/^\+ /, '')}</span>`
                  + `</div>`;
       }
 
       // FY 25-26 detailed ledger — hidden until "Show FY 25-26".
-      // Running balance starts from the FY 24-25 carry-forward.
+      // Running balance picks up from the FY 24-25 carry-forward.
       let fy25Html = '';
       if (p.fy25 && p.fy25.length) {
         const fy25Billed = p.fy25.reduce((a,t)=>a+(t.dr||0),0);
@@ -19329,48 +19345,50 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                  + `</div>`;
       }
 
-      // FY 25-26 closing → FY 26-27 opening B/F row
+      // FY 25-26 closing = FY 26-27 opening. Same accounting framing as bf24.
       const op = p.opening || 0;
       let bfHtml = '';
       if (Math.abs(op) > 0.5) {
-        const amt = op >= 0 ? '₹'+inRupees(op) : '−₹'+inRupees(Math.abs(op));
+        const amt = op >= 0 ? '+ ₹'+inRupees(op) : '− ₹'+inRupees(Math.abs(op));
         const cls = op >= 0 ? 'vamt' : 'vamt cr';
         bfHtml = `<div class="inv-row bf-row">`
-               + `<span class="vdate">01 Apr 26</span>`
-               + `<span class="vt">OPENING</span>`
-               + `<span class="vno">B/F</span>`
+               + `<span class="vdate">1 Apr 26</span>`
+               + `<span class="vt">FY 25-26 CLOSING</span>`
+               + `<span class="vno">Opening Balance</span>`
                + `<span class="${cls}">${amt}</span>`
-               + `<span class="vbal">${amt}</span>`
+               + `<span class="vbal">${amt.replace(/^\+ /, '')}</span>`
                + `</div>`;
       }
 
-      // FY 26-27 ledger (always visible)
+      // FY 26-27 ledger (always visible).
       const opt26 = { fy:'fy26', running: op };
       const fy26Html = (p.fy26 || []).map(t => vRow(t, opt26)).join('');
 
       const summary = `<div class="inv-summary">`
-                    + (Math.abs(bf24) > 0.5 ? `<span><span class="ks">B/F · APR 25</span> ${bf24<0?'−':''}₹${inRupees(Math.abs(bf24))}</span>` : '')
-                    + `<span><span class="ks">OPENING · APR 26</span> ${op<0?'−':''}₹${inRupees(Math.abs(op))}</span>`
-                    + `<span><span class="ks">BILLED</span> ₹${inRupees(p.billed)}</span>`
-                    + `<span><span class="ks">RECEIVED</span> ₹${inRupees(p.received)}</span>`
-                    + `<span><span class="ks">OUTSTANDING</span> <b>${p.outstanding<0?'−':''}₹${inRupees(Math.abs(p.outstanding))}</b></span>`
+                    + (Math.abs(bf24) > 0.5 ? `<span><span class="ks">FY 24-25 CLOSING</span> ${bf24<0?'− ':''}₹${inRupees(Math.abs(bf24))}</span>` : '')
+                    + `<span><span class="ks">OPENING · 1 APR 26</span> ${op<0?'− ':''}₹${inRupees(Math.abs(op))}</span>`
+                    + `<span><span class="ks">BILLED</span> + ₹${inRupees(p.billed)}</span>`
+                    + `<span><span class="ks">RECEIVED</span> − ₹${inRupees(p.received)}</span>`
+                    + `<span><span class="ks">OUTSTANDING</span> <b>${p.outstanding<0?'− ':''}₹${inRupees(Math.abs(p.outstanding))}</b></span>`
                     + `</div>`;
       const hasFY25 = !!(p.fy25 && p.fy25.length);
-      const hasAny  = hasFY25 || (p.fy26 && p.fy26.length);
       const pyBtn   = hasFY25 ? `<button class="py-toggle" type="button" data-has="true">Show FY 25-26</button>` : '';
-      const balBtn  = hasAny  ? `<button class="bal-toggle" type="button">Show balance</button>` : '';
+
+      // Outstanding state — drives footer color. Read from the party row.
+      const partyRow = inner.closest('tr').previousElementSibling;
+      const oldest   = +(partyRow?.dataset.oldest || 0);
+      const outNum   = +(partyRow?.dataset.out || 0);
+      let outState = 'state-neutral';
+      if (outNum <= 0.5 && outNum >= -0.5) outState = 'state-paid';
+      else if (outNum < -0.5)              outState = 'state-advance';
+      else if (oldest > 60)                outState = 'state-overdue';
+      else if (oldest > 30)                outState = 'state-watch';
+      inner.classList.add(outState);
 
       inner.innerHTML = bf24Html + fy25Html + bfHtml + fy26Html
-        + `<div class="inv-foot">${summary}<div class="drawer-actions">${pyBtn}${balBtn}</div></div>`;
+        + `<div class="inv-foot">${summary}<div class="drawer-actions">${pyBtn}</div></div>`;
       inner.dataset.loaded = '1';
 
-      // Wire per-drawer toggles
-      const balEl = inner.querySelector('.bal-toggle');
-      if (balEl) balEl.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const on = inner.classList.toggle('show-bal');
-        balEl.textContent = on ? 'Hide balance' : 'Show balance';
-      });
       const pyEl = inner.querySelector('.py-toggle');
       if (pyEl) pyEl.addEventListener('click', (e) => {
         e.stopPropagation();
