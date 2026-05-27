@@ -586,8 +586,10 @@
   .table.ledger thead th[data-sort].sorted.asc::after { content: ' ↑'; }
   .table.ledger thead th[data-sort].sorted { color: var(--text); }
 
-  /* Center Risk column header + badge (Risk is now the 5th column
-     after WTD-age was removed from the markup). */
+  /* Center the Last receipt and Risk columns — short values that read
+     better balanced in their column. */
+  .table.ledger thead th:nth-child(4),
+  .table.ledger tbody td:nth-child(4),
   .table.ledger thead th:nth-child(5),
   .table.ledger tbody td:nth-child(5) { text-align: center; }
 
