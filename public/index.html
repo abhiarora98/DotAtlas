@@ -19198,50 +19198,94 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       const CONTENT_W = W - MARGIN * 2;
       const RIGHT_X = W - MARGIN;
 
-      // Statement metadata
-      const today = new Date(2026, 4, 27);  // 27 May 2026 (cockpit "today")
-      const todayLong = today.toLocaleDateString('en-IN', {
-        day: '2-digit', month: 'long', year: 'numeric'
-      });
-      const generatedAt = today.toLocaleString('en-IN', {
-        day: '2-digit', month: 'short', year: 'numeric',
-        hour: 'numeric', minute: '2-digit', hour12: true
-      });
+      // Statement metadata — build date/time strings manually so the
+      // PDF reads the same regardless of the browser's locale.
+      const today = new Date(2026, 4, 27, 20, 14);  // 27 May 2026, 8:14 PM
+      const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const dateLong = `${today.getDate()} ${MONTHS[today.getMonth()]} ${today.getFullYear()}`;
+      const dateSlug = `${today.getDate()}-${MONTHS[today.getMonth()]}-${today.getFullYear()}`;
+      const hh = today.getHours();
+      const ampm = hh >= 12 ? 'PM' : 'AM';
+      const h12 = (hh % 12) || 12;
+      const timeStr = `${h12}:${String(today.getMinutes()).padStart(2,'0')} ${ampm}`;
+      const generatedAt = `${dateLong} · ${timeStr}`;
+
+      // Issuer (Comfort Industries — the seller/creditor whose ledger
+      // these receivables sit in). Sits above the statement title so
+      // the PDF reads as a document FROM the issuer, not from dot.atlas.
+      const ISSUER = {
+        name: 'Comfort Industries',
+        gst:  'GST: 06AALFC2138G1ZO',
+        emails: ['info@comfortindustries.in', 'accounts@comfortindustries.in'],
+        phone: 'Accounts: +91 88168 89093'
+      };
 
       // Selected FYs ordered chronologically
       const wants24 = selectedFYs.includes('24-25');
       const opFYs = ['25-26', '26-27'].filter(fy => selectedFYs.includes(fy));
 
-      // Page-header drawer (rendered on every page via autotable's
-      // didDrawPage hook). Holds the brand bar + party identity.
+      // Format a running-balance amount with Dr/Cr suffix from the
+      // issuer's perspective: positive → customer owes (Dr), negative
+      // → advance / we owe (Cr), zero → no suffix.
+      function fmtBal(n) {
+        const a = Math.abs(n);
+        const base = 'Rs. ' + inrNumber(a);
+        if (Math.abs(n) < 0.5) return base;       // ~0
+        return base + (n > 0 ? ' Dr' : ' Cr');
+      }
+
+      // Page header — drawn on every page via autotable's didDrawPage
+      // hook. Issuer block on top, divider, then statement title +
+      // party identity, divider.
       function drawHeader(data) {
         const y0 = MARGIN;
-        // Brand
+        // Issuer name
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(16);
+        doc.setTextColor(11, 18, 32);
+        doc.text(ISSUER.name, MARGIN, y0 + 14);
+        // GST — slightly smaller, gray
         doc.setFont('helvetica', 'normal');
-        doc.setFontSize(8.5);
-        doc.setTextColor(120, 120, 120);
-        doc.text('DOT.ATLAS', MARGIN, y0 + 4);
-        doc.setFontSize(8.5);
-        doc.text('Synced from Tally', RIGHT_X, y0 + 4, { align: 'right' });
-        // Title
+        doc.setFontSize(9);
+        doc.setTextColor(110, 118, 130);
+        doc.text(ISSUER.gst, MARGIN, y0 + 30);
+        // Emails — readable body text
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9.5);
+        doc.setTextColor(80, 88, 100);
+        doc.text(ISSUER.emails[0], MARGIN, y0 + 50);
+        doc.text(ISSUER.emails[1], MARGIN, y0 + 63);
+        // Phone — one line down
+        doc.text(ISSUER.phone, MARGIN, y0 + 82);
+
+        // Divider after issuer block
+        doc.setDrawColor(220, 224, 228);
+        doc.setLineWidth(0.6);
+        doc.line(MARGIN, y0 + 96, RIGHT_X, y0 + 96);
+
+        // Statement title
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(20);
         doc.setTextColor(11, 18, 32);
-        doc.text('Receivables Statement', MARGIN, y0 + 32);
+        doc.text('Account Statement', MARGIN, y0 + 124);
+
         // Party + meta
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(13);
         doc.setTextColor(11, 18, 32);
-        doc.text(p.name, MARGIN, y0 + 58);
+        doc.text(p.name, MARGIN, y0 + 148);
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(9.5);
         doc.setTextColor(95, 105, 120);
-        doc.text(`Statement as on ${todayLong}`, MARGIN, y0 + 74);
-        doc.text('Generated from dot.atlas', MARGIN, y0 + 88);
-        // Hairline under header
-        doc.setDrawColor(225, 228, 232);
+        doc.text(`Statement as on ${dateLong}`, MARGIN, y0 + 164);
+        doc.setFontSize(8.5);
+        doc.setTextColor(140, 148, 160);
+        doc.text('Generated from dot.atlas', MARGIN, y0 + 178);
+
+        // Divider before content
+        doc.setDrawColor(220, 224, 228);
         doc.setLineWidth(0.6);
-        doc.line(MARGIN, y0 + 102, RIGHT_X, y0 + 102);
+        doc.line(MARGIN, y0 + 192, RIGHT_X, y0 + 192);
       }
 
       // Page-footer drawer — page numbers + generated stamp
@@ -19261,8 +19305,9 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       }
 
       // Cursor tracks the current vertical position; autotable updates
-      // it via finalY. Plain text sections advance it manually.
-      let cursorY = MARGIN + 120;  // below header band
+      // it via finalY. Plain text sections advance it manually. The
+      // new header takes ~200pt so content starts ~MARGIN + 210.
+      let cursorY = MARGIN + 210;
 
       // ── Optional carry-forward block ────────────────────────
       if (wants24 && Math.abs(p.bf24) > 0.5) {
@@ -19273,7 +19318,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
           tableWidth: CONTENT_W,
           body: [[
             { content: 'Opening balance brought forward', styles: { fontStyle: 'bold', fontSize: 10.5, textColor: [11,18,32] } },
-            { content: inrAmt(p.bf24), styles: { halign: 'right', fontStyle: 'bold', fontSize: 11, textColor: p.bf24 < 0 ? [200,40,60] : [11,18,32] } }
+            { content: fmtBal(p.bf24), styles: { halign: 'right', fontStyle: 'bold', fontSize: 11, textColor: p.bf24 < 0 ? [200,40,60] : [11,18,32] } }
           ], [
             { content: '(as on 31 Mar 2025)', styles: { textColor: [120,128,140], fontSize: 9 } },
             { content: '', styles: {} }
@@ -19296,7 +19341,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 
       const fyMeta = {
         '25-26': { vouchers: p.fy25 || [], label: 'FY 25-26', closeLabel: 'Closing balance as on 31 Mar 2026', closeAmt: p.opening },
-        '26-27': { vouchers: p.fy26 || [], label: 'FY 26-27', closeLabel: 'Closing balance as on ' + todayLong, closeAmt: p.outstanding }
+        '26-27': { vouchers: p.fy26 || [], label: 'FY 26-27', closeLabel: 'Closing balance as on ' + dateLong, closeAmt: p.outstanding }
       };
 
       // Aggregate summary across selected operational FYs
@@ -19313,7 +19358,9 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         doc.text(meta.label, MARGIN, cursorY);
         cursorY += 6;
 
-        // Build voucher rows. Running balance accumulates here.
+        // Build voucher rows. Running balance accumulates here and
+        // renders with a Dr/Cr suffix so an accountant can read the
+        // direction at a glance.
         const body = meta.vouchers.map(v => {
           const dr = v.dr || 0, cr = v.cr || 0;
           running += dr - cr;
@@ -19326,8 +19373,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
             { content: 'Vch ' + (v.v || ''), styles: { textColor: [11, 18, 32] } },
             { content: (v.t || '').toString(), styles: { textColor: [80, 88, 100] } },
             { content: amt, styles: { halign: 'right', textColor: amtColor, fontStyle: 'bold' } },
-            { content: (running < 0 ? '-' : '') + 'Rs. ' + inrNumber(Math.abs(running)),
-              styles: { halign: 'right', textColor: running < 0 ? [200,40,60] : [80,88,100] } }
+            { content: fmtBal(running),
+              styles: { halign: 'right', textColor: running < -0.5 ? [200,40,60] : [80,88,100] } }
           ];
         });
 
@@ -19383,7 +19430,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
             theme: 'plain',
             body: [[
               { content: meta.closeLabel, styles: { fontStyle: 'bold', fontSize: 10, textColor: [11, 18, 32] } },
-              { content: (meta.closeAmt < 0 ? '-' : '') + 'Rs. ' + inrNumber(Math.abs(meta.closeAmt)),
+              { content: fmtBal(meta.closeAmt),
                 styles: { halign: 'right', fontStyle: 'bold', fontSize: 10.5, textColor: meta.closeAmt < 0 ? [200,40,60] : [11,18,32] } }
             ]],
             didDrawPage: (data) => { drawHeader(data); drawFooter(data); }
@@ -19415,27 +19462,34 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         finalAmt   = p.bf24;
       }
 
-      cursorY += 6;
+      // Final result block — stronger emphasis than anything else on
+      // the page. Thicker top rule, faint tinted fill so the row reads
+      // as the page-level conclusion, larger amount, Dr/Cr suffix.
+      cursorY += 10;
+      const blockH = 46;
+      // Faint grey-blue fill behind the row
+      doc.setFillColor(245, 247, 250);
+      doc.rect(MARGIN, cursorY, CONTENT_W, blockH, 'F');
+      // Top rule: 1.5pt near-black
       doc.setDrawColor(11, 18, 32);
-      doc.setLineWidth(1);
+      doc.setLineWidth(1.5);
       doc.line(MARGIN, cursorY, RIGHT_X, cursorY);
-      cursorY += 22;
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(11);
-      doc.setTextColor(11, 18, 32);
-      doc.text(finalLabel, MARGIN, cursorY);
-      doc.setFontSize(16);
-      const outAmt = (finalAmt < 0 ? '-' : '') + 'Rs. ' + inrNumber(Math.abs(finalAmt));
-      doc.setTextColor(finalAmt < 0 ? 200 : 11, finalAmt < 0 ? 40 : 18, finalAmt < 0 ? 60 : 32);
-      doc.text(outAmt, RIGHT_X, cursorY + 2, { align: 'right' });
-      cursorY += 18;
-      doc.setDrawColor(225, 228, 232);
+      // Bottom hairline
+      doc.setDrawColor(220, 224, 228);
       doc.setLineWidth(0.5);
-      doc.line(MARGIN, cursorY, RIGHT_X, cursorY);
-      cursorY += 22;
+      doc.line(MARGIN, cursorY + blockH, RIGHT_X, cursorY + blockH);
+      // Label
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11.5);
+      doc.setTextColor(11, 18, 32);
+      doc.text(finalLabel, MARGIN + 14, cursorY + 29);
+      // Amount — 20pt bold; Dr/Cr suffix for direction
+      doc.setFontSize(20);
+      doc.setTextColor(finalAmt < -0.5 ? 200 : 11, finalAmt < -0.5 ? 40 : 18, finalAmt < -0.5 ? 60 : 32);
+      doc.text(fmtBal(finalAmt), RIGHT_X - 14, cursorY + 31, { align: 'right' });
+      cursorY += blockH + 24;
 
       // ── Summary block ───────────────────────────────────────
-      const outstanding = finalAmt;
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(10);
       doc.setTextColor(11, 18, 32);
@@ -19447,9 +19501,9 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         tableWidth: CONTENT_W,
         theme: 'plain',
         body: [
-          ['Total billed',    inrAmt(totalBilled)],
-          ['Total received',  inrAmt(totalReceived)],
-          ['Outstanding',     inrAmt(outstanding)]
+          ['Sales this period',    inrAmt(totalBilled)],
+          ['Receipts this period', inrAmt(totalReceived)],
+          ['Outstanding',          fmtBal(finalAmt)]
         ],
         styles: {
           fontSize: 9.5,
@@ -19476,7 +19530,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       drawFooter({ pageNumber: 1 });
 
       const slug = String(p.name || 'party').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_|_$/g, '');
-      doc.save(`${slug}_Statement_${todayLong.replace(/\s+/g, '_')}.pdf`);
+      doc.save(`${slug}_Statement_${dateSlug}.pdf`);
     }
   })();
 
