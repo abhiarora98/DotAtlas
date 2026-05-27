@@ -1010,20 +1010,20 @@
   }
   .table.ledger .detail-inner .fy-section:last-child { border-bottom: 0; }
 
-  /* Current FY (latest non-empty) — emphasised as the live row. A
-     brighter top rule (--line-3) separates it from prior-year history;
-     its head gets a soft emerald wash so the eye lands here. */
+  /* Current FY (latest non-empty) — the final "result" row. An
+     emerald-tinted top rule separates it from history; the head sits
+     on a stronger emerald wash so the eye lands here. */
   .table.ledger .detail-inner .fy-section.headline {
-    border-top: 1px solid var(--line-3);
+    border-top: 1px solid rgba(78,222,163,0.32);
   }
   .table.ledger .detail-inner .fy-section.headline > .fy-head {
-    background: rgba(78,222,163,0.05);
-  }
-  .table.ledger .detail-inner .fy-section.headline > .fy-head.clickable:hover {
     background: rgba(78,222,163,0.09);
   }
+  .table.ledger .detail-inner .fy-section.headline > .fy-head.clickable:hover {
+    background: rgba(78,222,163,0.13);
+  }
   .table.ledger .detail-inner .fy-section.headline > .fy-head.clickable.open {
-    background: rgba(78,222,163,0.10);
+    background: rgba(78,222,163,0.14);
   }
 
   .table.ledger .detail-inner .fy-head {
@@ -1072,8 +1072,13 @@
     display: inline-block;
     width: 11px; text-align: center;
     font-size: 11px; line-height: 1;
-    color: var(--text-2);
+    color: var(--text);
     transition: color 120ms ease;
+  }
+  /* Expanded FY → title bolds up so the active row stands out from
+     collapsed siblings during a scan. */
+  .table.ledger .detail-inner .fy-head.clickable.open .dt-label-text {
+    font-weight: 700;
   }
   .table.ledger .detail-inner .fy-chev-blank { color: transparent; }
   .table.ledger .detail-inner .dt-sub {
@@ -1095,13 +1100,13 @@
     color: var(--text); letter-spacing: -0.01em;
     font-variant-numeric: tabular-nums;
   }
-  /* Headline closing — the "Current outstanding" line. Label gets a
-     touch of emphasis and the amount steps up another notch. */
+  /* Headline closing — the "Current outstanding" line. Label goes to
+     full text colour; amount steps up to a display-size 20px / 700. */
   .table.ledger .detail-inner .dt-closing.headline .dt-closing-label {
-    color: var(--text-2); font-weight: 600;
+    color: var(--text); font-weight: 700;
   }
   .table.ledger .detail-inner .dt-closing.headline .dt-closing-amount {
-    font-size: 18px; font-weight: 700; letter-spacing: -0.02em;
+    font-size: 20px; font-weight: 700; letter-spacing: -0.022em;
   }
   .table.ledger .detail-inner.state-overdue .dt-closing.headline .dt-closing-amount { color: var(--rose); }
   .table.ledger .detail-inner.state-paid    .dt-closing.headline .dt-closing-amount { color: var(--emerald); }
