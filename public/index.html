@@ -775,8 +775,8 @@
     color: var(--text-3); letter-spacing: 0.12em; margin-right: 6px; font-size: 10px;
   }
   .table.ledger .detail-inner .inv-summary b {
-    color: var(--text); font-family: var(--fd); font-weight: 500;
-    font-size: 13px; letter-spacing: -0.01em;
+    color: var(--text); font-family: var(--fd); font-weight: 600;
+    font-size: 15px; letter-spacing: -0.015em;
   }
   .table.ledger .detail-inner .bal-toggle {
     font-family: var(--fm); font-size: 10px; color: var(--text-3);
@@ -831,20 +831,36 @@
   }
   .table.ledger .detail-inner .prior-year .inv-row:last-child { border-bottom: 0; }
 
-  /* Opening B/F row — emphasised separator */
+  /* Opening / B/F rows — read as system-carried-forward balances,
+     not transactions. Lifted with a subtle tint, hairline frame,
+     amount slightly bolder. */
   .table.ledger .detail-inner .inv-row.bf-row {
-    border-bottom: 1px solid var(--line);
-    border-top: 1px solid var(--line);
-    padding: 10px 0;
-    margin: 4px 0 4px;
+    margin: 10px 0;
+    padding: 11px 14px;
+    background: rgba(78,222,163,0.045);
+    border: 1px solid rgba(78,222,163,0.18);
+    border-radius: 6px;
   }
-  .table.ledger .detail-inner .inv-row.bf-row .vt   { color: var(--emerald); }
-  .table.ledger .detail-inner .inv-row.bf-row .vno  { color: var(--emerald); }
-  .table.ledger .detail-inner .inv-row.bf-row .vamt { color: var(--text); font-weight: 500; }
-  /* FY 24-25 carry-forward — distinct from intra-period B/F */
+  .table.ledger .detail-inner .inv-row.bf-row .vdate {
+    color: var(--text-3); font-size: 10.5px;
+  }
+  .table.ledger .detail-inner .inv-row.bf-row .vt {
+    color: var(--emerald); font-size: 9px; letter-spacing: 0.16em;
+  }
+  .table.ledger .detail-inner .inv-row.bf-row .vno {
+    color: var(--emerald); font-weight: 600;
+  }
+  .table.ledger .detail-inner .inv-row.bf-row .vamt {
+    color: var(--text); font-family: var(--fd); font-weight: 600;
+    font-size: 14px; letter-spacing: -0.01em;
+  }
+  .table.ledger .detail-inner .inv-row.bf-row .vbal {
+    color: var(--text-2); font-family: var(--fd); font-weight: 500;
+  }
+  /* FY 24-25 carry-forward — distinct blue tint */
   .table.ledger .detail-inner .inv-row.bf-row.bf24 {
-    background: rgba(124,168,255,0.05);
-    border-color: rgba(124,168,255,0.20);
+    background: rgba(124,168,255,0.055);
+    border-color: rgba(124,168,255,0.22);
   }
   .table.ledger .detail-inner .inv-row.bf-row.bf24 .vt,
   .table.ledger .detail-inner .inv-row.bf-row.bf24 .vno { color: var(--blue); }
