@@ -586,8 +586,11 @@
   .table.ledger thead th[data-sort].sorted.asc::after { content: ' ↑'; }
   .table.ledger thead th[data-sort].sorted { color: var(--text); }
 
-  /* Center the Oldest, Last receipt and Risk columns — short values
-     that read better balanced in their column. */
+  /* Center the inner columns — Aging mini-bar, Oldest, Last receipt
+     and Risk all read better balanced. Party stays left, Outstanding
+     stays right. */
+  .table.ledger thead th:nth-child(2),
+  .table.ledger tbody td:nth-child(2),
   .table.ledger thead th:nth-child(3),
   .table.ledger tbody td:nth-child(3),
   .table.ledger thead th:nth-child(4),
