@@ -1,0 +1,7 @@
+Drop the Comfort Mats logo here as `comfort-logo.png`.
+
+The PDF statement loader fetches `assets/comfort-logo.png` and renders
+it on the top-right of every page's issuer band. Recommended:
+  - PNG format
+  - ~3:2 aspect ratio (drawn at 110pt × 72pt in the PDF)
+  - Transparent background works well against the white page
