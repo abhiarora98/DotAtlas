@@ -751,23 +751,42 @@
     font-size: 14px; color: var(--text);
     letter-spacing: -0.01em; margin-left: 4px;
   }
+  /* Concentration row — name + amount + % on the top line; thicker bar
+     spans the full width below. Heavier weights make the section read
+     as a primary cockpit panel. */
   .conc-row {
-    display: grid; grid-template-columns: 1fr 100px 110px;
-    gap: 14px; align-items: center;
-    padding: 12px 0; border-bottom: 1px solid var(--line);
+    display: grid;
+    grid-template-columns: 1fr auto 56px;
+    grid-template-rows: auto auto;
+    column-gap: 16px; row-gap: 10px;
+    padding: 16px 0; border-bottom: 1px solid var(--line);
   }
   .conc-row:last-child { border-bottom: 0; padding-bottom: 0; }
-  .conc-row .nm { font-size: 13px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
-  .conc-row .bar { height: 5px; border-radius: 999px; background: var(--surface-3); position: relative; overflow: hidden; }
-  .conc-row .bar > div { position: absolute; left: 0; top: 0; bottom: 0; background: var(--emerald); border-radius: 999px; }
-  .conc-row .v {
-    font-family: var(--fd); font-weight: 500; font-size: 13px;
-    text-align: right; color: var(--text); font-variant-numeric: tabular-nums;
-    display: inline-flex; gap: 10px; justify-content: flex-end; align-items: baseline;
+  .conc-row .nm {
+    grid-column: 1; grid-row: 1;
+    font-size: 13px; color: var(--text); font-weight: 500;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
-  .conc-row .v .conc-pct {
-    font-family: var(--fm); font-size: 10.5px; color: var(--text-3);
-    font-weight: 400;
+  .conc-row .v {
+    grid-column: 2; grid-row: 1;
+    font-family: var(--fd); font-weight: 600; font-size: 14.5px;
+    text-align: right; color: var(--text); font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em; white-space: nowrap;
+  }
+  .conc-row .conc-pct {
+    grid-column: 3; grid-row: 1;
+    font-family: var(--fm); font-size: 12px; color: var(--text-2);
+    font-weight: 500; letter-spacing: 0.02em;
+    text-align: right; font-variant-numeric: tabular-nums;
+  }
+  .conc-row .bar {
+    grid-column: 1 / -1; grid-row: 2;
+    height: 7px; border-radius: 999px;
+    background: var(--surface-3); position: relative; overflow: hidden;
+  }
+  .conc-row .bar > div {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    background: var(--emerald); border-radius: 999px;
   }
 
   /* promise calendar — next 7 days */
@@ -941,18 +960,39 @@
     font-variant-numeric: tabular-nums; white-space: nowrap;
   }
   /* Headline variant — Current outstanding inside the FY 26-27 row.
-     Stays on the same subtotal line; only the styling is bolder. */
+     Drops onto its own line below the subtotal, with a hairline
+     divider, a state-colored dot, and a noticeably bigger amount. */
+  .table.ledger .detail-inner .fy-closing.headline {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 14px;
+    margin-top: 12px; padding-top: 12px;
+    border-top: 1px solid #D8DEE8;
+  }
+  .table.ledger .detail-inner .fy-closing.headline .dot {
+    display: inline-block;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #0B1220;
+    vertical-align: 1px;
+    margin-right: 10px;
+    flex-shrink: 0;
+  }
   .table.ledger .detail-inner .fy-closing.headline .fy-closing-label {
-    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
-    color: #4B5563; font-weight: 500;
+    flex: 1;
+    font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: #4B5563; font-weight: 600;
   }
   .table.ledger .detail-inner .fy-closing.headline .fy-closing-amount {
-    font-size: 18px; font-weight: 700; letter-spacing: -0.02em;
+    font-size: 22px; font-weight: 700; letter-spacing: -0.025em;
   }
+  /* Outstanding state colors the amount text and the dot to match. */
   .table.ledger .detail-inner.state-overdue .fy-closing.headline .fy-closing-amount { color: #C73E5E; }
+  .table.ledger .detail-inner.state-overdue .fy-closing.headline .dot              { background: #C73E5E; box-shadow: 0 0 6px rgba(199,62,94,0.45); }
   .table.ledger .detail-inner.state-paid    .fy-closing.headline .fy-closing-amount { color: #00A572; }
+  .table.ledger .detail-inner.state-paid    .fy-closing.headline .dot              { background: #00A572; box-shadow: 0 0 6px rgba(0,165,114,0.45); }
   .table.ledger .detail-inner.state-advance .fy-closing.headline .fy-closing-amount { color: #00A572; }
+  .table.ledger .detail-inner.state-advance .fy-closing.headline .dot              { background: #00A572; box-shadow: 0 0 6px rgba(0,165,114,0.45); }
   .table.ledger .detail-inner.state-watch   .fy-closing.headline .fy-closing-amount { color: #B45309; }
+  .table.ledger .detail-inner.state-watch   .fy-closing.headline .dot              { background: #B45309; box-shadow: 0 0 6px rgba(180,83,9,0.45); }
 
   .table.ledger .detail-inner .fy-section { margin: 0; }
   .table.ledger .detail-inner .fy-rows {
@@ -2573,7 +2613,7 @@
           <div class="conc-headline"><b>28%</b> of on-book · <span class="conc-amt">₹1.23 Cr</span></div>
         </div>
         <div class="card-b">
-          <div class="conc-row"><div class="nm">Sunny Synthetic</div><div class="bar"><div style="width:100%;background:var(--rose);"></div></div><div class="v">₹33.8 L <span class="conc-pct">7.7%</span></div></div><div class="conc-row"><div class="nm">BM Distributor</div><div class="bar"><div style="width:90%;background:var(--amber);"></div></div><div class="v">₹30.2 L <span class="conc-pct">6.9%</span></div></div><div class="conc-row"><div class="nm">Shantinath Enterprise</div><div class="bar"><div style="width:68%;background:var(--blue);"></div></div><div class="v">₹23.0 L <span class="conc-pct">5.2%</span></div></div><div class="conc-row"><div class="nm">Sham Emporium Pvt Ltd</div><div class="bar"><div style="width:54%;background:var(--emerald);"></div></div><div class="v">₹18.2 L <span class="conc-pct">4.1%</span></div></div><div class="conc-row"><div class="nm">JSG Infotech Private Limited</div><div class="bar"><div style="width:52%;background:var(--emerald);"></div></div><div class="v">₹17.6 L <span class="conc-pct">4.0%</span></div></div>
+          <div class="conc-row"><div class="nm">Sunny Synthetic</div><div class="v">₹33.8 L</div><div class="conc-pct">7.7%</div><div class="bar"><div style="width:100%;background:var(--rose);"></div></div></div><div class="conc-row"><div class="nm">BM Distributor</div><div class="v">₹30.2 L</div><div class="conc-pct">6.9%</div><div class="bar"><div style="width:90%;background:var(--amber);"></div></div></div><div class="conc-row"><div class="nm">Shantinath Enterprise</div><div class="v">₹23.0 L</div><div class="conc-pct">5.2%</div><div class="bar"><div style="width:68%;background:var(--blue);"></div></div></div><div class="conc-row"><div class="nm">Sham Emporium Pvt Ltd</div><div class="v">₹18.2 L</div><div class="conc-pct">4.1%</div><div class="bar"><div style="width:54%;background:var(--emerald);"></div></div></div><div class="conc-row"><div class="nm">JSG Infotech Private Limited</div><div class="v">₹17.6 L</div><div class="conc-pct">4.0%</div><div class="bar"><div style="width:52%;background:var(--emerald);"></div></div></div>
         </div>
       </div>
 
@@ -2591,7 +2631,7 @@
           <div class="chips">
             <button class="chip on">All <span class="cnt">1188</span></button>
             <button class="chip">Overdue <span class="cnt">166</span></button>
-            <button class="chip">No receipt 30d <span class="cnt">—</span></button>
+            <button class="chip">No receipt · 30d <span class="cnt">—</span></button>
             <button class="chip">Promised <span class="cnt">0</span></button>
             <button class="chip">Credit hold <span class="cnt">0</span></button>
             <button class="chip">Top 20</button>
@@ -19492,19 +19532,30 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       const rowsHtml = vouchers.map(t => vRow(t, opt)).join('');
       const label = `FY ${esc(fy)} · ${vouchers.length} voucher${vouchers.length!==1?'s':''}`;
       const sub   = `Billed ${fmtShort(billed)} · Received ${fmtShort(recv)}`;
-      const closingCls = 'fy-closing' + (isHeadline ? ' headline' : '');
+      // Subtotal line — Billed/Received always; inline closing only for non-headline years.
+      const subtotal = isHeadline
+        ? `<div class="fy-subtotal"><span class="fy-sub">${sub}</span></div>`
+        : `<div class="fy-subtotal"><span class="fy-sub">${sub}</span>`
+          + `<div class="fy-closing">`
+          + `<span class="fy-closing-label">${esc(closingLabel)}</span>`
+          + `<span class="fy-closing-amount">${fmtAmt(closingAmount)}</span>`
+          + `</div></div>`;
+      // Headline gets its own row — thin divider above, colored state dot,
+      // larger amount. Reads as the row the eye must land on.
+      const headline = isHeadline
+        ? `<div class="fy-closing headline">`
+          + `<span class="dot"></span>`
+          + `<span class="fy-closing-label">${esc(closingLabel)}</span>`
+          + `<span class="fy-closing-amount">${fmtAmt(closingAmount)}</span>`
+          + `</div>`
+        : '';
       return `<div class="fy-section${defaultOpen?' open':''}" data-fy="${esc(fy)}">`
            + `<button type="button" class="fy-row fy-toggle">`
            + `<span class="chev">▸</span>`
            + `<div class="fy-info">`
            + `<span class="fy-label">${label}</span>`
-           + `<div class="fy-subtotal">`
-           + `<span class="fy-sub">${sub}</span>`
-           + `<div class="${closingCls}">`
-           + `<span class="fy-closing-label">${esc(closingLabel)}</span>`
-           + `<span class="fy-closing-amount">${fmtAmt(closingAmount)}</span>`
-           + `</div>`
-           + `</div>`
+           + subtotal
+           + headline
            + `</div>`
            + `</button>`
            + `<div class="fy-rows">${rowsHtml}</div>`
@@ -19695,7 +19746,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const chipMap = {
       'all': 'all',
       'overdue': 'overdue',
-      'no receipt 30d': 'noreceipt',
+      'no receipt · 30d': 'noreceipt',
       'promised': 'promised',
       'credit hold': 'credit',
       'top 20': 'top20'
