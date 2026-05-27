@@ -746,13 +746,8 @@
     letter-spacing: 0.06em;
   }
 
-  /* Sticky aging — strip stays at the top while the user scrolls the ledger */
-  .aging-card {
-    position: sticky; top: 0; z-index: 4;
-    background: var(--void);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-  }
+  /* Aging card scrolls naturally — keeping it sticky was sandwiching the
+     party-ledger title underneath when the chip bar also stuck. */
 
   /* Concentration card — top-5 headline + per-party rows */
   .concentration-card .card-h .conc-headline {
@@ -857,20 +852,19 @@
   .promise-cal .pc-day.today .pc-num { color: var(--text); }
   .promise-cal .pc-day.empty .pc-amt { color: var(--text-4); }
 
-  /* ledger filter tools row — sticky so chips + search stay reachable
-     while scrolling through hundreds of party rows. */
+  /* Ledger filter tools row — sticky so chips + search stay reachable
+     while scrolling. Uses the theme's surface variable so it adapts
+     correctly in both light and dark modes. */
   .ledger-card { overflow: visible; }
-  .ledger-card .card-h,
   .ledger-card .ledger-tools {
     position: sticky;
+    top: 0;
     z-index: 3;
-    background:
-      linear-gradient(180deg, rgba(11,18,32,0.92), rgba(11,18,32,0.88));
+    background: var(--void);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
   }
-  .ledger-card .card-h     { top: 116px; }
-  .ledger-card .ledger-tools { top: 167px; }
   .ledger-tools {
     display: flex; align-items: center; justify-content: space-between;
     padding: 12px 22px; border-bottom: 1px solid var(--line);
