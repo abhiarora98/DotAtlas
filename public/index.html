@@ -543,17 +543,19 @@
     font-family: var(--fm); font-size: 9.5px;
     color: var(--text-3); letter-spacing: 0.14em; text-transform: uppercase;
     text-align: left; font-weight: 500;
-    padding: 0 0 14px;
+    padding: 0 16px 14px 0;
     border-bottom: 1px solid var(--line);
   }
+  .table thead th:last-child { padding-right: 0; }
   .table thead th:last-child, .table tbody td:last-child { text-align: right; }
   .table thead th.r { text-align: right; }
   .table tbody td {
-    padding: 14px 0;
+    padding: 14px 16px 14px 0;
     border-bottom: 1px solid var(--line);
     font-size: 13px;
     vertical-align: middle;
   }
+  .table tbody td:last-child { padding-right: 0; }
   .table tbody tr:last-child td { border-bottom: 0; }
   .table .name { display: flex; align-items: center; gap: 12px; color: var(--text); }
   .table .name .av-sq {
@@ -1249,6 +1251,11 @@
   .risk-cluster .risk-dot.r { background: var(--rose);  box-shadow: 0 0 6px var(--rose);  }
   .risk-cluster .risk-dot.b { background: var(--blue);  box-shadow: 0 0 6px var(--blue);  }
   .risk-cluster .risk-lbl   { font-family: var(--fm); font-size: 10px; color: var(--text-2); letter-spacing: 0.08em; text-transform: uppercase; }
+
+  /* Hide the aging mini-bar for parties without aged invoices —
+     showing an empty bar reads as data, not absence. */
+  .table.ledger tr.party-r.paid .mini-bar,
+  .table.ledger tr.party-r.advance .mini-bar { display: none; }
 
   /* "Paid" / settled party rows — muted to deprioritise visually */
   .table.ledger tr.party-r.paid td { color: var(--text-3); }
@@ -17606,7 +17613,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">18 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹1 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹1</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="mohit-interiors-jalgaon" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-1" data-lastr="9999">
@@ -17620,7 +17627,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹1 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹1</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="the-scm-silk" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-1" data-lastr="47">
@@ -17634,7 +17641,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">09 Apr</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹1 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹1</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="m-s-kamla-polymer" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-1" data-lastr="6">
@@ -17648,7 +17655,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">20 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹1 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹1</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="ganesh-traders-goregaon" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-1" data-lastr="8">
@@ -17662,7 +17669,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">18 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹1 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹1</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="m-s-karan-enterprises" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-1" data-lastr="9999">
@@ -17676,7 +17683,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹1 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹1</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="m-s-mayoor-products" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-1" data-lastr="14">
@@ -17690,7 +17697,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">12 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹1 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹1</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="m-r-automobiles" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-1" data-lastr="8">
@@ -17704,7 +17711,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">18 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹1 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹1</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="shree-niha-traders" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-3" data-lastr="9999">
@@ -17718,7 +17725,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹3 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹3</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="7-space" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-14" data-lastr="36">
@@ -17732,7 +17739,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">20 Apr</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹14 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹14</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="perfect-engineering" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-16" data-lastr="9999">
@@ -17746,7 +17753,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹16 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹16</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="k-m-auto-industries" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-86" data-lastr="25">
@@ -17760,7 +17767,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">01 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹86 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹86</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="bhatia-textile" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-100" data-lastr="6">
@@ -17774,7 +17781,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">20 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹100 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹100</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="ayush-prasad-kushwaha" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-100" data-lastr="45">
@@ -17788,7 +17795,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">11 Apr</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹100 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹100</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="k-c-carpet" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-160" data-lastr="15">
@@ -17802,7 +17809,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">11 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹160 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹160</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="m-s-sachdeva-traders" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-160" data-lastr="9999">
@@ -17816,7 +17823,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹160 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹160</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="sahil-agency" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-200" data-lastr="12">
@@ -17830,7 +17837,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">14 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹200 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹200</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="suraj-gaddi-works" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-225" data-lastr="46">
@@ -17844,7 +17851,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">10 Apr</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹225 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹225</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="neel-enterprise" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-236" data-lastr="47">
@@ -17858,7 +17865,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">09 Apr</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹236 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹236</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="home-style-odisha" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-253" data-lastr="17">
@@ -17872,7 +17879,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">09 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹253 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹253</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="genie-bazaar-private-limited" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-271" data-lastr="9999">
@@ -17886,7 +17893,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹271 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹271</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="sri-jagdamba-traders" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-278" data-lastr="9999">
@@ -17900,7 +17907,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹278 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹278</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="jaipur-golden-transport-org-hr" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-300" data-lastr="9999">
@@ -17914,7 +17921,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹300 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹300</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="sikandar-sultan" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-395" data-lastr="9999">
@@ -17928,7 +17935,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹395 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹395</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="v-p-accessories" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-440" data-lastr="9999">
@@ -17942,7 +17949,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹440 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹440</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="popular-trading-co" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-452" data-lastr="9999">
@@ -17956,7 +17963,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹452 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹452</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="auto-perfection" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-460" data-lastr="29">
@@ -17970,7 +17977,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">27 Apr</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹460 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹460</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="faizan-shaikh" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-500" data-lastr="9999">
@@ -17984,7 +17991,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹500 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹500</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="ganpati-marketing-delhi" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-500" data-lastr="9999">
@@ -17998,7 +18005,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹500 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹500</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="anvi-carpet" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-578" data-lastr="9999">
@@ -18012,7 +18019,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹578 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹578</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="jain-packaging-mill-store" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-581" data-lastr="33">
@@ -18026,7 +18033,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">23 Apr</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹581 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹581</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="rupesh-verma-panipat" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-618" data-lastr="41">
@@ -18040,7 +18047,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">15 Apr</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹618 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹618</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="raja-plastic" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-761" data-lastr="9999">
@@ -18054,7 +18061,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹761 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹761</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="ankit-kumar-keshri" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-775" data-lastr="9999">
@@ -18068,7 +18075,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹775 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹775</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="ambala-khadi-bhandar" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-895" data-lastr="9999">
@@ -18082,7 +18089,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹895 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹895</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="satguru-enterprises-rupnagar" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-922" data-lastr="4">
@@ -18096,7 +18103,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">22 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹922 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹922</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="bafna-home-decor" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-954" data-lastr="9999">
@@ -18110,7 +18117,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹954 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹954</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="trisaaj" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-981" data-lastr="9999">
@@ -18124,7 +18131,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹981 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹981</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="mahalaxmi-hoods" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-1186" data-lastr="8">
@@ -18138,7 +18145,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">18 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹1,186 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹1,186</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="salim-mansuri" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-1256" data-lastr="9999">
@@ -18152,7 +18159,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹1,256 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹1,256</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="ambika-seasonable-store" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-1292" data-lastr="26">
@@ -18166,7 +18173,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">30 Apr</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹1,292 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹1,292</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="the-kothari-multitrade" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-1500" data-lastr="13">
@@ -18180,7 +18187,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">13 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹1,500 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹1,500</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="shree-sanmati-traders" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-1568" data-lastr="9999">
@@ -18194,7 +18201,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹1,568 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹1,568</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="nanda-enterprises" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-1650" data-lastr="9999">
@@ -18208,7 +18215,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹1,650 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹1,650</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="arvind-marketing-company" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-1865" data-lastr="9999">
@@ -18222,7 +18229,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹1,865 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹1,865</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="shree-luxmi-trading-company-baddi" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-2076" data-lastr="9999">
@@ -18236,7 +18243,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹2,076 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹2,076</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="new-srikrishna-stores" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-2112" data-lastr="9999">
@@ -18250,7 +18257,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹2,112 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹2,112</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="kripa-enterprises-nagpur" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-2203" data-lastr="5">
@@ -18264,7 +18271,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">21 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹2,203 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹2,203</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="jd-homez-ambala" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-2230" data-lastr="9999">
@@ -18278,7 +18285,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹2,230 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹2,230</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="deep-sales-agency" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-2250" data-lastr="9999">
@@ -18292,7 +18299,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹2,250 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹2,250</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="solapur-carpet" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-2314" data-lastr="11">
@@ -18306,7 +18313,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">15 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹2,314 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹2,314</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="m-s-yash-plastics" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-2558" data-lastr="48">
@@ -18320,7 +18327,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">08 Apr</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹2,558 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹2,558</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="vijaya-traders-madurai" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-2603" data-lastr="9999">
@@ -18334,7 +18341,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹2,603 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹2,603</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="scm-silks-private-limited" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-2773" data-lastr="9999">
@@ -18348,7 +18355,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹2,773 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹2,773</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="royal-inc" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-2809" data-lastr="9999">
@@ -18362,7 +18369,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹2,809 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹2,809</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="na-mats" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-2848" data-lastr="8">
@@ -18376,7 +18383,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">18 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹2,848 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹2,848</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="panther-new-delhi" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-3010" data-lastr="26">
@@ -18390,7 +18397,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">30 Apr</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹3,010 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹3,010</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="sri-vaishnav-enterprises" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-3175" data-lastr="54">
@@ -18404,7 +18411,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">02 Apr</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹3,175 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹3,175</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="gupta-associates" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-3354" data-lastr="9999">
@@ -18418,7 +18425,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹3,354 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹3,354</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="b-k-store" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-3393" data-lastr="9999">
@@ -18432,7 +18439,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹3,393 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹3,393</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="sky-eagle" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-3684" data-lastr="9999">
@@ -18446,7 +18453,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹3,684 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹3,684</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="malji-chetan-nagusa" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-4312" data-lastr="11">
@@ -18460,7 +18467,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">15 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹4,312 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹4,312</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="sham-lal-amar-nath" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-4342" data-lastr="9999">
@@ -18474,7 +18481,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹4,342 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹4,342</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="nmk-matting" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-4461" data-lastr="9999">
@@ -18488,7 +18495,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹4,461 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹4,461</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="fortuna-living-spaces-india-private-limited" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-4461" data-lastr="9999">
@@ -18502,7 +18509,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹4,461 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹4,461</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="new-rexine-centre" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-4571" data-lastr="11">
@@ -18516,7 +18523,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">15 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹4,571 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹4,571</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="pahadiya-home-decor-barwani" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-4796" data-lastr="9999">
@@ -18530,7 +18537,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹4,796 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹4,796</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="vaibhav-laxmi-enterprises" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-4833" data-lastr="9999">
@@ -18544,7 +18551,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹4,833 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹4,833</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="bisheshar-lal-kundanlal" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-5256" data-lastr="5">
@@ -18558,7 +18565,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">21 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹5,256 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹5,256</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="neelam-carpet-curtain-house" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-5730" data-lastr="9999">
@@ -18572,7 +18579,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹5,730 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹5,730</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="bilal-handloom" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-5995" data-lastr="9999">
@@ -18586,7 +18593,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹5,995 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹5,995</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="triangle-matting-and-carpets" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-6060" data-lastr="9999">
@@ -18600,7 +18607,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹6,060 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹6,060</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="dnd-co" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-6204" data-lastr="24">
@@ -18614,7 +18621,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">02 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹6,204 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹6,204</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="satguru-traders" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-6704" data-lastr="19">
@@ -18628,7 +18635,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">07 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹6,704 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹6,704</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="gupta-car-accessories-hisar" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-7080" data-lastr="9999">
@@ -18642,7 +18649,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹7,080 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹7,080</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="mahadev-marketing" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-7813" data-lastr="9999">
@@ -18656,7 +18663,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹7,813 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹7,813</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="ajanta-furnishing-jallandhar" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-7828" data-lastr="11">
@@ -18670,7 +18677,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">15 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹7,828 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹7,828</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="sri-vinayaga-traders" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-8266" data-lastr="14">
@@ -18684,7 +18691,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">12 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹8,266 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹8,266</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="r-h-handloom" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-8610" data-lastr="19">
@@ -18698,7 +18705,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">07 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹8,610 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹8,610</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="harpreet-singh" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-10186" data-lastr="9999">
@@ -18712,7 +18719,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹10,186 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹10,186</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="kumar-handloom-house" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-10409" data-lastr="9999">
@@ -18726,7 +18733,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹10,409 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹10,409</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="mehtab-ali-brothers" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-11017" data-lastr="7">
@@ -18740,7 +18747,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">19 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹11,017 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹11,017</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="shah-plastic" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-11617" data-lastr="1">
@@ -18754,7 +18761,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">25 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹11,617 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹11,617</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="shri-pooja-trading-company-new" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-11753" data-lastr="8">
@@ -18768,7 +18775,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">18 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹11,753 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹11,753</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="nakoda-trade-link" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-11885" data-lastr="25">
@@ -18782,7 +18789,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">01 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹11,885 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹11,885</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="ravariya-enterprises" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-12793" data-lastr="1">
@@ -18796,7 +18803,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">25 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹12,793 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹12,793</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="smb-traders" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-12820" data-lastr="1">
@@ -18810,7 +18817,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">25 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹12,820 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹12,820</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="a-r-b-sales-agency" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-12956" data-lastr="9999">
@@ -18824,7 +18831,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹12,956 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹12,956</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="accessory-creations" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-13653" data-lastr="9999">
@@ -18838,7 +18845,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹13,653 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹13,653</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="pradip-kumar-agarwala" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-14256" data-lastr="9999">
@@ -18852,7 +18859,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹14,256 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹14,256</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="morado-india" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-14811" data-lastr="4">
@@ -18866,7 +18873,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">22 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹14,811 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹14,811</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="penumudi-hardwares" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-14850" data-lastr="3">
@@ -18880,7 +18887,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">23 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹14,850 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹14,850</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="aaramdehi" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-15597" data-lastr="3">
@@ -18894,7 +18901,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">23 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹15,597 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹15,597</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="heritage-home-decor" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-16510" data-lastr="9999">
@@ -18908,7 +18915,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹16,510 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹16,510</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="aspire-tech-industries" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-16815" data-lastr="9999">
@@ -18922,7 +18929,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹16,815 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹16,815</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="bhartiya-vastu-bhandar" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-16977" data-lastr="6">
@@ -18936,7 +18943,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">20 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹16,977 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹16,977</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="risbana-traders" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-17010" data-lastr="6">
@@ -18950,7 +18957,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">20 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹17,010 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹17,010</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="berelia-sales" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-17055" data-lastr="12">
@@ -18964,7 +18971,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">14 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹17,055 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹17,055</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="harsha-plastic" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-18172" data-lastr="9999">
@@ -18978,7 +18985,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹18,172 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹18,172</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="rajhans-cine-world-private-limited-noida" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-19835" data-lastr="9999">
@@ -18992,7 +18999,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹19,835 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹19,835</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="m-s-shrivastava-furnishing-house" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-20720" data-lastr="19">
@@ -19006,7 +19013,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">07 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹20,720 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹20,720</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="unicorn-group-india" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-22087" data-lastr="4">
@@ -19020,7 +19027,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">22 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹22,087 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹22,087</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="m-s-ayodhyaprasad-abirchand" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-23448" data-lastr="41">
@@ -19034,7 +19041,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">15 Apr</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹23,448 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹23,448</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="nirmal-plastics" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-23671" data-lastr="1">
@@ -19048,7 +19055,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">25 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹23,671 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹23,671</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="bharat-trading-co" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-25557" data-lastr="18">
@@ -19062,7 +19069,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">08 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹25,557 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹25,557</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="car-zone" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-27725" data-lastr="9999">
@@ -19076,7 +19083,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹27,725 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹27,725</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="bajaj-trading-hisar" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-33276" data-lastr="9999">
@@ -19090,7 +19097,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹33,276 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹33,276</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="rajhans-cine-world-pvt-ltd-gujarat" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-47090" data-lastr="12">
@@ -19104,7 +19111,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">14 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹47,090 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹47,090</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="vali-trading-company-kolhapur" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-50000" data-lastr="4">
@@ -19118,7 +19125,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">22 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹50,000 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹50,000</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="m-s-carpet-house" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-50000" data-lastr="9999">
@@ -19132,7 +19139,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹50,000 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹50,000</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="sri-ram-furnishing" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-52170" data-lastr="26">
@@ -19146,7 +19153,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">30 Apr</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹52,170 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹52,170</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="shrinath-enterprises" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-55633" data-lastr="33">
@@ -19160,7 +19167,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">23 Apr</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹55,633 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹55,633</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="shahira-carpet-jaipur" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-64609" data-lastr="7">
@@ -19174,7 +19181,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">19 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹64,609 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹64,609</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="manmohan-karnani" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-67415" data-lastr="9999">
@@ -19188,7 +19195,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹67,415 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹67,415</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="narmada-traders" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-73715" data-lastr="1">
@@ -19202,7 +19209,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">25 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹73,715 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹73,715</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="mohit-carpet-and-matting-house" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-90231" data-lastr="9999">
@@ -19216,7 +19223,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">—</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹90,231 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹90,231</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="angel-wire-netting" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-98539" data-lastr="1">
@@ -19230,7 +19237,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                 <td class="num r" style="color:var(--text-4);">—</td>
                 <td class="mute r" style="font-family:var(--fm);font-size:11px;">25 May</td>
                 <td><span class="risk-cluster"><span class="risk-dot "></span><span class="risk-lbl">Advance</span></span></td>
-                <td class="num r" style="color:var(--emerald);">−₹98,539 Cr</td>
+                <td class="num r" style="color:var(--emerald);">−₹98,539</td>
               </tr>
               <tr class="detail-r"><td colspan="7"><div class="detail-inner" data-loaded="0"></div></td></tr>
               <tr class="party-r advance" data-pid="travancore-cocotuft-pvt-ltd-dta-unit" data-advance="1" data-risk="advance" data-oldest="0" data-dso="0" data-out="-100568" data-lastr="4">
