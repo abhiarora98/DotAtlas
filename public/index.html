@@ -539,6 +539,11 @@
   .table {
     width: 100%; border-collapse: collapse;
   }
+  /* Lock column widths so header text and row content always share
+     the same column edges — without this, auto layout shifts column
+     boundaries whenever a row's content is wider than the header. */
+  .table.ledger { table-layout: fixed; }
+  .table.ledger td, .table.ledger th { overflow: hidden; text-overflow: ellipsis; }
   .table thead th {
     font-family: var(--fm); font-size: 9.5px;
     color: var(--text-3); letter-spacing: 0.14em; text-transform: uppercase;
@@ -569,8 +574,9 @@
   .table .name .av-sq.e { background: linear-gradient(135deg, rgba(78,222,163,0.18), rgba(78,222,163,0.04)); color: var(--emerald); border-color: rgba(78,222,163,0.18); }
   .table .name .av-sq.b { background: linear-gradient(135deg, rgba(124,168,255,0.18), rgba(124,168,255,0.04)); color: var(--blue); border-color: rgba(124,168,255,0.18); }
   .table .name .av-sq.a { background: linear-gradient(135deg, rgba(255,176,121,0.18), rgba(255,176,121,0.04)); color: var(--amber); border-color: rgba(255,176,121,0.18); }
-  .table .name .nm-c .pri { font-weight: 500; font-size: 13px; }
-  .table .name .nm-c .sec { font-family: var(--fm); font-size: 10.5px; color: var(--text-3); margin-top: 2px; letter-spacing: 0.04em; }
+  .table .name .nm-c { min-width: 0; flex: 1; }
+  .table .name .nm-c .pri { font-weight: 500; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .table .name .nm-c .sec { font-family: var(--fm); font-size: 10.5px; color: var(--text-3); margin-top: 2px; letter-spacing: 0.04em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .table .num { font-family: var(--fd); font-weight: 500; color: var(--text); font-variant-numeric: tabular-nums; }
   .table .num .cur { font-size: 11px; color: var(--text-3); margin-right: 2px; }
   .table .mute { color: var(--text-2); font-size: 12.5px; }
@@ -2806,8 +2812,17 @@
         </div>
         <div class="card-b" style="padding-top:6px;">
           <table class="table ledger">
+            <colgroup>
+              <col style="width:320px;"/>
+              <col style="width:140px;"/>
+              <col style="width:80px;"/>
+              <col style="width:90px;"/>
+              <col style="width:110px;"/>
+              <col style="width:120px;"/>
+              <col/>
+            </colgroup>
             <thead><tr>
-              <th style="width:300px;">Party</th>
+              <th>Party</th>
               <th>Aging</th>
               <th class="r">Oldest</th>
               <th class="r">Wtd-age</th>
