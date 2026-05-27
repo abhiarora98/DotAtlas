@@ -973,18 +973,75 @@
   /* === Receivables drawer — clean "paper" inset within the cockpit ===
      Tally-style ledger that reads in 2 seconds. Self-contained palette
      (does not consume CSS vars) so it stays the same in dark + light. */
+  /* Drawer surface — attached to the party row above. Theme-aware
+     subtle tint so it reads as the same continuous component. */
   .table.ledger tr.detail-r > td {
     padding: 0;
-    background: #F8F9FB;
-    color: #0B1220;
-    border-bottom: 1px solid rgba(0,0,0,0.10);
+    background: var(--surface-2);
+    color: var(--text);
+    border-bottom: 1px solid var(--line);
   }
-  /* Drawer = full table width, statement-style. No horizontal padding
-     so content edges sit on the same x as the party row's leftmost
-     and rightmost cells above. */
   .table.ledger .detail-inner {
-    padding: 14px 0 18px 0;
+    padding: 0;
     box-sizing: border-box;
+  }
+
+  /* === Unified drawer card === */
+  .table.ledger .detail-inner .drawer-card {
+    border: 1px solid var(--line);
+    border-top: 0;        /* attached flush to the party row */
+    background: var(--surface);
+    overflow: hidden;
+  }
+  .table.ledger .detail-inner .drawer-summary {
+    border-bottom: 1px solid var(--line);
+  }
+  /* Summary stack — one row per FY · closing right-aligned at the
+     same x as the Outstanding column above. */
+  .table.ledger .detail-inner .ds-row {
+    display: grid;
+    grid-template-columns: 1fr 200px;
+    align-items: center;
+    padding: 14px 0 14px 22px;
+    border-bottom: 1px solid var(--line);
+  }
+  .table.ledger .detail-inner .ds-row:last-child { border-bottom: 0; }
+  .table.ledger .detail-inner .ds-info {
+    display: flex; flex-direction: column; gap: 3px; min-width: 0;
+  }
+  .table.ledger .detail-inner .ds-label {
+    font-family: var(--fb); font-size: 13.5px; font-weight: 500;
+    color: var(--text); letter-spacing: -0.005em;
+  }
+  .table.ledger .detail-inner .ds-sub {
+    font-family: var(--fm); font-size: 10.5px; color: var(--text-3);
+    letter-spacing: 0.04em;
+  }
+  .table.ledger .detail-inner .ds-closing {
+    display: flex; flex-direction: column; align-items: flex-end;
+    gap: 2px; text-align: right; white-space: nowrap;
+  }
+  .table.ledger .detail-inner .ds-closing-label {
+    font-family: var(--fm); font-size: 10px; color: var(--text-3);
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .table.ledger .detail-inner .ds-closing-amount {
+    font-family: var(--fd); font-size: 15px; font-weight: 600;
+    color: var(--text); letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+  }
+  /* Headline (current FY) — bigger amount + state colour */
+  .table.ledger .detail-inner .ds-row.headline .ds-closing-amount {
+    font-size: 20px; font-weight: 700; letter-spacing: -0.025em;
+  }
+  .table.ledger .detail-inner.state-overdue .ds-row.headline .ds-closing-amount { color: var(--rose); }
+  .table.ledger .detail-inner.state-paid    .ds-row.headline .ds-closing-amount { color: var(--emerald); }
+  .table.ledger .detail-inner.state-advance .ds-row.headline .ds-closing-amount { color: var(--blue); }
+  .table.ledger .detail-inner.state-watch   .ds-row.headline .ds-closing-amount { color: var(--amber); }
+
+  /* Ledger area inside the drawer */
+  .table.ledger .detail-inner .drawer-ledger {
+    max-height: 480px; overflow-y: auto;
   }
 
   /* Voucher row — Date · Type · Voucher · Amount · Running Balance */
@@ -998,7 +1055,7 @@
     border-radius: 4px;
   }
   /* Zebra striping — very subtle warm tint on alternating rows */
-  .table.ledger .detail-inner .fy-rows .inv-row:nth-child(even) {
+  .table.ledger .detail-inner .drawer-ledger .inv-row:nth-child(even) {
     background: rgba(11,18,32,0.04);
   }
   .table.ledger .detail-inner .vdate { color: #4B5563; }
@@ -1031,99 +1088,11 @@
     font-variant-numeric: tabular-nums; white-space: nowrap;
   }
 
-  /* === Year row — one clean line per financial year ===
-     Grid lines: [chev 22px] [info 1fr] [closing 170px ≈ Outstanding col].
-     The carry-forward variant hides the chevron. */
-  .table.ledger .detail-inner .fy-row {
-    display: grid;
-    grid-template-columns: 22px 1fr 170px;
-    column-gap: 16px;
-    align-items: center;
-    width: 100%;
-    padding: 14px 0 14px 18px;     /* zero right padding so the closing column right edge lands on the Outstanding column edge above */
-    border-bottom: 1px solid #E6E8EE;
-    background: transparent;
-    border-left: 0; border-right: 0; border-top: 0;
-    text-align: left;
-    font-family: var(--fb);
-  }
-  .table.ledger .detail-inner button.fy-row {
-    cursor: pointer;
-    transition: background 150ms var(--ease);
-  }
-  .table.ledger .detail-inner button.fy-row:hover { background: rgba(11,18,32,0.025); }
-  .table.ledger .detail-inner .fy-row .chev {
-    font-size: 11px; color: #6B7280; line-height: 1;
-    text-align: center;
-    transition: transform 200ms var(--ease), color 200ms var(--ease);
-  }
-  .table.ledger .detail-inner .fy-section.open .fy-row .chev {
-    transform: rotate(90deg); color: #0B1220;
-  }
-  .table.ledger .detail-inner .fy-row.carry-row {
-    grid-template-columns: 1fr 170px;
-  }
-  .table.ledger .detail-inner .fy-info {
-    display: flex; flex-direction: column; gap: 4px; min-width: 0;
-  }
-  .table.ledger .detail-inner .fy-label {
-    font-family: var(--fb); font-size: 13.5px; font-weight: 500;
-    color: #0B1220; letter-spacing: -0.005em;
-  }
-  .table.ledger .detail-inner .fy-sub {
-    font-family: var(--fm); font-size: 10.5px; color: #6B7280;
-    letter-spacing: 0.04em;
-  }
-  /* Closing block — right-aligned in its column. Label sits above the
-     amount so a long label can't push the number around. */
-  .table.ledger .detail-inner .fy-closing {
-    display: flex; flex-direction: column; align-items: flex-end;
-    gap: 2px; text-align: right; white-space: nowrap;
-  }
-  .table.ledger .detail-inner .fy-closing-label {
-    font-family: var(--fm); font-size: 10.5px; color: #6B7280;
-    letter-spacing: 0.06em;
-  }
-  .table.ledger .detail-inner .fy-closing-amount {
-    font-family: var(--fd); font-size: 15px; font-weight: 500;
-    color: #0B1220; letter-spacing: -0.01em;
-    font-variant-numeric: tabular-nums; white-space: nowrap;
-  }
-  /* Headline variant — Current outstanding for the current FY.
-     Stays in the closing column; bumps label + amount weight so it
-     reads as the headline number. */
-  .table.ledger .detail-inner .fy-closing.headline .fy-closing-label {
-    font-size: 9.5px; letter-spacing: 0.18em; text-transform: uppercase;
-    color: #4B5563; font-weight: 600;
-  }
-  .table.ledger .detail-inner .fy-closing.headline .fy-closing-amount {
-    font-size: 19px; font-weight: 700; letter-spacing: -0.025em;
-  }
-  /* Outstanding state colors the headline amount. */
-  .table.ledger .detail-inner.state-overdue .fy-closing.headline .fy-closing-amount { color: #C73E5E; }
-  .table.ledger .detail-inner.state-paid    .fy-closing.headline .fy-closing-amount { color: #00A572; }
-  .table.ledger .detail-inner.state-advance .fy-closing.headline .fy-closing-amount { color: #00A572; }
-  .table.ledger .detail-inner.state-watch   .fy-closing.headline .fy-closing-amount { color: #B45309; }
-
-  /* Year sections — a little more breathing room between blocks. */
-  .table.ledger .detail-inner .fy-section { margin: 12px 0; }
-  .table.ledger .detail-inner .fy-rows {
-    display: none;
-    margin: 8px 0 18px 36px;
-    padding: 0;
-    background: rgba(11,18,32,0.025);
-    border-radius: 6px;
-    max-height: 480px;
-    overflow-y: auto;
-  }
-  .table.ledger .detail-inner .fy-section.open .fy-rows { display: block; }
-
-  /* Sticky column header inside each year's scrollable ledger panel. */
+  /* Sticky column header inside the unified drawer ledger. */
   .table.ledger .detail-inner .inv-header {
     position: sticky; top: 0; z-index: 2;
-    background: rgba(11,18,32,0.92);
-    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-    border-bottom: 1px solid var(--line-2);
+    background: var(--surface-3);
+    border-bottom: 1px solid var(--line);
     font-family: var(--fm); font-size: 9.5px; font-weight: 600;
     color: var(--text-2); letter-spacing: 0.14em; text-transform: uppercase;
     padding: 10px 14px;
@@ -1132,49 +1101,9 @@
   .table.ledger .detail-inner .inv-header > span:nth-child(2),
   .table.ledger .detail-inner .inv-header > span:nth-child(3) { text-align: center; }
   .table.ledger .detail-inner .inv-header .hdr-r { text-align: right; }
-  /* Voucher rows inside .fy-rows get the same horizontal padding as the
-     header so columns align across header + every row. */
-  .table.ledger .detail-inner .fy-rows .inv-row {
+  /* Voucher rows inside the drawer-ledger get matching horizontal padding. */
+  .table.ledger .detail-inner .drawer-ledger .inv-row {
     padding-left: 14px; padding-right: 14px;
-  }
-
-  /* === Recency timeline — left border colour per financial year ===
-     The borders sit flush so the strip reads as one continuous vertical
-     line whose colour deepens as we approach the live year. */
-  .table.ledger .detail-inner > .fy-row.carry-row,
-  .table.ledger .detail-inner > .fy-section {
-    border-left: 2px solid transparent;
-  }
-  .table.ledger .detail-inner > .fy-row.carry-row {
-    border-left-color: #C9D3E2;   /* muted slate · archival */
-  }
-  .table.ledger .detail-inner > .fy-section[data-fy="25-26"] {
-    border-left-color: #7CA8FF;   /* soft blue · previous */
-  }
-  .table.ledger .detail-inner > .fy-section[data-fy="26-27"] {
-    border-left: 3px solid #0B1220;  /* solid · current */
-  }
-  .table.ledger .detail-inner > .fy-row.carry-row,
-  .table.ledger .detail-inner > .fy-section > .fy-row {
-    padding-left: 22px;
-  }
-  .table.ledger .detail-inner > .fy-section[data-fy="26-27"] > .fy-row {
-    padding-left: 21px;  /* compensate for 3 px border */
-  }
-
-  /* Per-year tone: FY 24-25 archival, FY 25-26 soft blue, FY 26-27 full */
-  .table.ledger .detail-inner > .fy-row.carry-row .fy-label,
-  .table.ledger .detail-inner > .fy-row.carry-row .fy-closing-label {
-    color: #6B7785;
-  }
-  .table.ledger .detail-inner > .fy-row.carry-row .fy-closing-amount {
-    color: #4B5563; font-weight: 500;
-  }
-  .table.ledger .detail-inner > .fy-section[data-fy="25-26"] .fy-label {
-    color: #1840CC;
-  }
-  .table.ledger .detail-inner > .fy-section[data-fy="26-27"] .fy-label {
-    color: #0B1220; font-weight: 600; font-size: 14px;
   }
 
   /* Activity dot — small leading marker inside each party row's secondary line.
@@ -18639,33 +18568,20 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
            + `</div>`;
     }
 
+    // One unified drawer card per party:
+    //   ┌──────────────────────────────────────────────────────┐
+    //   │ SUMMARY BAR (one line per FY · closing right-aligned)│
+    //   ├──────────────────────────────────────────────────────┤
+    //   │ LEDGER (Date | Type | Vch | Amount | Running Balance)│
+    //   └──────────────────────────────────────────────────────┘
     function renderDrawer(inner, p) {
       const bf24 = p.bf24 || 0;
       const op   = p.opening || 0;
       const out  = p.outstanding || 0;
-      const hasFY25 = !!(p.fy25 && p.fy25.length);
-      const hasFY26 = !!(p.fy26 && p.fy26.length);
+      const fy25 = p.fy25 || [];
+      const fy26 = p.fy26 || [];
 
-      let html = '';
-
-      // FY 24-25 — carry-forward only. Subtitle stays inline with label;
-      // amount sits in its own right-aligned column matching Outstanding.
-      if (Math.abs(bf24) > 0.5) {
-        html += `<div class="fy-row carry-row" data-fy="24-25">`
-              + `<div class="fy-info">`
-              + `<span class="fy-label">FY 24-25 (carry forward)</span>`
-              + `<span class="fy-sub">Closing balance as on 31 Mar 2025</span>`
-              + `</div>`
-              + `<div class="fy-closing">`
-              + `<span class="fy-closing-amount">${fmtAmt(bf24)}</span>`
-              + `</div>`
-              + `</div>`;
-      }
-
-      if (hasFY25) html += yearRow('25-26', p.fy25, op,  bf24, false, 'Closing', false);
-      if (hasFY26) html += yearRow('26-27', p.fy26, out, op,   true,  'Current outstanding', true);
-
-      // State class drives the headline's color.
+      // State class drives the headline colour.
       const partyRow = inner.closest('tr').previousElementSibling;
       const oldest   = +(partyRow?.dataset.oldest || 0);
       const outNum   = +(partyRow?.dataset.out || 0);
@@ -18676,19 +18592,69 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       else if (oldest > 30)         outState = 'state-watch';
       inner.classList.add(outState);
 
-      inner.innerHTML = html;
+      function summaryRow(label, sub, closingLabel, closingAmt, isHeadline) {
+        return `<div class="ds-row${isHeadline ? ' headline' : ''}">`
+             + `<div class="ds-info">`
+             + `<span class="ds-label">${esc(label)}</span>`
+             + (sub ? `<span class="ds-sub">${esc(sub)}</span>` : '')
+             + `</div>`
+             + `<div class="ds-closing">`
+             + `<span class="ds-closing-label">${esc(closingLabel)}</span>`
+             + `<span class="ds-closing-amount">${fmtAmt(closingAmt)}</span>`
+             + `</div>`
+             + `</div>`;
+      }
+      const summary = [];
+      if (Math.abs(bf24) > 0.5) {
+        summary.push(summaryRow(
+          'FY 24-25 (carry forward)',
+          'Closing balance as on 31 Mar 2025',
+          'Closing', bf24, false
+        ));
+      }
+      if (fy25.length) {
+        const billed = fy25.reduce((a,t)=>a+(t.dr||0),0);
+        const recv   = fy25.reduce((a,t)=>a+(t.cr||0),0);
+        summary.push(summaryRow(
+          `FY 25-26 · ${fy25.length} voucher${fy25.length!==1?'s':''}`,
+          `Billed ${fmtShort(billed)} · Received ${fmtShort(recv)}`,
+          'Closing', op, false
+        ));
+      }
+      if (fy26.length) {
+        const billed = fy26.reduce((a,t)=>a+(t.dr||0),0);
+        const recv   = fy26.reduce((a,t)=>a+(t.cr||0),0);
+        summary.push(summaryRow(
+          `FY 26-27 · ${fy26.length} voucher${fy26.length!==1?'s':''}`,
+          `Billed ${fmtShort(billed)} · Received ${fmtShort(recv)}`,
+          'Current outstanding', out, true
+        ));
+      }
+
+      // Single ledger — FY 25-26 then FY 26-27, chronological; running
+      // balance flows from the FY 24-25 carry-forward.
+      const opt = { running: bf24 };
+      const voucherRows = [...fy25, ...fy26].map(t => vRow(t, opt)).join('');
+
+      const ledger = voucherRows
+        ? `<div class="drawer-ledger">`
+          + `<div class="inv-row inv-header">`
+          +   `<span>Date</span>`
+          +   `<span>Type</span>`
+          +   `<span>Vch No</span>`
+          +   `<span class="hdr-r">Amount</span>`
+          +   `<span class="hdr-r">Running Balance</span>`
+          + `</div>`
+          + voucherRows
+          + `</div>`
+        : '';
+
+      inner.innerHTML =
+        `<div class="drawer-card">`
+        + `<div class="drawer-summary">${summary.join('')}</div>`
+        + ledger
+        + `</div>`;
       inner.dataset.loaded = '1';
-
-      // Wire year chevron toggles
-      inner.querySelectorAll('.fy-toggle').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          btn.closest('.fy-section').classList.toggle('open');
-        });
-      });
-
-      // (Notes / follow-up editor removed for now — drawer focused on the
-      //  ledger only. Storage hooks below stay dormant for future revival.)
     }
 
     // ── Party notes (Phase 1: localStorage; Phase 2: Atlas backend) ──
