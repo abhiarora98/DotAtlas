@@ -19418,10 +19418,17 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         return base + (n > 0 ? ' Dr' : ' Cr');
       }
 
-      // Page header — drawn on every page via autotable's didDrawPage
-      // hook. Issuer block on top, divider, then statement title +
-      // party identity, divider.
+      // The "summary sheet" is the final dedicated page — its layout
+      // owns its own header/footer so the standard ones are gated off.
+      let onSummaryPage = false;
+
+      // Page header — only paints on page 1. Continuation pages (long
+      // ledgers) and the summary sheet get a clean canvas; repeating
+      // the brand-band on every page makes the statement feel pasted-
+      // together rather than designed.
       function drawHeader(data) {
+        if (onSummaryPage)            return;
+        if (data && data.pageNumber !== 1) return;
         const y0 = MARGIN;
 
         // Comfort Mats logo — top-right, balancing the issuer block
@@ -19495,8 +19502,12 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         doc.line(MARGIN, metaY + 46, RIGHT_X, metaY + 46);
       }
 
-      // Page-footer drawer — page numbers + generated stamp
+      // Page-footer drawer — generated stamp on ledger pages. Skipped
+      // on the summary sheet (which has its own richer bottom blocks).
+      // Page indicator is stamped in a final pass after the summary
+      // page exists, so "X of Y" reflects the true total.
       function drawFooter(data) {
+        if (onSummaryPage) return;
         const y = H - MARGIN + 20;
         doc.setDrawColor(225, 228, 232);
         doc.setLineWidth(0.5);
@@ -19505,10 +19516,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         doc.setFontSize(8);
         doc.setTextColor(140, 148, 160);
         doc.text('Generated from dot.atlas · Synced from Tally', MARGIN, y);
-        const pageNum = data.pageNumber;
-        const total = doc.internal.getNumberOfPages();
         doc.text(`Generated on ${generatedAt}`, W / 2, y, { align: 'center' });
-        doc.text(`Page ${pageNum} of ${total}`, RIGHT_X, y, { align: 'right' });
       }
 
       // Cursor tracks the current vertical position; autotable updates
@@ -19756,105 +19764,130 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         finalAmt   = p.bf24;
       }
 
-      // Final result block — stronger emphasis than anything else on
-      // the page. Thicker top rule, faint tinted fill so the row reads
-      // as the page-level conclusion, larger amount, Dr/Cr suffix.
-      cursorY += 10;
-      const blockH = 46;
-      // Faint grey-blue fill behind the row
+      // ──────────────────────────────────────────────────────────
+      // Dedicated summary sheet (the final page). Force a page break
+      // so the closing block never crams under the last voucher row.
+      // Layout: Summary panel → divider → big CURRENT OUTSTANDING
+      // box → bottom contact/generation blocks. No brand header, no
+      // running footer — those belong to the ledger pages only.
+      // ──────────────────────────────────────────────────────────
+      doc.addPage();
+      onSummaryPage = true;
+      const summaryPageNum = doc.internal.getNumberOfPages();
+
+      // ─ Top: Summary panel ───────────────────────────────────
+      let yS = MARGIN + 12;
+      doc.setFont(FONT, 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(80, 88, 100);
+      doc.text('SUMMARY', MARGIN, yS);
+      yS += 22;
+
+      // Three rows: Sales / Receipts / Outstanding. Generous vertical
+      // gap so the panel reads as a deliberate composition.
+      const summaryRows = [
+        ['Sales this period',    inrAmt(totalBilled),    [11,18,32]],
+        ['Receipts this period', inrAmt(totalReceived),  [0,132,92]],
+        ['Outstanding',          fmtBal(finalAmt),       finalAmt < -0.5 ? [0,132,92] : [11,18,32]],
+      ];
+      summaryRows.forEach(([label, val, color]) => {
+        doc.setFont(FONT, 'normal');
+        doc.setFontSize(11);
+        doc.setTextColor(80, 88, 100);
+        doc.text(label, MARGIN, yS);
+        doc.setFont(FONT, 'bold');
+        doc.setTextColor(color[0], color[1], color[2]);
+        doc.text(val, RIGHT_X, yS, { align: 'right' });
+        yS += 24;
+      });
+
+      // Divider after summary
+      yS += 14;
+      doc.setDrawColor(220, 224, 228);
+      doc.setLineWidth(0.5);
+      doc.line(MARGIN, yS, RIGHT_X, yS);
+
+      // ─ Mid: Large CURRENT OUTSTANDING box ───────────────────
+      // Generous breathing room above, faint tint, centered label
+      // and amount. This is the page's focal point.
+      yS += 56;
+      const boxH = 130;
       doc.setFillColor(245, 247, 250);
-      doc.rect(MARGIN, cursorY, CONTENT_W, blockH, 'F');
-      // Top rule: 1.5pt near-black
+      doc.rect(MARGIN, yS, CONTENT_W, boxH, 'F');
       doc.setDrawColor(11, 18, 32);
       doc.setLineWidth(1.5);
-      doc.line(MARGIN, cursorY, RIGHT_X, cursorY);
-      // Bottom hairline
+      doc.line(MARGIN, yS, RIGHT_X, yS);
       doc.setDrawColor(220, 224, 228);
       doc.setLineWidth(0.5);
-      doc.line(MARGIN, cursorY + blockH, RIGHT_X, cursorY + blockH);
-      // Label
+      doc.line(MARGIN, yS + boxH, RIGHT_X, yS + boxH);
+
       doc.setFont(FONT, 'bold');
-      doc.setFontSize(11.5);
-      doc.setTextColor(11, 18, 32);
-      doc.text(finalLabel, MARGIN + 14, cursorY + 29);
-      // Amount — 20pt bold; Dr/Cr suffix. Cr (advance/credit balance)
-      // tints emerald, matching the rest of the document.
-      doc.setFontSize(20);
+      doc.setFontSize(11);
+      doc.setTextColor(80, 88, 100);
+      doc.text(finalLabel, MARGIN + CONTENT_W / 2, yS + 44, { align: 'center' });
+
+      doc.setFont(FONT, 'bold');
+      doc.setFontSize(34);
       if (finalAmt < -0.5) doc.setTextColor(0, 132, 92);
       else                 doc.setTextColor(11, 18, 32);
-      doc.text(fmtBal(finalAmt), RIGHT_X - 14, cursorY + 31, { align: 'right' });
-      cursorY += blockH + 24;
+      doc.text(fmtBal(finalAmt), MARGIN + CONTENT_W / 2, yS + 92, { align: 'center' });
 
-      // ── Summary block ───────────────────────────────────────
-      doc.setFont(FONT, 'bold');
-      doc.setFontSize(10);
-      doc.setTextColor(11, 18, 32);
-      doc.text('Summary', MARGIN, cursorY);
-      cursorY += 14;
-      doc.autoTable({
-        startY: cursorY,
-        margin: { left: MARGIN, right: MARGIN },
-        tableWidth: CONTENT_W,
-        theme: 'plain',
-        body: [
-          ['Sales this period',    inrAmt(totalBilled)],
-          ['Receipts this period', inrAmt(totalReceived)],
-          ['Outstanding',          fmtBal(finalAmt)]
-        ],
-        styles: {
-          font: FONT,
-          fontSize: 9.5,
-          cellPadding: { top: 4, right: 8, bottom: 4, left: 0 },
-          lineColor: [240, 242, 246],
-          lineWidth: { bottom: 0.3 }
-        },
-        columnStyles: {
-          0: { textColor: [80, 88, 100] },
-          1: { halign: 'right', textColor: [11, 18, 32], fontStyle: 'bold' }
-        },
-        didParseCell: (data) => {
-          // Outstanding row gets a slightly heavier treatment
-          if (data.row.index === 2 && data.column.index === 1) {
-            data.cell.styles.fontSize = 10.5;
-          }
-        },
-        didDrawPage: (data) => { drawHeader(data); drawFooter(data); }
-      });
-      cursorY = doc.lastAutoTable.finalY;
+      yS += boxH + 50;
 
-      // ── Signature block (issuer side, bottom-right) ─────────
-      // Standard practice on accounting statements — the issuer signs
-      // off so the recipient knows who to contact for reconciliation.
-      // Sits on the last page only (after summary).
-      const sigPad = 36;
-      let sigY = cursorY + sigPad;
-      // Page-break guard — if the signature wouldn't fit comfortably
-      // above the footer band, push it to a fresh page.
-      if (sigY > H - MARGIN - 90) {
-        doc.addPage();
-        drawHeader({ pageNumber: doc.internal.getNumberOfPages() });
-        drawFooter({ pageNumber: doc.internal.getNumberOfPages() });
-        sigY = MARGIN + headerBottom + 12;
-      }
-      const sigX = RIGHT_X - 200;
+      // Divider before the bottom contact / generation blocks
       doc.setDrawColor(220, 224, 228);
       doc.setLineWidth(0.5);
-      doc.line(sigX, sigY, RIGHT_X, sigY);
+      doc.line(MARGIN, yS, RIGHT_X, yS);
+
+      // ─ Bottom: Contact (left) + Generation info (right) ─────
+      // Anchored to the page bottom so the layout always reads the
+      // same regardless of how short the summary above is.
+      const bottomY = H - MARGIN - 78;
+
+      // Bottom-left: signature / contact
       doc.setFont(FONT, 'bold');
       doc.setFontSize(10);
       doc.setTextColor(11, 18, 32);
-      doc.text('For Comfort Industries', sigX, sigY + 16);
+      doc.text('For Comfort Industries', MARGIN, bottomY);
       doc.setFont(FONT, 'normal');
       doc.setFontSize(9);
       doc.setTextColor(80, 88, 100);
-      doc.text('Accounts Department',         sigX, sigY + 30);
-      doc.text('+91 88168 89093',             sigX, sigY + 43);
-      doc.text('accounts@comfortindustries.in', sigX, sigY + 56);
+      doc.text('Accounts Department',         MARGIN, bottomY + 14);
+      doc.text('+91 88168 89093',             MARGIN, bottomY + 38);
+      doc.text('accounts@comfortindustries.in', MARGIN, bottomY + 51);
 
-      // Defensive: ensure header/footer paint on page 1 even if no
-      // autotable triggered didDrawPage (degenerate selection).
+      // Bottom-right: generation info (stacked, right-aligned)
+      doc.setFont(FONT, 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(110, 118, 130);
+      doc.text('Generated from dot.atlas', RIGHT_X, bottomY,      { align: 'right' });
+      doc.text('Synced from Tally',         RIGHT_X, bottomY + 14, { align: 'right' });
+      doc.text(`Generated on ${generatedAt}`, RIGHT_X, bottomY + 28, { align: 'right' });
+      const totalPages = doc.internal.getNumberOfPages();
+      doc.text(`Page ${summaryPageNum} of ${totalPages}`,
+               RIGHT_X, bottomY + 42, { align: 'right' });
+
+      // Defensive: ensure the first page picks up the brand header
+      // even if no autotable fired didDrawPage (degenerate selection).
+      onSummaryPage = false;
+      doc.setPage(1);
       drawHeader({ pageNumber: 1 });
       drawFooter({ pageNumber: 1 });
+
+      // Final pass: stamp "Page X of Y" on every ledger page now that
+      // the total page count (including the summary sheet) is known.
+      // The summary sheet stamps its own indicator inside the bottom-
+      // right generation block, so we skip it here.
+      const totalPagesFinal = doc.internal.getNumberOfPages();
+      for (let i = 1; i < summaryPageNum; i++) {
+        doc.setPage(i);
+        doc.setFont(FONT, 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(140, 148, 160);
+        doc.text(`Page ${i} of ${totalPagesFinal}`,
+                 RIGHT_X, H - MARGIN + 20, { align: 'right' });
+      }
+      doc.setPage(summaryPageNum);
 
       const slug = String(p.name || 'party').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_|_$/g, '');
       doc.save(`${slug}_Statement_${dateSlug}.pdf`);
