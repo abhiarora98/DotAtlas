@@ -1242,6 +1242,26 @@
   .table.ledger .detail-inner .dl-year input[type="checkbox"]:checked + span {
     color: var(--text);
   }
+  /* Select all — small visual separation from the year list */
+  .table.ledger .detail-inner .dl-year.dl-all {
+    padding-right: 8px;
+    border-right: 1px solid var(--line-2);
+    margin-right: 4px;
+    color: var(--text-3);
+  }
+  /* Indeterminate state — partial selection, render a small dash */
+  .table.ledger .detail-inner .dl-year input[type="checkbox"]:indeterminate {
+    background: var(--emerald);
+    border-color: var(--emerald);
+  }
+  .table.ledger .detail-inner .dl-year input[type="checkbox"]:indeterminate::after {
+    content: '';
+    position: absolute;
+    left: 2px; top: 5px;
+    width: 7px; height: 0;
+    border-top: 1.8px solid #0B1220;
+    transform: none;
+  }
   .table.ledger .detail-inner .dl-btn {
     font-family: var(--fm); font-size: 11px; font-weight: 600;
     letter-spacing: 0.1em; text-transform: uppercase;
@@ -18839,18 +18859,22 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       // Year-selection checkboxes for the statement export. Only show
       // a checkbox for a year that actually has data; default-check the
       // current FY so a single click is sufficient for the common case.
+      // Order: newest FY first → carry-forward last (chronological-back).
       const pid = inner.closest('tr')?.previousElementSibling?.dataset?.pid || '';
       const yearOpts = [];
-      if (Math.abs(bf24) > 0.5) yearOpts.push({ fy: '24-25', label: 'FY 24-25' });
-      if (fy25.length)          yearOpts.push({ fy: '25-26', label: 'FY 25-26' });
       if (fy26.length)          yearOpts.push({ fy: '26-27', label: 'FY 26-27' });
+      if (fy25.length)          yearOpts.push({ fy: '25-26', label: 'FY 25-26' });
+      if (Math.abs(bf24) > 0.5) yearOpts.push({ fy: '24-25', label: 'FY 24-25 carry forward' });
       const yearChecks = yearOpts.map(y => {
         const checked = (y.fy === currentFy) ? ' checked' : '';
         return `<label class="dl-year"><input type="checkbox" data-fy="${y.fy}"${checked}><span>${y.label}</span></label>`;
       }).join('');
+      const selectAllBox = yearOpts.length > 1
+        ? `<label class="dl-year dl-all"><input type="checkbox" class="dl-all-cb"><span>Select all</span></label>`
+        : '';
       const footer = yearOpts.length
         ? `<div class="drawer-footer">`
-          + `<div class="dl-years">${yearChecks}</div>`
+          + `<div class="dl-years">${selectAllBox}${yearChecks}</div>`
           + `<button type="button" class="dl-btn" data-pid="${esc(pid)}">Download statement PDF</button>`
           + `</div>`
         : '';
@@ -19125,14 +19149,34 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
           e.stopPropagation();
           const pid = dlBtn.dataset.pid;
           const footer = dlBtn.closest('.drawer-footer');
-          const selected = Array.from(footer.querySelectorAll('input[type="checkbox"]:checked'))
+          const selected = Array.from(footer.querySelectorAll('input[type="checkbox"][data-fy]:checked'))
             .map(cb => cb.dataset.fy);
           if (!selected.length) return;
           generateStatementPDF(pid, selected, dlBtn);
           return;
         }
-        // Checkbox clicks inside the footer — never bubble up to the
-        // party-row toggle.
+        // "Select all" toggle inside the footer.
+        const allCb = e.target.closest('.dl-all-cb');
+        if (allCb) {
+          e.stopPropagation();
+          const footer = allCb.closest('.drawer-footer');
+          // The click event fires AFTER the checkbox toggles, so
+          // allCb.checked reflects the target state.
+          const want = allCb.checked;
+          footer.querySelectorAll('input[type="checkbox"][data-fy]').forEach(cb => {
+            cb.checked = want;
+          });
+          allCb.indeterminate = false;
+          return;
+        }
+        // Individual year checkbox click — keep Select all in sync.
+        if (e.target.matches('.dl-year input[type="checkbox"][data-fy]')) {
+          e.stopPropagation();
+          const footer = e.target.closest('.drawer-footer');
+          syncSelectAll(footer);
+          return;
+        }
+        // Other footer clicks — never bubble up to the party-row toggle.
         if (e.target.closest('.drawer-footer')) {
           e.stopPropagation();
           return;
@@ -19150,14 +19194,45 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       });
     }
 
+    // Keeps the "Select all" checkbox in sync with the per-year boxes:
+    // all checked → checked; none → unchecked; partial → indeterminate.
+    function syncSelectAll(footer) {
+      const all = footer.querySelector('.dl-all-cb');
+      if (!all) return;
+      const yearBoxes = Array.from(footer.querySelectorAll('input[type="checkbox"][data-fy]'));
+      const checked = yearBoxes.filter(cb => cb.checked).length;
+      if (checked === 0)                  { all.checked = false; all.indeterminate = false; }
+      else if (checked === yearBoxes.length){ all.checked = true;  all.indeterminate = false; }
+      else                                { all.checked = false; all.indeterminate = true;  }
+    }
+
     // ── Statement PDF generation ──────────────────────────────
     // A professional account-statement layout: brand header, party
     // identity, per-FY voucher table, closing per year, and a final
     // "Current Outstanding" footer that mirrors what the drawer shows.
+    // Cached logo data URL — null = not attempted; ''  = tried+failed
+    // (file missing or fetch error); other = base64 data URL ready
+    // to hand to jsPDF.addImage.
+    let logoCache = null;
+    function loadLogo() {
+      if (logoCache !== null) return Promise.resolve(logoCache || null);
+      return fetch('assets/comfort-logo.png')
+        .then(r => r.ok ? r.blob() : null)
+        .then(blob => {
+          if (!blob) { logoCache = ''; return null; }
+          return new Promise(resolve => {
+            const reader = new FileReader();
+            reader.onload  = () => { logoCache = reader.result; resolve(reader.result); };
+            reader.onerror = () => { logoCache = ''; resolve(null); };
+            reader.readAsDataURL(blob);
+          });
+        })
+        .catch(() => { logoCache = ''; return null; });
+    }
+
     function generateStatementPDF(pid, selectedFYs, btnEl) {
       const p = dataCache && dataCache[pid];
       if (!p || !window.jspdf) return;
-      const { jsPDF } = window.jspdf;
 
       // Disable the button briefly so a double-click can't queue two
       // exports while jsPDF builds the doc.
@@ -19165,14 +19240,17 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         btnEl.disabled = true;
         btnEl.textContent = 'Generating…';
       }
-      try {
-        buildPDF(p, selectedFYs);
-      } finally {
-        if (btnEl) {
-          btnEl.disabled = false;
-          btnEl.textContent = 'Download statement PDF';
-        }
-      }
+      // Logo loads asynchronously — if it can't be fetched (missing
+      // asset, network), the PDF still renders without it.
+      loadLogo()
+        .then(logo => buildPDF(p, selectedFYs, logo))
+        .catch(err => console.error('PDF generation failed:', err))
+        .finally(() => {
+          if (btnEl) {
+            btnEl.disabled = false;
+            btnEl.textContent = 'Download statement PDF';
+          }
+        });
     }
 
     // Formatter — Indian-style commas, no symbol (the caller decides
@@ -19190,7 +19268,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       return (n < 0 ? '-' : '') + 'Rs. ' + inrNumber(Math.abs(n));
     }
 
-    function buildPDF(p, selectedFYs) {
+    function buildPDF(p, selectedFYs, logoDataURL) {
       const doc = new (window.jspdf.jsPDF)({ unit: 'pt', format: 'a4' });
       const W = doc.internal.pageSize.getWidth();   // 595
       const H = doc.internal.pageSize.getHeight();  // 842
@@ -19236,10 +19314,14 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       else                                    periodEnd = '31 Mar 2025';
       const periodLine = `Period: ${periodStart} – ${periodEnd}`;
 
-      // Optional customer meta — only render lines for fields that
-      // exist on the party record (city/gst/phone). Keeps the header
-      // honest: if the data isn't in Tally, the line just doesn't show.
-      const partyMeta = [p.city, p.gst, p.phone].filter(Boolean);
+      // Optional customer meta — labelled lines for fields that exist
+      // on the party record. Keeps the header honest: if the data
+      // isn't in Tally, the line just doesn't show.
+      const partyMeta = [];
+      if (p.city)  partyMeta.push(String(p.city));
+      if (p.gst)   partyMeta.push(`GSTIN: ${p.gst}`);
+      if (p.phone) partyMeta.push(`Phone: ${p.phone}`);
+      if (p.email) partyMeta.push(`Email: ${p.email}`);
 
       // Format a running-balance amount with Dr/Cr suffix from the
       // issuer's perspective: positive → customer owes (Dr), negative
@@ -19256,6 +19338,16 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       // party identity, divider.
       function drawHeader(data) {
         const y0 = MARGIN;
+
+        // Comfort Mats logo — top-right, balancing the issuer block
+        // on the left. Drops silently if the asset isn't on disk yet.
+        if (logoDataURL) {
+          try {
+            const logoW = 110, logoH = 72;
+            doc.addImage(logoDataURL, 'PNG', RIGHT_X - logoW, y0, logoW, logoH);
+          } catch (e) { /* unsupported format / corrupt → skip */ }
+        }
+
         // Issuer name
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(16);
@@ -19355,7 +19447,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
               styles: { fontStyle: 'bold', fontSize: 10, textColor: [80, 88, 100] } },
             { content: fmtBal(amount),
               styles: { halign: 'right', fontStyle: 'bold', fontSize: 10.5,
-                        textColor: amount < -0.5 ? [200,40,60] : [60, 68, 80] } }
+                        textColor: amount < -0.5 ? [0,132,92] : [60, 68, 80] } }
           ], [
             { content: `(${dateText})`, styles: { textColor: [140, 148, 160], fontSize: 9 } },
             { content: '', styles: {} }
@@ -19367,9 +19459,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       }
 
       // ── Optional carry-forward block (FY 24-25) ──────────────
-      // Tracked as a "section rendered" so the next operational FY
-      // shows its opening row to make continuity visible.
-      let sectionsBefore = 0;
+      // Just the opening row + divider — no voucher detail exists.
       if (wants24 && Math.abs(p.bf24) > 0.5) {
         openingRow('as on 31 Mar 2025', p.bf24);
         // Divider
@@ -19377,7 +19467,6 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         doc.setLineWidth(0.5);
         doc.line(MARGIN, cursorY, RIGHT_X, cursorY);
         cursorY += 12;
-        sectionsBefore++;
       }
 
       // ── Operational FY tables ───────────────────────────────
@@ -19399,6 +19488,17 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         const meta = fyMeta[fy];
         if (!meta.vouchers.length) return;
 
+        // Page-break guard — keep the FY heading + opening row + at
+        // least the table header together. If less than ~120pt remains
+        // before the footer band, push to a fresh page.
+        const minRoom = 130;
+        if (cursorY + minRoom > H - MARGIN - 40) {
+          doc.addPage();
+          drawHeader({ pageNumber: doc.internal.getNumberOfPages() });
+          drawFooter({ pageNumber: doc.internal.getNumberOfPages() });
+          cursorY = MARGIN + headerBottom;
+        }
+
         // FY heading
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(11.5);
@@ -19406,14 +19506,13 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         doc.text(meta.label, MARGIN, cursorY);
         cursorY += 10;
 
-        // Opening balance row — only if a prior section was rendered
-        // (carry-forward block OR a previous selected FY). The very
-        // first section drops it since there's no continuity to show.
-        if (sectionsBefore > 0) {
-          openingRow(meta.openDate, meta.openAmt);
-          cursorY += 4;
-        }
-        sectionsBefore++;
+        // Opening Balance B/F row — every FY shows it so the flow
+        // "Closing FY N → Opening FY N+1" is always explicit.
+        openingRow(meta.openDate, meta.openAmt);
+        cursorY += 4;
+
+        // Per-FY totals (computed during voucher iteration below)
+        let fyDebit = 0, fyCredit = 0;
 
         // Build voucher rows with separate Debit / Credit columns, the
         // standard ledger format an accountant expects. Sales + Debit
@@ -19422,13 +19521,15 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         const body = meta.vouchers.map(v => {
           const dr = v.dr || 0, cr = v.cr || 0;
           running += dr - cr;
-          if (dr > 0) totalBilled += dr;
-          if (cr > 0) totalReceived += cr;
+          if (dr > 0) { totalBilled += dr;   fyDebit  += dr; }
+          if (cr > 0) { totalReceived += cr; fyCredit += cr; }
           const debitCell  = dr > 0 ? 'Rs. ' + inrNumber(dr) : '—';
           const creditCell = cr > 0 ? 'Rs. ' + inrNumber(cr) : '—';
+          // Balance colour: Dr (positive) = dark text; Cr (negative) = emerald.
+          const balColor = running < -0.5 ? [0,132,92] : [11,18,32];
           return [
             { content: v.d, styles: { textColor: [80, 88, 100] } },
-            { content: String(v.v || ''),
+            { content: 'Vch ' + (v.v || ''),
               styles: { textColor: [11, 18, 32], fontStyle: 'bold' } },
             { content: (v.t || '').toString(), styles: { textColor: [80, 88, 100] } },
             { content: debitCell,
@@ -19440,7 +19541,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                         textColor: cr > 0 ? [0,132,92] : [180,186,196],
                         fontStyle: cr > 0 ? 'bold' : 'normal' } },
             { content: fmtBal(running),
-              styles: { halign: 'right', textColor: running < -0.5 ? [200,40,60] : [80,88,100] } }
+              styles: { halign: 'right', textColor: balColor, fontStyle: 'bold' } }
           ];
         });
 
@@ -19488,29 +19589,49 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
             4: { cellWidth: colCredit, halign: 'right' },
             5: { cellWidth: colBal,    halign: 'right' }
           },
+          rowPageBreak: 'avoid',
           body,
           didDrawPage: (data) => { drawHeader(data); drawFooter(data); }
         });
         cursorY = doc.lastAutoTable.finalY;
 
-        // Closing line for this FY (except the last operational FY,
-        // which is replaced by the "Current Outstanding" emphasis).
+        // ── Per-FY totals (Total Debit / Total Credit / Closing) ──
+        // Three-row block ending each FY section. Numbers reconcile
+        // back to the voucher table and the bottom-line summary.
+        const balColor = meta.closeAmt < -0.5 ? [0,132,92] : [11,18,32];
+        doc.autoTable({
+          startY: cursorY + 6,
+          margin: { left: MARGIN, right: MARGIN },
+          tableWidth: CONTENT_W,
+          theme: 'plain',
+          body: [
+            [{ content: 'Total Debit',   styles: { textColor: [80,88,100], fontSize: 9.5 } },
+             { content: 'Rs. ' + inrNumber(fyDebit),
+               styles: { halign: 'right', textColor: [11,18,32], fontStyle: 'bold', fontSize: 9.5 } }],
+            [{ content: 'Total Credit',  styles: { textColor: [80,88,100], fontSize: 9.5 } },
+             { content: 'Rs. ' + inrNumber(fyCredit),
+               styles: { halign: 'right', textColor: [0,132,92],  fontStyle: 'bold', fontSize: 9.5 } }],
+            [{ content: meta.closeLabel,
+               styles: { textColor: [11,18,32], fontStyle: 'bold', fontSize: 10 } },
+             { content: fmtBal(meta.closeAmt),
+               styles: { halign: 'right', textColor: balColor, fontStyle: 'bold', fontSize: 10.5 } }]
+          ],
+          styles: {
+            cellPadding: { top: 4, right: 8, bottom: 4, left: 8 },
+            lineColor: [240, 242, 246],
+            lineWidth: { bottom: 0.3 }
+          },
+          columnStyles: {
+            0: { cellWidth: CONTENT_W * 0.6 },
+            1: { cellWidth: CONTENT_W * 0.4, halign: 'right' }
+          },
+          didDrawPage: (data) => { drawHeader(data); drawFooter(data); }
+        });
+        cursorY = doc.lastAutoTable.finalY + 14;
+
+        // Section divider between FYs
         const isLast = (idx === opFYs.length - 1);
         if (!isLast) {
-          doc.autoTable({
-            startY: cursorY + 4,
-            margin: { left: MARGIN, right: MARGIN },
-            tableWidth: CONTENT_W,
-            theme: 'plain',
-            body: [[
-              { content: meta.closeLabel, styles: { fontStyle: 'bold', fontSize: 10, textColor: [11, 18, 32] } },
-              { content: fmtBal(meta.closeAmt),
-                styles: { halign: 'right', fontStyle: 'bold', fontSize: 10.5, textColor: meta.closeAmt < 0 ? [200,40,60] : [11,18,32] } }
-            ]],
-            didDrawPage: (data) => { drawHeader(data); drawFooter(data); }
-          });
-          cursorY = doc.lastAutoTable.finalY + 14;
-          // Section divider
           doc.setDrawColor(225, 228, 232);
           doc.setLineWidth(0.5);
           doc.line(MARGIN, cursorY - 6, RIGHT_X, cursorY - 6);
@@ -19557,9 +19678,11 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       doc.setFontSize(11.5);
       doc.setTextColor(11, 18, 32);
       doc.text(finalLabel, MARGIN + 14, cursorY + 29);
-      // Amount — 20pt bold; Dr/Cr suffix for direction
+      // Amount — 20pt bold; Dr/Cr suffix. Cr (advance/credit balance)
+      // tints emerald, matching the rest of the document.
       doc.setFontSize(20);
-      doc.setTextColor(finalAmt < -0.5 ? 200 : 11, finalAmt < -0.5 ? 40 : 18, finalAmt < -0.5 ? 60 : 32);
+      if (finalAmt < -0.5) doc.setTextColor(0, 132, 92);
+      else                 doc.setTextColor(11, 18, 32);
       doc.text(fmtBal(finalAmt), RIGHT_X - 14, cursorY + 31, { align: 'right' });
       cursorY += blockH + 24;
 
