@@ -19216,18 +19216,30 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     let logoCache = null;
     function loadLogo() {
       if (logoCache !== null) return Promise.resolve(logoCache || null);
-      return fetch('assets/comfort-logo.png')
-        .then(r => r.ok ? r.blob() : null)
-        .then(blob => {
-          if (!blob) { logoCache = ''; return null; }
-          return new Promise(resolve => {
-            const reader = new FileReader();
-            reader.onload  = () => { logoCache = reader.result; resolve(reader.result); };
-            reader.onerror = () => { logoCache = ''; resolve(null); };
-            reader.readAsDataURL(blob);
-          });
-        })
-        .catch(() => { logoCache = ''; return null; });
+      // Try a few candidate paths so the loader works whether the
+      // dashboard is served from "/" (Vercel default), "/public/"
+      // (some preview setups), or "./" (local file://).
+      const candidates = [
+        '/assets/comfort-logo.png',
+        'assets/comfort-logo.png',
+        './assets/comfort-logo.png'
+      ];
+      function tryNext(i) {
+        if (i >= candidates.length) { logoCache = ''; return null; }
+        return fetch(candidates[i])
+          .then(r => (r && r.ok) ? r.blob() : null)
+          .then(blob => {
+            if (!blob) return tryNext(i + 1);
+            return new Promise(resolve => {
+              const reader = new FileReader();
+              reader.onload  = () => { logoCache = reader.result; resolve(reader.result); };
+              reader.onerror = () => resolve(tryNext(i + 1));
+              reader.readAsDataURL(blob);
+            });
+          })
+          .catch(() => tryNext(i + 1));
+      }
+      return tryNext(0);
     }
 
     function generateStatementPDF(pid, selectedFYs, btnEl) {
