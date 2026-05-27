@@ -19751,88 +19751,95 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       // If the live FY (26-27) is in the selection, the bottom line
       // is "Current Outstanding"; otherwise it's the last selected
       // FY's closing balance, labelled with the relevant cut-off date.
-      let finalLabel, finalAmt;
+      // Closing balance + its cut-off date, derived from the FY
+      // selection. Naming stays consistent across the summary panel
+      // and the styled closing row below it.
+      let finalAmt, closingDate;
       if (opFYs.includes('26-27')) {
-        finalLabel = 'CURRENT OUTSTANDING';
-        finalAmt   = p.outstanding;
+        finalAmt    = p.outstanding;
+        closingDate = dateLong;            // statement date (current FY)
       } else if (opFYs.includes('25-26')) {
-        finalLabel = 'CLOSING BALANCE C/F AS ON 31 MAR 2026';
-        finalAmt   = p.opening;
+        finalAmt    = p.opening;
+        closingDate = '31 Mar 2026';
       } else {
-        // Only carry-forward selected
-        finalLabel = 'CLOSING BALANCE C/F AS ON 31 MAR 2025';
-        finalAmt   = p.bf24;
+        finalAmt    = p.bf24;
+        closingDate = '31 Mar 2025';
       }
+      const closingLabel = `Closing balance as on ${closingDate}`;
 
       // ──────────────────────────────────────────────────────────
       // Dedicated summary sheet (the final page). Force a page break
       // so the closing block never crams under the last voucher row.
-      // Layout: Summary panel → divider → big CURRENT OUTSTANDING
-      // box → bottom contact/generation blocks. No brand header, no
-      // running footer — those belong to the ledger pages only.
+      // Layout: SUMMARY panel → divider → styled closing-balance row
+      // → divider → bottom contact + generation blocks.
       // ──────────────────────────────────────────────────────────
       doc.addPage();
       onSummaryPage = true;
       const summaryPageNum = doc.internal.getNumberOfPages();
 
-      // ─ Top: Summary panel ───────────────────────────────────
+      // ─ Top: SUMMARY panel — matches the per-FY totals styling
+      // on page 1 so the document reads as one continuous statement.
       let yS = MARGIN + 12;
       doc.setFont(FONT, 'bold');
-      doc.setFontSize(11);
+      doc.setFontSize(10.5);
       doc.setTextColor(80, 88, 100);
       doc.text('SUMMARY', MARGIN, yS);
-      yS += 22;
+      yS += 20;
 
-      // Three rows: Sales / Receipts / Outstanding. Generous vertical
-      // gap so the panel reads as a deliberate composition.
       const summaryRows = [
-        ['Sales this period',    inrAmt(totalBilled),    [11,18,32]],
-        ['Receipts this period', inrAmt(totalReceived),  [0,132,92]],
-        ['Outstanding',          fmtBal(finalAmt),       finalAmt < -0.5 ? [0,132,92] : [11,18,32]],
+        { label: 'Sales this period',    value: inrAmt(totalBilled),   color: [11,18,32], size: 9.5 },
+        { label: 'Receipts this period', value: inrAmt(totalReceived), color: [0,132,92], size: 9.5 },
+        { label: closingLabel,           value: fmtBal(finalAmt),
+          color: finalAmt < -0.5 ? [0,132,92] : [11,18,32], size: 10.5, bold: true }
       ];
-      summaryRows.forEach(([label, val, color]) => {
-        doc.setFont(FONT, 'normal');
-        doc.setFontSize(11);
-        doc.setTextColor(80, 88, 100);
-        doc.text(label, MARGIN, yS);
+      summaryRows.forEach(r => {
+        doc.setFont(FONT, r.bold ? 'bold' : 'normal');
+        doc.setFontSize(r.size);
+        doc.setTextColor(r.bold ? 11 : 80, r.bold ? 18 : 88, r.bold ? 32 : 100);
+        doc.text(r.label, MARGIN, yS);
         doc.setFont(FONT, 'bold');
-        doc.setTextColor(color[0], color[1], color[2]);
-        doc.text(val, RIGHT_X, yS, { align: 'right' });
-        yS += 24;
+        doc.setFontSize(r.size);
+        doc.setTextColor(r.color[0], r.color[1], r.color[2]);
+        doc.text(r.value, RIGHT_X, yS, { align: 'right' });
+        // Hairline rule between rows for ledger feel
+        const ruleY = yS + 8;
+        doc.setDrawColor(240, 242, 246);
+        doc.setLineWidth(0.3);
+        doc.line(MARGIN, ruleY, RIGHT_X, ruleY);
+        yS += 22;
       });
 
       // Divider after summary
-      yS += 14;
+      yS += 18;
       doc.setDrawColor(220, 224, 228);
       doc.setLineWidth(0.5);
       doc.line(MARGIN, yS, RIGHT_X, yS);
 
-      // ─ Mid: Large CURRENT OUTSTANDING box ───────────────────
-      // Generous breathing room above, faint tint, centered label
-      // and amount. This is the page's focal point.
-      yS += 56;
-      const boxH = 130;
-      doc.setFillColor(245, 247, 250);
-      doc.rect(MARGIN, yS, CONTENT_W, boxH, 'F');
-      doc.setDrawColor(11, 18, 32);
-      doc.setLineWidth(1.5);
+      // ─ Mid: Styled closing-balance row — same grey tint as the
+      // Opening Balance B/F rows on page 1. Single line, label left
+      // and amount right. No hero block.
+      yS += 22;
+      const rowH = 36;
+      doc.setFillColor(248, 250, 252);
+      doc.rect(MARGIN, yS, CONTENT_W, rowH, 'F');
+      // Faint hairline above + below to anchor the row
+      doc.setDrawColor(225, 228, 232);
+      doc.setLineWidth(0.4);
       doc.line(MARGIN, yS, RIGHT_X, yS);
-      doc.setDrawColor(220, 224, 228);
-      doc.setLineWidth(0.5);
-      doc.line(MARGIN, yS + boxH, RIGHT_X, yS + boxH);
+      doc.line(MARGIN, yS + rowH, RIGHT_X, yS + rowH);
 
       doc.setFont(FONT, 'bold');
       doc.setFontSize(11);
-      doc.setTextColor(80, 88, 100);
-      doc.text(finalLabel, MARGIN + CONTENT_W / 2, yS + 44, { align: 'center' });
+      doc.setTextColor(11, 18, 32);
+      doc.text(`Closing Balance as on ${closingDate}`, MARGIN + 14, yS + 23);
 
       doc.setFont(FONT, 'bold');
-      doc.setFontSize(34);
+      doc.setFontSize(12);
       if (finalAmt < -0.5) doc.setTextColor(0, 132, 92);
       else                 doc.setTextColor(11, 18, 32);
-      doc.text(fmtBal(finalAmt), MARGIN + CONTENT_W / 2, yS + 92, { align: 'center' });
+      doc.text(fmtBal(finalAmt), RIGHT_X - 14, yS + 24, { align: 'right' });
 
-      yS += boxH + 50;
+      yS += rowH + 22;
 
       // Divider before the bottom contact / generation blocks
       doc.setDrawColor(220, 224, 228);
