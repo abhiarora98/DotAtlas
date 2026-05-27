@@ -691,28 +691,47 @@
 
   /* kpi sparkline */
   .kpi .spark { display: block; margin-top: 14px; width: 100%; height: 26px; }
+  .kpi-hero .spark { height: 36px; margin-top: 18px; }
+  .kpi .collections-bars { height: 32px; margin-top: 12px; }
+  .kpi .collections-axis {
+    display: flex; justify-content: space-between;
+    margin-top: 4px;
+    font-family: var(--fm); font-size: 9px; color: var(--text-3);
+    letter-spacing: 0.1em; text-transform: uppercase;
+  }
 
   /* aging band — a single horizontal visual you read in 0.4s */
   .aging-band {
-    display: flex; height: 96px; width: 100%; gap: 6px;
+    display: flex; height: 100px; width: 100%; gap: 12px;
   }
   .aging-band .ab-seg {
-    position: relative; padding: 12px 14px; min-width: 112px;
+    position: relative; padding: 14px 16px; min-width: 124px;
     background: linear-gradient(180deg, rgba(78,222,163,0.10), rgba(78,222,163,0.025));
     border: 1px solid rgba(78,222,163,0.22);
-    border-radius: 6px;
+    border-radius: 8px;
     display: flex; flex-direction: column; gap: 4px; justify-content: space-between;
-    cursor: pointer; transition: all 200ms var(--ease);
+    cursor: pointer;
+    transition: transform 200ms var(--ease), border-color 200ms var(--ease), box-shadow 200ms var(--ease);
   }
   .aging-band .ab-seg.warn  { background: linear-gradient(180deg, rgba(255,176,121,0.10), rgba(255,176,121,0.025)); border-color: rgba(255,176,121,0.28); }
   .aging-band .ab-seg.amber { background: linear-gradient(180deg, rgba(255,176,121,0.20), rgba(255,176,121,0.06));  border-color: rgba(255,176,121,0.40); }
   .aging-band .ab-seg.bad   { background: linear-gradient(180deg, rgba(255,138,168,0.20), rgba(255,138,168,0.04));  border-color: rgba(255,138,168,0.38); }
+  /* Stronger hover — lift + brighter ring */
   .aging-band .ab-seg:hover {
-    transform: translateY(-1px);
-    border-color: rgba(255,255,255,0.18);
+    transform: translateY(-2px);
+    border-color: rgba(255,255,255,0.28);
+    box-shadow: 0 6px 18px -8px rgba(0,0,0,0.5);
   }
+  /* Selected — solid white ring + filled background tier */
   .aging-band .ab-seg.on {
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18);
+    transform: translateY(-1px);
+    border-color: rgba(255,255,255,0.55);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.18), 0 6px 18px -8px rgba(0,0,0,0.45);
+  }
+  .aging-band .ab-seg.on::after {
+    content: ''; position: absolute; top: 10px; right: 10px;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(255,255,255,0.7);
   }
   .aging-band .ab-amt {
     font-family: var(--fd); font-size: 18px; font-weight: 500; color: var(--text);
@@ -739,7 +758,7 @@
   .concentration-card .card-h .conc-headline {
     font-family: var(--fm); font-size: 11px;
     color: var(--text-3); letter-spacing: 0.06em;
-    text-align: right;
+    text-align: right; line-height: 1.5;
   }
   .concentration-card .card-h .conc-headline b {
     font-family: var(--fd); font-weight: 600;
@@ -751,6 +770,33 @@
     font-size: 14px; color: var(--text);
     letter-spacing: -0.01em; margin-left: 4px;
   }
+  .concentration-card .card-h .conc-headline .conc-insight {
+    margin-top: 2px;
+    color: var(--rose);
+    letter-spacing: 0.06em;
+    font-size: 10.5px;
+  }
+  /* Tiny legend — anchors bar colors to risk meaning */
+  .conc-legend {
+    margin-top: 14px; padding-top: 14px;
+    border-top: 1px solid var(--line);
+    display: inline-flex; gap: 20px; flex-wrap: wrap;
+    font-family: var(--fm); font-size: 10px;
+    color: var(--text-3); letter-spacing: 0.06em;
+  }
+  .conc-legend .cl-item { display: inline-flex; align-items: center; gap: 7px; }
+  .conc-legend .cl-dot {
+    width: 8px; height: 3px; border-radius: 2px;
+  }
+  /* Clickable rows — hover reads as "open this party" */
+  .conc-row {
+    cursor: pointer;
+    transition: background 200ms var(--ease);
+  }
+  .conc-row:hover {
+    background: rgba(255,255,255,0.02);
+  }
+  .conc-row:hover .nm { color: var(--emerald); }
   /* Concentration row — name + amount + % on the top line; thicker bar
      spans the full width below. Heavier weights make the section read
      as a primary cockpit panel. */
@@ -811,7 +857,20 @@
   .promise-cal .pc-day.today .pc-num { color: var(--text); }
   .promise-cal .pc-day.empty .pc-amt { color: var(--text-4); }
 
-  /* ledger filter tools row */
+  /* ledger filter tools row — sticky so chips + search stay reachable
+     while scrolling through hundreds of party rows. */
+  .ledger-card { overflow: visible; }
+  .ledger-card .card-h,
+  .ledger-card .ledger-tools {
+    position: sticky;
+    z-index: 3;
+    background:
+      linear-gradient(180deg, rgba(11,18,32,0.92), rgba(11,18,32,0.88));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  .ledger-card .card-h     { top: 116px; }
+  .ledger-card .ledger-tools { top: 167px; }
   .ledger-tools {
     display: flex; align-items: center; justify-content: space-between;
     padding: 12px 22px; border-bottom: 1px solid var(--line);
@@ -2646,8 +2705,15 @@
           <div class="lbl"><span>Net receivables</span><span class="ind"></span></div>
           <div class="v"><span class="cur">₹</span>3.68<span class="un">Cr</span></div>
           <div class="d"><span class="arr">↑</span>+₹26.3 L since 01 Apr 26</div>
-          <svg class="spark" viewBox="0 0 120 26" preserveAspectRatio="none">
-            <polyline fill="none" stroke="var(--emerald)" stroke-width="1.4" points="0.0,24.0 4.44,23.09 8.89,13.58 13.33,19.2 17.78,17.3 22.22,16.62 26.67,18.12 31.11,19.52 35.56,14.16 40.0,8.62 44.44,10.53 48.89,8.81 53.33,7.84 57.78,12.9 62.22,7.98 66.67,12.35 71.11,8.27 75.56,7.16 80.0,2.0 84.44,4.02 88.89,3.62 93.33,7.01 97.78,15.29 102.22,16.12 106.67,11.54 111.11,12.14 115.56,11.47 120.0,9.97"/>
+          <svg class="spark" viewBox="0 0 120 30" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="netSparkFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--blue)" stop-opacity="0.28"/>
+                <stop offset="100%" stop-color="var(--blue)" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <polyline fill="url(#netSparkFill)" stroke="none" points="0,30 0.0,24.0 4.44,23.09 8.89,13.58 13.33,19.2 17.78,17.3 22.22,16.62 26.67,18.12 31.11,19.52 35.56,14.16 40.0,8.62 44.44,10.53 48.89,8.81 53.33,7.84 57.78,12.9 62.22,7.98 66.67,12.35 71.11,8.27 75.56,7.16 80.0,2.0 84.44,4.02 88.89,3.62 93.33,7.01 97.78,15.29 102.22,16.12 106.67,11.54 111.11,12.14 115.56,11.47 120.0,9.97 120,30"/>
+            <polyline fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="0.0,24.0 4.44,23.09 8.89,13.58 13.33,19.2 17.78,17.3 22.22,16.62 26.67,18.12 31.11,19.52 35.56,14.16 40.0,8.62 44.44,10.53 48.89,8.81 53.33,7.84 57.78,12.9 62.22,7.98 66.67,12.35 71.11,8.27 75.56,7.16 80.0,2.0 84.44,4.02 88.89,3.62 93.33,7.01 97.78,15.29 102.22,16.12 106.67,11.54 111.11,12.14 115.56,11.47 120.0,9.97"/>
           </svg>
         </div>
         <div class="kpi kpi-overdue">
@@ -2664,24 +2730,25 @@
           <div class="lbl"><span>Collections · last 7 days</span><span class="ind"></span></div>
           <div class="v"><span class="cur">₹</span>72.6<span class="un">L</span></div>
           <div class="d dn"><span class="arr">↓</span>−₹12.0 L vs. prior 7d</div>
-          <svg class="spark" viewBox="0 0 120 26" preserveAspectRatio="none">
-            <g fill="var(--emerald)" opacity="0.85">
-              <rect x="2" y="12" width="6" height="14" rx="1"/>
-              <rect x="10" y="13" width="6" height="13" rx="1"/>
-              <rect x="18" y="18" width="6" height="8" rx="1"/>
-              <rect x="26" y="18" width="6" height="8" rx="1"/>
-              <rect x="34" y="24" width="6" height="2" rx="1"/>
-              <rect x="42" y="14" width="6" height="12" rx="1"/>
-              <rect x="50" y="19" width="6" height="7" rx="1"/>
-              <rect x="58" y="16" width="6" height="10" rx="1"/>
-              <rect x="66" y="4" width="6" height="22" rx="1"/>
-              <rect x="74" y="18" width="6" height="8" rx="1"/>
-              <rect x="82" y="22" width="6" height="4" rx="1"/>
-              <rect x="90" y="24" width="6" height="2" rx="1"/>
-              <rect x="98" y="19" width="6" height="7" rx="1"/>
-              <rect x="106" y="24" width="6" height="2" rx="1"/>
+          <svg class="spark collections-bars" viewBox="0 0 120 32" preserveAspectRatio="none">
+            <g fill="var(--emerald)">
+              <rect x="2"   y="14" width="7" height="14" rx="1.5"/>
+              <rect x="11"  y="15" width="7" height="13" rx="1.5"/>
+              <rect x="20"  y="20" width="7" height="8"  rx="1.5"/>
+              <rect x="29"  y="20" width="7" height="8"  rx="1.5"/>
+              <rect x="38"  y="26" width="7" height="2"  rx="1"/>
+              <rect x="47"  y="16" width="7" height="12" rx="1.5"/>
+              <rect x="56"  y="21" width="7" height="7"  rx="1.5"/>
+              <rect x="65"  y="18" width="7" height="10" rx="1.5"/>
+              <rect x="74"  y="6"  width="7" height="22" rx="1.5"/>
+              <rect x="83"  y="20" width="7" height="8"  rx="1.5"/>
+              <rect x="92"  y="24" width="7" height="4"  rx="1.5"/>
+              <rect x="101" y="26" width="7" height="2"  rx="1"/>
+              <rect x="110" y="22" width="7" height="6"  rx="1.5"/>
+              <line x1="0" y1="29" x2="120" y2="29" stroke="var(--line)" stroke-width="0.5"/>
             </g>
           </svg>
+          <div class="collections-axis"><span>2 wk ago</span><span>today</span></div>
         </div>
       </div>
 
@@ -2699,14 +2766,22 @@
       <div class="card mt-14 concentration-card">
         <div class="card-h">
           <div class="t"><span class="ic">▣</span><h3>Concentration</h3><span class="sub">TOP 5 PARTIES</span></div>
-          <div class="conc-headline"><b>28%</b> of on-book · <span class="conc-amt">₹1.23 Cr</span></div>
+          <div class="conc-headline">
+            <div><b>28%</b> of on-book · <span class="conc-amt">₹1.23 Cr</span></div>
+            <div class="conc-insight">3 over 60 days · ₹65.8 L at risk</div>
+          </div>
         </div>
         <div class="card-b">
-          <div class="conc-row"><div class="nm">Sunny Synthetic</div><div class="v">₹33.8 L</div><div class="conc-pct">7.7%</div><div class="bar"><div style="width:100%;background:var(--rose);"></div></div></div><div class="conc-row"><div class="nm">BM Distributor</div><div class="v">₹30.2 L</div><div class="conc-pct">6.9%</div><div class="bar"><div style="width:90%;background:var(--amber);"></div></div></div><div class="conc-row"><div class="nm">Shantinath Enterprise</div><div class="v">₹23.0 L</div><div class="conc-pct">5.2%</div><div class="bar"><div style="width:68%;background:var(--blue);"></div></div></div><div class="conc-row"><div class="nm">Sham Emporium Pvt Ltd</div><div class="v">₹18.2 L</div><div class="conc-pct">4.1%</div><div class="bar"><div style="width:54%;background:var(--emerald);"></div></div></div><div class="conc-row"><div class="nm">JSG Infotech Private Limited</div><div class="v">₹17.6 L</div><div class="conc-pct">4.0%</div><div class="bar"><div style="width:52%;background:var(--emerald);"></div></div></div>
+          <div class="conc-row" data-pid="sunny-synthetic" data-risk="watch"><div class="nm">Sunny Synthetic</div><div class="v">₹33.8 L</div><div class="conc-pct">7.7%</div><div class="bar"><div style="width:100%;background:var(--amber);"></div></div></div><div class="conc-row" data-pid="bm-distributor" data-risk="high"><div class="nm">BM Distributor</div><div class="v">₹30.2 L</div><div class="conc-pct">6.9%</div><div class="bar"><div style="width:90%;background:var(--rose);"></div></div></div><div class="conc-row" data-pid="shantinath-enterprise" data-risk="watch"><div class="nm">Shantinath Enterprise</div><div class="v">₹23.0 L</div><div class="conc-pct">5.2%</div><div class="bar"><div style="width:68%;background:var(--amber);"></div></div></div><div class="conc-row" data-pid="sham-emporium-pvt-ltd" data-risk="high"><div class="nm">Sham Emporium Pvt Ltd</div><div class="v">₹18.2 L</div><div class="conc-pct">4.1%</div><div class="bar"><div style="width:54%;background:var(--rose);"></div></div></div><div class="conc-row" data-pid="jsg-infotech-private-limited" data-risk="high"><div class="nm">JSG Infotech Private Limited</div><div class="v">₹17.6 L</div><div class="conc-pct">4.0%</div><div class="bar"><div style="width:52%;background:var(--rose);"></div></div></div>
+          <div class="conc-legend">
+            <span class="cl-item"><span class="cl-dot" style="background:var(--rose);"></span>High risk · oldest &gt; 60d</span>
+            <span class="cl-item"><span class="cl-dot" style="background:var(--amber);"></span>Watch · 30–60d</span>
+            <span class="cl-item"><span class="cl-dot" style="background:var(--emerald);"></span>Good · &lt; 30d</span>
+          </div>
         </div>
       </div>
 
-      <div class="card mt-14">
+      <div class="card mt-14 ledger-card">
         <div class="card-h">
           <div class="t"><span class="ic">≡</span><h3>Party ledger</h3><span class="sub">1188 PARTIES · FY 24-25 B/F + FY 25-26 + 26-27 · ON-DEMAND</span></div>
           <div class="seg" data-sortgrp="ledger">
@@ -20124,6 +20199,23 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       });
     }
 
+    // ── Concentration: click a party name to jump to + open its ledger row
+    document.querySelectorAll('.concentration-card .conc-row').forEach(cr => {
+      cr.addEventListener('click', () => {
+        const pid = cr.dataset.pid;
+        if (!pid) return;
+        const row = document.querySelector(`tr.party-r[data-pid="${pid}"]`);
+        if (!row) return;
+        // Open the row if it isn't already
+        const detail = row.nextElementSibling;
+        if (detail && !detail.classList.contains('open')) {
+          row.click();
+        }
+        // Smooth-scroll into view, accounting for the sticky header height.
+        if (row.scrollIntoView) row.scrollIntoView({behavior:'smooth', block:'center'});
+      });
+    });
+
     // ── Aging band: click a segment to filter ledger ───────
     // Click toggles the bucket — second click on the same segment clears.
     document.querySelectorAll('.aging-band .ab-seg').forEach((seg, i) => {
@@ -20165,7 +20257,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         activeChip = 'all'; activeQuery = '';
         // Scroll the ledger into view so the result is visible immediately.
         const ledger = document.querySelector('table.ledger');
-        if (ledger) ledger.scrollIntoView({behavior:'smooth', block:'start'});
+        if (ledger && ledger.scrollIntoView) ledger.scrollIntoView({behavior:'smooth', block:'start'});
       });
     });
   })();
