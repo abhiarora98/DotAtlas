@@ -280,6 +280,30 @@
   }
   .hero-h .when b { color: var(--text); font-weight: 500; }
 
+  /* Tighter stack used on the receivables hero — denser line-height,
+     ledger-style alignment, plus a small "synced from Tally" tag. */
+  .hero-h .when-stack {
+    display: flex; flex-direction: column; gap: 3px;
+    line-height: 1.4;
+  }
+  .hero-h .when-stack b { font-family: var(--fb); }
+  .hero-h .when-stack .amt {
+    font-family: var(--fd); font-size: 12px; letter-spacing: -0.005em;
+  }
+  .hero-h .when-stack .sync-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    align-self: flex-end;
+    margin-top: 8px; padding-top: 8px;
+    border-top: 1px solid var(--line);
+    font-size: 9.5px; color: var(--text-3);
+    letter-spacing: 0.08em;
+  }
+  .hero-h .when-stack .sync-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--emerald);
+    box-shadow: 0 0 4px var(--emerald);
+  }
+
   /* RANGE SELECTOR */
   .range-bar {
     display: flex; justify-content: space-between; align-items: center;
@@ -316,9 +340,33 @@
 
   /* KPI ROW */
   .kpis {
-    display: grid; grid-template-columns: repeat(4, 1fr);
+    display: grid; grid-template-columns: 1.35fr 1fr 1fr 1fr;
     gap: 14px; margin-bottom: 14px;
   }
+  /* Hero KPI — Net receivables. Bigger value, faint blue tint, stronger
+     border so the eye lands here first. */
+  .kpi.kpi-hero {
+    background:
+      linear-gradient(180deg, rgba(124,168,255,0.06), rgba(124,168,255,0.01)),
+      linear-gradient(180deg, var(--surface-2) 0%, rgba(19,24,31,0.4) 100%);
+    border-color: rgba(124,168,255,0.22);
+  }
+  .kpi.kpi-hero::before {
+    background: linear-gradient(90deg, transparent, rgba(124,168,255,0.45), transparent);
+  }
+  .kpi.kpi-hero .v { font-size: 44px; }
+  .kpi.kpi-hero .v .cur { font-size: 18px; }
+  .kpi.kpi-hero .v .un { font-size: 17px; }
+
+  /* Overdue KPI — slightly stronger red surface; this is the bucket
+     collections teams will watch every morning. */
+  .kpi.kpi-overdue {
+    background:
+      linear-gradient(180deg, rgba(255,138,168,0.06), rgba(255,138,168,0.01)),
+      linear-gradient(180deg, var(--surface-2) 0%, rgba(19,24,31,0.4) 100%);
+    border-color: rgba(255,138,168,0.20);
+  }
+  .kpi.kpi-overdue .v { color: var(--rose); }
   .kpi {
     background: linear-gradient(180deg, var(--surface-2) 0%, rgba(19,24,31,0.4) 100%);
     border: 1px solid var(--line);
@@ -646,40 +694,81 @@
 
   /* aging band — a single horizontal visual you read in 0.4s */
   .aging-band {
-    display: flex; height: 64px; width: 100%; gap: 4px;
+    display: flex; height: 96px; width: 100%; gap: 6px;
   }
   .aging-band .ab-seg {
-    position: relative; padding: 10px 14px; min-width: 96px;
+    position: relative; padding: 12px 14px; min-width: 112px;
     background: linear-gradient(180deg, rgba(78,222,163,0.10), rgba(78,222,163,0.025));
     border: 1px solid rgba(78,222,163,0.22);
     border-radius: 6px;
-    display: flex; flex-direction: column; justify-content: space-between;
+    display: flex; flex-direction: column; gap: 4px; justify-content: space-between;
     cursor: pointer; transition: all 200ms var(--ease);
   }
   .aging-band .ab-seg.warn  { background: linear-gradient(180deg, rgba(255,176,121,0.10), rgba(255,176,121,0.025)); border-color: rgba(255,176,121,0.28); }
   .aging-band .ab-seg.amber { background: linear-gradient(180deg, rgba(255,176,121,0.20), rgba(255,176,121,0.06));  border-color: rgba(255,176,121,0.40); }
   .aging-band .ab-seg.bad   { background: linear-gradient(180deg, rgba(255,138,168,0.20), rgba(255,138,168,0.04));  border-color: rgba(255,138,168,0.38); }
-  .aging-band .ab-seg:hover { transform: translateY(-1px); }
+  .aging-band .ab-seg:hover {
+    transform: translateY(-1px);
+    border-color: rgba(255,255,255,0.18);
+  }
+  .aging-band .ab-seg.on {
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18);
+  }
   .aging-band .ab-amt {
-    font-family: var(--fd); font-size: 17px; font-weight: 500; color: var(--text);
+    font-family: var(--fd); font-size: 18px; font-weight: 500; color: var(--text);
     letter-spacing: -0.015em; font-variant-numeric: tabular-nums;
   }
+  .aging-band .ab-pct {
+    font-family: var(--fm); font-size: 10.5px; color: var(--text-2);
+    letter-spacing: 0.04em;
+  }
   .aging-band .ab-lab {
-    font-family: var(--fm); font-size: 10px; color: var(--text-2);
+    font-family: var(--fm); font-size: 9.5px; color: var(--text-3);
     letter-spacing: 0.06em;
   }
 
-  /* concentration rows */
+  /* Sticky aging — strip stays at the top while the user scrolls the ledger */
+  .aging-card {
+    position: sticky; top: 0; z-index: 4;
+    background: var(--void);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  /* Concentration card — top-5 headline + per-party rows */
+  .concentration-card .card-h .conc-headline {
+    font-family: var(--fm); font-size: 11px;
+    color: var(--text-3); letter-spacing: 0.06em;
+    text-align: right;
+  }
+  .concentration-card .card-h .conc-headline b {
+    font-family: var(--fd); font-weight: 600;
+    font-size: 17px; color: var(--text);
+    letter-spacing: -0.02em;
+  }
+  .concentration-card .card-h .conc-headline .conc-amt {
+    font-family: var(--fd); font-weight: 500;
+    font-size: 14px; color: var(--text);
+    letter-spacing: -0.01em; margin-left: 4px;
+  }
   .conc-row {
-    display: grid; grid-template-columns: 1fr 84px 64px;
-    gap: 12px; align-items: center;
-    padding: 10px 0; border-bottom: 1px solid var(--line);
+    display: grid; grid-template-columns: 1fr 100px 110px;
+    gap: 14px; align-items: center;
+    padding: 12px 0; border-bottom: 1px solid var(--line);
   }
   .conc-row:last-child { border-bottom: 0; padding-bottom: 0; }
-  .conc-row .nm { font-size: 12.5px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .conc-row .bar { height: 4px; border-radius: 999px; background: var(--surface-3); position: relative; overflow: hidden; }
+  .conc-row .nm { font-size: 13px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+  .conc-row .bar { height: 5px; border-radius: 999px; background: var(--surface-3); position: relative; overflow: hidden; }
   .conc-row .bar > div { position: absolute; left: 0; top: 0; bottom: 0; background: var(--emerald); border-radius: 999px; }
-  .conc-row .v { font-family: var(--fd); font-weight: 500; font-size: 12.5px; text-align: right; color: var(--text); font-variant-numeric: tabular-nums; }
+  .conc-row .v {
+    font-family: var(--fd); font-weight: 500; font-size: 13px;
+    text-align: right; color: var(--text); font-variant-numeric: tabular-nums;
+    display: inline-flex; gap: 10px; justify-content: flex-end; align-items: baseline;
+  }
+  .conc-row .v .conc-pct {
+    font-family: var(--fm); font-size: 10.5px; color: var(--text-3);
+    font-weight: 400;
+  }
 
   /* promise calendar — next 7 days */
   .promise-cal {
@@ -746,22 +835,16 @@
     padding: 22px 28px 24px 64px;
   }
 
-  /* Voucher row — Date · Type · Voucher · Amount [· Running Balance]
-     Balance column is hidden by default; the .show-bal toggle reveals it. */
+  /* Voucher row — Date · Type · Voucher · Amount · Running Balance */
   .table.ledger .detail-inner .inv-row {
     display: grid;
-    grid-template-columns: 76px 110px 112px 1fr;
+    grid-template-columns: 76px 110px 112px 1fr 130px;
     gap: 18px; padding: 10px 12px;
     font-family: var(--fm); font-size: 12px;
     color: #4B5563; letter-spacing: 0.02em;
     align-items: baseline;
     border-radius: 4px;
   }
-  .table.ledger .detail-inner .inv-row .vbal { display: none; }
-  .table.ledger .detail-inner.show-bal .inv-row {
-    grid-template-columns: 76px 110px 112px 1fr 130px;
-  }
-  .table.ledger .detail-inner.show-bal .inv-row .vbal { display: block; }
   /* Zebra striping — very subtle warm tint on alternating rows */
   .table.ledger .detail-inner .fy-rows .inv-row:nth-child(even) {
     background: rgba(11,18,32,0.04);
@@ -839,9 +922,14 @@
     font-family: var(--fm); font-size: 10.5px; color: #6B7280;
     letter-spacing: 0.04em;
   }
+  /* Subtitle row carries the Billed/Received summary on the left and the
+     closing block on the right — same line, right-aligned for comparison. */
+  .table.ledger .detail-inner .fy-subtotal {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 24px; flex-wrap: wrap;
+  }
   .table.ledger .detail-inner .fy-closing {
-    display: flex; justify-content: space-between; align-items: baseline;
-    margin-top: 2px;
+    display: inline-flex; gap: 10px; align-items: baseline; white-space: nowrap;
   }
   .table.ledger .detail-inner .fy-closing-label {
     font-family: var(--fm); font-size: 10.5px; color: #6B7280;
@@ -853,17 +941,13 @@
     font-variant-numeric: tabular-nums; white-space: nowrap;
   }
   /* Headline variant — Current outstanding inside the FY 26-27 row.
-     Stronger emphasis + state-driven color. */
-  .table.ledger .detail-inner .fy-closing.headline {
-    margin-top: 8px; padding-top: 10px;
-    border-top: 1px solid #E6E8EE;
-  }
+     Stays on the same subtotal line; only the styling is bolder. */
   .table.ledger .detail-inner .fy-closing.headline .fy-closing-label {
     font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
     color: #4B5563; font-weight: 500;
   }
   .table.ledger .detail-inner .fy-closing.headline .fy-closing-amount {
-    font-size: 20px; font-weight: 700; letter-spacing: -0.022em;
+    font-size: 18px; font-weight: 700; letter-spacing: -0.02em;
   }
   .table.ledger .detail-inner.state-overdue .fy-closing.headline .fy-closing-amount { color: #C73E5E; }
   .table.ledger .detail-inner.state-paid    .fy-closing.headline .fy-closing-amount { color: #00A572; }
@@ -919,22 +1003,18 @@
     color: #0B1220; font-weight: 600; font-size: 14px;
   }
 
-  /* Show-balance pill — reveals the running-balance column inside
-     expanded year sections. */
-  .table.ledger .detail-inner .bal-toggle {
-    display: block;
-    margin: 18px 0 0 auto;
-    font-family: var(--fm); font-size: 10px; color: #4B5563;
-    background: transparent; border: 1px solid #D8DEE8;
-    border-radius: 999px; padding: 5px 12px; cursor: pointer;
-    letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap;
-    transition: all 200ms var(--ease);
+  /* Activity dot — small leading marker inside each party row's secondary line.
+     Emerald = recent receipt (last 30d), muted slate = stale or no record. */
+  .table.ledger tr.party-r .sec .act-dot {
+    display: inline-block; width: 6px; height: 6px;
+    border-radius: 50%; margin-right: 6px;
+    vertical-align: 1px;
+    background: var(--emerald);
+    box-shadow: 0 0 5px var(--emerald);
   }
-  .table.ledger .detail-inner .bal-toggle:hover {
-    color: #0B1220; border-color: #98A0AE;
-  }
-  .table.ledger .detail-inner.show-bal .bal-toggle {
-    background: #0B1220; color: #FFFFFF; border-color: #0B1220;
+  .table.ledger tr.party-r .sec .act-dot.stale {
+    background: var(--text-4);
+    box-shadow: none;
   }
 
   .table.ledger .detail-inner .drawer-skeleton {
@@ -2424,15 +2504,16 @@
           <div class="eb"><span class="live-dot"></span>Receivables · ₹3.68 Cr net · 225 on book · 1188 parties total</div>
           <h1>Who <span class="em">owes you</span>, and how <span class="accent">long</span>.</h1>
         </div>
-        <div class="when">
-          PARTIES TOTAL · <b>1188</b><br/>
-          ON BOOK · <b class="amt">₹4.40 Cr</b> · 225<br/>
-          ADVANCES HELD · <b>₹71.8 L</b> · 132
+        <div class="when when-stack">
+          <div><b>1188</b> parties total</div>
+          <div><b>225</b> on book · <b class="amt">₹4.40 Cr</b></div>
+          <div><b>₹71.8 L</b> advances · 132 parties</div>
+          <div class="sync-tag"><span class="sync-dot"></span>Synced from Tally · 2m ago</div>
         </div>
       </div>
 
       <div class="kpis">
-        <div class="kpi">
+        <div class="kpi kpi-hero">
           <div class="lbl"><span>Net receivables</span><span class="ind"></span></div>
           <div class="v"><span class="cur">₹</span>3.68<span class="un">Cr</span></div>
           <div class="d"><span class="arr">↑</span>+₹26.3 L since 01 Apr 26</div>
@@ -2440,8 +2521,8 @@
             <polyline fill="none" stroke="var(--emerald)" stroke-width="1.4" points="0.0,24.0 4.44,23.09 8.89,13.58 13.33,19.2 17.78,17.3 22.22,16.62 26.67,18.12 31.11,19.52 35.56,14.16 40.0,8.62 44.44,10.53 48.89,8.81 53.33,7.84 57.78,12.9 62.22,7.98 66.67,12.35 71.11,8.27 75.56,7.16 80.0,2.0 84.44,4.02 88.89,3.62 93.33,7.01 97.78,15.29 102.22,16.12 106.67,11.54 111.11,12.14 115.56,11.47 120.0,9.97"/>
           </svg>
         </div>
-        <div class="kpi">
-          <div class="lbl"><span>Overdue · &gt;30d</span><span class="ind a"></span></div>
+        <div class="kpi kpi-overdue">
+          <div class="lbl"><span>Overdue · &gt;30d</span><span class="ind r"></span></div>
           <div class="v"><span class="cur">₹</span>2.75<span class="un">Cr</span></div>
           <div class="d dn"><span class="arr">→</span>166 parties · 132 past 60d</div>
         </div>
@@ -2451,7 +2532,7 @@
           <div class="d"><span class="arr">→</span>weighted avg age · 225 on book</div>
         </div>
         <div class="kpi">
-          <div class="lbl"><span>Collected · 7d</span><span class="ind"></span></div>
+          <div class="lbl"><span>Collections · last 7 days</span><span class="ind"></span></div>
           <div class="v"><span class="cur">₹</span>72.6<span class="un">L</span></div>
           <div class="d dn"><span class="arr">↓</span>−₹12.0 L vs. prior 7d</div>
           <svg class="spark" viewBox="0 0 120 26" preserveAspectRatio="none">
@@ -2475,23 +2556,24 @@
         </div>
       </div>
 
-      <div class="card mt-14">
+      <div class="card mt-14 aging-card">
         <div class="card-h">
-          <div class="t"><span class="ic">⊜</span><h3>Aging</h3><span class="sub">SUNDRY DEBTORS · COMBINED · 26 MAY</span></div>
+          <div class="t"><span class="ic">⊜</span><h3>Aging</h3><span class="sub">CLICK A BUCKET TO FILTER · COMBINED · 26 MAY</span></div>
         </div>
         <div class="card-b">
           <div class="aging-band">
-            <div class="ab-seg" style="flex: 16532027;"><div class="ab-amt">₹1.65 Cr</div><div class="ab-lab">0–30 days · 91 parties</div></div><div class="ab-seg warn" style="flex: 11990465;"><div class="ab-amt">₹1.20 Cr</div><div class="ab-lab">31–60 days · 50 parties</div></div><div class="ab-seg amber" style="flex: 6163362;"><div class="ab-amt">₹61.6 L</div><div class="ab-lab">61–90 days · 31 parties</div></div><div class="ab-seg bad" style="flex: 9329647;"><div class="ab-amt">₹93.3 L</div><div class="ab-lab">90+ days · 109 parties</div></div>
+            <div class="ab-seg" style="flex: 16532027;" data-bucket="0-30"><div class="ab-amt">₹1.65 Cr</div><div class="ab-pct">37% of receivables</div><div class="ab-lab">0–30 days · 91 parties</div></div><div class="ab-seg warn" style="flex: 11990465;" data-bucket="31-60"><div class="ab-amt">₹1.20 Cr</div><div class="ab-pct">27% of receivables</div><div class="ab-lab">31–60 days · 50 parties</div></div><div class="ab-seg amber" style="flex: 6163362;" data-bucket="61-90"><div class="ab-amt">₹61.6 L</div><div class="ab-pct">14% of receivables</div><div class="ab-lab">61–90 days · 31 parties</div></div><div class="ab-seg bad" style="flex: 9329647;" data-bucket="90+"><div class="ab-amt">₹93.3 L</div><div class="ab-pct">21% of receivables</div><div class="ab-lab">90+ days · 109 parties</div></div>
           </div>
         </div>
       </div>
 
-      <div class="card mt-14">
+      <div class="card mt-14 concentration-card">
         <div class="card-h">
-          <div class="t"><span class="ic">▣</span><h3>Concentration</h3><span class="sub">TOP 5 = 28% OF ON-BOOK · ₹1.23 Cr</span></div>
+          <div class="t"><span class="ic">▣</span><h3>Concentration</h3><span class="sub">TOP 5 PARTIES</span></div>
+          <div class="conc-headline"><b>28%</b> of on-book · <span class="conc-amt">₹1.23 Cr</span></div>
         </div>
         <div class="card-b">
-          <div class="conc-row"><div class="nm">Sunny Synthetic</div><div class="bar"><div style="width:100%;background:var(--rose);"></div></div><div class="v">₹33.8 L</div></div><div class="conc-row"><div class="nm">BM Distributor</div><div class="bar"><div style="width:90%;background:var(--amber);"></div></div><div class="v">₹30.2 L</div></div><div class="conc-row"><div class="nm">Shantinath Enterprise</div><div class="bar"><div style="width:68%;background:var(--blue);"></div></div><div class="v">₹23.0 L</div></div><div class="conc-row"><div class="nm">Sham Emporium Pvt Ltd</div><div class="bar"><div style="width:54%;background:var(--emerald);"></div></div><div class="v">₹18.2 L</div></div><div class="conc-row"><div class="nm">JSG Infotech Private Limited</div><div class="bar"><div style="width:52%;background:var(--emerald);"></div></div><div class="v">₹17.6 L</div></div>
+          <div class="conc-row"><div class="nm">Sunny Synthetic</div><div class="bar"><div style="width:100%;background:var(--rose);"></div></div><div class="v">₹33.8 L <span class="conc-pct">7.7%</span></div></div><div class="conc-row"><div class="nm">BM Distributor</div><div class="bar"><div style="width:90%;background:var(--amber);"></div></div><div class="v">₹30.2 L <span class="conc-pct">6.9%</span></div></div><div class="conc-row"><div class="nm">Shantinath Enterprise</div><div class="bar"><div style="width:68%;background:var(--blue);"></div></div><div class="v">₹23.0 L <span class="conc-pct">5.2%</span></div></div><div class="conc-row"><div class="nm">Sham Emporium Pvt Ltd</div><div class="bar"><div style="width:54%;background:var(--emerald);"></div></div><div class="v">₹18.2 L <span class="conc-pct">4.1%</span></div></div><div class="conc-row"><div class="nm">JSG Infotech Private Limited</div><div class="bar"><div style="width:52%;background:var(--emerald);"></div></div><div class="v">₹17.6 L <span class="conc-pct">4.0%</span></div></div>
         </div>
       </div>
 
@@ -2508,12 +2590,11 @@
         <div class="ledger-tools">
           <div class="chips">
             <button class="chip on">All <span class="cnt">1188</span></button>
-            <button class="chip">On book <span class="cnt">225</span></button>
             <button class="chip">Overdue <span class="cnt">166</span></button>
-            <button class="chip">60+ days <span class="cnt">132</span></button>
-            <button class="chip">High risk <span class="cnt">132</span></button>
-            <button class="chip">Advance <span class="cnt">132</span></button>
-            <button class="chip">Paid <span class="cnt">831</span></button>
+            <button class="chip">No receipt 30d <span class="cnt">—</span></button>
+            <button class="chip">Promised <span class="cnt">0</span></button>
+            <button class="chip">Credit hold <span class="cnt">0</span></button>
+            <button class="chip">Top 20</button>
           </div>
           <input class="search" placeholder="Search party, voucher…"/>
         </div>
@@ -19399,6 +19480,11 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     // Each year row carries its closing-balance line at the bottom of
     // the info stack — explicit "Closing as on..." / "Current outstanding"
     // wording removes the "just another amount" ambiguity.
+    // Year row layout
+    //   line 1: chev + FY · vouchers
+    //   line 2: Billed/Received subtitle on the left, closing block right-aligned
+    // The closing block gets a .headline modifier for FY 26-27 (state colored,
+    // bigger amount) so the live year reads as the focal point.
     function yearRow(fy, vouchers, closingAmount, runningStart, defaultOpen, closingLabel, isHeadline) {
       const billed = vouchers.reduce((a,t)=>a+(t.dr||0),0);
       const recv   = vouchers.reduce((a,t)=>a+(t.cr||0),0);
@@ -19412,10 +19498,12 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
            + `<span class="chev">▸</span>`
            + `<div class="fy-info">`
            + `<span class="fy-label">${label}</span>`
+           + `<div class="fy-subtotal">`
            + `<span class="fy-sub">${sub}</span>`
            + `<div class="${closingCls}">`
            + `<span class="fy-closing-label">${esc(closingLabel)}</span>`
            + `<span class="fy-closing-amount">${fmtAmt(closingAmount)}</span>`
+           + `</div>`
            + `</div>`
            + `</div>`
            + `</button>`
@@ -19432,29 +19520,27 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 
       let html = '';
 
-      // FY 24-25 — carry-forward only, no chevron, no Billed/Received line.
+      // FY 24-25 — carry-forward only. Subtitle ("Closing balance as on...")
+      // and amount share the same line for visual consistency with the
+      // active years below.
       if (Math.abs(bf24) > 0.5) {
         html += `<div class="fy-row carry-row" data-fy="24-25">`
               + `<div class="fy-info">`
               + `<span class="fy-label">FY 24-25 (carry forward)</span>`
+              + `<div class="fy-subtotal">`
+              + `<span class="fy-sub">Closing balance as on 31 Mar 2025</span>`
               + `<div class="fy-closing">`
-              + `<span class="fy-closing-label">Closing balance as on 31 Mar 2025</span>`
               + `<span class="fy-closing-amount">${fmtAmt(bf24)}</span>`
+              + `</div>`
               + `</div>`
               + `</div>`
               + `</div>`;
       }
 
-      if (hasFY25) html += yearRow('25-26', p.fy25, op,  bf24, false, 'Closing as on 31 Mar 2026', false);
-      if (hasFY26) html += yearRow('26-27', p.fy26, out, op,   true,  'Current outstanding',      true);
+      if (hasFY25) html += yearRow('25-26', p.fy25, op,  bf24, false, 'Closing', false);
+      if (hasFY26) html += yearRow('26-27', p.fy26, out, op,   true,  'Current outstanding', true);
 
-      // Show-balance toggle — reveals the running-balance column inside
-      // any expanded year. Default off to keep rows compact.
-      if (hasFY25 || hasFY26) {
-        html += `<button class="bal-toggle" type="button">Show balance</button>`;
-      }
-
-      // State class — drives the headline's color.
+      // State class drives the headline's color.
       const partyRow = inner.closest('tr').previousElementSibling;
       const oldest   = +(partyRow?.dataset.oldest || 0);
       const outNum   = +(partyRow?.dataset.out || 0);
@@ -19468,19 +19554,12 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       inner.innerHTML = html;
       inner.dataset.loaded = '1';
 
-      // Wire chevron toggles
+      // Wire year chevron toggles
       inner.querySelectorAll('.fy-toggle').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
           btn.closest('.fy-section').classList.toggle('open');
         });
-      });
-      // Wire the show-balance toggle
-      const balBtn = inner.querySelector('.bal-toggle');
-      if (balBtn) balBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const on = inner.classList.toggle('show-bal');
-        balBtn.textContent = on ? 'Hide balance' : 'Show balance';
       });
     }
 
@@ -19563,18 +19642,27 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     let activeChip = 'all';
     let activeQuery = '';
 
+    // Top-N filter: precompute the on-book rows ranked by outstanding so
+    // chip "Top 20" can do a quick membership lookup per row.
+    let topNSet = null;
+    function buildTopN(n) {
+      const ranked = [...partyRows]
+        .filter(r => +r.dataset.out > 0.5)
+        .sort((a,b) => (+b.dataset.out) - (+a.dataset.out))
+        .slice(0, n);
+      topNSet = new Set(ranked);
+    }
     function passesChip(row){
       const oldest = +row.dataset.oldest;
-      const risk   = row.dataset.risk;
       const out    = +row.dataset.out;
+      const lastR  = +row.dataset.lastr;
       switch(activeChip){
         case 'all':       return true;
-        case 'onbook':    return out > 0.5;
         case 'overdue':   return oldest > 30 && out > 0.5;
-        case '60+':       return oldest > 60 && out > 0.5;
-        case 'high':      return risk === 'high';
-        case 'advance':   return out < -0.5;
-        case 'paid':      return Math.abs(out) <= 0.5;
+        case 'noreceipt': return lastR > 30 && out > 0.5;
+        case 'promised':  return false;   /* awaiting promise data integration */
+        case 'credit':    return false;   /* awaiting credit-hold data */
+        case 'top20':     return topNSet ? topNSet.has(row) : false;
         default:          return true;
       }
     }
@@ -19606,13 +19694,47 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     // Chip filter mapping
     const chipMap = {
       'all': 'all',
-      'on book': 'onbook',
       'overdue': 'overdue',
-      '60+ days': '60+',
-      'high risk': 'high',
-      'advance': 'advance',
-      'paid': 'paid'
+      'no receipt 30d': 'noreceipt',
+      'promised': 'promised',
+      'credit hold': 'credit',
+      'top 20': 'top20'
     };
+    buildTopN(20);
+
+    // Real "No receipt 30d" count (only on-book parties)
+    const noReceiptCount = [...partyRows].filter(r => +r.dataset.out > 0.5 && +r.dataset.lastr > 30).length;
+    const noRecChip = [...chipsRoot.querySelectorAll('.chip')].find(c => /no receipt/i.test(c.textContent));
+    if (noRecChip) noRecChip.querySelector('.cnt').textContent = noReceiptCount;
+
+    // Decorate each party row with:
+    //   · an activity dot (active vs stale) inside the secondary line
+    //   · a native `title` tooltip explaining the risk verdict
+    partyRows.forEach(row => {
+      const oldest = +row.dataset.oldest;
+      const dso    = +row.dataset.dso;
+      const lastR  = +row.dataset.lastr;
+      const risk   = row.dataset.risk;
+      const out    = +row.dataset.out;
+      // Activity dot — green when receipt seen in last 30 days, grey otherwise.
+      const sec = row.querySelector('.sec');
+      if (sec && !sec.querySelector('.act-dot')) {
+        const dot = document.createElement('span');
+        const stale = (lastR >= 9999 || lastR > 30);
+        dot.className = 'act-dot' + (stale ? ' stale' : ' active');
+        dot.title = stale ? 'No receipt in last 30 days' : 'Recent receipt activity';
+        sec.insertBefore(dot, sec.firstChild);
+      }
+      // Risk tooltip — explains why the row is High / Watch / Good / Paid.
+      const reasons = [];
+      if (oldest > 0) reasons.push(`oldest invoice ${oldest}d`);
+      if (dso > 0)    reasons.push(`weighted avg ${dso}d`);
+      if (lastR < 9999) reasons.push(`last receipt ${lastR}d ago`);
+      else reasons.push('no receipt on record');
+      if (out > 0.5)  reasons.unshift(`outstanding ₹${(out>=100000?(out/100000).toFixed(1)+'L':Math.round(out).toString())}`);
+      const verdict = risk.charAt(0).toUpperCase() + risk.slice(1);
+      row.title = `${verdict} · ${reasons.join(' · ')}`;
+    });
     if (chipsRoot) {
       chipsRoot.addEventListener('click', e => {
         const c = e.target.closest('.chip'); if (!c) return;
@@ -19705,18 +19827,30 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     }
 
     // ── Aging band: click a segment to filter ledger ───────
+    // Click toggles the bucket — second click on the same segment clears.
     document.querySelectorAll('.aging-band .ab-seg').forEach((seg, i) => {
       const minAge = [0, 31, 61, 91];
       const maxAge = [30, 60, 90, 9999];
       seg.addEventListener('click', () => {
-        document.querySelectorAll('.aging-band .ab-seg').forEach(x => x.style.outline = '');
-        seg.style.outline = '1px solid var(--line-3)';
-        seg.style.outlineOffset = '-1px';
+        const wasActive = seg.classList.contains('on');
+        document.querySelectorAll('.aging-band .ab-seg').forEach(x => x.classList.remove('on'));
+        if (wasActive) {
+          // Toggle off — show everything (active chip / search take over)
+          partyRows.forEach(row => {
+            const detail = row.nextElementSibling;
+            row.style.display = '';
+            if (detail) detail.style.display = '';
+          });
+          if (countEl) countEl.textContent = partyRows.length;
+          return;
+        }
+        seg.classList.add('on');
         const lo = minAge[i], hi = maxAge[i];
         partyRows.forEach(row => {
           const oldest = +row.dataset.oldest;
+          const out = +row.dataset.out;
           const detail = row.nextElementSibling;
-          const visible = oldest >= lo && oldest <= hi;
+          const visible = oldest >= lo && oldest <= hi && out > 0.5;
           row.style.display = visible ? '' : 'none';
           if (detail) {
             if (!visible) { detail.classList.remove('open'); row.classList.remove('open'); detail.style.display = 'none'; }
@@ -19731,6 +19865,9 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
           chipsRoot.querySelector('.chip').classList.add('on');
         }
         activeChip = 'all'; activeQuery = '';
+        // Scroll the ledger into view so the result is visible immediately.
+        const ledger = document.querySelector('table.ledger');
+        if (ledger) ledger.scrollIntoView({behavior:'smooth', block:'start'});
       });
     });
   })();
