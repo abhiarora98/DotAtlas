@@ -764,12 +764,26 @@
   .table.ledger .detail-inner.show-bal .inv-row .vbal { display: block; }
   /* Zebra striping — very subtle warm tint on alternating rows */
   .table.ledger .detail-inner .fy-rows .inv-row:nth-child(even) {
-    background: rgba(11,18,32,0.025);
+    background: rgba(11,18,32,0.04);
   }
   .table.ledger .detail-inner .vdate { color: #4B5563; }
+  /* Type column rendered as a small color-coded pill per voucher type */
   .table.ledger .detail-inner .vt {
-    color: #6B7280; font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase;
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase;
+    background: rgba(11,18,32,0.06); color: #4B5563;
+    text-align: center; justify-self: start;
+    line-height: 1.4;
   }
+  .table.ledger .detail-inner .vt.vt-sales       { background: rgba(43,91,255,0.10); color: #1840CC; }
+  .table.ledger .detail-inner .vt.vt-receipt     { background: rgba(0,165,114,0.12);  color: #00875E; }
+  .table.ledger .detail-inner .vt.vt-credit-note { background: rgba(0,165,114,0.06);  color: #00875E; }
+  .table.ledger .detail-inner .vt.vt-debit-note  { background: rgba(43,91,255,0.06);  color: #1840CC; }
+  .table.ledger .detail-inner .vt.vt-journal     { background: rgba(11,18,32,0.08);   color: #4B5563; }
+  .table.ledger .detail-inner .vt.vt-payment     { background: rgba(11,18,32,0.06);   color: #4B5563; }
+  .table.ledger .detail-inner .vt.vt-purchase    { background: rgba(11,18,32,0.06);   color: #4B5563; }
   .table.ledger .detail-inner .vno  { color: #0B1220; }
   /* Sales (Dr) — black; Receipts (Cr) — emerald */
   .table.ledger .detail-inner .vamt {
@@ -859,9 +873,51 @@
   .table.ledger .detail-inner .fy-section { margin: 0; }
   .table.ledger .detail-inner .fy-rows {
     display: none;
-    padding: 8px 0 12px 38px;
+    margin: 6px 0 14px 36px;
+    padding: 8px 16px;
+    background: rgba(11,18,32,0.025);
+    border-radius: 6px;
   }
   .table.ledger .detail-inner .fy-section.open .fy-rows { display: block; }
+
+  /* === Recency timeline — left border colour per financial year ===
+     The borders sit flush so the strip reads as one continuous vertical
+     line whose colour deepens as we approach the live year. */
+  .table.ledger .detail-inner > .fy-row.carry-row,
+  .table.ledger .detail-inner > .fy-section {
+    border-left: 2px solid transparent;
+  }
+  .table.ledger .detail-inner > .fy-row.carry-row {
+    border-left-color: #C9D3E2;   /* muted slate · archival */
+  }
+  .table.ledger .detail-inner > .fy-section[data-fy="25-26"] {
+    border-left-color: #7CA8FF;   /* soft blue · previous */
+  }
+  .table.ledger .detail-inner > .fy-section[data-fy="26-27"] {
+    border-left: 3px solid #0B1220;  /* solid · current */
+  }
+  .table.ledger .detail-inner > .fy-row.carry-row,
+  .table.ledger .detail-inner > .fy-section > .fy-row {
+    padding-left: 22px;
+  }
+  .table.ledger .detail-inner > .fy-section[data-fy="26-27"] > .fy-row {
+    padding-left: 21px;  /* compensate for 3 px border */
+  }
+
+  /* Per-year tone: FY 24-25 archival, FY 25-26 soft blue, FY 26-27 full */
+  .table.ledger .detail-inner > .fy-row.carry-row .fy-label,
+  .table.ledger .detail-inner > .fy-row.carry-row .fy-closing-label {
+    color: #6B7785;
+  }
+  .table.ledger .detail-inner > .fy-row.carry-row .fy-closing-amount {
+    color: #4B5563; font-weight: 500;
+  }
+  .table.ledger .detail-inner > .fy-section[data-fy="25-26"] .fy-label {
+    color: #1840CC;
+  }
+  .table.ledger .detail-inner > .fy-section[data-fy="26-27"] .fy-label {
+    color: #0B1220; font-weight: 600; font-size: 14px;
+  }
 
   /* Show-balance pill — reveals the running-balance column inside
      expanded year sections. */
@@ -19316,9 +19372,11 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       const cls = isDebit ? 'vamt' : 'vamt cr';
       opt.running += (t.dr || 0) - (t.cr || 0);
       const bal = (opt.running < 0 ? '−₹'+inRupees(Math.abs(opt.running)) : '₹'+inRupees(opt.running));
+      // Type badge — small color pill per voucher type.
+      const typeKey = (t.t||'').toLowerCase().replace(/\s+/g,'-');
       return `<div class="inv-row">`
            + `<span class="vdate">${esc(t.d)}</span>`
-           + `<span class="vt">${esc((t.t||'').toUpperCase())}</span>`
+           + `<span class="vt vt-${typeKey}">${esc((t.t||'').toUpperCase())}</span>`
            + `<span class="vno">Vch ${esc(t.v)}</span>`
            + `<span class="${cls}">${amt}</span>`
            + `<span class="vbal">${bal}</span>`
@@ -19376,7 +19434,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 
       // FY 24-25 — carry-forward only, no chevron, no Billed/Received line.
       if (Math.abs(bf24) > 0.5) {
-        html += `<div class="fy-row carry-row">`
+        html += `<div class="fy-row carry-row" data-fy="24-25">`
               + `<div class="fy-info">`
               + `<span class="fy-label">FY 24-25 (carry forward)</span>`
               + `<div class="fy-closing">`
