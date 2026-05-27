@@ -19295,7 +19295,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     }
 
     // Collapsible year section with inline toggle in its header.
-    function yearSection(fy, vouchers, rows, opt) {
+    function yearSection(fy, vouchers, opt) {
       const billed = vouchers.reduce((a,t)=>a+(t.dr||0),0);
       const recv   = vouchers.reduce((a,t)=>a+(t.cr||0),0);
       const rowHtml = vouchers.map(t => vRow(t, opt)).join('');
