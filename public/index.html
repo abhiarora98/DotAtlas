@@ -19242,6 +19242,67 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       return tryNext(0);
     }
 
+    // Unicode font loader — fetches Roboto Regular + Bold from jsdelivr
+    // and caches the base64 TTFs. Roboto carries the ₹ glyph; jsPDF's
+    // built-in Helvetica does not. Falls back to "Rs." rendering if
+    // any fetch fails (offline, CDN blocked, etc.) so the export
+    // never breaks.
+    const FONT_URLS = {
+      regular: [
+        'https://cdn.jsdelivr.net/npm/roboto-fontface@0.10.0/fonts/roboto/Roboto-Regular.ttf',
+        'https://cdn.jsdelivr.net/gh/googlefonts/roboto@main/src/hinted/Roboto-Regular.ttf'
+      ],
+      bold: [
+        'https://cdn.jsdelivr.net/npm/roboto-fontface@0.10.0/fonts/roboto/Roboto-Bold.ttf',
+        'https://cdn.jsdelivr.net/gh/googlefonts/roboto@main/src/hinted/Roboto-Bold.ttf'
+      ]
+    };
+    let fontCache = null;  // null=unknown; false=failed; {regular, bold}=loaded
+    function arrayBufferToBase64(buffer) {
+      let binary = '';
+      const bytes = new Uint8Array(buffer);
+      const chunk = 0x8000;  // chunk to keep argument count safe
+      for (let i = 0; i < bytes.length; i += chunk) {
+        binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+      }
+      return btoa(binary);
+    }
+    function fetchFirst(urls) {
+      return urls.reduce((acc, url) =>
+        acc.then(b64 => b64 || fetch(url)
+          .then(r => r.ok ? r.arrayBuffer() : null)
+          .then(buf => buf ? arrayBufferToBase64(buf) : null)
+          .catch(() => null)
+        ),
+        Promise.resolve(null)
+      );
+    }
+    function loadFonts() {
+      if (fontCache !== null) return Promise.resolve(fontCache || null);
+      return Promise.all([fetchFirst(FONT_URLS.regular), fetchFirst(FONT_URLS.bold)])
+        .then(([reg, bold]) => {
+          if (reg && bold) { fontCache = { regular: reg, bold: bold }; return fontCache; }
+          fontCache = false;
+          return null;
+        })
+        .catch(() => { fontCache = false; return null; });
+    }
+    // Register the cached TTFs with this jsPDF doc instance and return
+    // the font family name to use. 'Roboto' supports ₹; 'helvetica'
+    // does not (so the caller renders "Rs." instead).
+    function applyFontsToDoc(doc) {
+      if (!fontCache) return 'helvetica';
+      try {
+        doc.addFileToVFS('Roboto-Regular.ttf', fontCache.regular);
+        doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal');
+        doc.addFileToVFS('Roboto-Bold.ttf', fontCache.bold);
+        doc.addFont('Roboto-Bold.ttf', 'Roboto', 'bold');
+        return 'Roboto';
+      } catch (e) {
+        return 'helvetica';
+      }
+    }
+
     function generateStatementPDF(pid, selectedFYs, btnEl) {
       const p = dataCache && dataCache[pid];
       if (!p || !window.jspdf) return;
@@ -19252,10 +19313,11 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         btnEl.disabled = true;
         btnEl.textContent = 'Generating…';
       }
-      // Logo loads asynchronously — if it can't be fetched (missing
-      // asset, network), the PDF still renders without it.
-      loadLogo()
-        .then(logo => buildPDF(p, selectedFYs, logo))
+      // Logo + fonts load asynchronously. Either can fail without
+      // breaking the export — missing logo → header without it;
+      // missing fonts → "Rs." instead of "₹".
+      Promise.all([loadLogo(), loadFonts()])
+        .then(([logo]) => buildPDF(p, selectedFYs, logo))
         .catch(err => console.error('PDF generation failed:', err))
         .finally(() => {
           if (btnEl) {
@@ -19276,12 +19338,23 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       head = head.replace(/(\d)(?=(\d\d)+$)/g, '$1,');
       return (n < 0 ? '-' : '') + head + ',' + last3;
     }
+    // Per-doc rupee symbol — set inside buildPDF based on whether the
+    // Roboto TTF loaded. Defaults to "Rs." so any stray caller before
+    // buildPDF still renders something readable.
+    let RUPEE = 'Rs.';
     function inrAmt(n) {
-      return (n < 0 ? '-' : '') + 'Rs. ' + inrNumber(Math.abs(n));
+      return (n < 0 ? '-' : '') + RUPEE + inrNumber(Math.abs(n));
     }
 
     function buildPDF(p, selectedFYs, logoDataURL) {
       const doc = new (window.jspdf.jsPDF)({ unit: 'pt', format: 'a4' });
+      // Apply Unicode font (Roboto) if available; otherwise fall back
+      // to Helvetica + "Rs." literal. The font choice propagates to
+      // every doc.setFont() and autotable styles below via FONT.
+      const FONT = applyFontsToDoc(doc);
+      // RUPEE carries any trailing space it needs so callers can just
+      // concatenate it onto the number (no per-call join logic).
+      RUPEE = (FONT === 'Roboto') ? '₹' : 'Rs. ';
       const W = doc.internal.pageSize.getWidth();   // 595
       const H = doc.internal.pageSize.getHeight();  // 842
       const MARGIN = 48;
@@ -19340,7 +19413,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       // → advance / we owe (Cr), zero → no suffix.
       function fmtBal(n) {
         const a = Math.abs(n);
-        const base = 'Rs. ' + inrNumber(a);
+        const base = RUPEE + inrNumber(a);
         if (Math.abs(n) < 0.5) return base;       // ~0
         return base + (n > 0 ? ' Dr' : ' Cr');
       }
@@ -19361,17 +19434,17 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         }
 
         // Issuer name
-        doc.setFont('helvetica', 'bold');
+        doc.setFont(FONT, 'bold');
         doc.setFontSize(16);
         doc.setTextColor(11, 18, 32);
         doc.text(ISSUER.name, MARGIN, y0 + 14);
         // GST — slightly smaller, gray
-        doc.setFont('helvetica', 'normal');
+        doc.setFont(FONT, 'normal');
         doc.setFontSize(9);
         doc.setTextColor(110, 118, 130);
         doc.text(ISSUER.gst, MARGIN, y0 + 30);
         // Emails — readable body text
-        doc.setFont('helvetica', 'normal');
+        doc.setFont(FONT, 'normal');
         doc.setFontSize(9.5);
         doc.setTextColor(80, 88, 100);
         doc.text(ISSUER.emails[0], MARGIN, y0 + 50);
@@ -19385,20 +19458,20 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         doc.line(MARGIN, y0 + 96, RIGHT_X, y0 + 96);
 
         // Statement title
-        doc.setFont('helvetica', 'bold');
+        doc.setFont(FONT, 'bold');
         doc.setFontSize(20);
         doc.setTextColor(11, 18, 32);
         doc.text('Account Statement', MARGIN, y0 + 124);
 
         // Party name (bold)
-        doc.setFont('helvetica', 'bold');
+        doc.setFont(FONT, 'bold');
         doc.setFontSize(13);
         doc.setTextColor(11, 18, 32);
         doc.text(p.name, MARGIN, y0 + 148);
 
         // Optional party meta lines (city / GST / phone)
         let metaY = y0 + 162;
-        doc.setFont('helvetica', 'normal');
+        doc.setFont(FONT, 'normal');
         doc.setFontSize(9);
         doc.setTextColor(110, 118, 130);
         partyMeta.forEach(line => {
@@ -19407,7 +19480,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         });
 
         // Statement as on + period
-        doc.setFont('helvetica', 'normal');
+        doc.setFont(FONT, 'normal');
         doc.setFontSize(9.5);
         doc.setTextColor(95, 105, 120);
         doc.text(`Statement as on ${dateLong}`, MARGIN, metaY + 4);
@@ -19428,7 +19501,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         doc.setDrawColor(225, 228, 232);
         doc.setLineWidth(0.5);
         doc.line(MARGIN, y - 18, RIGHT_X, y - 18);
-        doc.setFont('helvetica', 'normal');
+        doc.setFont(FONT, 'normal');
         doc.setFontSize(8);
         doc.setTextColor(140, 148, 160);
         doc.text('Generated from dot.atlas · Synced from Tally', MARGIN, y);
@@ -19448,7 +19521,11 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       // a FY section. Two-line layout (label + parenthetical date on
       // line 2; amount right-aligned on the right column), muted so it
       // reads as continuity context rather than a transaction.
-      function openingRow(dateText, amount) {
+      // sourceText: shorthand explaining where the opening came from
+      //   - carry-forward / FY 24-25 standalone: "as on 31 Mar 2025"
+      //   - FY 25-26 opening:                     "from FY 24-25 closing"
+      //   - FY 26-27 opening:                     "from FY 25-26 closing"
+      function openingRow(sourceText, amount) {
         doc.autoTable({
           startY: cursorY,
           margin: { left: MARGIN, right: MARGIN },
@@ -19461,10 +19538,10 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
               styles: { halign: 'right', fontStyle: 'bold', fontSize: 10.5,
                         textColor: amount < -0.5 ? [0,132,92] : [60, 68, 80] } }
           ], [
-            { content: `(${dateText})`, styles: { textColor: [140, 148, 160], fontSize: 9 } },
+            { content: `(${sourceText})`, styles: { textColor: [140, 148, 160], fontSize: 9 } },
             { content: '', styles: {} }
           ]],
-          styles: { fillColor: [248, 250, 252] },
+          styles: { fillColor: [248, 250, 252], font: FONT },
           didDrawPage: (data) => { drawHeader(data); drawFooter(data); }
         });
         cursorY = doc.lastAutoTable.finalY + 8;
@@ -19489,8 +19566,16 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         : (opFYs[0] === '26-27' ? p.opening : 0);
 
       const fyMeta = {
-        '25-26': { vouchers: p.fy25 || [], label: 'FY 25-26', closeLabel: 'Closing Balance C/F as on 31 Mar 2026', closeAmt: p.opening, openAmt: p.bf24,    openDate: '01 Apr 2025' },
-        '26-27': { vouchers: p.fy26 || [], label: 'FY 26-27', closeLabel: 'Closing Balance C/F as on ' + dateLong, closeAmt: p.outstanding, openAmt: p.opening, openDate: '01 Apr 2026' }
+        '25-26': {
+          vouchers: p.fy25 || [], label: 'FY 25-26',
+          closeLabel: 'Closing Balance C/F as on 31 Mar 2026', closeAmt: p.opening,
+          openAmt: p.bf24, openSource: 'from FY 24-25 closing'
+        },
+        '26-27': {
+          vouchers: p.fy26 || [], label: 'FY 26-27',
+          closeLabel: 'Closing Balance C/F as on ' + dateLong, closeAmt: p.outstanding,
+          openAmt: p.opening, openSource: 'from FY 25-26 closing'
+        }
       };
 
       // Aggregate summary across selected operational FYs
@@ -19512,7 +19597,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         }
 
         // FY heading
-        doc.setFont('helvetica', 'bold');
+        doc.setFont(FONT, 'bold');
         doc.setFontSize(11.5);
         doc.setTextColor(11, 18, 32);
         doc.text(meta.label, MARGIN, cursorY);
@@ -19520,7 +19605,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 
         // Opening Balance B/F row — every FY shows it so the flow
         // "Closing FY N → Opening FY N+1" is always explicit.
-        openingRow(meta.openDate, meta.openAmt);
+        openingRow(meta.openSource, meta.openAmt);
         cursorY += 4;
 
         // Per-FY totals (computed during voucher iteration below)
@@ -19535,8 +19620,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
           running += dr - cr;
           if (dr > 0) { totalBilled += dr;   fyDebit  += dr; }
           if (cr > 0) { totalReceived += cr; fyCredit += cr; }
-          const debitCell  = dr > 0 ? 'Rs. ' + inrNumber(dr) : '—';
-          const creditCell = cr > 0 ? 'Rs. ' + inrNumber(cr) : '—';
+          const debitCell  = dr > 0 ? RUPEE + inrNumber(dr) : '—';
+          const creditCell = cr > 0 ? RUPEE + inrNumber(cr) : '—';
           // Balance colour: Dr (positive) = dark text; Cr (negative) = emerald.
           const balColor = running < -0.5 ? [0,132,92] : [11,18,32];
           return [
@@ -19568,6 +19653,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
           margin: { left: MARGIN, right: MARGIN },
           tableWidth: CONTENT_W,
           theme: 'plain',
+          styles: { font: FONT },
           head: [[
             { content: 'Date',    styles: { halign: 'left'  } },
             { content: 'Voucher', styles: { halign: 'left'  } },
@@ -19618,10 +19704,10 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
           theme: 'plain',
           body: [
             [{ content: 'Total Debit',   styles: { textColor: [80,88,100], fontSize: 9.5 } },
-             { content: 'Rs. ' + inrNumber(fyDebit),
+             { content: RUPEE + inrNumber(fyDebit),
                styles: { halign: 'right', textColor: [11,18,32], fontStyle: 'bold', fontSize: 9.5 } }],
             [{ content: 'Total Credit',  styles: { textColor: [80,88,100], fontSize: 9.5 } },
-             { content: 'Rs. ' + inrNumber(fyCredit),
+             { content: RUPEE + inrNumber(fyCredit),
                styles: { halign: 'right', textColor: [0,132,92],  fontStyle: 'bold', fontSize: 9.5 } }],
             [{ content: meta.closeLabel,
                styles: { textColor: [11,18,32], fontStyle: 'bold', fontSize: 10 } },
@@ -19629,6 +19715,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                styles: { halign: 'right', textColor: balColor, fontStyle: 'bold', fontSize: 10.5 } }]
           ],
           styles: {
+            font: FONT,
             cellPadding: { top: 4, right: 8, bottom: 4, left: 8 },
             lineColor: [240, 242, 246],
             lineWidth: { bottom: 0.3 }
@@ -19686,7 +19773,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       doc.setLineWidth(0.5);
       doc.line(MARGIN, cursorY + blockH, RIGHT_X, cursorY + blockH);
       // Label
-      doc.setFont('helvetica', 'bold');
+      doc.setFont(FONT, 'bold');
       doc.setFontSize(11.5);
       doc.setTextColor(11, 18, 32);
       doc.text(finalLabel, MARGIN + 14, cursorY + 29);
@@ -19699,7 +19786,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       cursorY += blockH + 24;
 
       // ── Summary block ───────────────────────────────────────
-      doc.setFont('helvetica', 'bold');
+      doc.setFont(FONT, 'bold');
       doc.setFontSize(10);
       doc.setTextColor(11, 18, 32);
       doc.text('Summary', MARGIN, cursorY);
@@ -19715,6 +19802,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
           ['Outstanding',          fmtBal(finalAmt)]
         ],
         styles: {
+          font: FONT,
           fontSize: 9.5,
           cellPadding: { top: 4, right: 8, bottom: 4, left: 0 },
           lineColor: [240, 242, 246],
@@ -19752,11 +19840,11 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       doc.setDrawColor(220, 224, 228);
       doc.setLineWidth(0.5);
       doc.line(sigX, sigY, RIGHT_X, sigY);
-      doc.setFont('helvetica', 'bold');
+      doc.setFont(FONT, 'bold');
       doc.setFontSize(10);
       doc.setTextColor(11, 18, 32);
       doc.text('For Comfort Industries', sigX, sigY + 16);
-      doc.setFont('helvetica', 'normal');
+      doc.setFont(FONT, 'normal');
       doc.setFontSize(9);
       doc.setTextColor(80, 88, 100);
       doc.text('Accounts Department',         sigX, sigY + 30);
