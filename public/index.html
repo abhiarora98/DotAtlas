@@ -19224,6 +19224,23 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       const wants24 = selectedFYs.includes('24-25');
       const opFYs = ['25-26', '26-27'].filter(fy => selectedFYs.includes(fy));
 
+      // Statement period — earliest selected FY's opening date through
+      // either the statement-as-on date (if current FY is included) or
+      // the last selected FY's closing date.
+      let periodStart, periodEnd;
+      if (selectedFYs.includes('24-25'))      periodStart = '01 Apr 2024';
+      else if (selectedFYs.includes('25-26')) periodStart = '01 Apr 2025';
+      else                                    periodStart = '01 Apr 2026';
+      if (selectedFYs.includes('26-27'))      periodEnd = dateLong;
+      else if (selectedFYs.includes('25-26')) periodEnd = '31 Mar 2026';
+      else                                    periodEnd = '31 Mar 2025';
+      const periodLine = `Period: ${periodStart} – ${periodEnd}`;
+
+      // Optional customer meta — only render lines for fields that
+      // exist on the party record (city/gst/phone). Keeps the header
+      // honest: if the data isn't in Tally, the line just doesn't show.
+      const partyMeta = [p.city, p.gst, p.phone].filter(Boolean);
+
       // Format a running-balance amount with Dr/Cr suffix from the
       // issuer's perspective: positive → customer owes (Dr), negative
       // → advance / we owe (Cr), zero → no suffix.
@@ -19269,23 +19286,36 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         doc.setTextColor(11, 18, 32);
         doc.text('Account Statement', MARGIN, y0 + 124);
 
-        // Party + meta
+        // Party name (bold)
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(13);
         doc.setTextColor(11, 18, 32);
         doc.text(p.name, MARGIN, y0 + 148);
+
+        // Optional party meta lines (city / GST / phone)
+        let metaY = y0 + 162;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(110, 118, 130);
+        partyMeta.forEach(line => {
+          doc.text(String(line), MARGIN, metaY);
+          metaY += 12;
+        });
+
+        // Statement as on + period
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(9.5);
         doc.setTextColor(95, 105, 120);
-        doc.text(`Statement as on ${dateLong}`, MARGIN, y0 + 164);
+        doc.text(`Statement as on ${dateLong}`, MARGIN, metaY + 4);
+        doc.text(periodLine, MARGIN, metaY + 18);
         doc.setFontSize(8.5);
         doc.setTextColor(140, 148, 160);
-        doc.text('Generated from dot.atlas', MARGIN, y0 + 178);
+        doc.text('Generated from dot.atlas', MARGIN, metaY + 32);
 
         // Divider before content
         doc.setDrawColor(220, 224, 228);
         doc.setLineWidth(0.6);
-        doc.line(MARGIN, y0 + 192, RIGHT_X, y0 + 192);
+        doc.line(MARGIN, metaY + 46, RIGHT_X, metaY + 46);
       }
 
       // Page-footer drawer — page numbers + generated stamp
@@ -19305,31 +19335,49 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       }
 
       // Cursor tracks the current vertical position; autotable updates
-      // it via finalY. Plain text sections advance it manually. The
-      // new header takes ~200pt so content starts ~MARGIN + 210.
-      let cursorY = MARGIN + 210;
+      // it via finalY. Plain text sections advance it manually. Header
+      // grows with the optional party meta lines, so compute the start.
+      const headerBottom = 162 + (partyMeta.length * 12) + 46 + 12;  // metaY + divider + breathing
+      let cursorY = MARGIN + headerBottom;
 
-      // ── Optional carry-forward block ────────────────────────
-      if (wants24 && Math.abs(p.bf24) > 0.5) {
+      // Render an "Opening balance brought forward" row at the top of
+      // a FY section. Two-line layout (label + parenthetical date on
+      // line 2; amount right-aligned on the right column), muted so it
+      // reads as continuity context rather than a transaction.
+      function openingRow(dateText, amount) {
         doc.autoTable({
           startY: cursorY,
           margin: { left: MARGIN, right: MARGIN },
-          theme: 'plain',
           tableWidth: CONTENT_W,
+          theme: 'plain',
           body: [[
-            { content: 'Opening balance brought forward', styles: { fontStyle: 'bold', fontSize: 10.5, textColor: [11,18,32] } },
-            { content: fmtBal(p.bf24), styles: { halign: 'right', fontStyle: 'bold', fontSize: 11, textColor: p.bf24 < 0 ? [200,40,60] : [11,18,32] } }
+            { content: 'Opening Balance B/F',
+              styles: { fontStyle: 'bold', fontSize: 10, textColor: [80, 88, 100] } },
+            { content: fmtBal(amount),
+              styles: { halign: 'right', fontStyle: 'bold', fontSize: 10.5,
+                        textColor: amount < -0.5 ? [200,40,60] : [60, 68, 80] } }
           ], [
-            { content: '(as on 31 Mar 2025)', styles: { textColor: [120,128,140], fontSize: 9 } },
+            { content: `(${dateText})`, styles: { textColor: [140, 148, 160], fontSize: 9 } },
             { content: '', styles: {} }
           ]],
+          styles: { fillColor: [248, 250, 252] },
           didDrawPage: (data) => { drawHeader(data); drawFooter(data); }
         });
-        cursorY = doc.lastAutoTable.finalY + 16;
+        cursorY = doc.lastAutoTable.finalY + 8;
+      }
+
+      // ── Optional carry-forward block (FY 24-25) ──────────────
+      // Tracked as a "section rendered" so the next operational FY
+      // shows its opening row to make continuity visible.
+      let sectionsBefore = 0;
+      if (wants24 && Math.abs(p.bf24) > 0.5) {
+        openingRow('as on 31 Mar 2025', p.bf24);
         // Divider
         doc.setDrawColor(225, 228, 232);
         doc.setLineWidth(0.5);
-        doc.line(MARGIN, cursorY - 8, RIGHT_X, cursorY - 8);
+        doc.line(MARGIN, cursorY, RIGHT_X, cursorY);
+        cursorY += 12;
+        sectionsBefore++;
       }
 
       // ── Operational FY tables ───────────────────────────────
@@ -19340,8 +19388,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         : (opFYs[0] === '26-27' ? p.opening : 0);
 
       const fyMeta = {
-        '25-26': { vouchers: p.fy25 || [], label: 'FY 25-26', closeLabel: 'Closing balance as on 31 Mar 2026', closeAmt: p.opening },
-        '26-27': { vouchers: p.fy26 || [], label: 'FY 26-27', closeLabel: 'Closing balance as on ' + dateLong, closeAmt: p.outstanding }
+        '25-26': { vouchers: p.fy25 || [], label: 'FY 25-26', closeLabel: 'Closing Balance C/F as on 31 Mar 2026', closeAmt: p.opening, openAmt: p.bf24,    openDate: '01 Apr 2025' },
+        '26-27': { vouchers: p.fy26 || [], label: 'FY 26-27', closeLabel: 'Closing Balance C/F as on ' + dateLong, closeAmt: p.outstanding, openAmt: p.opening, openDate: '01 Apr 2026' }
       };
 
       // Aggregate summary across selected operational FYs
@@ -19356,39 +19404,64 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         doc.setFontSize(11.5);
         doc.setTextColor(11, 18, 32);
         doc.text(meta.label, MARGIN, cursorY);
-        cursorY += 6;
+        cursorY += 10;
 
-        // Build voucher rows. Running balance accumulates here and
-        // renders with a Dr/Cr suffix so an accountant can read the
-        // direction at a glance.
+        // Opening balance row — only if a prior section was rendered
+        // (carry-forward block OR a previous selected FY). The very
+        // first section drops it since there's no continuity to show.
+        if (sectionsBefore > 0) {
+          openingRow(meta.openDate, meta.openAmt);
+          cursorY += 4;
+        }
+        sectionsBefore++;
+
+        // Build voucher rows with separate Debit / Credit columns, the
+        // standard ledger format an accountant expects. Sales + Debit
+        // Notes hit Debit; Receipts + Credit Notes hit Credit. Balance
+        // shows running with Dr/Cr suffix.
         const body = meta.vouchers.map(v => {
           const dr = v.dr || 0, cr = v.cr || 0;
           running += dr - cr;
           if (dr > 0) totalBilled += dr;
           if (cr > 0) totalReceived += cr;
-          const amt = dr > 0 ? '+' + inrAmt(dr) : '-' + inrAmt(cr);
-          const amtColor = dr > 0 ? [11,18,32] : [0, 132, 92];
+          const debitCell  = dr > 0 ? 'Rs. ' + inrNumber(dr) : '—';
+          const creditCell = cr > 0 ? 'Rs. ' + inrNumber(cr) : '—';
           return [
             { content: v.d, styles: { textColor: [80, 88, 100] } },
-            { content: 'Vch ' + (v.v || ''), styles: { textColor: [11, 18, 32] } },
+            { content: String(v.v || ''),
+              styles: { textColor: [11, 18, 32], fontStyle: 'bold' } },
             { content: (v.t || '').toString(), styles: { textColor: [80, 88, 100] } },
-            { content: amt, styles: { halign: 'right', textColor: amtColor, fontStyle: 'bold' } },
+            { content: debitCell,
+              styles: { halign: 'right',
+                        textColor: dr > 0 ? [11,18,32] : [180,186,196],
+                        fontStyle: dr > 0 ? 'bold' : 'normal' } },
+            { content: creditCell,
+              styles: { halign: 'right',
+                        textColor: cr > 0 ? [0,132,92] : [180,186,196],
+                        fontStyle: cr > 0 ? 'bold' : 'normal' } },
             { content: fmtBal(running),
               styles: { halign: 'right', textColor: running < -0.5 ? [200,40,60] : [80,88,100] } }
           ];
         });
 
+        // Six-column ledger: Date | Voucher | Type | Debit | Credit | Balance
+        // Column widths sum to CONTENT_W (~499pt). Date stays narrow,
+        // voucher gets enough to fit Tally-style refs, Debit/Credit
+        // equal, Balance takes whatever's left.
+        const colDate = 58, colVch = 70, colType = 58, colDebit = 92, colCredit = 92;
+        const colBal = CONTENT_W - colDate - colVch - colType - colDebit - colCredit;
         doc.autoTable({
           startY: cursorY,
           margin: { left: MARGIN, right: MARGIN },
           tableWidth: CONTENT_W,
           theme: 'plain',
           head: [[
-            { content: 'Date',            styles: { halign: 'left' } },
-            { content: 'Voucher',         styles: { halign: 'left' } },
-            { content: 'Type',            styles: { halign: 'left' } },
-            { content: 'Amount',          styles: { halign: 'right' } },
-            { content: 'Running balance', styles: { halign: 'right' } }
+            { content: 'Date',    styles: { halign: 'left'  } },
+            { content: 'Voucher', styles: { halign: 'left'  } },
+            { content: 'Type',    styles: { halign: 'left'  } },
+            { content: 'Debit',   styles: { halign: 'right' } },
+            { content: 'Credit',  styles: { halign: 'right' } },
+            { content: 'Balance', styles: { halign: 'right' } }
           ]],
           headStyles: {
             fillColor: [245, 247, 250],
@@ -19408,11 +19481,12 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
           },
           alternateRowStyles: { fillColor: [250, 251, 253] },
           columnStyles: {
-            0: { cellWidth: 70  },
-            1: { cellWidth: 95  },
-            2: { cellWidth: 75  },
-            3: { cellWidth: 120, halign: 'right' },
-            4: { cellWidth: CONTENT_W - 70 - 95 - 75 - 120, halign: 'right' }
+            0: { cellWidth: colDate },
+            1: { cellWidth: colVch  },
+            2: { cellWidth: colType },
+            3: { cellWidth: colDebit,  halign: 'right' },
+            4: { cellWidth: colCredit, halign: 'right' },
+            5: { cellWidth: colBal,    halign: 'right' }
           },
           body,
           didDrawPage: (data) => { drawHeader(data); drawFooter(data); }
@@ -19454,11 +19528,11 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         finalLabel = 'CURRENT OUTSTANDING';
         finalAmt   = p.outstanding;
       } else if (opFYs.includes('25-26')) {
-        finalLabel = 'CLOSING BALANCE AS ON 31 MAR 2026';
+        finalLabel = 'CLOSING BALANCE C/F AS ON 31 MAR 2026';
         finalAmt   = p.opening;
       } else {
         // Only carry-forward selected
-        finalLabel = 'CLOSING BALANCE AS ON 31 MAR 2025';
+        finalLabel = 'CLOSING BALANCE C/F AS ON 31 MAR 2025';
         finalAmt   = p.bf24;
       }
 
@@ -19523,9 +19597,39 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         },
         didDrawPage: (data) => { drawHeader(data); drawFooter(data); }
       });
+      cursorY = doc.lastAutoTable.finalY;
 
-      // Trigger footer/header on first page (in case no autotable was
-      // emitted before the cursor reached the end — defensive).
+      // ── Signature block (issuer side, bottom-right) ─────────
+      // Standard practice on accounting statements — the issuer signs
+      // off so the recipient knows who to contact for reconciliation.
+      // Sits on the last page only (after summary).
+      const sigPad = 36;
+      let sigY = cursorY + sigPad;
+      // Page-break guard — if the signature wouldn't fit comfortably
+      // above the footer band, push it to a fresh page.
+      if (sigY > H - MARGIN - 90) {
+        doc.addPage();
+        drawHeader({ pageNumber: doc.internal.getNumberOfPages() });
+        drawFooter({ pageNumber: doc.internal.getNumberOfPages() });
+        sigY = MARGIN + headerBottom + 12;
+      }
+      const sigX = RIGHT_X - 200;
+      doc.setDrawColor(220, 224, 228);
+      doc.setLineWidth(0.5);
+      doc.line(sigX, sigY, RIGHT_X, sigY);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(11, 18, 32);
+      doc.text('For Comfort Industries', sigX, sigY + 16);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(80, 88, 100);
+      doc.text('Accounts Department',         sigX, sigY + 30);
+      doc.text('+91 88168 89093',             sigX, sigY + 43);
+      doc.text('accounts@comfortindustries.in', sigX, sigY + 56);
+
+      // Defensive: ensure header/footer paint on page 1 even if no
+      // autotable triggered didDrawPage (degenerate selection).
       drawHeader({ pageNumber: 1 });
       drawFooter({ pageNumber: 1 });
 
