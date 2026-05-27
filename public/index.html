@@ -556,7 +556,7 @@
   .table thead th.r { text-align: right; }
   .table tbody td {
     padding: 17px 16px 17px 0;
-    border-bottom: 1px solid var(--line);
+    border-bottom: 1px solid rgba(255,255,255,0.035);
     font-size: 13px;
     vertical-align: middle;
   }
@@ -569,9 +569,12 @@
     top: 49px;           /* sits flush under the sticky chip bar */
     z-index: 2;
     background: var(--surface-2);
+    color: var(--text-2);   /* readable while scrolling, still subtle */
+    font-size: 10px; font-weight: 600; letter-spacing: 0.16em;
     padding-top: 12px; padding-bottom: 12px;
-    border-bottom: 1px solid var(--line);
+    border-bottom: 1px solid var(--line-2);
     border-top: 1px solid var(--line);
+    box-shadow: 0 4px 10px -8px rgba(0,0,0,0.5);
   }
   /* Center the Risk column so badge sits under "RISK" header */
   .table.ledger thead th:nth-child(6),
@@ -910,7 +913,13 @@
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--line);
+    box-shadow: 0 6px 14px -10px rgba(0,0,0,0.55);  /* subtle anchor */
   }
+  /* Right side of the filter row: search + sort, on one baseline */
+  .ledger-tools-right {
+    display: inline-flex; gap: 12px; align-items: center;
+  }
+  .ledger-tools-right .search { min-width: 200px; }
   .ledger-tools {
     display: flex; align-items: center; justify-content: space-between;
     padding: 12px 22px; border-bottom: 1px solid var(--line);
@@ -1273,11 +1282,12 @@
   .table.ledger .detail-inner .detail-acts button.prime { background: var(--text); color: var(--void); border-color: var(--text); }
   .table.ledger .detail-inner .detail-acts button.prime:hover { background: var(--emerald); color: var(--void); border-color: var(--emerald); }
 
-  /* mini-aging bar — same start-x every row (cell's left padding) */
+  /* mini-aging bar — same start-x every row (cell's left padding).
+     Track lightened so the colored fills carry the eye. */
   .mini-bar {
-    display: inline-flex; height: 6px; width: 100px;
+    display: inline-flex; height: 6px; width: 92px;
     border-radius: 999px; overflow: hidden; gap: 1px;
-    background: var(--surface-3);
+    background: rgba(255,255,255,0.04);
   }
   .mini-bar > span { display: block; height: 100%; }
   .mini-bar .s0 { background: var(--blue); }
@@ -1286,7 +1296,7 @@
   .mini-bar .s3 { background: var(--rose); }
 
   /* Risk badge — pill with tinted background + leading dot.
-     Maps Good→blue, Watch→amber, High→rose, Advance→muted blue. */
+     Goal: blue / amber / red pop instantly during scanning. */
   .risk-cluster {
     display: inline-flex; gap: 7px; align-items: center;
     padding: 4px 10px;
@@ -1294,21 +1304,62 @@
     background: rgba(255,255,255,0.04);
   }
   .risk-cluster .risk-dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    background: var(--blue); box-shadow: 0 0 5px var(--blue);
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--blue); box-shadow: 0 0 7px var(--blue);
   }
-  .risk-cluster .risk-dot.w { background: var(--amber); box-shadow: 0 0 5px var(--amber); }
-  .risk-cluster .risk-dot.r { background: var(--rose);  box-shadow: 0 0 5px var(--rose);  }
+  .risk-cluster .risk-dot.w { background: var(--amber); box-shadow: 0 0 7px var(--amber); }
+  .risk-cluster .risk-dot.r { background: var(--rose);  box-shadow: 0 0 7px var(--rose);  }
   .risk-cluster .risk-lbl   {
-    font-family: var(--fm); font-size: 10px; color: var(--text-2);
-    letter-spacing: 0.08em; text-transform: uppercase;
+    font-family: var(--fm); font-size: 10px; font-weight: 600;
+    color: var(--text); letter-spacing: 0.08em; text-transform: uppercase;
   }
-  /* Per-row tint so the badge background matches the verdict */
-  .table.ledger tr.party-r[data-risk="good"]    .risk-cluster { background: rgba(124,168,255,0.10); }
-  .table.ledger tr.party-r[data-risk="watch"]   .risk-cluster { background: rgba(255,176,121,0.10); }
-  .table.ledger tr.party-r[data-risk="high"]    .risk-cluster { background: rgba(255,138,168,0.10); }
-  .table.ledger tr.party-r[data-risk="advance"] .risk-cluster { background: rgba(124,168,255,0.06); }
+  /* Per-row tint + per-risk label color so badges scan fast */
+  .table.ledger tr.party-r[data-risk="good"]    .risk-cluster { background: rgba(124,168,255,0.16); }
+  .table.ledger tr.party-r[data-risk="good"]    .risk-cluster .risk-lbl { color: var(--blue); }
+  .table.ledger tr.party-r[data-risk="watch"]   .risk-cluster { background: rgba(255,176,121,0.18); }
+  .table.ledger tr.party-r[data-risk="watch"]   .risk-cluster .risk-lbl { color: var(--amber); }
+  .table.ledger tr.party-r[data-risk="high"]    .risk-cluster { background: rgba(255,138,168,0.18); }
+  .table.ledger tr.party-r[data-risk="high"]    .risk-cluster .risk-lbl { color: var(--rose); }
+  .table.ledger tr.party-r[data-risk="advance"] .risk-cluster { background: rgba(124,168,255,0.08); }
+  .table.ledger tr.party-r[data-risk="advance"] .risk-cluster .risk-lbl { color: var(--blue); opacity: 0.8; }
   .table.ledger tr.party-r[data-risk="paid"]    .risk-cluster { background: rgba(255,255,255,0.025); }
+  .table.ledger tr.party-r[data-risk="paid"]    .risk-cluster .risk-lbl { color: var(--text-3); }
+
+  /* Negative outstanding (advances) — muted blue, lighter weight so
+     they don't compete with on-book Dr amounts. */
+  .table.ledger tr.party-r.advance td:last-child {
+    color: var(--blue) !important;
+    font-weight: 500;
+    opacity: 0.75;
+  }
+
+  /* Custom tooltip — overrides the native title attribute we replaced
+     with data-tooltip. Multi-line with newlines preserved, premium card. */
+  .table.ledger tr.party-r[data-tooltip] { position: relative; }
+  .table.ledger tr.party-r[data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 64px;
+    top: 100%;
+    transform: translateY(6px);
+    background: var(--surface-2);
+    color: var(--text);
+    padding: 10px 14px;
+    border: 1px solid var(--line-2);
+    border-radius: 6px;
+    font-family: var(--fm);
+    font-size: 11px;
+    line-height: 1.55;
+    letter-spacing: 0.03em;
+    white-space: pre;
+    max-width: 320px;
+    z-index: 50;
+    box-shadow: 0 12px 28px -10px rgba(0,0,0,0.55);
+    pointer-events: none;
+    opacity: 0;
+    animation: tipFade 120ms 250ms var(--ease) forwards;  /* delay before show */
+  }
+  @keyframes tipFade { to { opacity: 1; } }
 
   /* Hide the aging mini-bar for parties without aged invoices —
      showing an empty bar reads as data, not absence. */
@@ -2843,12 +2894,6 @@
       <div class="card mt-14 ledger-card">
         <div class="card-h">
           <div class="t"><span class="ic">≡</span><h3>Party ledger</h3><span class="sub">1188 PARTIES · FY 24-25 B/F + FY 25-26 + 26-27 · ON-DEMAND</span></div>
-          <div class="seg" data-sortgrp="ledger">
-            <button class="on" data-sort="outstanding">OUTSTANDING</button>
-            <button data-sort="aged">AGED</button>
-            <button data-sort="dso">DSO</button>
-            <button data-sort="risk">RISK</button>
-          </div>
         </div>
         <div class="ledger-tools">
           <div class="chips">
@@ -2860,17 +2905,25 @@
             <button class="chip">Hold <span class="cnt">0</span></button>
             <button class="chip">Top 20</button>
           </div>
-          <input class="search" placeholder="Search party, voucher…"/>
+          <div class="ledger-tools-right">
+            <input class="search" placeholder="Search party, voucher…"/>
+            <div class="seg" data-sortgrp="ledger">
+              <button class="on" data-sort="outstanding">OUTSTANDING</button>
+              <button data-sort="aged">AGED</button>
+              <button data-sort="dso">DSO</button>
+              <button data-sort="risk">RISK</button>
+            </div>
+          </div>
         </div>
         <div class="card-b" style="padding-top:6px;">
           <table class="table ledger">
             <colgroup>
-              <col style="width:320px;"/>
-              <col style="width:140px;"/>
+              <col style="width:380px;"/>
+              <col style="width:130px;"/>
+              <col style="width:78px;"/>
               <col style="width:80px;"/>
-              <col style="width:90px;"/>
-              <col style="width:110px;"/>
-              <col style="width:120px;"/>
+              <col style="width:108px;"/>
+              <col style="width:106px;"/>
               <col/>
             </colgroup>
             <thead><tr>
@@ -20167,14 +20220,16 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         sec.insertBefore(dot, sec.firstChild);
       }
       // Risk tooltip — explains why the row is High / Watch / Good / Paid.
+      // Stored as data-tooltip so we can style it (native title can't be).
       const reasons = [];
-      if (oldest > 0) reasons.push(`oldest invoice ${oldest}d`);
-      if (dso > 0)    reasons.push(`weighted avg ${dso}d`);
-      if (lastR < 9999) reasons.push(`last receipt ${lastR}d ago`);
-      else reasons.push('no receipt on record');
-      if (out > 0.5)  reasons.unshift(`outstanding ₹${(out>=100000?(out/100000).toFixed(1)+'L':Math.round(out).toString())}`);
-      const verdict = risk.charAt(0).toUpperCase() + risk.slice(1);
-      row.title = `${verdict} · ${reasons.join(' · ')}`;
+      if (oldest > 0)   reasons.push(`Oldest ${oldest}d`);
+      if (dso > 0)      reasons.push(`Weighted avg ${dso}d`);
+      if (lastR < 9999) reasons.push(`Last receipt ${lastR}d ago`);
+      else              reasons.push('No receipt on record');
+      if (out > 0.5)    reasons.unshift(`Outstanding ₹${(out>=100000?(out/100000).toFixed(1)+'L':Math.round(out).toString())}`);
+      const verdict = (risk.charAt(0).toUpperCase() + risk.slice(1)) + ' risk';
+      // Multi-line via real newlines — CSS white-space: pre preserves them.
+      row.dataset.tooltip = verdict + '\n' + reasons.join('\n');
     });
     if (chipsRoot) {
       chipsRoot.addEventListener('click', e => {
