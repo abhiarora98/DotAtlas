@@ -1025,6 +1025,9 @@
   .table.ledger .detail-inner .fy-section.headline > .fy-head.clickable.open {
     background: rgba(78,222,163,0.14);
   }
+  .table.ledger .detail-inner .fy-section.headline > .fy-head.clickable.open .fy-chev {
+    color: var(--emerald);
+  }
 
   .table.ledger .detail-inner .fy-head {
     display: flex;
@@ -1036,22 +1039,21 @@
     transition: background 120ms ease;
   }
   /* Clickable rows get a faint bg tint as the affordance; hover deepens
-     it; the .open state holds a small emerald wash so it reads as live. */
+     it; the .open state holds a slightly stronger neutral wash. Green
+     tint is reserved for the current-outstanding (headline) row only,
+     so the final result is the only place the eye lands on emerald. */
   .table.ledger .detail-inner .fy-head.clickable {
     cursor: pointer;
     background: rgba(255,255,255,0.018);
   }
   .table.ledger .detail-inner .fy-head.clickable:hover {
-    background: rgba(255,255,255,0.04);
+    background: rgba(255,255,255,0.045);
   }
   .table.ledger .detail-inner .fy-head.clickable:hover .dt-label-text {
     color: var(--emerald);
   }
   .table.ledger .detail-inner .fy-head.clickable.open {
-    background: rgba(78,222,163,0.05);
-  }
-  .table.ledger .detail-inner .fy-head.clickable.open .fy-chev {
-    color: var(--emerald);
+    background: rgba(255,255,255,0.06);
   }
   .table.ledger .detail-inner .fy-head-left {
     max-width: 520px;
@@ -1124,10 +1126,13 @@
   }
   .table.ledger .detail-inner .fy-body.open { display: block; }
 
-  /* Voucher row — Date · Type · Voucher · Amount · Running Balance */
+  /* Voucher row — Date · Type · Voucher · Amount · Running Balance.
+     Running balance column widened so its right-aligned text sits
+     further from the Amount column, restoring visual breathing room
+     between the two numeric columns. */
   .table.ledger .detail-inner .inv-row {
     display: grid;
-    grid-template-columns: 76px 110px 112px 1fr 130px;
+    grid-template-columns: 76px 110px 112px 1fr 160px;
     gap: 18px; padding: 7px 12px;
     font-family: var(--fm); font-size: 12px;
     color: #4B5563; letter-spacing: 0.02em;
