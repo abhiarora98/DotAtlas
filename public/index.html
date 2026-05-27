@@ -586,17 +586,6 @@
   .table.ledger thead th[data-sort].sorted.asc::after { content: ' ↑'; }
   .table.ledger thead th[data-sort].sorted { color: var(--text); }
 
-  /* Last sale cell — days in colour, '(sold DD MMM)' as a muted
-     mono subtitle next to it. */
-  .table.ledger tbody td .ls-days {
-    font-family: var(--fm); font-weight: 500;
-  }
-  .table.ledger tbody td .ls-date {
-    font-family: var(--fm); font-size: 10px;
-    color: var(--text-3); letter-spacing: 0.04em;
-    margin-left: 4px; white-space: nowrap;
-  }
-
   /* Center the inner columns — Aging mini-bar, Last sale, Last receipt
      and Risk all read better balanced. Party stays left, Outstanding
      stays right. */
@@ -2928,7 +2917,7 @@
             <colgroup>
               <col class="col-party"/>
               <col style="width:180px;"/>
-              <col style="width:170px;"/>
+              <col style="width:120px;"/>
               <col style="width:130px;"/>
               <col style="width:120px;"/>
               <col style="width:150px;"/>
@@ -18950,9 +18939,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                         :             'var(--text-2)';
         // Trim a trailing "25" off FY 25-26 dates ("12 May 25" → "12 May")
         const dateLabel = latestStr.replace(/\s+\d{2}$/, '');
-        td.innerHTML =
-          '<span class="ls-days" style="color:' + daysColor + ';">' + days + 'd</span> '
-        + '<span class="ls-date">(sold ' + dateLabel + ')</span>';
+        td.style.color = daysColor;
+        td.textContent = dateLabel;
       });
     }
 
