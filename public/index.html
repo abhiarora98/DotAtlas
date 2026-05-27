@@ -757,8 +757,7 @@
     border-radius: 4px;
   }
   /* Zebra striping — very subtle warm tint on alternating rows */
-  .table.ledger .detail-inner > .inv-row:nth-of-type(even),
-  .table.ledger .detail-inner .py-rows > .inv-row:nth-of-type(even) {
+  .table.ledger .detail-inner .fy-rows .inv-row:nth-child(even) {
     background: rgba(11,18,32,0.025);
   }
   .table.ledger .detail-inner .vdate { color: #4B5563; }
@@ -777,75 +776,86 @@
     font-variant-numeric: tabular-nums; white-space: nowrap;
   }
 
-  /* Single-line carry-forward row at each year boundary —
-     muted gray-blue card, no voucher chrome. */
-  .table.ledger .detail-inner .closing-row {
-    display: flex; align-items: baseline; justify-content: space-between;
-    margin: 16px 0;
-    padding: 12px 16px;
-    background: #EEF2F7;
-    border: 1px solid #D8DEE8;
-    border-radius: 6px;
+  /* === Year row — one clean line per financial year ===
+     [chevron] · [label + subtitle stack] · ... · [closing amount]
+     The carry-forward variant hides the chevron and isn't clickable. */
+  .table.ledger .detail-inner .fy-row {
+    display: grid;
+    grid-template-columns: 22px 1fr auto;
+    column-gap: 16px;
+    align-items: center;
+    width: 100%;
+    padding: 16px 4px;
+    border-bottom: 1px solid #E6E8EE;
+    background: transparent;
+    border-left: 0; border-right: 0; border-top: 0;
+    text-align: left;
+    font-family: var(--fb);
   }
-  .table.ledger .detail-inner .closing-row .cr-label {
-    font-family: var(--fm); font-size: 11px; color: #4B5563;
+  .table.ledger .detail-inner button.fy-row {
+    cursor: pointer;
+    transition: background 150ms var(--ease);
+  }
+  .table.ledger .detail-inner button.fy-row:hover { background: rgba(11,18,32,0.025); }
+  .table.ledger .detail-inner .fy-row .chev {
+    font-size: 11px; color: #6B7280; line-height: 1;
+    text-align: center;
+    transition: transform 200ms var(--ease), color 200ms var(--ease);
+  }
+  .table.ledger .detail-inner .fy-section.open .fy-row .chev {
+    transform: rotate(90deg); color: #0B1220;
+  }
+  .table.ledger .detail-inner .fy-row.carry-row {
+    grid-template-columns: 1fr auto;
+  }
+  .table.ledger .detail-inner .fy-info {
+    display: flex; flex-direction: column; gap: 4px; min-width: 0;
+  }
+  .table.ledger .detail-inner .fy-label {
+    font-family: var(--fb); font-size: 13.5px; font-weight: 500;
+    color: #0B1220; letter-spacing: -0.005em;
+  }
+  .table.ledger .detail-inner .fy-sub {
+    font-family: var(--fm); font-size: 10.5px; color: #6B7280;
     letter-spacing: 0.04em;
   }
-  .table.ledger .detail-inner .closing-row .cr-amount {
-    font-family: var(--fd); font-weight: 600; font-size: 15px;
+  .table.ledger .detail-inner .fy-amount {
+    font-family: var(--fd); font-size: 16px; font-weight: 500;
     color: #0B1220; letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+  .table.ledger .detail-inner .fy-section { margin: 0; }
+  .table.ledger .detail-inner .fy-rows {
+    display: none;
+    padding: 8px 0 12px 38px;
+  }
+  .table.ledger .detail-inner .fy-section.open .fy-rows { display: block; }
+
+  /* Headline outstanding — the one number that matters */
+  .table.ledger .detail-inner .outstanding-line {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-top: 20px; padding-top: 18px;
+    border-top: 1px solid #D8DEE8;
+  }
+  .table.ledger .detail-inner .ol-label {
+    font-family: var(--fm); font-size: 10.5px; color: #4B5563;
+    letter-spacing: 0.14em; text-transform: uppercase; font-weight: 500;
+  }
+  .table.ledger .detail-inner .ol-amount {
+    font-family: var(--fd); font-size: 22px; font-weight: 700;
+    color: #0B1220; letter-spacing: -0.025em;
     font-variant-numeric: tabular-nums;
   }
-
-  /* Year section — header line with inline toggle, rows collapse below */
-  .table.ledger .detail-inner .year-section { margin: 14px 0; }
-  .table.ledger .detail-inner .year-header {
-    display: flex; align-items: baseline; justify-content: space-between;
-    gap: 16px; padding: 8px 12px;
-    border-bottom: 1px solid #E6E8EE;
-  }
-  .table.ledger .detail-inner .yh-summary {
-    font-family: var(--fm); font-size: 10.5px; color: #4B5563;
-    letter-spacing: 0.08em; text-transform: uppercase;
-  }
-  .table.ledger .detail-inner .year-toggle {
-    font-family: var(--fm); font-size: 10.5px;
-    background: transparent; border: 0; padding: 0;
-    color: #2C5BFF; cursor: pointer;
-    letter-spacing: 0.08em; text-transform: uppercase;
-    white-space: nowrap;
-    transition: color 200ms var(--ease);
-  }
-  .table.ledger .detail-inner .year-toggle:hover { color: #1840CC; }
-  .table.ledger .detail-inner .year-rows { display: none; padding-top: 6px; }
-  .table.ledger .detail-inner .year-section.open .year-rows { display: block; }
+  .table.ledger .detail-inner.state-overdue .ol-amount { color: #C73E5E; }
+  .table.ledger .detail-inner.state-paid    .ol-amount { color: #00A572; }
+  .table.ledger .detail-inner.state-advance .ol-amount { color: #00A572; }
+  .table.ledger .detail-inner.state-watch   .ol-amount { color: #B45309; }
 
   .table.ledger .detail-inner .drawer-skeleton {
     font-family: var(--fm); font-size: 11px; color: #6B7280;
     letter-spacing: 0.1em; text-transform: uppercase;
     padding: 18px 0; text-align: center;
   }
-
-  .table.ledger .detail-inner .inv-foot {
-    margin-top: 22px; padding-top: 18px;
-    border-top: 2px solid #D8DEE8;
-  }
-  .table.ledger .detail-inner .inv-summary {
-    display: flex; gap: 28px; flex-wrap: wrap; align-items: baseline;
-    font-family: var(--fm); font-size: 12px; color: #0B1220;
-  }
-  .table.ledger .detail-inner .inv-summary .ks {
-    color: #6B7280; letter-spacing: 0.14em; text-transform: uppercase;
-    margin-right: 6px; font-size: 9.5px; font-weight: 500;
-  }
-  .table.ledger .detail-inner .inv-summary b {
-    color: #0B1220; font-family: var(--fd); font-weight: 700;
-    font-size: 17px; letter-spacing: -0.02em;
-  }
-  .table.ledger .detail-inner.state-overdue .inv-summary b { color: #C73E5E; }
-  .table.ledger .detail-inner.state-paid    .inv-summary b { color: #00A572; }
-  .table.ledger .detail-inner.state-advance .inv-summary b { color: #00A572; }
-  .table.ledger .detail-inner.state-watch   .inv-summary b { color: #B45309; }
 
   /* Parent party-r stays in the dark cockpit; just give it a touch
      more presence so the open state reads as "stronger than drawer". */
@@ -19269,6 +19279,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     }
     const esc = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
 
+    // Compact "+/−₹X" amount + running balance for a transaction row.
     function vRow(t, opt) {
       const isDebit = t.dr > 0;
       const amt = isDebit ? '+₹'+inRupees(t.dr) : '−₹'+inRupees(t.cr);
@@ -19284,85 +19295,85 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
            + `</div>`;
     }
 
-    // Single-line carry-forward row: label · amount.
-    // Used to mark each financial-year boundary (closing → next-year opening).
-    function closingRow(date, amount) {
-      const sign = amount < 0 ? '−' : '';
-      return `<div class="closing-row">`
-           + `<span class="cr-label">Closing balance as on ${esc(date)}</span>`
-           + `<span class="cr-amount">${sign}₹${inRupees(Math.abs(amount))}</span>`
-           + `</div>`;
+    // Short formatter for header subtitles: ₹X.X L / ₹X.XX Cr.
+    function fmtShort(n) {
+      const a = Math.abs(n); const sign = n < 0 ? '−' : '';
+      if (a >= 10000000) return sign + '₹' + (a/10000000).toFixed(2) + ' Cr';
+      if (a >= 100000)   return sign + '₹' + (a/100000).toFixed(1) + ' L';
+      return sign + '₹' + inRupees(a);
+    }
+    function fmtAmt(n) {
+      return (n < 0 ? '−' : '') + '₹' + inRupees(Math.abs(n));
     }
 
-    // Collapsible year section with inline toggle in its header.
-    function yearSection(fy, vouchers, opt) {
+    // A collapsible year row: chevron · label · subtitle · closing amount.
+    // Transactions render below, hidden until the row is toggled open.
+    function yearRow(fy, vouchers, closingAmount, runningStart) {
       const billed = vouchers.reduce((a,t)=>a+(t.dr||0),0);
       const recv   = vouchers.reduce((a,t)=>a+(t.cr||0),0);
-      const rowHtml = vouchers.map(t => vRow(t, opt)).join('');
-      const openCls = opt.defaultOpen ? ' open' : '';
-      const btnText = opt.defaultOpen ? `Hide FY ${fy}` : `Show FY ${fy}`;
-      return `<div class="year-section${openCls}" data-fy="${esc(fy)}">`
-           + `<div class="year-header">`
-           + `<span class="yh-summary">FY ${esc(fy)} · ${vouchers.length} voucher${vouchers.length!==1?'s':''} · billed ₹${inRupees(billed)} · received ₹${inRupees(recv)}</span>`
-           + `<button class="year-toggle" type="button">${btnText}</button>`
-           + `</div>`
-           + `<div class="year-rows">${rowHtml}</div>`
+      const opt = { running: runningStart };
+      const rowsHtml = vouchers.map(t => vRow(t, opt)).join('');
+      const label = `FY ${esc(fy)} · ${vouchers.length} voucher${vouchers.length!==1?'s':''}`;
+      const sub   = `Billed ${fmtShort(billed)} · Received ${fmtShort(recv)}`;
+      return `<div class="fy-section" data-fy="${esc(fy)}">`
+           + `<button type="button" class="fy-row fy-toggle">`
+           + `<span class="chev">▸</span>`
+           + `<div class="fy-info"><span class="fy-label">${label}</span><span class="fy-sub">${sub}</span></div>`
+           + `<span class="fy-amount">${fmtAmt(closingAmount)}</span>`
+           + `</button>`
+           + `<div class="fy-rows">${rowsHtml}</div>`
            + `</div>`;
     }
 
     function renderDrawer(inner, p) {
       const bf24 = p.bf24 || 0;
-      const op   = p.opening || 0;
+      const op   = p.opening || 0;  // FY 25-26 closing == FY 26-27 opening
+      const out  = p.outstanding || 0;
       const hasFY25 = !!(p.fy25 && p.fy25.length);
       const hasFY26 = !!(p.fy26 && p.fy26.length);
 
-      // Carry-forward from FY 24-25 (the only thing we keep of that year).
-      const cr24 = Math.abs(bf24) > 0.5 ? closingRow('31 Mar 2025', bf24) : '';
+      let html = '';
 
-      // FY 25-26 — collapsed by default; running balance starts from bf24.
-      const fy25Section = hasFY25
-        ? yearSection('25-26', p.fy25, { running: bf24, defaultOpen: false })
-        : '';
+      // FY 24-25 carry-forward — read-only, no chevron.
+      if (Math.abs(bf24) > 0.5) {
+        html += `<div class="fy-row carry-row">`
+              + `<div class="fy-info"><span class="fy-label">FY 24-25 (carry forward)</span>`
+              + `<span class="fy-sub">Closing balance as on 31 Mar 2025</span></div>`
+              + `<span class="fy-amount">${fmtAmt(bf24)}</span>`
+              + `</div>`;
+      }
 
-      // FY 25-26 closing = FY 26-27 opening.
-      const cr25 = Math.abs(op) > 0.5 ? closingRow('31 Mar 2026', op) : '';
+      // FY 25-26 — closing amount is the running balance after the year.
+      if (hasFY25) html += yearRow('25-26', p.fy25, op, bf24);
 
-      // FY 26-27 — expanded by default; running balance starts from op.
-      const fy26Section = hasFY26
-        ? yearSection('26-27', p.fy26, { running: op, defaultOpen: true })
-        : '';
+      // FY 26-27 — closing amount = current outstanding.
+      if (hasFY26) html += yearRow('26-27', p.fy26, out, op);
 
-      const summary = `<div class="inv-summary">`
-                    + (Math.abs(bf24) > 0.5 ? `<span><span class="ks">FY 24-25 CLOSING</span> ${bf24<0?'−':''}₹${inRupees(Math.abs(bf24))}</span>` : '')
-                    + (Math.abs(op) > 0.5   ? `<span><span class="ks">FY 25-26 CLOSING</span> ${op<0?'−':''}₹${inRupees(Math.abs(op))}</span>` : '')
-                    + `<span><span class="ks">BILLED</span> +₹${inRupees(p.billed)}</span>`
-                    + `<span><span class="ks">RECEIVED</span> −₹${inRupees(p.received)}</span>`
-                    + `<span><span class="ks">OUTSTANDING</span> <b>${p.outstanding<0?'−':''}₹${inRupees(Math.abs(p.outstanding))}</b></span>`
-                    + `</div>`;
+      // Single bold headline at the bottom.
+      html += `<div class="outstanding-line">`
+            + `<span class="ol-label">Current outstanding</span>`
+            + `<span class="ol-amount">${fmtAmt(out)}</span>`
+            + `</div>`;
 
-      // Outstanding state — drives footer color. Read from the party row.
+      // State class — drives the headline's color.
       const partyRow = inner.closest('tr').previousElementSibling;
       const oldest   = +(partyRow?.dataset.oldest || 0);
       const outNum   = +(partyRow?.dataset.out || 0);
       let outState = 'state-neutral';
-      if (outNum <= 0.5 && outNum >= -0.5) outState = 'state-paid';
-      else if (outNum < -0.5)              outState = 'state-advance';
-      else if (oldest > 60)                outState = 'state-overdue';
-      else if (oldest > 30)                outState = 'state-watch';
+      if (Math.abs(outNum) <= 0.5) outState = 'state-paid';
+      else if (outNum < -0.5)       outState = 'state-advance';
+      else if (oldest > 60)         outState = 'state-overdue';
+      else if (oldest > 30)         outState = 'state-watch';
       inner.classList.add(outState);
 
-      inner.innerHTML = cr24 + fy25Section + cr25 + fy26Section
-        + `<div class="inv-foot">${summary}</div>`;
+      inner.innerHTML = html;
       inner.dataset.loaded = '1';
 
-      // Wire the inline year toggles
-      inner.querySelectorAll('.year-toggle').forEach(btn => {
+      // Wire chevron toggles
+      inner.querySelectorAll('.fy-toggle').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
-          const section = btn.closest('.year-section');
-          const fy = section.dataset.fy;
-          const isOpen = section.classList.toggle('open');
-          btn.textContent = isOpen ? `Hide FY ${fy}` : `Show FY ${fy}`;
+          btn.closest('.fy-section').classList.toggle('open');
         });
       });
     }
