@@ -998,7 +998,7 @@
   }
   /* Drawer top — contained header block. LEFT bounded to 520px so FY
      labels read as a column, not a stretched grid; RIGHT a fixed 220px
-     stack of closing amounts. Ledger sits below this header. */
+     stack of closing amounts, pulled inward 24px from the card edge. */
   .table.ledger .detail-inner .drawer-top {
     display: flex;
     justify-content: space-between;
@@ -1009,25 +1009,44 @@
   }
   .table.ledger .detail-inner .drawer-left {
     max-width: 520px;
-    display: flex; flex-direction: column; gap: 10px;
+    display: flex; flex-direction: column; gap: 12px;
     min-width: 0;
   }
   .table.ledger .detail-inner .drawer-right {
     width: 220px;
-    display: flex; flex-direction: column; gap: 10px;
+    display: flex; flex-direction: column; gap: 12px;
     text-align: right;
     flex-shrink: 0;
+    padding-right: 24px;
   }
   .table.ledger .detail-inner .dt-block {
-    display: flex; flex-direction: column; gap: 3px; min-width: 0;
+    display: flex; flex-direction: column; gap: 2px; min-width: 0;
+    padding: 2px 0 2px 0;
+  }
+  .table.ledger .detail-inner .dt-block.clickable {
+    cursor: pointer;
+  }
+  .table.ledger .detail-inner .dt-block.clickable:hover .dt-label-text {
+    color: var(--emerald);
   }
   .table.ledger .detail-inner .dt-label {
-    font-family: var(--fb); font-size: 13.5px; font-weight: 500;
+    font-family: var(--fb); font-size: 13.5px; font-weight: 600;
     color: var(--text); letter-spacing: -0.005em;
+    display: inline-flex; align-items: baseline; gap: 6px;
   }
+  .table.ledger .detail-inner .fy-chev {
+    display: inline-block;
+    width: 10px; text-align: center;
+    font-size: 10px; line-height: 1;
+    color: var(--text-3);
+    transition: transform 120ms ease;
+  }
+  .table.ledger .detail-inner .fy-chev-blank { color: transparent; }
   .table.ledger .detail-inner .dt-sub {
-    font-family: var(--fm); font-size: 10.5px; color: var(--text-3);
+    font-family: var(--fm); font-size: 10.5px;
+    color: var(--text-3); font-weight: 400;
     letter-spacing: 0.04em;
+    padding-left: 16px;  /* align with label text past the chevron */
   }
   .table.ledger .detail-inner .dt-closing {
     display: flex; flex-direction: column; align-items: flex-end;
@@ -1050,6 +1069,12 @@
   .table.ledger .detail-inner.state-advance .dt-closing.headline .dt-closing-amount { color: var(--blue); }
   .table.ledger .detail-inner.state-watch   .dt-closing.headline .dt-closing-amount { color: var(--amber); }
 
+  /* Per-FY voucher pane — hidden by default; .open reveals the
+     header row + voucher rows. State persists in the DOM so closing
+     and re-opening the party drawer keeps the FY in the same state. */
+  .table.ledger .detail-inner .fy-pane { display: none; }
+  .table.ledger .detail-inner .fy-pane.open { display: block; }
+
   /* Ledger area inside the drawer — no internal scroll. The page
      scrolls naturally and the column header sticks to viewport below
      the chip bar. */
@@ -1061,7 +1086,7 @@
   .table.ledger .detail-inner .inv-row {
     display: grid;
     grid-template-columns: 76px 110px 112px 1fr 130px;
-    gap: 18px; padding: 10px 12px;
+    gap: 18px; padding: 7px 12px;
     font-family: var(--fm); font-size: 12px;
     color: #4B5563; letter-spacing: 0.02em;
     align-items: baseline;
@@ -1110,7 +1135,7 @@
     border-bottom: 1px solid var(--line);
     font-family: var(--fm); font-size: 9.5px; font-weight: 600;
     color: var(--text-2); letter-spacing: 0.14em; text-transform: uppercase;
-    padding: 10px 14px;
+    padding: 8px 14px;
   }
   .table.ledger .detail-inner .inv-header > span { text-align: left; }
   .table.ledger .detail-inner .inv-header > span:nth-child(2),
@@ -18607,67 +18632,89 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       else if (oldest > 30)         outState = 'state-watch';
       inner.classList.add(outState);
 
-      // Build two parallel stacks: LEFT (year labels + sub) and RIGHT
-       // (closing labels + amounts). Same item count keeps them paired.
+      // Current FY = latest non-empty. Defaults to expanded; previous
+      // FYs render collapsed. FY 24-25 is informational (carry-forward
+      // only, no voucher detail) so it has no chevron and no pane.
+      const currentFy = fy26.length ? '26-27' : (fy25.length ? '25-26' : null);
+
+      // Running balance flows chronologically across FYs — split into
+      // per-FY voucher arrays but keep the cursor continuous.
+      const opt = { running: bf24 };
+      const fy25Rows = fy25.map(t => vRow(t, opt)).join('');
+      const fy26Rows = fy26.map(t => vRow(t, opt)).join('');
+
       const leftBlocks = [];
       const rightBlocks = [];
-      function pushPair(label, sub, closingLabel, amount, isHeadline) {
-        leftBlocks.push(
-          `<div class="dt-block">`
-          + `<div class="dt-label">${esc(label)}</div>`
-          + (sub ? `<div class="dt-sub">${esc(sub)}</div>` : '')
-          + `</div>`
-        );
-        rightBlocks.push(
-          `<div class="dt-closing${isHeadline ? ' headline' : ''}">`
-          + `<div class="dt-closing-label">${esc(closingLabel)}</div>`
-          + `<div class="dt-closing-amount">${fmtAmt(amount)}</div>`
-          + `</div>`
-        );
+
+      function leftBlock(label, sub, fyKey, expandable, isOpen) {
+        const chev = expandable
+          ? `<span class="fy-chev">${isOpen ? '▾' : '▸'}</span>`
+          : `<span class="fy-chev fy-chev-blank"></span>`;
+        const cls = 'dt-block'
+          + (expandable ? ' clickable' : '')
+          + (isOpen ? ' open' : '');
+        const attr = expandable ? ` data-fy="${esc(fyKey)}"` : '';
+        return `<div class="${cls}"${attr}>`
+             + `<div class="dt-label">${chev}<span class="dt-label-text">${esc(label)}</span></div>`
+             + (sub ? `<div class="dt-sub">${esc(sub)}</div>` : '')
+             + `</div>`;
       }
+      function rightBlock(closingLabel, amount, isHeadline) {
+        return `<div class="dt-closing${isHeadline ? ' headline' : ''}">`
+             + `<div class="dt-closing-label">${esc(closingLabel)}</div>`
+             + `<div class="dt-closing-amount">${fmtAmt(amount)}</div>`
+             + `</div>`;
+      }
+
       if (Math.abs(bf24) > 0.5) {
-        pushPair(
+        leftBlocks.push(leftBlock(
           'FY 24-25 (carry forward)',
           'Closing balance as on 31 Mar 2025',
-          'Closing', bf24, false
-        );
+          '24-25', false, false
+        ));
+        rightBlocks.push(rightBlock('Closing', bf24, false));
       }
       if (fy25.length) {
+        const isOpen = currentFy === '25-26';
         const billed = fy25.reduce((a,t)=>a+(t.dr||0),0);
         const recv   = fy25.reduce((a,t)=>a+(t.cr||0),0);
-        pushPair(
+        leftBlocks.push(leftBlock(
           `FY 25-26 · ${fy25.length} voucher${fy25.length!==1?'s':''}`,
           `Billed ${fmtShort(billed)} · Received ${fmtShort(recv)}`,
-          'Closing', op, false
-        );
+          '25-26', true, isOpen
+        ));
+        rightBlocks.push(rightBlock('Closing', op, false));
       }
       if (fy26.length) {
+        const isOpen = currentFy === '26-27';
         const billed = fy26.reduce((a,t)=>a+(t.dr||0),0);
         const recv   = fy26.reduce((a,t)=>a+(t.cr||0),0);
-        pushPair(
+        leftBlocks.push(leftBlock(
           `FY 26-27 · ${fy26.length} voucher${fy26.length!==1?'s':''}`,
           `Billed ${fmtShort(billed)} · Received ${fmtShort(recv)}`,
-          'Current outstanding', out, true
-        );
+          '26-27', true, isOpen
+        ));
+        rightBlocks.push(rightBlock('Current outstanding', out, true));
       }
 
-      // Single ledger — FY 25-26 then FY 26-27, chronological; running
-      // balance flows from the FY 24-25 carry-forward.
-      const opt = { running: bf24 };
-      const voucherRows = [...fy25, ...fy26].map(t => vRow(t, opt)).join('');
-
-      const ledger = voucherRows
-        ? `<div class="drawer-ledger">`
-          + `<div class="inv-row inv-header">`
-          +   `<span>Date</span>`
-          +   `<span>Type</span>`
-          +   `<span>Vch No</span>`
-          +   `<span class="hdr-r">Amount</span>`
-          +   `<span class="hdr-r">Running Balance</span>`
-          + `</div>`
-          + voucherRows
-          + `</div>`
-        : '';
+      // Per-FY voucher pane. Visibility controlled by the .open class
+      // — toggled by clicking the matching left block.
+      function pane(fyKey, rowsHtml, isOpen) {
+        if (!rowsHtml) return '';
+        return `<div class="fy-pane${isOpen ? ' open' : ''}" data-fy="${esc(fyKey)}">`
+             + `<div class="inv-row inv-header">`
+             +   `<span>Date</span>`
+             +   `<span>Type</span>`
+             +   `<span>Vch No</span>`
+             +   `<span class="hdr-r">Amount</span>`
+             +   `<span class="hdr-r">Running Balance</span>`
+             + `</div>`
+             + rowsHtml
+             + `</div>`;
+      }
+      const ledger =
+        pane('25-26', fy25Rows, currentFy === '25-26') +
+        pane('26-27', fy26Rows, currentFy === '26-27');
 
       inner.innerHTML =
         `<div class="drawer-card">`
@@ -18675,7 +18722,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         +   `<div class="drawer-left">${leftBlocks.join('')}</div>`
         +   `<div class="drawer-right">${rightBlocks.join('')}</div>`
         + `</div>`
-        + ledger
+        + (ledger ? `<div class="drawer-ledger">${ledger}</div>` : '')
         + `</div>`;
       inner.dataset.loaded = '1';
     }
@@ -18929,6 +18976,27 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         else loadData().then(() => renderFromCache(inner, row.dataset.pid));
       });
     });
+
+    // Delegated FY-block toggle — clicking a left-side FY block
+    // expands/collapses just its voucher pane below. State lives in
+    // the DOM (.open class), so it survives the drawer being closed
+    // and re-opened.
+    const ledgerTbl = document.querySelector('table.ledger');
+    if (ledgerTbl) {
+      ledgerTbl.addEventListener('click', (e) => {
+        const block = e.target.closest('.dt-block.clickable');
+        if (!block) return;
+        e.stopPropagation();
+        const drawer = block.closest('.detail-inner');
+        if (!drawer) return;
+        const fy = block.dataset.fy;
+        const isOpen = block.classList.toggle('open');
+        const chev = block.querySelector('.fy-chev');
+        if (chev) chev.textContent = isOpen ? '▾' : '▸';
+        const targetPane = drawer.querySelector(`.fy-pane[data-fy="${fy}"]`);
+        if (targetPane) targetPane.classList.toggle('open', isOpen);
+      });
+    }
   })();
 
   // ── Receivables: ledger filter (chips + search) ────────────
