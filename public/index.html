@@ -981,6 +981,8 @@
   }
   .table.ledger .detail-inner {
     padding: 22px 28px 24px 64px;
+    max-width: 920px;       /* cap so closing amounts don't drift to the right edge of a 1200 px table */
+    box-sizing: border-box;
   }
 
   /* Voucher row — Date · Type · Voucher · Amount · Running Balance */
