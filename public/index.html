@@ -1193,6 +1193,76 @@
     padding-left: 14px; padding-right: 14px;
   }
 
+  /* === Drawer footer: year checkboxes + Download statement PDF === */
+  .table.ledger .detail-inner .drawer-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 18px;
+    padding: 12px 18px 14px;
+    border-top: 1px solid var(--line);
+    background: var(--surface);
+    flex-wrap: wrap;
+  }
+  .table.ledger .detail-inner .dl-years {
+    display: flex; gap: 14px; flex-wrap: wrap;
+  }
+  .table.ledger .detail-inner .dl-year {
+    display: inline-flex; align-items: center; gap: 7px;
+    cursor: pointer;
+    font-family: var(--fm); font-size: 10.5px;
+    color: var(--text-2); letter-spacing: 0.06em; text-transform: uppercase;
+    user-select: none;
+    padding: 4px 2px;
+  }
+  .table.ledger .detail-inner .dl-year input[type="checkbox"] {
+    appearance: none; -webkit-appearance: none;
+    width: 13px; height: 13px; margin: 0;
+    border: 1px solid var(--line-3);
+    border-radius: 3px;
+    background: transparent;
+    cursor: pointer;
+    position: relative;
+    transition: background 120ms ease, border-color 120ms ease;
+  }
+  .table.ledger .detail-inner .dl-year input[type="checkbox"]:checked {
+    background: var(--emerald);
+    border-color: var(--emerald);
+  }
+  .table.ledger .detail-inner .dl-year input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 3px; top: 0px;
+    width: 4px; height: 8px;
+    border: solid #0B1220;
+    border-width: 0 1.6px 1.6px 0;
+    transform: rotate(45deg);
+  }
+  .table.ledger .detail-inner .dl-year:hover input[type="checkbox"]:not(:checked) {
+    border-color: var(--text-2);
+  }
+  .table.ledger .detail-inner .dl-year input[type="checkbox"]:checked + span {
+    color: var(--text);
+  }
+  .table.ledger .detail-inner .dl-btn {
+    font-family: var(--fm); font-size: 11px; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text);
+    background: rgba(78,222,163,0.10);
+    border: 1px solid rgba(78,222,163,0.40);
+    padding: 9px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+  }
+  .table.ledger .detail-inner .dl-btn:hover {
+    background: rgba(78,222,163,0.18);
+    border-color: var(--emerald);
+    color: var(--emerald);
+  }
+  .table.ledger .detail-inner .dl-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
   /* Activity dot — small leading marker inside each party row's secondary line.
      Emerald = recent receipt (last 30d), muted slate = stale or no record. */
   .table.ledger tr.party-r .sec .act-dot {
@@ -1981,6 +2051,8 @@
     box-shadow: 0 1px 0 var(--line-2);
   }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js" defer></script>
 </head>
 <body>
 
@@ -18764,8 +18836,27 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         ));
       }
 
+      // Year-selection checkboxes for the statement export. Only show
+      // a checkbox for a year that actually has data; default-check the
+      // current FY so a single click is sufficient for the common case.
+      const pid = inner.closest('tr')?.previousElementSibling?.dataset?.pid || '';
+      const yearOpts = [];
+      if (Math.abs(bf24) > 0.5) yearOpts.push({ fy: '24-25', label: 'FY 24-25' });
+      if (fy25.length)          yearOpts.push({ fy: '25-26', label: 'FY 25-26' });
+      if (fy26.length)          yearOpts.push({ fy: '26-27', label: 'FY 26-27' });
+      const yearChecks = yearOpts.map(y => {
+        const checked = (y.fy === currentFy) ? ' checked' : '';
+        return `<label class="dl-year"><input type="checkbox" data-fy="${y.fy}"${checked}><span>${y.label}</span></label>`;
+      }).join('');
+      const footer = yearOpts.length
+        ? `<div class="drawer-footer">`
+          + `<div class="dl-years">${yearChecks}</div>`
+          + `<button type="button" class="dl-btn" data-pid="${esc(pid)}">Download statement PDF</button>`
+          + `</div>`
+        : '';
+
       inner.innerHTML =
-        `<div class="drawer-card">${sections.join('')}</div>`;
+        `<div class="drawer-card">${sections.join('')}${footer}</div>`;
       inner.dataset.loaded = '1';
     }
 
@@ -19026,6 +19117,26 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const ledgerTbl = document.querySelector('table.ledger');
     if (ledgerTbl) {
       ledgerTbl.addEventListener('click', (e) => {
+        // Statement PDF download — must run before stopPropagation
+        // checks below so a click inside the footer never toggles the
+        // party drawer.
+        const dlBtn = e.target.closest('.dl-btn');
+        if (dlBtn) {
+          e.stopPropagation();
+          const pid = dlBtn.dataset.pid;
+          const footer = dlBtn.closest('.drawer-footer');
+          const selected = Array.from(footer.querySelectorAll('input[type="checkbox"]:checked'))
+            .map(cb => cb.dataset.fy);
+          if (!selected.length) return;
+          generateStatementPDF(pid, selected, dlBtn);
+          return;
+        }
+        // Checkbox clicks inside the footer — never bubble up to the
+        // party-row toggle.
+        if (e.target.closest('.drawer-footer')) {
+          e.stopPropagation();
+          return;
+        }
         const head = e.target.closest('.fy-head.clickable');
         if (!head) return;
         e.stopPropagation();
@@ -19037,6 +19148,335 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         const body = section.querySelector(':scope > .fy-body');
         if (body) body.classList.toggle('open', isOpen);
       });
+    }
+
+    // ── Statement PDF generation ──────────────────────────────
+    // A professional account-statement layout: brand header, party
+    // identity, per-FY voucher table, closing per year, and a final
+    // "Current Outstanding" footer that mirrors what the drawer shows.
+    function generateStatementPDF(pid, selectedFYs, btnEl) {
+      const p = dataCache && dataCache[pid];
+      if (!p || !window.jspdf) return;
+      const { jsPDF } = window.jspdf;
+
+      // Disable the button briefly so a double-click can't queue two
+      // exports while jsPDF builds the doc.
+      if (btnEl) {
+        btnEl.disabled = true;
+        btnEl.textContent = 'Generating…';
+      }
+      try {
+        buildPDF(p, selectedFYs);
+      } finally {
+        if (btnEl) {
+          btnEl.disabled = false;
+          btnEl.textContent = 'Download statement PDF';
+        }
+      }
+    }
+
+    // Formatter — Indian-style commas, no symbol (the caller decides
+    // where ₹ goes). Negatives keep their minus sign for the table cell.
+    function inrNumber(n) {
+      const a = Math.abs(Math.round(n));
+      let s = String(a);
+      if (s.length <= 3) return (n < 0 ? '-' : '') + s;
+      const last3 = s.slice(-3);
+      let head = s.slice(0, -3);
+      head = head.replace(/(\d)(?=(\d\d)+$)/g, '$1,');
+      return (n < 0 ? '-' : '') + head + ',' + last3;
+    }
+    function inrAmt(n) {
+      return (n < 0 ? '-' : '') + 'Rs. ' + inrNumber(Math.abs(n));
+    }
+
+    function buildPDF(p, selectedFYs) {
+      const doc = new (window.jspdf.jsPDF)({ unit: 'pt', format: 'a4' });
+      const W = doc.internal.pageSize.getWidth();   // 595
+      const H = doc.internal.pageSize.getHeight();  // 842
+      const MARGIN = 48;
+      const CONTENT_W = W - MARGIN * 2;
+      const RIGHT_X = W - MARGIN;
+
+      // Statement metadata
+      const today = new Date(2026, 4, 27);  // 27 May 2026 (cockpit "today")
+      const todayLong = today.toLocaleDateString('en-IN', {
+        day: '2-digit', month: 'long', year: 'numeric'
+      });
+      const generatedAt = today.toLocaleString('en-IN', {
+        day: '2-digit', month: 'short', year: 'numeric',
+        hour: 'numeric', minute: '2-digit', hour12: true
+      });
+
+      // Selected FYs ordered chronologically
+      const wants24 = selectedFYs.includes('24-25');
+      const opFYs = ['25-26', '26-27'].filter(fy => selectedFYs.includes(fy));
+
+      // Page-header drawer (rendered on every page via autotable's
+      // didDrawPage hook). Holds the brand bar + party identity.
+      function drawHeader(data) {
+        const y0 = MARGIN;
+        // Brand
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+        doc.setTextColor(120, 120, 120);
+        doc.text('DOT.ATLAS', MARGIN, y0 + 4);
+        doc.setFontSize(8.5);
+        doc.text('Synced from Tally', RIGHT_X, y0 + 4, { align: 'right' });
+        // Title
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(20);
+        doc.setTextColor(11, 18, 32);
+        doc.text('Receivables Statement', MARGIN, y0 + 32);
+        // Party + meta
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(13);
+        doc.setTextColor(11, 18, 32);
+        doc.text(p.name, MARGIN, y0 + 58);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9.5);
+        doc.setTextColor(95, 105, 120);
+        doc.text(`Statement as on ${todayLong}`, MARGIN, y0 + 74);
+        doc.text('Generated from dot.atlas', MARGIN, y0 + 88);
+        // Hairline under header
+        doc.setDrawColor(225, 228, 232);
+        doc.setLineWidth(0.6);
+        doc.line(MARGIN, y0 + 102, RIGHT_X, y0 + 102);
+      }
+
+      // Page-footer drawer — page numbers + generated stamp
+      function drawFooter(data) {
+        const y = H - MARGIN + 20;
+        doc.setDrawColor(225, 228, 232);
+        doc.setLineWidth(0.5);
+        doc.line(MARGIN, y - 18, RIGHT_X, y - 18);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(140, 148, 160);
+        doc.text('Generated from dot.atlas · Synced from Tally', MARGIN, y);
+        const pageNum = data.pageNumber;
+        const total = doc.internal.getNumberOfPages();
+        doc.text(`Generated on ${generatedAt}`, W / 2, y, { align: 'center' });
+        doc.text(`Page ${pageNum} of ${total}`, RIGHT_X, y, { align: 'right' });
+      }
+
+      // Cursor tracks the current vertical position; autotable updates
+      // it via finalY. Plain text sections advance it manually.
+      let cursorY = MARGIN + 120;  // below header band
+
+      // ── Optional carry-forward block ────────────────────────
+      if (wants24 && Math.abs(p.bf24) > 0.5) {
+        doc.autoTable({
+          startY: cursorY,
+          margin: { left: MARGIN, right: MARGIN },
+          theme: 'plain',
+          tableWidth: CONTENT_W,
+          body: [[
+            { content: 'Opening balance brought forward', styles: { fontStyle: 'bold', fontSize: 10.5, textColor: [11,18,32] } },
+            { content: inrAmt(p.bf24), styles: { halign: 'right', fontStyle: 'bold', fontSize: 11, textColor: p.bf24 < 0 ? [200,40,60] : [11,18,32] } }
+          ], [
+            { content: '(as on 31 Mar 2025)', styles: { textColor: [120,128,140], fontSize: 9 } },
+            { content: '', styles: {} }
+          ]],
+          didDrawPage: (data) => { drawHeader(data); drawFooter(data); }
+        });
+        cursorY = doc.lastAutoTable.finalY + 16;
+        // Divider
+        doc.setDrawColor(225, 228, 232);
+        doc.setLineWidth(0.5);
+        doc.line(MARGIN, cursorY - 8, RIGHT_X, cursorY - 8);
+      }
+
+      // ── Operational FY tables ───────────────────────────────
+      // Running balance flows from the earliest selected FY's known
+      // opening. Each FY ends with its own "Closing balance" line.
+      let running = (opFYs[0] === '25-26')
+        ? p.bf24
+        : (opFYs[0] === '26-27' ? p.opening : 0);
+
+      const fyMeta = {
+        '25-26': { vouchers: p.fy25 || [], label: 'FY 25-26', closeLabel: 'Closing balance as on 31 Mar 2026', closeAmt: p.opening },
+        '26-27': { vouchers: p.fy26 || [], label: 'FY 26-27', closeLabel: 'Closing balance as on ' + todayLong, closeAmt: p.outstanding }
+      };
+
+      // Aggregate summary across selected operational FYs
+      let totalBilled = 0, totalReceived = 0;
+
+      opFYs.forEach((fy, idx) => {
+        const meta = fyMeta[fy];
+        if (!meta.vouchers.length) return;
+
+        // FY heading
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11.5);
+        doc.setTextColor(11, 18, 32);
+        doc.text(meta.label, MARGIN, cursorY);
+        cursorY += 6;
+
+        // Build voucher rows. Running balance accumulates here.
+        const body = meta.vouchers.map(v => {
+          const dr = v.dr || 0, cr = v.cr || 0;
+          running += dr - cr;
+          if (dr > 0) totalBilled += dr;
+          if (cr > 0) totalReceived += cr;
+          const amt = dr > 0 ? '+' + inrAmt(dr) : '-' + inrAmt(cr);
+          const amtColor = dr > 0 ? [11,18,32] : [0, 132, 92];
+          return [
+            { content: v.d, styles: { textColor: [80, 88, 100] } },
+            { content: 'Vch ' + (v.v || ''), styles: { textColor: [11, 18, 32] } },
+            { content: (v.t || '').toString(), styles: { textColor: [80, 88, 100] } },
+            { content: amt, styles: { halign: 'right', textColor: amtColor, fontStyle: 'bold' } },
+            { content: (running < 0 ? '-' : '') + 'Rs. ' + inrNumber(Math.abs(running)),
+              styles: { halign: 'right', textColor: running < 0 ? [200,40,60] : [80,88,100] } }
+          ];
+        });
+
+        doc.autoTable({
+          startY: cursorY,
+          margin: { left: MARGIN, right: MARGIN },
+          tableWidth: CONTENT_W,
+          theme: 'plain',
+          head: [[
+            { content: 'Date',            styles: { halign: 'left' } },
+            { content: 'Voucher',         styles: { halign: 'left' } },
+            { content: 'Type',            styles: { halign: 'left' } },
+            { content: 'Amount',          styles: { halign: 'right' } },
+            { content: 'Running balance', styles: { halign: 'right' } }
+          ]],
+          headStyles: {
+            fillColor: [245, 247, 250],
+            textColor: [80, 88, 100],
+            fontStyle: 'bold',
+            fontSize: 8.5,
+            cellPadding: { top: 6, right: 8, bottom: 6, left: 8 },
+            lineColor: [225, 228, 232],
+            lineWidth: { bottom: 0.5 }
+          },
+          bodyStyles: {
+            fontSize: 9,
+            cellPadding: { top: 5, right: 8, bottom: 5, left: 8 },
+            textColor: [11, 18, 32],
+            lineColor: [240, 242, 246],
+            lineWidth: { bottom: 0.3 }
+          },
+          alternateRowStyles: { fillColor: [250, 251, 253] },
+          columnStyles: {
+            0: { cellWidth: 70  },
+            1: { cellWidth: 95  },
+            2: { cellWidth: 75  },
+            3: { cellWidth: 120, halign: 'right' },
+            4: { cellWidth: CONTENT_W - 70 - 95 - 75 - 120, halign: 'right' }
+          },
+          body,
+          didDrawPage: (data) => { drawHeader(data); drawFooter(data); }
+        });
+        cursorY = doc.lastAutoTable.finalY;
+
+        // Closing line for this FY (except the last operational FY,
+        // which is replaced by the "Current Outstanding" emphasis).
+        const isLast = (idx === opFYs.length - 1);
+        if (!isLast) {
+          doc.autoTable({
+            startY: cursorY + 4,
+            margin: { left: MARGIN, right: MARGIN },
+            tableWidth: CONTENT_W,
+            theme: 'plain',
+            body: [[
+              { content: meta.closeLabel, styles: { fontStyle: 'bold', fontSize: 10, textColor: [11, 18, 32] } },
+              { content: (meta.closeAmt < 0 ? '-' : '') + 'Rs. ' + inrNumber(Math.abs(meta.closeAmt)),
+                styles: { halign: 'right', fontStyle: 'bold', fontSize: 10.5, textColor: meta.closeAmt < 0 ? [200,40,60] : [11,18,32] } }
+            ]],
+            didDrawPage: (data) => { drawHeader(data); drawFooter(data); }
+          });
+          cursorY = doc.lastAutoTable.finalY + 14;
+          // Section divider
+          doc.setDrawColor(225, 228, 232);
+          doc.setLineWidth(0.5);
+          doc.line(MARGIN, cursorY - 6, RIGHT_X, cursorY - 6);
+          cursorY += 4;
+        }
+      });
+
+      // ── Final balance block (current outstanding OR historical
+      // closing, depending on which FYs the user selected) ─────
+      // If the live FY (26-27) is in the selection, the bottom line
+      // is "Current Outstanding"; otherwise it's the last selected
+      // FY's closing balance, labelled with the relevant cut-off date.
+      let finalLabel, finalAmt;
+      if (opFYs.includes('26-27')) {
+        finalLabel = 'CURRENT OUTSTANDING';
+        finalAmt   = p.outstanding;
+      } else if (opFYs.includes('25-26')) {
+        finalLabel = 'CLOSING BALANCE AS ON 31 MAR 2026';
+        finalAmt   = p.opening;
+      } else {
+        // Only carry-forward selected
+        finalLabel = 'CLOSING BALANCE AS ON 31 MAR 2025';
+        finalAmt   = p.bf24;
+      }
+
+      cursorY += 6;
+      doc.setDrawColor(11, 18, 32);
+      doc.setLineWidth(1);
+      doc.line(MARGIN, cursorY, RIGHT_X, cursorY);
+      cursorY += 22;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(11, 18, 32);
+      doc.text(finalLabel, MARGIN, cursorY);
+      doc.setFontSize(16);
+      const outAmt = (finalAmt < 0 ? '-' : '') + 'Rs. ' + inrNumber(Math.abs(finalAmt));
+      doc.setTextColor(finalAmt < 0 ? 200 : 11, finalAmt < 0 ? 40 : 18, finalAmt < 0 ? 60 : 32);
+      doc.text(outAmt, RIGHT_X, cursorY + 2, { align: 'right' });
+      cursorY += 18;
+      doc.setDrawColor(225, 228, 232);
+      doc.setLineWidth(0.5);
+      doc.line(MARGIN, cursorY, RIGHT_X, cursorY);
+      cursorY += 22;
+
+      // ── Summary block ───────────────────────────────────────
+      const outstanding = finalAmt;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(11, 18, 32);
+      doc.text('Summary', MARGIN, cursorY);
+      cursorY += 14;
+      doc.autoTable({
+        startY: cursorY,
+        margin: { left: MARGIN, right: MARGIN },
+        tableWidth: CONTENT_W,
+        theme: 'plain',
+        body: [
+          ['Total billed',    inrAmt(totalBilled)],
+          ['Total received',  inrAmt(totalReceived)],
+          ['Outstanding',     inrAmt(outstanding)]
+        ],
+        styles: {
+          fontSize: 9.5,
+          cellPadding: { top: 4, right: 8, bottom: 4, left: 0 },
+          lineColor: [240, 242, 246],
+          lineWidth: { bottom: 0.3 }
+        },
+        columnStyles: {
+          0: { textColor: [80, 88, 100] },
+          1: { halign: 'right', textColor: [11, 18, 32], fontStyle: 'bold' }
+        },
+        didParseCell: (data) => {
+          // Outstanding row gets a slightly heavier treatment
+          if (data.row.index === 2 && data.column.index === 1) {
+            data.cell.styles.fontSize = 10.5;
+          }
+        },
+        didDrawPage: (data) => { drawHeader(data); drawFooter(data); }
+      });
+
+      // Trigger footer/header on first page (in case no autotable was
+      // emitted before the cursor reached the end — defensive).
+      drawHeader({ pageNumber: 1 });
+      drawFooter({ pageNumber: 1 });
+
+      const slug = String(p.name || 'party').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_|_$/g, '');
+      doc.save(`${slug}_Statement_${todayLong.replace(/\s+/g, '_')}.pdf`);
     }
   })();
 
