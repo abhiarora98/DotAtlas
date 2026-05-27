@@ -996,56 +996,59 @@
     background: var(--surface);
     /* No overflow:hidden — sticky descendants need a non-clipping ancestor */
   }
-  .table.ledger .detail-inner .drawer-summary {
+  /* Drawer top — contained header block. LEFT bounded to 520px so FY
+     labels read as a column, not a stretched grid; RIGHT a fixed 220px
+     stack of closing amounts. Ledger sits below this header. */
+  .table.ledger .detail-inner .drawer-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 32px;
+    padding: 16px 18px 14px;
     border-bottom: 1px solid var(--line);
   }
-  /* Summary stack — label/sub on the left aligned with the ledger
-     Date column edge; closing block right-anchored to the Outstanding
-     column edge above. */
-  .table.ledger .detail-inner .ds-row {
-    display: grid;
-    grid-template-columns: 1fr 200px;
-    align-items: center;
-    padding: 12px 0 12px 14px;
-    border-bottom: 1px solid var(--line);
+  .table.ledger .detail-inner .drawer-left {
+    max-width: 520px;
+    display: flex; flex-direction: column; gap: 10px;
+    min-width: 0;
   }
-  .table.ledger .detail-inner .ds-row:last-child { border-bottom: 0; }
-  /* Label + sub inline so the whole left side reads as one line:
-     "FY 25-26 · 39 vouchers   Billed ... · Received ..." */
-  .table.ledger .detail-inner .ds-info {
-    display: flex; flex-direction: row; align-items: baseline;
-    gap: 14px; min-width: 0; flex-wrap: wrap;
+  .table.ledger .detail-inner .drawer-right {
+    width: 220px;
+    display: flex; flex-direction: column; gap: 10px;
+    text-align: right;
+    flex-shrink: 0;
   }
-  .table.ledger .detail-inner .ds-label {
+  .table.ledger .detail-inner .dt-block {
+    display: flex; flex-direction: column; gap: 3px; min-width: 0;
+  }
+  .table.ledger .detail-inner .dt-label {
     font-family: var(--fb); font-size: 13.5px; font-weight: 500;
     color: var(--text); letter-spacing: -0.005em;
   }
-  .table.ledger .detail-inner .ds-sub {
+  .table.ledger .detail-inner .dt-sub {
     font-family: var(--fm); font-size: 10.5px; color: var(--text-3);
     letter-spacing: 0.04em;
   }
-  .table.ledger .detail-inner .ds-closing {
+  .table.ledger .detail-inner .dt-closing {
     display: flex; flex-direction: column; align-items: flex-end;
-    gap: 2px; text-align: right; white-space: nowrap;
+    gap: 2px; white-space: nowrap;
   }
-  .table.ledger .detail-inner .ds-closing-label {
+  .table.ledger .detail-inner .dt-closing-label {
     font-family: var(--fm); font-size: 10px; color: var(--text-3);
     letter-spacing: 0.08em; text-transform: uppercase;
   }
-  .table.ledger .detail-inner .ds-closing-amount {
+  .table.ledger .detail-inner .dt-closing-amount {
     font-family: var(--fd); font-size: 15px; font-weight: 600;
     color: var(--text); letter-spacing: -0.01em;
     font-variant-numeric: tabular-nums;
   }
-  /* Headline (current FY) — slightly heavier than closing rows but
-     not loud; the party-row above already carries the headline. */
-  .table.ledger .detail-inner .ds-row.headline .ds-closing-amount {
+  .table.ledger .detail-inner .dt-closing.headline .dt-closing-amount {
     font-size: 16px; font-weight: 600; letter-spacing: -0.018em;
   }
-  .table.ledger .detail-inner.state-overdue .ds-row.headline .ds-closing-amount { color: var(--rose); }
-  .table.ledger .detail-inner.state-paid    .ds-row.headline .ds-closing-amount { color: var(--emerald); }
-  .table.ledger .detail-inner.state-advance .ds-row.headline .ds-closing-amount { color: var(--blue); }
-  .table.ledger .detail-inner.state-watch   .ds-row.headline .ds-closing-amount { color: var(--amber); }
+  .table.ledger .detail-inner.state-overdue .dt-closing.headline .dt-closing-amount { color: var(--rose); }
+  .table.ledger .detail-inner.state-paid    .dt-closing.headline .dt-closing-amount { color: var(--emerald); }
+  .table.ledger .detail-inner.state-advance .dt-closing.headline .dt-closing-amount { color: var(--blue); }
+  .table.ledger .detail-inner.state-watch   .dt-closing.headline .dt-closing-amount { color: var(--amber); }
 
   /* Ledger area inside the drawer — no internal scroll. The page
      scrolls naturally and the column header sticks to viewport below
@@ -18604,43 +18607,48 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       else if (oldest > 30)         outState = 'state-watch';
       inner.classList.add(outState);
 
-      function summaryRow(label, sub, closingLabel, closingAmt, isHeadline) {
-        return `<div class="ds-row${isHeadline ? ' headline' : ''}">`
-             + `<div class="ds-info">`
-             + `<span class="ds-label">${esc(label)}</span>`
-             + (sub ? `<span class="ds-sub">${esc(sub)}</span>` : '')
-             + `</div>`
-             + `<div class="ds-closing">`
-             + `<span class="ds-closing-label">${esc(closingLabel)}</span>`
-             + `<span class="ds-closing-amount">${fmtAmt(closingAmt)}</span>`
-             + `</div>`
-             + `</div>`;
+      // Build two parallel stacks: LEFT (year labels + sub) and RIGHT
+       // (closing labels + amounts). Same item count keeps them paired.
+      const leftBlocks = [];
+      const rightBlocks = [];
+      function pushPair(label, sub, closingLabel, amount, isHeadline) {
+        leftBlocks.push(
+          `<div class="dt-block">`
+          + `<div class="dt-label">${esc(label)}</div>`
+          + (sub ? `<div class="dt-sub">${esc(sub)}</div>` : '')
+          + `</div>`
+        );
+        rightBlocks.push(
+          `<div class="dt-closing${isHeadline ? ' headline' : ''}">`
+          + `<div class="dt-closing-label">${esc(closingLabel)}</div>`
+          + `<div class="dt-closing-amount">${fmtAmt(amount)}</div>`
+          + `</div>`
+        );
       }
-      const summary = [];
       if (Math.abs(bf24) > 0.5) {
-        summary.push(summaryRow(
+        pushPair(
           'FY 24-25 (carry forward)',
           'Closing balance as on 31 Mar 2025',
           'Closing', bf24, false
-        ));
+        );
       }
       if (fy25.length) {
         const billed = fy25.reduce((a,t)=>a+(t.dr||0),0);
         const recv   = fy25.reduce((a,t)=>a+(t.cr||0),0);
-        summary.push(summaryRow(
+        pushPair(
           `FY 25-26 · ${fy25.length} voucher${fy25.length!==1?'s':''}`,
           `Billed ${fmtShort(billed)} · Received ${fmtShort(recv)}`,
           'Closing', op, false
-        ));
+        );
       }
       if (fy26.length) {
         const billed = fy26.reduce((a,t)=>a+(t.dr||0),0);
         const recv   = fy26.reduce((a,t)=>a+(t.cr||0),0);
-        summary.push(summaryRow(
+        pushPair(
           `FY 26-27 · ${fy26.length} voucher${fy26.length!==1?'s':''}`,
           `Billed ${fmtShort(billed)} · Received ${fmtShort(recv)}`,
           'Current outstanding', out, true
-        ));
+        );
       }
 
       // Single ledger — FY 25-26 then FY 26-27, chronological; running
@@ -18663,7 +18671,10 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 
       inner.innerHTML =
         `<div class="drawer-card">`
-        + `<div class="drawer-summary">${summary.join('')}</div>`
+        + `<div class="drawer-top">`
+        +   `<div class="drawer-left">${leftBlocks.join('')}</div>`
+        +   `<div class="drawer-right">${rightBlocks.join('')}</div>`
+        + `</div>`
         + ledger
         + `</div>`;
       inner.dataset.loaded = '1';
