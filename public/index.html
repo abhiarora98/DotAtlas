@@ -979,9 +979,11 @@
     color: #0B1220;
     border-bottom: 1px solid rgba(0,0,0,0.10);
   }
+  /* Drawer = full table width, statement-style. No horizontal padding
+     so content edges sit on the same x as the party row's leftmost
+     and rightmost cells above. */
   .table.ledger .detail-inner {
-    padding: 22px 28px 24px 64px;
-    max-width: 920px;       /* cap so closing amounts don't drift to the right edge of a 1200 px table */
+    padding: 14px 0 18px 0;
     box-sizing: border-box;
   }
 
@@ -1030,15 +1032,15 @@
   }
 
   /* === Year row — one clean line per financial year ===
-     [chevron] · [label + subtitle stack] · ... · [closing amount]
-     The carry-forward variant hides the chevron and isn't clickable. */
+     Grid lines: [chev 22px] [info 1fr] [closing 170px ≈ Outstanding col].
+     The carry-forward variant hides the chevron. */
   .table.ledger .detail-inner .fy-row {
     display: grid;
-    grid-template-columns: 22px 1fr;
+    grid-template-columns: 22px 1fr 170px;
     column-gap: 16px;
-    align-items: start;
+    align-items: center;
     width: 100%;
-    padding: 16px 4px;
+    padding: 14px 0 14px 18px;     /* zero right padding so the closing column right edge lands on the Outstanding column edge above */
     border-bottom: 1px solid #E6E8EE;
     background: transparent;
     border-left: 0; border-right: 0; border-top: 0;
@@ -1059,10 +1061,10 @@
     transform: rotate(90deg); color: #0B1220;
   }
   .table.ledger .detail-inner .fy-row.carry-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 170px;
   }
   .table.ledger .detail-inner .fy-info {
-    display: flex; flex-direction: column; gap: 5px; min-width: 0;
+    display: flex; flex-direction: column; gap: 4px; min-width: 0;
   }
   .table.ledger .detail-inner .fy-label {
     font-family: var(--fb); font-size: 13.5px; font-weight: 500;
@@ -1072,14 +1074,11 @@
     font-family: var(--fm); font-size: 10.5px; color: #6B7280;
     letter-spacing: 0.04em;
   }
-  /* Subtitle row carries the Billed/Received summary on the left and the
-     closing block on the right — same line, right-aligned for comparison. */
-  .table.ledger .detail-inner .fy-subtotal {
-    display: flex; align-items: baseline; justify-content: space-between;
-    gap: 24px; flex-wrap: wrap;
-  }
+  /* Closing block — right-aligned in its column. Label sits above the
+     amount so a long label can't push the number around. */
   .table.ledger .detail-inner .fy-closing {
-    display: inline-flex; gap: 10px; align-items: baseline; white-space: nowrap;
+    display: flex; flex-direction: column; align-items: flex-end;
+    gap: 2px; text-align: right; white-space: nowrap;
   }
   .table.ledger .detail-inner .fy-closing-label {
     font-family: var(--fm); font-size: 10.5px; color: #6B7280;
@@ -1090,40 +1089,21 @@
     color: #0B1220; letter-spacing: -0.01em;
     font-variant-numeric: tabular-nums; white-space: nowrap;
   }
-  /* Headline variant — Current outstanding inside the FY 26-27 row.
-     Drops onto its own line below the subtotal, with a hairline
-     divider, a state-colored dot, and a noticeably bigger amount. */
-  .table.ledger .detail-inner .fy-closing.headline {
-    display: flex; align-items: baseline; justify-content: space-between;
-    gap: 14px;
-    margin-top: 12px; padding-top: 12px;
-    border-top: 1px solid #D8DEE8;
-  }
-  .table.ledger .detail-inner .fy-closing.headline .dot {
-    display: inline-block;
-    width: 8px; height: 8px; border-radius: 50%;
-    background: #0B1220;
-    vertical-align: 1px;
-    margin-right: 10px;
-    flex-shrink: 0;
-  }
+  /* Headline variant — Current outstanding for the current FY.
+     Stays in the closing column; bumps label + amount weight so it
+     reads as the headline number. */
   .table.ledger .detail-inner .fy-closing.headline .fy-closing-label {
-    flex: 1;
-    font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase;
+    font-size: 9.5px; letter-spacing: 0.18em; text-transform: uppercase;
     color: #4B5563; font-weight: 600;
   }
   .table.ledger .detail-inner .fy-closing.headline .fy-closing-amount {
-    font-size: 22px; font-weight: 700; letter-spacing: -0.025em;
+    font-size: 19px; font-weight: 700; letter-spacing: -0.025em;
   }
-  /* Outstanding state colors the amount text and the dot to match. */
+  /* Outstanding state colors the headline amount. */
   .table.ledger .detail-inner.state-overdue .fy-closing.headline .fy-closing-amount { color: #C73E5E; }
-  .table.ledger .detail-inner.state-overdue .fy-closing.headline .dot              { background: #C73E5E; box-shadow: 0 0 6px rgba(199,62,94,0.45); }
   .table.ledger .detail-inner.state-paid    .fy-closing.headline .fy-closing-amount { color: #00A572; }
-  .table.ledger .detail-inner.state-paid    .fy-closing.headline .dot              { background: #00A572; box-shadow: 0 0 6px rgba(0,165,114,0.45); }
   .table.ledger .detail-inner.state-advance .fy-closing.headline .fy-closing-amount { color: #00A572; }
-  .table.ledger .detail-inner.state-advance .fy-closing.headline .dot              { background: #00A572; box-shadow: 0 0 6px rgba(0,165,114,0.45); }
   .table.ledger .detail-inner.state-watch   .fy-closing.headline .fy-closing-amount { color: #B45309; }
-  .table.ledger .detail-inner.state-watch   .fy-closing.headline .dot              { background: #B45309; box-shadow: 0 0 6px rgba(180,83,9,0.45); }
 
   /* Year sections — a little more breathing room between blocks. */
   .table.ledger .detail-inner .fy-section { margin: 12px 0; }
@@ -18629,31 +18609,22 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       const rowsHtml = vouchers.map(t => vRow(t, opt)).join('');
       const label = `FY ${esc(fy)} · ${vouchers.length} voucher${vouchers.length!==1?'s':''}`;
       const sub   = `Billed ${fmtShort(billed)} · Received ${fmtShort(recv)}`;
-      // Subtotal line — Billed/Received always; inline closing only for non-headline years.
-      const subtotal = isHeadline
-        ? `<div class="fy-subtotal"><span class="fy-sub">${sub}</span></div>`
-        : `<div class="fy-subtotal"><span class="fy-sub">${sub}</span>`
-          + `<div class="fy-closing">`
-          + `<span class="fy-closing-label">${esc(closingLabel)}</span>`
-          + `<span class="fy-closing-amount">${fmtAmt(closingAmount)}</span>`
-          + `</div></div>`;
-      // Headline gets its own row — thin divider above, colored state dot,
-      // larger amount. Reads as the row the eye must land on.
-      const headline = isHeadline
-        ? `<div class="fy-closing headline">`
-          + `<span class="dot"></span>`
-          + `<span class="fy-closing-label">${esc(closingLabel)}</span>`
-          + `<span class="fy-closing-amount">${fmtAmt(closingAmount)}</span>`
-          + `</div>`
-        : '';
+      // Closing block — sits in its own right-aligned column matching
+      // the table's Outstanding column edge. Headline modifier bumps
+      // the typography for FY 26-27 (current outstanding).
+      const closingHtml =
+        `<div class="fy-closing${isHeadline ? ' headline' : ''}">`
+        + `<span class="fy-closing-label">${esc(closingLabel)}</span>`
+        + `<span class="fy-closing-amount">${fmtAmt(closingAmount)}</span>`
+        + `</div>`;
       return `<div class="fy-section${defaultOpen?' open':''}" data-fy="${esc(fy)}">`
            + `<button type="button" class="fy-row fy-toggle">`
            + `<span class="chev">▸</span>`
            + `<div class="fy-info">`
            + `<span class="fy-label">${label}</span>`
-           + subtotal
-           + headline
+           + `<span class="fy-sub">${sub}</span>`
            + `</div>`
+           + closingHtml
            + `</button>`
            + `<div class="fy-rows">`
            + `<div class="inv-row inv-header">`
@@ -18677,19 +18648,16 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 
       let html = '';
 
-      // FY 24-25 — carry-forward only. Subtitle ("Closing balance as on...")
-      // and amount share the same line for visual consistency with the
-      // active years below.
+      // FY 24-25 — carry-forward only. Subtitle stays inline with label;
+      // amount sits in its own right-aligned column matching Outstanding.
       if (Math.abs(bf24) > 0.5) {
         html += `<div class="fy-row carry-row" data-fy="24-25">`
               + `<div class="fy-info">`
               + `<span class="fy-label">FY 24-25 (carry forward)</span>`
-              + `<div class="fy-subtotal">`
               + `<span class="fy-sub">Closing balance as on 31 Mar 2025</span>`
+              + `</div>`
               + `<div class="fy-closing">`
               + `<span class="fy-closing-amount">${fmtAmt(bf24)}</span>`
-              + `</div>`
-              + `</div>`
               + `</div>`
               + `</div>`;
       }
