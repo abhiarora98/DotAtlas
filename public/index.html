@@ -1003,22 +1003,54 @@
     /* No overflow:hidden — sticky descendants need a non-clipping ancestor */
   }
   /* Each FY is its own self-contained section: head on top, voucher
-     body directly beneath. Sections stack vertically; clicking a head
-     toggles only its own body. */
+     body directly beneath. Sections stack vertically with a stronger
+     divider between them so the timeline reads at a glance. */
   .table.ledger .detail-inner .fy-section {
-    border-bottom: 1px solid var(--line);
+    border-bottom: 1px solid var(--line-2);
   }
   .table.ledger .detail-inner .fy-section:last-child { border-bottom: 0; }
+
+  /* Current FY (latest non-empty) — emphasised as the live row. A
+     brighter top rule (--line-3) separates it from prior-year history;
+     its head gets a soft emerald wash so the eye lands here. */
+  .table.ledger .detail-inner .fy-section.headline {
+    border-top: 1px solid var(--line-3);
+  }
+  .table.ledger .detail-inner .fy-section.headline > .fy-head {
+    background: rgba(78,222,163,0.05);
+  }
+  .table.ledger .detail-inner .fy-section.headline > .fy-head.clickable:hover {
+    background: rgba(78,222,163,0.09);
+  }
+  .table.ledger .detail-inner .fy-section.headline > .fy-head.clickable.open {
+    background: rgba(78,222,163,0.10);
+  }
+
   .table.ledger .detail-inner .fy-head {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     gap: 32px;
-    padding: 14px 18px;
+    padding: 10px 18px;
     width: 100%; box-sizing: border-box;
+    transition: background 120ms ease;
   }
-  .table.ledger .detail-inner .fy-head.clickable { cursor: pointer; }
+  /* Clickable rows get a faint bg tint as the affordance; hover deepens
+     it; the .open state holds a small emerald wash so it reads as live. */
+  .table.ledger .detail-inner .fy-head.clickable {
+    cursor: pointer;
+    background: rgba(255,255,255,0.018);
+  }
+  .table.ledger .detail-inner .fy-head.clickable:hover {
+    background: rgba(255,255,255,0.04);
+  }
   .table.ledger .detail-inner .fy-head.clickable:hover .dt-label-text {
+    color: var(--emerald);
+  }
+  .table.ledger .detail-inner .fy-head.clickable.open {
+    background: rgba(78,222,163,0.05);
+  }
+  .table.ledger .detail-inner .fy-head.clickable.open .fy-chev {
     color: var(--emerald);
   }
   .table.ledger .detail-inner .fy-head-left {
@@ -1034,21 +1066,21 @@
   .table.ledger .detail-inner .dt-label {
     font-family: var(--fb); font-size: 13.5px; font-weight: 600;
     color: var(--text); letter-spacing: -0.005em;
-    display: inline-flex; align-items: baseline; gap: 6px;
+    display: inline-flex; align-items: baseline; gap: 8px;
   }
   .table.ledger .detail-inner .fy-chev {
     display: inline-block;
-    width: 10px; text-align: center;
-    font-size: 10px; line-height: 1;
-    color: var(--text-3);
-    transition: transform 120ms ease;
+    width: 11px; text-align: center;
+    font-size: 11px; line-height: 1;
+    color: var(--text-2);
+    transition: color 120ms ease;
   }
   .table.ledger .detail-inner .fy-chev-blank { color: transparent; }
   .table.ledger .detail-inner .dt-sub {
     font-family: var(--fm); font-size: 10.5px;
     color: var(--text-3); font-weight: 400;
     letter-spacing: 0.04em;
-    padding-left: 16px;  /* align with label text past the chevron */
+    padding-left: 19px;  /* align with label text past the chevron + gap */
   }
   .table.ledger .detail-inner .dt-closing {
     display: flex; flex-direction: column; align-items: flex-end;
@@ -1063,8 +1095,13 @@
     color: var(--text); letter-spacing: -0.01em;
     font-variant-numeric: tabular-nums;
   }
+  /* Headline closing — the "Current outstanding" line. Label gets a
+     touch of emphasis and the amount steps up another notch. */
+  .table.ledger .detail-inner .dt-closing.headline .dt-closing-label {
+    color: var(--text-2); font-weight: 600;
+  }
   .table.ledger .detail-inner .dt-closing.headline .dt-closing-amount {
-    font-size: 16px; font-weight: 600; letter-spacing: -0.018em;
+    font-size: 18px; font-weight: 700; letter-spacing: -0.02em;
   }
   .table.ledger .detail-inner.state-overdue .dt-closing.headline .dt-closing-amount { color: var(--rose); }
   .table.ledger .detail-inner.state-paid    .dt-closing.headline .dt-closing-amount { color: var(--emerald); }
@@ -18648,7 +18685,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       // directly beneath. Click head → toggles only that section's body.
       function fySection(fyKey, label, sub, closingLabel, amount, isHeadline, rowsHtml, expandable, isOpen) {
         const chev = expandable
-          ? `<span class="fy-chev">${isOpen ? '▾' : '▸'}</span>`
+          ? `<span class="fy-chev">${isOpen ? '▼' : '▶'}</span>`
           : `<span class="fy-chev fy-chev-blank"></span>`;
         const headCls = 'fy-head'
           + (expandable ? ' clickable' : '')
@@ -18678,7 +18715,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
             + rowsHtml
             + `</div>`
           : '';
-        return `<div class="fy-section" data-fy="${esc(fyKey)}">${head}${body}</div>`;
+        const secCls = 'fy-section' + (isHeadline ? ' headline' : '');
+        return `<div class="${secCls}" data-fy="${esc(fyKey)}">${head}${body}</div>`;
       }
 
       const sections = [];
@@ -18985,7 +19023,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         if (!section) return;
         const isOpen = head.classList.toggle('open');
         const chev = head.querySelector('.fy-chev');
-        if (chev) chev.textContent = isOpen ? '▾' : '▸';
+        if (chev) chev.textContent = isOpen ? '▼' : '▶';
         const body = section.querySelector(':scope > .fy-body');
         if (body) body.classList.toggle('open', isOpen);
       });
