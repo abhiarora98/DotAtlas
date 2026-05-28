@@ -571,16 +571,11 @@
     top: 49px;
     z-index: 2;
     background: var(--void);
-    color: var(--text-2);
+    color: var(--text);
     font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
     padding-top: 12px; padding-bottom: 12px;
-    border-bottom: 1px solid var(--line);
+    border-bottom: 1px solid var(--line-2);
   }
-  /* Main scanning anchors get full contrast; the rest stay one step
-     back so the eye lands on Party / Aging / Outstanding first. */
-  .table.ledger thead th:nth-child(1),
-  .table.ledger thead th:nth-child(2),
-  .table.ledger thead th:last-child { color: var(--text); }
   /* Click any column header to sort by it. Active sort gets a tiny arrow. */
   .table.ledger thead th[data-sort] {
     cursor: pointer; user-select: none;
@@ -901,9 +896,9 @@
     border-bottom: 1px solid var(--line);
   }
   .ledger-tools {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 12px 22px; border-bottom: 1px solid var(--line);
-    gap: 14px;
+    display: flex; flex-direction: column; align-items: stretch;
+    padding: 14px 22px; border-bottom: 1px solid var(--line);
+    gap: 12px;
   }
   /* Aging filter chips — two-line: bucket label on top, amount + count
      below. Bigger and weightier so amount + count read at a glance. */
@@ -931,9 +926,10 @@
   .ledger-tools .chips .chip.on .cnt { color: var(--void); opacity: 0.62; }
   /* Smaller, compact search input — controls fade into the background */
   .ledger-tools .search {
+    align-self: flex-end;            /* own line, right-aligned below filters */
     background: transparent; border: 1px solid var(--line); border-radius: 999px;
-    padding: 5px 12px; color: var(--text-2); font-family: var(--fb); font-size: 11.5px;
-    min-width: 160px; max-width: 220px; outline: 0;
+    padding: 7px 14px; color: var(--text-2); font-family: var(--fb); font-size: 12.5px;
+    width: 300px; max-width: 100%; outline: 0;
   }
   .ledger-tools .search::placeholder { color: var(--text-3); }
   .ledger-tools .search:focus { border-color: var(--line-3); color: var(--text); }
@@ -1392,9 +1388,9 @@
   /* mini-aging bar — same start-x every row (cell's left padding).
      Track lightened so the colored fills carry the eye. */
   .mini-bar {
-    display: inline-flex; height: 6px; width: 92px;
+    display: inline-flex; height: 8px; width: 96px;
     border-radius: 999px; overflow: hidden; gap: 1px;
-    background: rgba(255,255,255,0.04);
+    background: rgba(255,255,255,0.08);
   }
   /* Three aging buckets: blue 0–30D · amber 31–60D · red >60D.
      Bar segments are widths proportional to outstanding in each band. */
@@ -1403,6 +1399,12 @@
   .mini-bar .s1 { background: var(--amber); }
   .mini-bar .s2 { background: var(--rose); }
   .table.ledger tr.party-r .mini-bar { cursor: help; }
+  /* DSO numbers (col 3) read faster — heavier + a touch larger; the
+     threshold colour is set inline per row (green / amber / red). */
+  .table.ledger tbody td:nth-child(3) {
+    font-family: var(--fd); font-weight: 700; font-size: 13px;
+    font-variant-numeric: tabular-nums;
+  }
 
   /* Aging bar hover tooltip — bucket breakdown of outstanding. */
   .aging-tip {
@@ -2995,8 +2997,6 @@
         <div class="ledger-tools">
           <div class="chips">
             <button class="chip on" data-filter="all"><span class="chip-lab">All</span><span class="chip-meta"><span class="chip-amt">—</span> • <span class="cnt">1188</span></span></button>
-            <button class="chip" data-filter="overdue"><span class="chip-lab">Overdue</span><span class="chip-meta"><span class="chip-amt">—</span> • <span class="cnt">—</span></span></button>
-            <button class="chip" data-filter="noreceipt"><span class="chip-lab">No receipt · 30d</span><span class="chip-meta"><span class="chip-amt">—</span> • <span class="cnt">—</span></span></button>
             <button class="chip" data-filter="0-30"><span class="chip-lab">0–30</span><span class="chip-meta"><span class="chip-amt">—</span> • <span class="cnt">—</span></span></button>
             <button class="chip" data-filter="31-60"><span class="chip-lab">31–60</span><span class="chip-meta"><span class="chip-amt">—</span> • <span class="cnt">—</span></span></button>
             <button class="chip" data-filter="61-90"><span class="chip-lab">61–90</span><span class="chip-meta"><span class="chip-amt">—</span> • <span class="cnt">—</span></span></button>
