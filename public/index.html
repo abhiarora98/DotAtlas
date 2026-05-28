@@ -19380,7 +19380,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         name: 'Comfort Industries',
         gst:  'GST: 06AALFC2138G1ZO',
         emails: ['info@comfortindustries.in', 'accounts@comfortindustries.in'],
-        phone: 'Accounts: +91 88168 89093'
+        phone: 'Accounts: +91 88168 89093',
+        phoneNumber: '+91 88168 89093'
       };
 
       // Selected FYs ordered chronologically
@@ -19397,7 +19398,6 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       if (selectedFYs.includes('26-27'))      periodEnd = dateLong;
       else if (selectedFYs.includes('25-26')) periodEnd = '31 Mar 2026';
       else                                    periodEnd = '31 Mar 2025';
-      const periodLine = `Period: ${periodStart} – ${periodEnd}`;
 
       // Optional customer meta — labelled lines for fields that exist
       // on the party record. Keeps the header honest: if the data
@@ -19418,111 +19418,112 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         return base + (n > 0 ? ' Dr' : ' Cr');
       }
 
-      // The "summary sheet" is the final dedicated page — its layout
-      // owns its own header/footer so the standard ones are gated off.
-      let onSummaryPage = false;
-
-      // Page header — only paints on page 1. Continuation pages (long
-      // ledgers) and the summary sheet get a clean canvas; repeating
-      // the brand-band on every page makes the statement feel pasted-
-      // together rather than designed.
+      // Page header. Page 1 → full branded header. Pages 2+ → a
+      // compact continuation header (party + statement + period), no
+      // logo/GST/email repeat, so long statements read like a single
+      // continuous ledger rather than stacked one-pagers.
       function drawHeader(data) {
-        if (onSummaryPage)            return;
-        if (data && data.pageNumber !== 1) return;
+        const pageNum = data && data.pageNumber;
+        if (pageNum && pageNum !== 1) {
+          const yc = MARGIN;
+          doc.setFont(FONT, 'bold');
+          doc.setFontSize(11);
+          doc.setTextColor(11, 18, 32);
+          doc.text(`${p.name} — Account Statement`, MARGIN, yc + 10);
+          doc.setFont(FONT, 'normal');
+          doc.setFontSize(8.5);
+          doc.setTextColor(120, 128, 140);
+          doc.text(`Period: ${periodStart} – ${periodEnd}`, MARGIN, yc + 23);
+          doc.setDrawColor(220, 224, 228);
+          doc.setLineWidth(0.5);
+          doc.line(MARGIN, yc + 32, RIGHT_X, yc + 32);
+          return;
+        }
         const y0 = MARGIN;
 
-        // Comfort Mats logo — top-right, balancing the issuer block
-        // on the left. Drops silently if the asset isn't on disk yet.
+        // Comfort Mats logo — top-right, ~15% smaller than before.
         if (logoDataURL) {
           try {
-            const logoW = 110, logoH = 72;
-            doc.addImage(logoDataURL, 'PNG', RIGHT_X - logoW, y0, logoW, logoH);
+            const logoW = 94, logoH = 61;
+            doc.addImage(logoDataURL, 'PNG', RIGHT_X - logoW, y0 - 2, logoW, logoH);
           } catch (e) { /* unsupported format / corrupt → skip */ }
         }
 
-        // Issuer name
+        // Issuer name + GST — tight stack.
         doc.setFont(FONT, 'bold');
-        doc.setFontSize(16);
+        doc.setFontSize(15);
         doc.setTextColor(11, 18, 32);
-        doc.text(ISSUER.name, MARGIN, y0 + 14);
-        // GST — slightly smaller, gray
+        doc.text(ISSUER.name, MARGIN, y0 + 13);
         doc.setFont(FONT, 'normal');
-        doc.setFontSize(9);
+        doc.setFontSize(8.5);
         doc.setTextColor(110, 118, 130);
-        doc.text(ISSUER.gst, MARGIN, y0 + 30);
-        // Emails — readable body text
-        doc.setFont(FONT, 'normal');
-        doc.setFontSize(9.5);
-        doc.setTextColor(80, 88, 100);
-        doc.text(ISSUER.emails[0], MARGIN, y0 + 50);
-        doc.text(ISSUER.emails[1], MARGIN, y0 + 63);
-        // Phone — one line down
-        doc.text(ISSUER.phone, MARGIN, y0 + 82);
+        doc.text(ISSUER.gst, MARGIN, y0 + 26);
 
         // Divider after issuer block
         doc.setDrawColor(220, 224, 228);
-        doc.setLineWidth(0.6);
-        doc.line(MARGIN, y0 + 96, RIGHT_X, y0 + 96);
+        doc.setLineWidth(0.5);
+        doc.line(MARGIN, y0 + 36, RIGHT_X, y0 + 36);
 
-        // Statement title
+        // Statement title + party
         doc.setFont(FONT, 'bold');
-        doc.setFontSize(20);
+        doc.setFontSize(17);
         doc.setTextColor(11, 18, 32);
-        doc.text('Account Statement', MARGIN, y0 + 124);
-
-        // Party name (bold)
+        doc.text('Account Statement', MARGIN, y0 + 58);
         doc.setFont(FONT, 'bold');
-        doc.setFontSize(13);
-        doc.setTextColor(11, 18, 32);
-        doc.text(p.name, MARGIN, y0 + 148);
+        doc.setFontSize(12);
+        doc.text(p.name, MARGIN, y0 + 75);
 
-        // Optional party meta lines (city / GST / phone)
-        let metaY = y0 + 162;
+        // Optional party meta (customer city / GSTIN / phone / email)
+        let metaY = y0 + 88;
         doc.setFont(FONT, 'normal');
-        doc.setFontSize(9);
+        doc.setFontSize(8.5);
         doc.setTextColor(110, 118, 130);
         partyMeta.forEach(line => {
           doc.text(String(line), MARGIN, metaY);
-          metaY += 12;
+          metaY += 11;
         });
 
-        // Statement as on + period
+        // Inline metadata — one row, bullet-separated.
         doc.setFont(FONT, 'normal');
-        doc.setFontSize(9.5);
-        doc.setTextColor(95, 105, 120);
-        doc.text(`Statement as on ${dateLong}`, MARGIN, metaY + 4);
-        doc.text(periodLine, MARGIN, metaY + 18);
         doc.setFontSize(8.5);
-        doc.setTextColor(140, 148, 160);
-        doc.text('Generated from dot.atlas', MARGIN, metaY + 32);
+        doc.setTextColor(120, 128, 140);
+        doc.text(
+          `Statement as on ${dateLong}   •   Period: ${periodStart} – ${periodEnd}   •   Generated from dot.atlas`,
+          MARGIN, metaY + 2
+        );
 
         // Divider before content
         doc.setDrawColor(220, 224, 228);
-        doc.setLineWidth(0.6);
-        doc.line(MARGIN, metaY + 46, RIGHT_X, metaY + 46);
+        doc.setLineWidth(0.5);
+        doc.line(MARGIN, metaY + 14, RIGHT_X, metaY + 14);
       }
 
-      // Page-footer drawer — generated stamp on ledger pages. Skipped
-      // on the summary sheet (which has its own richer bottom blocks).
-      // Page indicator is stamped in a final pass after the summary
-      // page exists, so "X of Y" reflects the true total.
-      function drawFooter(data) {
-        if (onSummaryPage) return;
-        const y = H - MARGIN + 20;
+      // Compact two-line footer, drawn in a final pass once the total
+      // page count is known. Line 1: issuer contact. Line 2: provenance
+      // + page indicator. Centered so it reads as a tidy sign-off.
+      function drawFooter(pageNum, totalPages) {
+        const y = H - MARGIN + 6;
         doc.setDrawColor(225, 228, 232);
         doc.setLineWidth(0.5);
-        doc.line(MARGIN, y - 18, RIGHT_X, y - 18);
+        doc.line(MARGIN, y - 16, RIGHT_X, y - 16);
+        const cx = MARGIN + CONTENT_W / 2;
+        doc.setFont(FONT, 'bold');
+        doc.setFontSize(8.5);
+        doc.setTextColor(80, 88, 100);
+        doc.text(`Accounts: ${ISSUER.phoneNumber}   •   ${ISSUER.emails[1]}`, cx, y, { align: 'center' });
         doc.setFont(FONT, 'normal');
         doc.setFontSize(8);
         doc.setTextColor(140, 148, 160);
-        doc.text('Generated from dot.atlas · Synced from Tally', MARGIN, y);
-        doc.text(`Generated on ${generatedAt}`, W / 2, y, { align: 'center' });
+        doc.text(
+          `Generated from dot.atlas   •   Synced from Tally   •   ${dateLong}   •   Page ${pageNum} of ${totalPages}`,
+          cx, y + 13, { align: 'center' }
+        );
       }
 
       // Cursor tracks the current vertical position; autotable updates
       // it via finalY. Plain text sections advance it manually. Header
       // grows with the optional party meta lines, so compute the start.
-      const headerBottom = 162 + (partyMeta.length * 12) + 46 + 12;  // metaY + divider + breathing
+      const headerBottom = 88 + (partyMeta.length * 11) + 26;  // metaY + inline meta + divider
       let cursorY = MARGIN + headerBottom;
 
       // Render an "Opening balance brought forward" row at the top of
@@ -19550,7 +19551,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
             { content: '', styles: {} }
           ]],
           styles: { fillColor: [248, 250, 252], font: FONT },
-          didDrawPage: (data) => { drawHeader(data); drawFooter(data); }
+          didDrawPage: (data) => { drawHeader(data); }
         });
         cursorY = doc.lastAutoTable.finalY + 8;
       }
@@ -19586,8 +19587,9 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         }
       };
 
-      // Aggregate summary across selected operational FYs
-      let totalBilled = 0, totalReceived = 0;
+      // The last selected FY's debit/credit, captured in the loop and
+      // rendered in the unbreakable final block below it.
+      let lastFyDebit = 0, lastFyCredit = 0;
 
       opFYs.forEach((fy, idx) => {
         const meta = fyMeta[fy];
@@ -19626,8 +19628,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         const body = meta.vouchers.map(v => {
           const dr = v.dr || 0, cr = v.cr || 0;
           running += dr - cr;
-          if (dr > 0) { totalBilled += dr;   fyDebit  += dr; }
-          if (cr > 0) { totalReceived += cr; fyCredit += cr; }
+          if (dr > 0) fyDebit  += dr;
+          if (cr > 0) fyCredit += cr;
           const debitCell  = dr > 0 ? RUPEE + inrNumber(dr) : '—';
           const creditCell = cr > 0 ? RUPEE + inrNumber(cr) : '—';
           // Balance colour: Dr (positive) = dark text; Cr (negative) = emerald.
@@ -19658,10 +19660,13 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         const colBal = CONTENT_W - colDate - colVch - colType - colDebit - colCredit;
         doc.autoTable({
           startY: cursorY,
-          margin: { left: MARGIN, right: MARGIN },
+          // top: room for the continuation header on pages 2+.
+          // bottom: room for the per-page footer line.
+          margin: { top: MARGIN + 42, left: MARGIN, right: MARGIN, bottom: MARGIN + 28 },
           tableWidth: CONTENT_W,
           theme: 'plain',
           styles: { font: FONT },
+          showHead: 'everyPage',
           head: [[
             { content: 'Date',    styles: { halign: 'left'  } },
             { content: 'Voucher', styles: { halign: 'left'  } },
@@ -19675,13 +19680,13 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
             textColor: [80, 88, 100],
             fontStyle: 'bold',
             fontSize: 8.5,
-            cellPadding: { top: 6, right: 8, bottom: 6, left: 8 },
+            cellPadding: { top: 5, right: 8, bottom: 5, left: 8 },
             lineColor: [225, 228, 232],
             lineWidth: { bottom: 0.5 }
           },
           bodyStyles: {
             fontSize: 9,
-            cellPadding: { top: 5, right: 8, bottom: 5, left: 8 },
+            cellPadding: { top: 3.5, right: 8, bottom: 3.5, left: 8 },
             textColor: [11, 18, 32],
             lineColor: [240, 242, 246],
             lineWidth: { bottom: 0.3 }
@@ -19697,17 +19702,26 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
           },
           rowPageBreak: 'avoid',
           body,
-          didDrawPage: (data) => { drawHeader(data); drawFooter(data); }
+          didDrawPage: (data) => { drawHeader(data); }
         });
         cursorY = doc.lastAutoTable.finalY;
 
-        // ── Per-FY totals (Total Debit / Total Credit / Closing) ──
-        // Three-row block ending each FY section. Numbers reconcile
-        // back to the voucher table and the bottom-line summary.
+        const isLast = (idx === opFYs.length - 1);
+
+        // The last selected FY's totals + closing are rendered as one
+        // unbreakable block AFTER the loop, so they never split across
+        // a page. Capture its numbers and skip the inline render.
+        if (isLast) {
+          lastFyDebit  = fyDebit;
+          lastFyCredit = fyCredit;
+          return;
+        }
+
+        // ── Per-FY totals for intermediate years ────────────────
         const balColor = meta.closeAmt < -0.5 ? [0,132,92] : [11,18,32];
         doc.autoTable({
           startY: cursorY + 6,
-          margin: { left: MARGIN, right: MARGIN },
+          margin: { top: MARGIN + 42, left: MARGIN, right: MARGIN, bottom: MARGIN + 28 },
           tableWidth: CONTENT_W,
           theme: 'plain',
           body: [
@@ -19732,28 +19746,21 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
             0: { cellWidth: CONTENT_W * 0.6 },
             1: { cellWidth: CONTENT_W * 0.4, halign: 'right' }
           },
-          didDrawPage: (data) => { drawHeader(data); drawFooter(data); }
+          didDrawPage: (data) => { drawHeader(data); }
         });
         cursorY = doc.lastAutoTable.finalY + 14;
 
         // Section divider between FYs
-        const isLast = (idx === opFYs.length - 1);
-        if (!isLast) {
-          doc.setDrawColor(225, 228, 232);
-          doc.setLineWidth(0.5);
-          doc.line(MARGIN, cursorY - 6, RIGHT_X, cursorY - 6);
-          cursorY += 4;
-        }
+        doc.setDrawColor(225, 228, 232);
+        doc.setLineWidth(0.5);
+        doc.line(MARGIN, cursorY - 6, RIGHT_X, cursorY - 6);
+        cursorY += 4;
       });
 
-      // ── Final balance block (current outstanding OR historical
-      // closing, depending on which FYs the user selected) ─────
-      // If the live FY (26-27) is in the selection, the bottom line
-      // is "Current Outstanding"; otherwise it's the last selected
-      // FY's closing balance, labelled with the relevant cut-off date.
-      // Closing balance + its cut-off date, derived from the FY
-      // selection. Naming stays consistent across the summary panel
-      // and the styled closing row below it.
+      // ── Final block: Total Debit / Total Credit / double rule /
+      // Closing Balance, then the issuer sign-off. Rendered as one
+      // unit with a page-break guard so totals + closing never split
+      // across pages and always land together on the final page.
       let finalAmt, closingDate;
       if (opFYs.includes('26-27')) {
         finalAmt    = p.outstanding;
@@ -19765,136 +19772,80 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         finalAmt    = p.bf24;
         closingDate = '31 Mar 2025';
       }
-      const closingLabel = `Closing balance as on ${closingDate}`;
 
-      // ──────────────────────────────────────────────────────────
-      // Dedicated summary sheet (the final page). Force a page break
-      // so the closing block never crams under the last voucher row.
-      // Layout: SUMMARY panel → divider → styled closing-balance row
-      // → divider → bottom contact + generation blocks.
-      // ──────────────────────────────────────────────────────────
-      doc.addPage();
-      onSummaryPage = true;
-      const summaryPageNum = doc.internal.getNumberOfPages();
+      // Height of the whole closing unit (totals + rule + closing +
+      // signature). If it won't fit above the footer band, start a
+      // fresh page so it stays intact.
+      const FINAL_BLOCK_H = 200;
+      if (cursorY + FINAL_BLOCK_H > H - (MARGIN + 28)) {
+        doc.addPage();
+        drawHeader({ pageNumber: doc.internal.getNumberOfPages() });
+        cursorY = MARGIN + 42;
+      } else {
+        cursorY += 10;
+      }
 
-      // ─ Top: SUMMARY panel — matches the per-FY totals styling
-      // on page 1 so the document reads as one continuous statement.
-      let yS = MARGIN + 12;
-      doc.setFont(FONT, 'bold');
-      doc.setFontSize(10.5);
+      // Totals — right-aligned amounts under the Balance column edge.
+      doc.setFont(FONT, 'normal');
+      doc.setFontSize(10);
       doc.setTextColor(80, 88, 100);
-      doc.text('SUMMARY', MARGIN, yS);
-      yS += 20;
-
-      const summaryRows = [
-        { label: 'Sales this period',    value: inrAmt(totalBilled),   color: [11,18,32], size: 9.5 },
-        { label: 'Receipts this period', value: inrAmt(totalReceived), color: [0,132,92], size: 9.5 },
-        { label: closingLabel,           value: fmtBal(finalAmt),
-          color: finalAmt < -0.5 ? [0,132,92] : [11,18,32], size: 10.5, bold: true }
-      ];
-      summaryRows.forEach(r => {
-        doc.setFont(FONT, r.bold ? 'bold' : 'normal');
-        doc.setFontSize(r.size);
-        doc.setTextColor(r.bold ? 11 : 80, r.bold ? 18 : 88, r.bold ? 32 : 100);
-        doc.text(r.label, MARGIN, yS);
-        doc.setFont(FONT, 'bold');
-        doc.setFontSize(r.size);
-        doc.setTextColor(r.color[0], r.color[1], r.color[2]);
-        doc.text(r.value, RIGHT_X, yS, { align: 'right' });
-        // Hairline rule between rows for ledger feel
-        const ruleY = yS + 8;
-        doc.setDrawColor(240, 242, 246);
-        doc.setLineWidth(0.3);
-        doc.line(MARGIN, ruleY, RIGHT_X, ruleY);
-        yS += 22;
-      });
-
-      // Divider after summary
-      yS += 18;
-      doc.setDrawColor(220, 224, 228);
-      doc.setLineWidth(0.5);
-      doc.line(MARGIN, yS, RIGHT_X, yS);
-
-      // ─ Mid: Styled closing-balance row — same grey tint as the
-      // Opening Balance B/F rows on page 1. Single line, label left
-      // and amount right. No hero block.
-      yS += 22;
-      const rowH = 36;
-      doc.setFillColor(248, 250, 252);
-      doc.rect(MARGIN, yS, CONTENT_W, rowH, 'F');
-      // Faint hairline above + below to anchor the row
-      doc.setDrawColor(225, 228, 232);
-      doc.setLineWidth(0.4);
-      doc.line(MARGIN, yS, RIGHT_X, yS);
-      doc.line(MARGIN, yS + rowH, RIGHT_X, yS + rowH);
-
+      doc.text('Total Debit', MARGIN + 8, cursorY + 4);
       doc.setFont(FONT, 'bold');
-      doc.setFontSize(11);
       doc.setTextColor(11, 18, 32);
-      doc.text(`Closing Balance as on ${closingDate}`, MARGIN + 14, yS + 23);
+      doc.text(RUPEE + inrNumber(lastFyDebit), RIGHT_X - 8, cursorY + 4, { align: 'right' });
+      cursorY += 18;
+      doc.setFont(FONT, 'normal');
+      doc.setTextColor(80, 88, 100);
+      doc.text('Total Credit', MARGIN + 8, cursorY + 4);
+      doc.setFont(FONT, 'bold');
+      doc.setTextColor(0, 132, 92);
+      doc.text(RUPEE + inrNumber(lastFyCredit), RIGHT_X - 8, cursorY + 4, { align: 'right' });
+      cursorY += 22;
 
+      // Double rule — the accounting "totals closed" marker.
+      doc.setDrawColor(11, 18, 32);
+      doc.setLineWidth(0.6);
+      doc.line(MARGIN, cursorY, RIGHT_X, cursorY);
+      doc.line(MARGIN, cursorY + 3, RIGHT_X, cursorY + 3);
+      cursorY += 22;
+
+      // Closing balance — the headline figure. Slightly larger + bold.
       doc.setFont(FONT, 'bold');
       doc.setFontSize(12);
+      doc.setTextColor(11, 18, 32);
+      doc.text(`Closing Balance as on ${closingDate}`, MARGIN + 8, cursorY + 4);
+      doc.setFontSize(13.5);
       if (finalAmt < -0.5) doc.setTextColor(0, 132, 92);
       else                 doc.setTextColor(11, 18, 32);
-      doc.text(fmtBal(finalAmt), RIGHT_X - 14, yS + 24, { align: 'right' });
+      doc.text(fmtBal(finalAmt), RIGHT_X - 8, cursorY + 5, { align: 'right' });
+      cursorY += 40;
 
-      yS += rowH + 22;
-
-      // Divider before the bottom contact / generation blocks
+      // Issuer sign-off (bottom-left feel, flows under the closing).
       doc.setDrawColor(220, 224, 228);
       doc.setLineWidth(0.5);
-      doc.line(MARGIN, yS, RIGHT_X, yS);
-
-      // ─ Bottom: Contact (left) + Generation info (right) ─────
-      // Anchored to the page bottom so the layout always reads the
-      // same regardless of how short the summary above is.
-      const bottomY = H - MARGIN - 78;
-
-      // Bottom-left: signature / contact
+      doc.line(MARGIN, cursorY, MARGIN + 220, cursorY);
+      cursorY += 16;
       doc.setFont(FONT, 'bold');
       doc.setFontSize(10);
       doc.setTextColor(11, 18, 32);
-      doc.text('For Comfort Industries', MARGIN, bottomY);
+      doc.text('For Comfort Industries', MARGIN, cursorY);
       doc.setFont(FONT, 'normal');
       doc.setFontSize(9);
       doc.setTextColor(80, 88, 100);
-      doc.text('Accounts Department',         MARGIN, bottomY + 14);
-      doc.text('+91 88168 89093',             MARGIN, bottomY + 38);
-      doc.text('accounts@comfortindustries.in', MARGIN, bottomY + 51);
+      doc.text('Accounts Department',           MARGIN, cursorY + 14);
+      doc.text(ISSUER.phoneNumber,              MARGIN, cursorY + 28);
+      doc.text(ISSUER.emails[1],                MARGIN, cursorY + 41);
 
-      // Bottom-right: generation info (stacked, right-aligned)
-      doc.setFont(FONT, 'normal');
-      doc.setFontSize(9);
-      doc.setTextColor(110, 118, 130);
-      doc.text('Generated from dot.atlas', RIGHT_X, bottomY,      { align: 'right' });
-      doc.text('Synced from Tally',         RIGHT_X, bottomY + 14, { align: 'right' });
-      doc.text(`Generated on ${generatedAt}`, RIGHT_X, bottomY + 28, { align: 'right' });
-      const totalPages = doc.internal.getNumberOfPages();
-      doc.text(`Page ${summaryPageNum} of ${totalPages}`,
-               RIGHT_X, bottomY + 42, { align: 'right' });
-
-      // Defensive: ensure the first page picks up the brand header
-      // even if no autotable fired didDrawPage (degenerate selection).
-      onSummaryPage = false;
+      // ── Final pass: per-page footer line with true page totals ──
+      const totalPagesFinal = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= totalPagesFinal; i++) {
+        doc.setPage(i);
+        drawFooter(i, totalPagesFinal);
+      }
+      // Ensure page 1 carries the full brand header even if no
+      // autotable fired its didDrawPage (degenerate selection).
       doc.setPage(1);
       drawHeader({ pageNumber: 1 });
-      drawFooter({ pageNumber: 1 });
-
-      // Final pass: stamp "Page X of Y" on every ledger page now that
-      // the total page count (including the summary sheet) is known.
-      // The summary sheet stamps its own indicator inside the bottom-
-      // right generation block, so we skip it here.
-      const totalPagesFinal = doc.internal.getNumberOfPages();
-      for (let i = 1; i < summaryPageNum; i++) {
-        doc.setPage(i);
-        doc.setFont(FONT, 'normal');
-        doc.setFontSize(8);
-        doc.setTextColor(140, 148, 160);
-        doc.text(`Page ${i} of ${totalPagesFinal}`,
-                 RIGHT_X, H - MARGIN + 20, { align: 'right' });
-      }
-      doc.setPage(summaryPageNum);
 
       const slug = String(p.name || 'party').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_|_$/g, '');
       doc.save(`${slug}_Statement_${dateSlug}.pdf`);
