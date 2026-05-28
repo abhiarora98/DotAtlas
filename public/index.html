@@ -1455,51 +1455,88 @@
     color: var(--emerald); font-size: 10px; letter-spacing: 0.04em;
   }
 
-  /* Aging popover — anchored beside the bar on click. Full open-bill
-     detail (Invoice · Date · Age · Billed · Paid · Balance). */
-  .aging-pop {
-    position: fixed; z-index: 9998; left: 0; top: 0;
+  /* Aging modal — centered dialog over a dimmed backdrop. Aging summary
+     (bands + %) + open-bill list (Invoice · Date · Age · Billed · Paid ·
+     Balance). */
+  .aging-backdrop {
+    position: fixed; inset: 0; z-index: 9998;
+    background: rgba(6,9,18,0.62);
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+    opacity: 0; pointer-events: none; transition: opacity 120ms ease;
+  }
+  .aging-backdrop.show { opacity: 1; pointer-events: auto; }
+  .aging-modal {
+    position: relative;
     background: var(--surface-2); border: 1px solid var(--line-2);
-    border-radius: 9px; box-shadow: 0 14px 40px rgba(0,0,0,0.5);
-    width: 460px; max-width: calc(100vw - 16px);
-    opacity: 0; pointer-events: none; transition: opacity 90ms ease;
+    border-radius: 12px; box-shadow: 0 24px 70px rgba(0,0,0,0.55);
+    width: 560px; max-width: 100%; max-height: 84vh;
+    display: flex; flex-direction: column; overflow: hidden;
     font-family: var(--fm);
+    transform: translateY(6px) scale(0.99); transition: transform 120ms ease;
   }
-  .aging-pop.show { opacity: 1; pointer-events: auto; }
-  .aging-pop .ap-head {
-    display: flex; justify-content: space-between; align-items: baseline;
-    padding: 12px 16px; border-bottom: 1px solid var(--line);
+  .aging-backdrop.show .aging-modal { transform: none; }
+  .aging-modal .am-close {
+    position: absolute; top: 12px; right: 12px;
+    width: 26px; height: 26px; border-radius: 6px;
+    background: transparent; border: 1px solid var(--line-2);
+    color: var(--text-2); font-size: 12px; cursor: pointer; line-height: 1;
   }
-  .aging-pop .ap-name { font-family: var(--fb); font-size: 14px; font-weight: 600; color: var(--text); }
-  .aging-pop .ap-tot { font-family: var(--fd); font-size: 14px; font-weight: 600; color: var(--text); }
-  .aging-pop .ap-tot span { font-family: var(--fm); font-size: 10px; color: var(--text-3); margin-left: 4px; letter-spacing: 0.06em; text-transform: uppercase; }
-  .aging-pop .ap-row {
-    display: grid; grid-template-columns: 1fr 64px 52px 78px 78px 84px; gap: 10px;
-    padding: 6px 16px; align-items: baseline;
+  .aging-modal .am-close:hover { color: var(--text); border-color: var(--line-3); background: var(--surface-3); }
+  .aging-modal .am-head {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 24px; padding: 18px 20px 14px; border-bottom: 1px solid var(--line);
+  }
+  .aging-modal .am-name { font-family: var(--fb); font-size: 16px; font-weight: 600; color: var(--text); }
+  .aging-modal .am-sub  { font-size: 10.5px; color: var(--text-3); letter-spacing: 0.04em; margin-top: 3px; }
+  .aging-modal .am-head-r { text-align: right; padding-right: 28px; white-space: nowrap; }
+  .aging-modal .am-tot { font-family: var(--fd); font-size: 18px; font-weight: 700; color: var(--text); }
+  .aging-modal .am-tot-l { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-3); }
+  .aging-modal .am-bands { padding: 14px 20px; border-bottom: 1px solid var(--line); }
+  .aging-modal .am-band {
+    display: flex; align-items: center; gap: 8px; padding: 4px 0;
+    font-size: 12.5px; color: var(--text-2);
+  }
+  .aging-modal .am-band .am-bv { margin-left: auto; color: var(--text); font-variant-numeric: tabular-nums; }
+  .aging-modal .am-band .am-pct { color: var(--text-3); }
+  .aging-modal .am-band .am-zero { color: var(--text-4); }
+  .aging-modal .am-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .aging-modal .am-dot.b { background: var(--blue); }
+  .aging-modal .am-dot.a { background: var(--amber); }
+  .aging-modal .am-dot.r { background: var(--rose); }
+  .aging-modal .am-oldest { margin-top: 8px; font-size: 11px; color: var(--text-3); }
+  .aging-modal .am-oldest b { color: var(--text-2); font-weight: 600; }
+  .aging-modal .am-tbl-h {
+    padding: 12px 20px 4px; font-size: 9.5px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--text-3);
+  }
+  .aging-modal .am-row {
+    display: grid; grid-template-columns: 1fr 64px 50px 84px 84px 90px; gap: 10px;
+    padding: 6px 20px; align-items: baseline;
     font-size: 11.5px; color: var(--text-2); font-variant-numeric: tabular-nums;
   }
-  .aging-pop .ap-hrow {
-    font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+  .aging-modal .am-hrow {
+    font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
     color: var(--text-3); border-bottom: 1px solid var(--line);
-    padding-top: 9px; padding-bottom: 9px;
+    padding-top: 6px; padding-bottom: 8px;
   }
-  .aging-pop .ap-body { max-height: 320px; overflow-y: auto; }
-  .aging-pop .ap-body .ap-row:nth-child(even) { background: rgba(255,255,255,0.02); }
-  .aging-pop .ap-no   { color: var(--text); font-family: var(--fb); }
-  .aging-pop .ap-date { color: var(--text-2); }
-  .aging-pop .ap-age,
-  .aging-pop .ap-bill,
-  .aging-pop .ap-paid,
-  .aging-pop .ap-bal  { text-align: right; }
-  .aging-pop .ap-bal  { color: var(--text); font-weight: 600; }
-  .aging-pop .ap-empty { padding: 16px; color: var(--text-3); font-size: 12px; }
-  .aging-pop .ap-foot { padding: 10px 16px; border-top: 1px solid var(--line); text-align: right; }
-  .aging-pop .ap-ledger {
+  .aging-modal .am-body { overflow-y: auto; }
+  .aging-modal .am-body .am-row:nth-child(even) { background: rgba(255,255,255,0.02); }
+  .aging-modal .am-no   { color: var(--text); font-family: var(--fb); }
+  .aging-modal .am-date { color: var(--text-2); }
+  .aging-modal .am-age,
+  .aging-modal .am-bill,
+  .aging-modal .am-paid,
+  .aging-modal .am-bal  { text-align: right; }
+  .aging-modal .am-bal  { color: var(--text); font-weight: 600; }
+  .aging-modal .am-empty { padding: 18px 20px; color: var(--text-3); font-size: 12px; }
+  .aging-modal .am-foot { padding: 12px 20px; border-top: 1px solid var(--line); text-align: right; }
+  .aging-modal .ap-ledger {
     background: transparent; border: 0; cursor: pointer;
-    font-family: var(--fm); font-size: 11px; font-weight: 600;
+    font-family: var(--fm); font-size: 11.5px; font-weight: 600;
     letter-spacing: 0.04em; color: var(--emerald); padding: 2px 0;
   }
-  .aging-pop .ap-ledger:hover { text-decoration: underline; }
+  .aging-modal .ap-ledger:hover { text-decoration: underline; }
 
   /* Risk badge — minimal: small dot + label. No pill. */
   .risk-cluster {
@@ -19147,15 +19184,17 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     // Aging buckets + oldest, derived from the open bills. Shared by the
     // popover header and the PDF aging-summary block.
     function agingSummary(p){
-      const bills = computeOpenBills(p);
-      let b0 = 0, b1 = 0, b2 = 0, oldest = 0;
+      const bills = computeOpenBills(p);   // oldest-first
+      let b0 = 0, b1 = 0, b2 = 0;
       bills.forEach(b => {
         if (b.age > 60)      b2 += b.rem;
         else if (b.age > 30) b1 += b.rem;
         else                 b0 += b.rem;
-        if (b.age > oldest) oldest = b.age;
       });
-      return { bills, b0, b1, b2, total: b0 + b1 + b2, oldest };
+      const oldestBill = bills[0] || null;
+      return { bills, b0, b1, b2, total: b0 + b1 + b2,
+               oldest: oldestBill ? oldestBill.age : 0,
+               oldestDate: oldestBill ? oldestBill.dateStr : '' };
     }
     // Exposed for the hover-tooltip block (separate IIFE).
     window.__recvOpenBills = (pid) => {
@@ -19171,83 +19210,78 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       return '₹' + Math.round(a);
     }
 
-    // ── Aging popover — anchored beside the bar on click ───────
-    // Shows the full open-bill list (Invoice · Date · Age · Billed ·
-    // Paid · Balance) without pushing the table rows down. One popover
-    // at a time; closes on outside click / scroll / Escape.
-    const agingPop = document.createElement('div');
-    agingPop.className = 'aging-pop';
-    document.body.appendChild(agingPop);
-    let agingPopOpen = false;
+    // ── Aging modal — centered dialog on click ─────────────────
+    // Aging summary (bands + %) + the full open-bill list (Invoice ·
+    // Date · Age · Billed · Paid · Balance) in a focused dialog over a
+    // dimmed backdrop. Closes on ✕ / outside / Escape.
+    const agingBackdrop = document.createElement('div');
+    agingBackdrop.className = 'aging-backdrop';
+    agingBackdrop.innerHTML = '<div class="aging-modal" role="dialog" aria-modal="true"></div>';
+    document.body.appendChild(agingBackdrop);
+    const agingModal = agingBackdrop.querySelector('.aging-modal');
+    let agingModalOpen = false;
 
-    function closeAgingPop(){
-      agingPop.classList.remove('show');
-      agingPopOpen = false;
+    function closeAgingModal(){
+      agingBackdrop.classList.remove('show');
+      agingModalOpen = false;
     }
-    function openAgingPop(bar, row){
+    function openAgingModal(row){
       const pid = row.dataset.pid;
       const render = (p) => {
         const sum = agingSummary(p);
         const name = row.querySelector('.pri')?.textContent.trim() || '';
+        const pct = v => sum.total > 0 ? ` <span class="am-pct">(${Math.round(v/sum.total*100)}%)</span>` : '';
+        const bandVal = (v, withPct) => v > 0.5 ? fmtBillAmt(v) + (withPct ? pct(v) : '') : '<span class="am-zero">₹0</span>';
         const rowsHtml = sum.bills.map(b => {
           const ageC  = b.age > 60 ? 'var(--rose)' : b.age > 30 ? 'var(--amber)' : 'var(--text-2)';
           const paidC = b.paid > 0.5 ? 'var(--emerald)' : 'var(--text-4)';
-          return `<div class="ap-row">`
-            + `<span class="ap-no">${esc(b.label)}</span>`
-            + `<span class="ap-date">${esc(b.dateStr)}</span>`
-            + `<span class="ap-age" style="color:${ageC}">${b.age}d</span>`
-            + `<span class="ap-bill">${fmtBillAmt(b.billed)}</span>`
-            + `<span class="ap-paid" style="color:${paidC}">${b.paid > 0.5 ? fmtBillAmt(b.paid) : '—'}</span>`
-            + `<span class="ap-bal">${fmtBillAmt(b.rem)}</span>`
+          return `<div class="am-row">`
+            + `<span class="am-no">${esc(b.label)}</span>`
+            + `<span class="am-date">${esc(b.dateStr)}</span>`
+            + `<span class="am-age" style="color:${ageC}">${b.age}d</span>`
+            + `<span class="am-bill">${fmtBillAmt(b.billed)}</span>`
+            + `<span class="am-paid" style="color:${paidC}">${b.paid > 0.5 ? fmtBillAmt(b.paid) : '—'}</span>`
+            + `<span class="am-bal">${fmtBillAmt(b.rem)}</span>`
             + `</div>`;
         }).join('');
-        agingPop.innerHTML =
-          `<div class="ap-head"><div class="ap-name">${esc(name)}</div>`
-          + `<div class="ap-tot">${fmtBillAmt(sum.total)} <span>outstanding</span></div></div>`
-          + `<div class="ap-row ap-hrow"><span class="ap-no">Invoice</span><span class="ap-date">Date</span>`
-          + `<span class="ap-age">Age</span><span class="ap-bill">Billed</span>`
-          + `<span class="ap-paid">Paid</span><span class="ap-bal">Balance</span></div>`
-          + `<div class="ap-body">${rowsHtml || '<div class="ap-empty">No open invoices.</div>'}</div>`
-          + `<div class="ap-foot"><button type="button" class="ap-ledger" data-pid="${esc(pid)}">Open full ledger →</button></div>`;
-        // Position beside the bar (right side, flip left if no room).
-        agingPop.style.visibility = 'hidden';
-        agingPop.classList.add('show');
-        const r = bar.getBoundingClientRect();
-        const pr = agingPop.getBoundingClientRect();
-        const vw = window.innerWidth, vh = window.innerHeight;
-        let x = r.right + 12;
-        if (x + pr.width > vw - 8) x = r.left - pr.width - 12;
-        if (x < 8) x = 8;
-        let y = r.top - 6;
-        if (y + pr.height > vh - 8) y = vh - pr.height - 8;
-        if (y < 8) y = 8;
-        agingPop.style.left = x + 'px';
-        agingPop.style.top  = y + 'px';
-        agingPop.style.visibility = '';
-        agingPopOpen = true;
+        agingModal.innerHTML =
+          `<button type="button" class="am-close" aria-label="Close">✕</button>`
+          + `<div class="am-head"><div><div class="am-name">${esc(name)}</div>`
+          +   `<div class="am-sub">Aging summary · as on ${dateLongUI}</div></div>`
+          +   `<div class="am-head-r"><div class="am-tot">${fmtBillAmt(sum.total)}</div><div class="am-tot-l">Outstanding</div></div></div>`
+          + `<div class="am-bands">`
+          +   `<div class="am-band"><span class="am-dot b"></span>Current (0–30)<span class="am-bv">${bandVal(sum.b0, true)}</span></div>`
+          +   `<div class="am-band"><span class="am-dot a"></span>31–60<span class="am-bv">${bandVal(sum.b1, true)}</span></div>`
+          +   `<div class="am-band"><span class="am-dot r"></span>60+<span class="am-bv">${bandVal(sum.b2, true)}</span></div>`
+          +   `<div class="am-oldest">Oldest invoice: <b>${sum.oldest} days</b>${sum.oldestDate ? ` (${esc(sum.oldestDate)})` : ''}</div>`
+          + `</div>`
+          + `<div class="am-tbl-h">Open invoices</div>`
+          + `<div class="am-row am-hrow"><span class="am-no">Invoice</span><span class="am-date">Date</span>`
+          +   `<span class="am-age">Age</span><span class="am-bill">Billed</span>`
+          +   `<span class="am-paid">Paid</span><span class="am-bal">Balance</span></div>`
+          + `<div class="am-body">${rowsHtml || '<div class="am-empty">No open invoices.</div>'}</div>`
+          + `<div class="am-foot"><button type="button" class="ap-ledger" data-pid="${esc(pid)}">Open full ledger →</button></div>`;
+        agingBackdrop.classList.add('show');
+        agingModalOpen = true;
       };
       const p = dataCache && dataCache[pid];
       if (p) render(p);
       else loadData().then(() => { const pp = dataCache[pid]; if (pp) render(pp); });
     }
+    // A UI-friendly "as on" date for the modal header.
+    const dateLongUI = '27 May 2026';
 
-    // Outside click / scroll / Escape → close. The bar's own click is
-    // capture-phase + stopPropagation, so it never reaches here.
-    document.addEventListener('click', (e) => {
-      if (!agingPopOpen) return;
-      if (e.target.closest('.aging-pop')) return;
-      closeAgingPop();
-    });
-    window.addEventListener('scroll', () => { if (agingPopOpen) closeAgingPop(); }, true);
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAgingPop(); });
-    // "Open full ledger →" inside the popover.
-    agingPop.addEventListener('click', (e) => {
+    // Close: ✕, backdrop click (outside the dialog), Escape.
+    agingBackdrop.addEventListener('click', (e) => {
+      if (e.target === agingBackdrop || e.target.closest('.am-close')) { closeAgingModal(); return; }
       const btn = e.target.closest('.ap-ledger');
-      if (!btn) return;
-      const row = document.querySelector(`tr.party-r[data-pid="${btn.dataset.pid}"]`);
-      closeAgingPop();
-      if (row) { openLedgerRow(row); if (row.scrollIntoView) row.scrollIntoView({ behavior:'smooth', block:'center' }); }
+      if (btn) {
+        const r = document.querySelector(`tr.party-r[data-pid="${btn.dataset.pid}"]`);
+        closeAgingModal();
+        if (r) { openLedgerRow(r); if (r.scrollIntoView) r.scrollIntoView({ behavior:'smooth', block:'center' }); }
+      }
     });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && agingModalOpen) closeAgingModal(); });
 
     const partyRows = Array.from(document.querySelectorAll('table.ledger tr.party-r'));
 
@@ -19370,9 +19404,9 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       });
     });
 
-    // Aging-bar click → anchored popover (collections detail), independent
-    // of the ledger accordion. Capture phase so it intercepts before the
-    // row's own handler (the bar must never open the ledger).
+    // Aging-bar click → centered modal dialog (collections detail),
+    // independent of the ledger accordion. Capture phase so it intercepts
+    // before the row's own handler (the bar must never open the ledger).
     document.querySelector('table.ledger').addEventListener('click', (e) => {
       const bar = e.target.closest('.mini-bar');
       if (!bar) return;
@@ -19380,10 +19414,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       if (!row) return;
       e.stopPropagation();
       if (+row.dataset.out <= 0.5) return;   // paid / advance — nothing to show
-      // Toggle off if the popover is already open for this party.
-      if (agingPopOpen && agingPop.dataset.pid === row.dataset.pid) { closeAgingPop(); return; }
-      agingPop.dataset.pid = row.dataset.pid;
-      openAgingPop(bar, row);
+      openAgingModal(row);
     }, true);
 
     // Delegated FY-head toggle — clicking an FY head expands or
@@ -19809,49 +19840,6 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         cursorY = doc.lastAutoTable.finalY + 8;
       }
 
-      // ── Optional Aging Summary (before the ledger) ───────────
-      // Snapshot of current dues by age band so the reader sees the
-      // exposure before reading entries. Toggled by the footer option.
-      if (opts.includeAging) {
-        const ag = agingSummary(p);
-        doc.setFont(FONT, 'bold');
-        doc.setFontSize(11);
-        doc.setTextColor(11, 18, 32);
-        doc.text(`Aging Summary (as on ${dateLong})`, MARGIN, cursorY);
-        cursorY += 6;
-        const band = (label, amt, color) => [
-          { content: label, styles: { textColor: [80,88,100], fontSize: 10 } },
-          { content: inrAmt(amt), styles: { halign: 'right', textColor: color, fontStyle: 'bold', fontSize: 10 } }
-        ];
-        doc.autoTable({
-          startY: cursorY + 4,
-          margin: { top: MARGIN + 42, left: MARGIN, right: MARGIN, bottom: MARGIN + 28 },
-          tableWidth: CONTENT_W,
-          theme: 'plain',
-          body: [
-            band('0–30 days',  ag.b0, [11,18,32]),
-            band('31–60 days', ag.b1, ag.b1 > 0.5 ? [184,124,0] : [11,18,32]),
-            band('60+ days',   ag.b2, ag.b2 > 0.5 ? [200,40,60] : [11,18,32]),
-            [ { content: 'Total Outstanding', styles: { textColor: [11,18,32], fontStyle: 'bold', fontSize: 10.5 } },
-              { content: fmtBal(ag.total),    styles: { halign: 'right', textColor: [11,18,32], fontStyle: 'bold', fontSize: 11 } } ]
-          ],
-          styles: { font: FONT, cellPadding: { top: 4, right: 8, bottom: 4, left: 8 },
-                    lineColor: [240,242,246], lineWidth: { bottom: 0.3 } },
-          columnStyles: { 0: { cellWidth: CONTENT_W * 0.62 }, 1: { cellWidth: CONTENT_W * 0.38, halign: 'right' } },
-          didDrawPage: () => { notePage(); }
-        });
-        cursorY = doc.lastAutoTable.finalY + 6;
-        doc.setFont(FONT, 'normal');
-        doc.setFontSize(9);
-        doc.setTextColor(110, 118, 130);
-        doc.text(`Oldest invoice: ${ag.oldest} days`, MARGIN, cursorY + 4);
-        cursorY += 16;
-        doc.setDrawColor(220, 224, 228);
-        doc.setLineWidth(0.5);
-        doc.line(MARGIN, cursorY, RIGHT_X, cursorY);
-        cursorY += 12;
-      }
-
       // ── Optional carry-forward block (FY 24-25) ──────────────
       // Just the opening row + divider — no voucher detail exists.
       if (wants24 && Math.abs(p.bf24) > 0.5) {
@@ -19886,6 +19874,11 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       // The last selected FY's debit/credit, captured in the loop and
       // rendered in the unbreakable final block below it.
       let lastFyDebit = 0, lastFyCredit = 0;
+
+      // Per-voucher pending balance (FIFO open bills) → marks unsettled
+      // invoices in the ledger rows. Keyed by the "Vch <no>" label.
+      const pendingMap = {};
+      computeOpenBills(p).forEach(b => { if (b.label && b.rem > 0.5) pendingMap[b.label] = b.rem; });
 
       opFYs.forEach((fy, idx) => {
         const meta = fyMeta[fy];
@@ -19930,6 +19923,9 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
           const creditCell = cr > 0 ? RUPEE + inrNumber(cr) : '—';
           // Balance colour: Dr (positive) = dark text; Cr (negative) = emerald.
           const balColor = running < -0.5 ? [0,132,92] : [11,18,32];
+          // Pending marker — open balance on this invoice (FIFO), if any.
+          const pend = pendingMap['Vch ' + (v.v || '')] || 0;
+          const pendCell = pend > 0.5 ? RUPEE + inrNumber(pend) : '';
           return [
             { content: v.d, styles: { textColor: [80, 88, 100] } },
             { content: 'Vch ' + (v.v || ''),
@@ -19944,16 +19940,16 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                         textColor: cr > 0 ? [0,132,92] : [180,186,196],
                         fontStyle: cr > 0 ? 'bold' : 'normal' } },
             { content: fmtBal(running),
-              styles: { halign: 'right', textColor: balColor, fontStyle: 'bold' } }
+              styles: { halign: 'right', textColor: balColor, fontStyle: 'bold' } },
+            { content: pendCell,
+              styles: { halign: 'right', textColor: [200,40,60], fontStyle: 'bold' } }
           ];
         });
 
-        // Six-column ledger: Date | Voucher | Type | Debit | Credit | Balance
-        // Column widths sum to CONTENT_W (~499pt). Date stays narrow,
-        // voucher gets enough to fit Tally-style refs, Debit/Credit
-        // equal, Balance takes whatever's left.
-        const colDate = 58, colVch = 70, colType = 58, colDebit = 92, colCredit = 92;
-        const colBal = CONTENT_W - colDate - colVch - colType - colDebit - colCredit;
+        // Seven-column ledger: Date | Voucher | Type | Debit | Credit |
+        // Balance | Pending. Widths sum to CONTENT_W (~499pt).
+        const colDate = 50, colVch = 58, colType = 50, colDebit = 76, colCredit = 76, colPend = 76;
+        const colBal = CONTENT_W - colDate - colVch - colType - colDebit - colCredit - colPend;
         doc.autoTable({
           startY: cursorY,
           // top: room for the continuation header on pages 2+.
@@ -19969,20 +19965,21 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
             { content: 'Type',    styles: { halign: 'left'  } },
             { content: 'Debit',   styles: { halign: 'right' } },
             { content: 'Credit',  styles: { halign: 'right' } },
-            { content: 'Balance', styles: { halign: 'right' } }
+            { content: 'Balance', styles: { halign: 'right' } },
+            { content: 'Pending', styles: { halign: 'right' } }
           ]],
           headStyles: {
             fillColor: [245, 247, 250],
             textColor: [80, 88, 100],
             fontStyle: 'bold',
-            fontSize: 8.5,
-            cellPadding: { top: 5, right: 8, bottom: 5, left: 8 },
+            fontSize: 8,
+            cellPadding: { top: 5, right: 6, bottom: 5, left: 6 },
             lineColor: [225, 228, 232],
             lineWidth: { bottom: 0.5 }
           },
           bodyStyles: {
-            fontSize: 9,
-            cellPadding: { top: 3.5, right: 8, bottom: 3.5, left: 8 },
+            fontSize: 8.5,
+            cellPadding: { top: 3.5, right: 6, bottom: 3.5, left: 6 },
             textColor: [11, 18, 32],
             lineColor: [240, 242, 246],
             lineWidth: { bottom: 0.3 }
@@ -19994,7 +19991,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
             2: { cellWidth: colType },
             3: { cellWidth: colDebit,  halign: 'right' },
             4: { cellWidth: colCredit, halign: 'right' },
-            5: { cellWidth: colBal,    halign: 'right' }
+            5: { cellWidth: colBal,    halign: 'right' },
+            6: { cellWidth: colPend,   halign: 'right' }
           },
           rowPageBreak: 'avoid',
           body,
@@ -20114,6 +20112,85 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       if (finalAmt < -0.5) doc.setTextColor(0, 132, 92);
       else                 doc.setTextColor(11, 18, 32);
       doc.text(fmtBal(finalAmt), RIGHT_X - 8, cursorY + 5, { align: 'right' });
+      cursorY += 8;
+
+      // ── Aging Summary card (end of statement) ────────────────
+      // Mirrors the receivables aging detail: bands + %, oldest invoice,
+      // the open-invoice list, and a total with a strong rule. Toggled
+      // by the footer "Include aging summary" option.
+      if (opts.includeAging) {
+        const ag = agingSummary(p);
+        // Keep the card header + bands together on the page.
+        cursorY += 26;
+        if (cursorY + 150 > H - (MARGIN + 24)) { doc.addPage(); notePage(); cursorY = MARGIN + 42; }
+
+        doc.setFont(FONT, 'bold'); doc.setFontSize(12); doc.setTextColor(11, 18, 32);
+        doc.text('Aging Summary', MARGIN, cursorY);
+        const tw = doc.getTextWidth('Aging Summary');
+        doc.setFont(FONT, 'normal'); doc.setFontSize(9); doc.setTextColor(120, 128, 140);
+        doc.text(`as on ${dateLong}`, MARGIN + tw + 8, cursorY);
+        cursorY += 16;
+
+        const pct = v => ag.total > 0 ? '  (' + Math.round(v / ag.total * 100) + '%)' : '';
+        const bandLine = (label, amt, color) => {
+          doc.setFont(FONT, 'normal'); doc.setFontSize(10); doc.setTextColor(80, 88, 100);
+          doc.text(label, MARGIN + 8, cursorY + 4);
+          doc.setFont(FONT, 'bold'); doc.setTextColor(color[0], color[1], color[2]);
+          doc.text(amt > 0.5 ? inrAmt(amt) + pct(amt) : RUPEE + '0', RIGHT_X - 8, cursorY + 4, { align: 'right' });
+          cursorY += 15;
+        };
+        bandLine('0–30 days',  ag.b0, [11, 18, 32]);
+        bandLine('31–60 days', ag.b1, ag.b1 > 0.5 ? [184, 124, 0] : [120, 128, 140]);
+        bandLine('60+ days',   ag.b2, ag.b2 > 0.5 ? [200, 40, 60] : [120, 128, 140]);
+        cursorY += 2;
+        doc.setFont(FONT, 'normal'); doc.setFontSize(9); doc.setTextColor(120, 128, 140);
+        doc.text(`Oldest invoice: ${ag.oldest} days${ag.oldestDate ? ' (' + ag.oldestDate + ')' : ''}`, MARGIN + 8, cursorY + 4);
+        cursorY += 18;
+
+        if (ag.bills.length) {
+          doc.setFont(FONT, 'bold'); doc.setFontSize(9); doc.setTextColor(80, 88, 100);
+          doc.text('Open invoices', MARGIN, cursorY + 4);
+          cursorY += 8;
+          const cV = 60, cAge = 46, cB = 82, cP = 82, cBal = 88;
+          const cInv = CONTENT_W - cV - cAge - cB - cP - cBal;
+          doc.autoTable({
+            startY: cursorY,
+            margin: { top: MARGIN + 42, left: MARGIN, right: MARGIN, bottom: MARGIN + 28 },
+            tableWidth: CONTENT_W, theme: 'plain', styles: { font: FONT }, showHead: 'everyPage',
+            head: [[
+              { content: 'Invoice' }, { content: 'Date' },
+              { content: 'Age', styles: { halign: 'right' } }, { content: 'Billed', styles: { halign: 'right' } },
+              { content: 'Paid', styles: { halign: 'right' } }, { content: 'Balance', styles: { halign: 'right' } }
+            ]],
+            headStyles: { fillColor: [245,247,250], textColor: [80,88,100], fontStyle: 'bold', fontSize: 8,
+                          cellPadding: { top: 5, right: 6, bottom: 5, left: 6 }, lineColor: [225,228,232], lineWidth: { bottom: 0.5 } },
+            bodyStyles: { fontSize: 8.5, cellPadding: { top: 3.5, right: 6, bottom: 3.5, left: 6 },
+                          textColor: [11,18,32], lineColor: [240,242,246], lineWidth: { bottom: 0.3 } },
+            alternateRowStyles: { fillColor: [250,251,253] },
+            columnStyles: { 0: { cellWidth: cInv }, 1: { cellWidth: cV }, 2: { cellWidth: cAge, halign: 'right' },
+                            3: { cellWidth: cB, halign: 'right' }, 4: { cellWidth: cP, halign: 'right' }, 5: { cellWidth: cBal, halign: 'right' } },
+            body: ag.bills.map(b => [
+              { content: b.label, styles: { fontStyle: 'bold' } },
+              { content: b.dateStr, styles: { textColor: [80,88,100] } },
+              { content: b.age + 'd', styles: { halign: 'right', textColor: b.age > 60 ? [200,40,60] : b.age > 30 ? [184,124,0] : [80,88,100] } },
+              { content: inrAmt(b.billed), styles: { halign: 'right' } },
+              { content: b.paid > 0.5 ? inrAmt(b.paid) : '—', styles: { halign: 'right', textColor: b.paid > 0.5 ? [0,132,92] : [180,186,196] } },
+              { content: inrAmt(b.rem), styles: { halign: 'right', fontStyle: 'bold' } }
+            ]),
+            didDrawPage: () => { notePage(); }
+          });
+          cursorY = doc.lastAutoTable.finalY;
+        }
+
+        cursorY += 8;
+        doc.setDrawColor(11, 18, 32); doc.setLineWidth(0.8);
+        doc.line(MARGIN, cursorY, RIGHT_X, cursorY);
+        cursorY += 18;
+        doc.setFont(FONT, 'bold'); doc.setFontSize(11.5); doc.setTextColor(11, 18, 32);
+        doc.text('Total outstanding', MARGIN + 8, cursorY);
+        doc.setFontSize(13);
+        doc.text(fmtBal(ag.total), RIGHT_X - 8, cursorY + 1, { align: 'right' });
+      }
 
       // ── Final pass: paint headers + footers now that the page count
       // and per-page FY map are known. Page 1 → full branded header;
