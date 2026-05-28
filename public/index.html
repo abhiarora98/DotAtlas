@@ -19875,11 +19875,6 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       // rendered in the unbreakable final block below it.
       let lastFyDebit = 0, lastFyCredit = 0;
 
-      // Per-voucher pending balance (FIFO open bills) → marks unsettled
-      // invoices in the ledger rows. Keyed by the "Vch <no>" label.
-      const pendingMap = {};
-      computeOpenBills(p).forEach(b => { if (b.label && b.rem > 0.5) pendingMap[b.label] = b.rem; });
-
       opFYs.forEach((fy, idx) => {
         const meta = fyMeta[fy];
         if (!meta.vouchers.length) return;
@@ -19923,13 +19918,6 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
           const creditCell = cr > 0 ? RUPEE + inrNumber(cr) : '—';
           // Balance colour: Dr (positive) = dark text; Cr (negative) = emerald.
           const balColor = running < -0.5 ? [0,132,92] : [11,18,32];
-          // Pending marker — open balance on this invoice (FIFO), if any.
-          const pend = pendingMap['Vch ' + (v.v || '')] || 0;
-          // Pending column: open balance for debit vouchers (red when
-          // open, muted em-dash when settled); blank for receipts/credits.
-          const isDebit = dr > 0;
-          const pendCell  = !isDebit ? '' : (pend > 0.5 ? RUPEE + inrNumber(pend) : '—');
-          const pendColor = (isDebit && pend > 0.5) ? [200,40,60] : [180,186,196];
           return [
             { content: v.d, styles: { textColor: [80, 88, 100] } },
             { content: 'Vch ' + (v.v || ''),
@@ -19944,16 +19932,13 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
                         textColor: cr > 0 ? [0,132,92] : [180,186,196],
                         fontStyle: cr > 0 ? 'bold' : 'normal' } },
             { content: fmtBal(running),
-              styles: { halign: 'right', textColor: balColor, fontStyle: 'bold' } },
-            { content: pendCell,
-              styles: { halign: 'right', textColor: pendColor, fontStyle: (isDebit && pend > 0.5) ? 'bold' : 'normal' } }
+              styles: { halign: 'right', textColor: balColor, fontStyle: 'bold' } }
           ];
         });
 
-        // Seven-column ledger: Date | Voucher | Type | Debit | Credit |
-        // Balance | Pending. Widths sum to CONTENT_W (~499pt).
-        const colDate = 50, colVch = 58, colType = 50, colDebit = 76, colCredit = 76, colPend = 76;
-        const colBal = CONTENT_W - colDate - colVch - colType - colDebit - colCredit - colPend;
+        // Six-column ledger: Date | Voucher | Type | Debit | Credit | Balance.
+        const colDate = 58, colVch = 70, colType = 58, colDebit = 92, colCredit = 92;
+        const colBal = CONTENT_W - colDate - colVch - colType - colDebit - colCredit;
         doc.autoTable({
           startY: cursorY,
           // top: room for the continuation header on pages 2+.
@@ -19969,21 +19954,20 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
             { content: 'Type',    styles: { halign: 'left'  } },
             { content: 'Debit',   styles: { halign: 'right' } },
             { content: 'Credit',  styles: { halign: 'right' } },
-            { content: 'Balance', styles: { halign: 'right' } },
-            { content: 'Pending', styles: { halign: 'right' } }
+            { content: 'Balance', styles: { halign: 'right' } }
           ]],
           headStyles: {
             fillColor: [245, 247, 250],
             textColor: [80, 88, 100],
             fontStyle: 'bold',
-            fontSize: 8,
-            cellPadding: { top: 5, right: 6, bottom: 5, left: 6 },
+            fontSize: 8.5,
+            cellPadding: { top: 5, right: 8, bottom: 5, left: 8 },
             lineColor: [225, 228, 232],
             lineWidth: { bottom: 0.5 }
           },
           bodyStyles: {
-            fontSize: 8.5,
-            cellPadding: { top: 3.5, right: 6, bottom: 3.5, left: 6 },
+            fontSize: 9,
+            cellPadding: { top: 3.5, right: 8, bottom: 3.5, left: 8 },
             textColor: [11, 18, 32],
             lineColor: [240, 242, 246],
             lineWidth: { bottom: 0.3 }
@@ -19995,8 +19979,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
             2: { cellWidth: colType },
             3: { cellWidth: colDebit,  halign: 'right' },
             4: { cellWidth: colCredit, halign: 'right' },
-            5: { cellWidth: colBal,    halign: 'right' },
-            6: { cellWidth: colPend,   halign: 'right' }
+            5: { cellWidth: colBal,    halign: 'right' }
           },
           rowPageBreak: 'avoid',
           body,
