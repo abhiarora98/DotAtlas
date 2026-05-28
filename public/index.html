@@ -1435,6 +1435,26 @@
     color: var(--text-2); display: flex; justify-content: space-between; gap: 18px;
   }
   .aging-tip .at-oldest b { color: var(--text); font-weight: 600; }
+  /* 60+ invoice list — the actionable follow-up detail. */
+  .aging-tip { min-width: 232px; }
+  .aging-tip .at-inv-h {
+    margin-top: 8px; padding-top: 7px; border-top: 1px solid var(--line);
+    color: var(--rose); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .aging-tip .at-inv {
+    display: flex; align-items: baseline; gap: 10px; padding: 2px 0;
+  }
+  .aging-tip .at-inv-n { color: var(--text-2); min-width: 64px; }
+  .aging-tip .at-inv-a {
+    color: var(--text); font-variant-numeric: tabular-nums;
+    margin-left: auto; text-align: right;
+  }
+  .aging-tip .at-inv-d {
+    color: var(--text-3); font-variant-numeric: tabular-nums;
+    min-width: 38px; text-align: right;
+  }
+  .aging-tip .at-more { color: var(--text-3); font-size: 10px; padding-top: 3px; }
 
   /* Risk badge — minimal: small dot + label. No pill. */
   .risk-cluster {
@@ -18651,8 +18671,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       if (!dataPromise) {
         dataPromise = fetch('data/receivables.json')
           .then(r => r.ok ? r.json() : Promise.reject(new Error('fetch failed: ' + r.status)))
-          .then(j => { dataCache = j.parties || {}; return dataCache; })
-          .catch(e => { console.error('receivables data:', e); dataCache = {}; return dataCache; });
+          .then(j => { dataCache = j.parties || {}; window.__recvParties = dataCache; return dataCache; })
+          .catch(e => { console.error('receivables data:', e); dataCache = {}; window.__recvParties = dataCache; return dataCache; });
       }
       return dataPromise;
     }
@@ -20085,11 +20105,12 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       });
     });
 
-    // ── Aging bar hover tooltip — bucket breakdown of outstanding ──
-    // Derives the three age-band amounts from the row's data attrs:
-    //   60+    = data-d60
-    //   31–60  = data-d30 − data-d60
-    //   0–30   = outstanding − data-d30
+    // ── Aging bar hover tooltip — bucket breakdown + 60+ invoices ──
+    // Bucket amounts come from the row's data attrs (matches the bar):
+    //   60+ = data-d60 · 31–60 = data-d30 − data-d60 · 0–30 = out − d30
+    // The individual 60+ invoices are computed on hover via a FIFO
+    // allocation of receipts against open bills (oldest first), seeded
+    // with the FY 24-25 carry-forward so the ageing is complete.
     (function(){
       const tip = document.createElement('div');
       tip.className = 'aging-tip';
@@ -20101,9 +20122,51 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         if (a >= 1e3) return '₹' + Math.round(a/1e3) + 'k';
         return '₹' + Math.round(a);
       };
+      const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
       const pctStr = (v, total) => total > 0 ? `<span class="at-pct">(${Math.round(v/total*100)}%)</span>` : '';
       const valCell = (v, total) =>
         v > 0 ? `${fmtShort(v)} ${pctStr(v, total)}` : '<span style="color:var(--text-4)">₹0</span>';
+
+      // FIFO open-bill ageing for one party → list of 60+ open invoices,
+      // oldest first. Returns [] when data isn't loaded yet.
+      const TODAY = new Date(2026, 4, 27);          // 27 May 2026
+      const MO = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+      function parseVchDate(d){
+        const parts = String(d||'').trim().split(/\s+/);
+        const day = parseInt(parts[0]); const month = MO[parts[1]];
+        if (month == null || isNaN(day)) return null;
+        const year = parts[2] ? 2000 + parseInt(parts[2]) : (month >= 3 ? 2026 : 2027);
+        return new Date(year, month, day);
+      }
+      function open60(pid){
+        const parties = window.__recvParties;
+        if (!parties || !parties[pid]) return [];
+        const p = parties[pid];
+        const bf24 = p.bf24 || 0;
+        const bills = [];
+        let credit = 0;
+        if (bf24 > 0.5) bills.push({ date: new Date(2025,2,31), label: 'Opening B/F', rem: bf24 });
+        else if (bf24 < -0.5) credit = -bf24;
+        [...(p.fy25||[]), ...(p.fy26||[])].forEach(v => {
+          const dr = v.dr || 0, cr = v.cr || 0;
+          if (dr > 0) {
+            let amt = dr;
+            if (credit > 0) { const u = Math.min(credit, amt); credit -= u; amt -= u; }
+            if (amt > 0.5) bills.push({ date: parseVchDate(v.d), label: 'Vch ' + (v.v||''), rem: amt });
+          }
+          if (cr > 0) {
+            let pay = cr;
+            for (const b of bills) { if (pay <= 0) break; if (b.rem > 0) { const u = Math.min(b.rem, pay); b.rem -= u; pay -= u; } }
+            if (pay > 0) credit += pay;
+          }
+        });
+        return bills
+          .filter(b => b.rem > 0.5 && b.date)
+          .map(b => ({ ...b, age: Math.round((TODAY - b.date) / 86400000) }))
+          .filter(b => b.age > 60)
+          .sort((a,b) => b.age - a.age);
+      }
+
       table.addEventListener('mouseover', e => {
         const bar = e.target.closest('.mini-bar');
         if (!bar) return;
@@ -20117,10 +20180,28 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         const amber = Math.max(0, d30 - d60);
         const blue  = Math.max(0, out - d30);
         const oldest = +row.dataset.oldest || 0;
+
+        // 60+ invoice list (top 4, "+N more" beyond that)
+        let invHtml = '';
+        if (d60 > 0.5) {
+          const list = open60(row.dataset.pid);
+          if (list.length) {
+            const top = list.slice(0, 4);
+            invHtml = '<div class="at-inv-h">60+ invoices</div>'
+              + top.map(b =>
+                  `<div class="at-inv"><span class="at-inv-n">${esc(b.label)}</span>`
+                + `<span class="at-inv-a">${fmtShort(b.rem)}</span>`
+                + `<span class="at-inv-d">${b.age}d</span></div>`
+                ).join('')
+              + (list.length > top.length ? `<div class="at-more">+${list.length - top.length} more</div>` : '');
+          }
+        }
+
         tip.innerHTML =
           `<div class="at-row"><span class="at-k"><span class="at-dot b"></span>Current (0–30)</span><span class="at-v">${valCell(blue, out)}</span></div>`
         + `<div class="at-row"><span class="at-k"><span class="at-dot a"></span>31–60</span><span class="at-v">${valCell(amber, out)}</span></div>`
         + `<div class="at-row"><span class="at-k"><span class="at-dot r"></span>60+</span><span class="at-v">${valCell(red, out)}</span></div>`
+        + invHtml
         + `<div class="at-oldest"><span>Oldest invoice</span><b>${oldest} days</b></div>`;
         tip.classList.add('show');
       });
