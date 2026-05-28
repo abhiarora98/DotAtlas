@@ -1436,7 +1436,7 @@
   }
   .aging-tip .at-oldest b { color: var(--text); font-weight: 600; }
   /* 60+ invoice list — the actionable follow-up detail. */
-  .aging-tip { min-width: 232px; }
+  .aging-tip { min-width: 268px; }
   .aging-tip .at-inv-h {
     margin-top: 8px; padding-top: 7px; border-top: 1px solid var(--line);
     color: var(--rose); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase;
@@ -1445,16 +1445,57 @@
   .aging-tip .at-inv {
     display: flex; align-items: baseline; gap: 10px; padding: 2px 0;
   }
-  .aging-tip .at-inv-n { color: var(--text-2); min-width: 64px; }
+  .aging-tip .at-inv-n { color: var(--text-2); min-width: 60px; }
   .aging-tip .at-inv-a {
     color: var(--text); font-variant-numeric: tabular-nums;
     margin-left: auto; text-align: right;
   }
   .aging-tip .at-inv-d {
     color: var(--text-3); font-variant-numeric: tabular-nums;
-    min-width: 38px; text-align: right;
+    min-width: 92px; text-align: right; white-space: nowrap;
   }
+  .aging-tip .at-inv-d .at-inv-dt { color: var(--text-4); }
   .aging-tip .at-more { color: var(--text-3); font-size: 10px; padding-top: 3px; }
+
+  /* Pending-invoice panel — click the aging bar to expand it in place
+     of the ledger drawer (data-view toggles between the two). */
+  .table.ledger .detail-inner .pending-panel { display: none; }
+  .table.ledger .detail-inner[data-view="pending"] .drawer-card { display: none; }
+  .table.ledger .detail-inner[data-view="pending"] .pending-panel { display: block; }
+  .table.ledger .detail-inner .pending-panel {
+    border: 1px solid var(--line); background: var(--surface);
+  }
+  .table.ledger .detail-inner .pending-panel .pp-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 12px 16px; border-bottom: 1px solid var(--line);
+    font-family: var(--fb); font-size: 13px; font-weight: 600; color: var(--text);
+  }
+  .table.ledger .detail-inner .pending-panel .pp-count {
+    font-family: var(--fm); font-size: 11px; font-weight: 500; color: var(--text-2);
+    letter-spacing: 0.02em;
+  }
+  .table.ledger .detail-inner .pending-panel .pp-row {
+    display: grid; grid-template-columns: 1fr 90px 84px 120px; gap: 14px;
+    padding: 7px 16px; align-items: baseline;
+    font-family: var(--fm); font-size: 12px; color: var(--text-2);
+  }
+  .table.ledger .detail-inner .pending-panel .pp-hrow {
+    font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text-3); border-bottom: 1px solid var(--line);
+    padding-top: 9px; padding-bottom: 9px;
+  }
+  .table.ledger .detail-inner .pending-panel .pp-row:not(.pp-hrow):nth-child(even) {
+    background: rgba(255,255,255,0.02);
+  }
+  .table.ledger .detail-inner .pending-panel .pp-no { color: var(--text); font-family: var(--fb); }
+  .table.ledger .detail-inner .pending-panel .pp-date { color: var(--text-2); }
+  .table.ledger .detail-inner .pending-panel .pp-age { text-align: right; font-variant-numeric: tabular-nums; }
+  .table.ledger .detail-inner .pending-panel .pp-amt {
+    text-align: right; color: var(--text); font-variant-numeric: tabular-nums; font-weight: 500;
+  }
+  .table.ledger .detail-inner .pending-panel .pp-empty {
+    padding: 14px 16px; color: var(--text-3); font-size: 12px;
+  }
 
   /* Risk badge — minimal: small dot + label. No pill. */
   .risk-cluster {
@@ -19055,6 +19096,84 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       else inner.innerHTML = '';
     }
 
+    // ── Shared FIFO open-bill ageing ───────────────────────────
+    // Allocates receipts + credit notes against open invoices oldest
+    // first (seeded with the FY 24-25 carry-forward) and returns the
+    // still-open bills, oldest first. Used by both the aging-bar hover
+    // tooltip (60+ slice) and the click-to-expand pending panel (all).
+    const AG_TODAY = new Date(2026, 4, 27);  // 27 May 2026
+    const AG_MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const AG_MO  = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+    function agParseDate(d){
+      const parts = String(d||'').trim().split(/\s+/);
+      const day = parseInt(parts[0]); const month = AG_MO[parts[1]];
+      if (month == null || isNaN(day)) return null;
+      const year = parts[2] ? 2000 + parseInt(parts[2]) : (month >= 3 ? 2026 : 2027);
+      return new Date(year, month, day);
+    }
+    function computeOpenBills(p){
+      const bf24 = p.bf24 || 0;
+      const bills = []; let credit = 0;
+      if (bf24 > 0.5) bills.push({ date: new Date(2025,2,31), label: 'Opening B/F', rem: bf24 });
+      else if (bf24 < -0.5) credit = -bf24;
+      [...(p.fy25||[]), ...(p.fy26||[])].forEach(v => {
+        const dr = v.dr || 0, cr = v.cr || 0;
+        if (dr > 0) {
+          let amt = dr;
+          if (credit > 0) { const u = Math.min(credit, amt); credit -= u; amt -= u; }
+          if (amt > 0.5) bills.push({ date: agParseDate(v.d), label: 'Vch ' + (v.v||''), rem: amt });
+        }
+        if (cr > 0) {
+          let pay = cr;
+          for (const b of bills) { if (pay <= 0) break; if (b.rem > 0) { const u = Math.min(b.rem, pay); b.rem -= u; pay -= u; } }
+          if (pay > 0) credit += pay;
+        }
+      });
+      return bills
+        .filter(b => b.rem > 0.5 && b.date)
+        .map(b => ({ label: b.label, rem: b.rem, age: Math.round((AG_TODAY - b.date) / 86400000),
+                     dateStr: b.date.getDate() + ' ' + AG_MON[b.date.getMonth()] }))
+        .sort((a,b) => b.age - a.age);
+    }
+    // Exposed for the hover-tooltip block (separate IIFE).
+    window.__recvOpenBills = (pid) => {
+      const p = dataCache && dataCache[pid];
+      return p ? computeOpenBills(p) : [];
+    };
+
+    function fmtBillAmt(n){
+      const a = Math.abs(n);
+      if (a >= 1e7) return '₹' + (a/1e7).toFixed(2) + ' Cr';
+      if (a >= 1e5) return '₹' + (a/1e5).toFixed(1) + ' L';
+      if (a >= 1e3) return '₹' + Math.round(a/1e3) + 'k';
+      return '₹' + Math.round(a);
+    }
+    // Click-to-expand pending-invoice panel (collections detail).
+    function renderPendingPanel(inner, p){
+      const bills = computeOpenBills(p);
+      const old = inner.querySelector('.pending-panel');
+      if (old) old.remove();
+      const total = bills.reduce((s,b)=>s+b.rem, 0);
+      const rows = bills.map(b => {
+        const c = b.age > 60 ? 'var(--rose)' : b.age > 30 ? 'var(--amber)' : 'var(--text-2)';
+        return `<div class="pp-row">`
+          + `<span class="pp-no">${esc(b.label)}</span>`
+          + `<span class="pp-date">${esc(b.dateStr)}</span>`
+          + `<span class="pp-age" style="color:${c}">${b.age}d</span>`
+          + `<span class="pp-amt">${fmtBillAmt(b.rem)}</span>`
+          + `</div>`;
+      }).join('');
+      const panel = document.createElement('div');
+      panel.className = 'pending-panel';
+      panel.innerHTML =
+        `<div class="pp-head"><span>Pending invoices</span>`
+        + `<span class="pp-count">${bills.length} open · ${fmtBillAmt(total)}</span></div>`
+        + `<div class="pp-row pp-hrow"><span>Invoice</span><span>Date</span>`
+        + `<span class="pp-age">Age</span><span class="pp-amt">Amount</span></div>`
+        + (rows || '<div class="pp-empty">No open invoices.</div>');
+      inner.appendChild(panel);
+    }
+
     const partyRows = Array.from(document.querySelectorAll('table.ledger tr.party-r'));
 
     // Pre-render every drawer in idle time after the JSON arrives.
@@ -19141,18 +19260,57 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         if (e.target.closest('button, input')) return;
         const detail = row.nextElementSibling;
         if (!detail || !detail.classList.contains('detail-r')) return;
+        const inner = detail.querySelector('.detail-inner');
+        // If the drawer is open in the pending-invoice view (opened via
+        // the aging bar), a name click switches it to the full ledger
+        // rather than collapsing.
+        if (detail.classList.contains('open') && inner && inner.dataset.view === 'pending') {
+          inner.dataset.view = 'ledger';
+          if (inner.dataset.loaded !== '1') {
+            if (dataCache) renderFromCache(inner, row.dataset.pid);
+            else loadData().then(() => renderFromCache(inner, row.dataset.pid));
+          }
+          return;
+        }
         const isOpen = row.classList.toggle('open');
         detail.classList.toggle('open', isOpen);
+        if (inner) inner.dataset.view = 'ledger';
         if (!isOpen) return;
         // Drawer is already in the DOM thanks to the idle pre-render —
         // CSS toggle is the only work here.
-        const inner = detail.querySelector('.detail-inner');
         if (!inner || inner.dataset.loaded === '1') return;
         // Fallback: user beat the pre-renderer. Render this one now.
         if (dataCache) renderFromCache(inner, row.dataset.pid);
         else loadData().then(() => renderFromCache(inner, row.dataset.pid));
       });
     });
+
+    // Aging-bar click → expand the pending-invoice panel (collections
+    // detail), distinct from the name click that opens the ledger.
+    // Capture phase so it intercepts before the row's own handler.
+    document.querySelector('table.ledger').addEventListener('click', (e) => {
+      const bar = e.target.closest('.mini-bar');
+      if (!bar) return;
+      const row = bar.closest('tr.party-r');
+      if (!row) return;
+      e.stopPropagation();   // don't let the row's ledger toggle fire
+      const detail = row.nextElementSibling;
+      if (!detail || !detail.classList.contains('detail-r')) return;
+      const inner = detail.querySelector('.detail-inner');
+      // Toggle off if already showing pending for this row.
+      if (detail.classList.contains('open') && inner.dataset.view === 'pending') {
+        detail.classList.remove('open'); row.classList.remove('open');
+        return;
+      }
+      const openPanel = (p) => {
+        renderPendingPanel(inner, p);
+        inner.dataset.view = 'pending';
+        row.classList.add('open'); detail.classList.add('open');
+      };
+      const p = dataCache && dataCache[row.dataset.pid];
+      if (p) openPanel(p);
+      else loadData().then(() => { const pp = dataCache[row.dataset.pid]; if (pp) openPanel(pp); });
+    }, true);
 
     // Delegated FY-head toggle — clicking an FY head expands or
     // collapses only its own body directly below. State lives in the
@@ -20128,43 +20286,10 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         v > 0 ? `${fmtShort(v)} ${pctStr(v, total)}` : '<span style="color:var(--text-4)">₹0</span>';
 
       // FIFO open-bill ageing for one party → list of 60+ open invoices,
-      // oldest first. Returns [] when data isn't loaded yet.
-      const TODAY = new Date(2026, 4, 27);          // 27 May 2026
-      const MO = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
-      function parseVchDate(d){
-        const parts = String(d||'').trim().split(/\s+/);
-        const day = parseInt(parts[0]); const month = MO[parts[1]];
-        if (month == null || isNaN(day)) return null;
-        const year = parts[2] ? 2000 + parseInt(parts[2]) : (month >= 3 ? 2026 : 2027);
-        return new Date(year, month, day);
-      }
+      // oldest first. Uses the shared FIFO exposed by the drawer block.
       function open60(pid){
-        const parties = window.__recvParties;
-        if (!parties || !parties[pid]) return [];
-        const p = parties[pid];
-        const bf24 = p.bf24 || 0;
-        const bills = [];
-        let credit = 0;
-        if (bf24 > 0.5) bills.push({ date: new Date(2025,2,31), label: 'Opening B/F', rem: bf24 });
-        else if (bf24 < -0.5) credit = -bf24;
-        [...(p.fy25||[]), ...(p.fy26||[])].forEach(v => {
-          const dr = v.dr || 0, cr = v.cr || 0;
-          if (dr > 0) {
-            let amt = dr;
-            if (credit > 0) { const u = Math.min(credit, amt); credit -= u; amt -= u; }
-            if (amt > 0.5) bills.push({ date: parseVchDate(v.d), label: 'Vch ' + (v.v||''), rem: amt });
-          }
-          if (cr > 0) {
-            let pay = cr;
-            for (const b of bills) { if (pay <= 0) break; if (b.rem > 0) { const u = Math.min(b.rem, pay); b.rem -= u; pay -= u; } }
-            if (pay > 0) credit += pay;
-          }
-        });
-        return bills
-          .filter(b => b.rem > 0.5 && b.date)
-          .map(b => ({ ...b, age: Math.round((TODAY - b.date) / 86400000) }))
-          .filter(b => b.age > 60)
-          .sort((a,b) => b.age - a.age);
+        const all = (typeof window.__recvOpenBills === 'function') ? window.__recvOpenBills(pid) : [];
+        return all.filter(b => b.age > 60);   // already oldest-first
       }
 
       table.addEventListener('mouseover', e => {
@@ -20191,7 +20316,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
               + top.map(b =>
                   `<div class="at-inv"><span class="at-inv-n">${esc(b.label)}</span>`
                 + `<span class="at-inv-a">${fmtShort(b.rem)}</span>`
-                + `<span class="at-inv-d">${b.age}d</span></div>`
+                + `<span class="at-inv-d">${b.age}d <span class="at-inv-dt">(${esc(b.dateStr||'')})</span></span></div>`
                 ).join('')
               + (list.length > top.length ? `<div class="at-more">+${list.length - top.length} more</div>` : '');
           }
