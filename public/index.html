@@ -20124,13 +20124,12 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       // by the footer "Include aging summary" option.
       if (opts.includeAging) {
         const ag = agingSummary(p);
-        // Generous gap, a hairline divider, then more space so the
-        // summary reads as its own section — not crammed under the ledger.
+        // Gap + hairline divider so the summary reads as its own section.
         cursorY += 30;
-        if (cursorY + 170 > H - (MARGIN + 24)) { doc.addPage(); notePage(); cursorY = MARGIN + 42; }
+        if (cursorY + 180 > H - (MARGIN + 24)) { doc.addPage(); notePage(); cursorY = MARGIN + 42; }
         doc.setDrawColor(220, 224, 228); doc.setLineWidth(0.5);
         doc.line(MARGIN, cursorY, RIGHT_X, cursorY);
-        cursorY += 26;
+        cursorY += 24;
 
         doc.setFont(FONT, 'bold'); doc.setFontSize(12.5); doc.setTextColor(11, 18, 32);
         doc.text('Aging Summary', MARGIN, cursorY);
@@ -20139,32 +20138,48 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         doc.text(`(as on ${dateLong})`, MARGIN + tw + 8, cursorY);
         cursorY += 16;
 
-        // Bands — amounts right-aligned to a near anchor (not the page
-        // edge) so label and value read together, compact.
-        const bandRight = MARGIN + 300;
-        const pct = v => ag.total > 0 ? '   (' + Math.round(v / ag.total * 100) + '%)' : '';
+        // Bands — the ₹ amount right-aligns to one fixed column so the
+        // three line up vertically; the % sits left-aligned just after.
+        const amountRight = MARGIN + 248;
         const bandLine = (label, amt, color) => {
           doc.setFont(FONT, 'normal'); doc.setFontSize(10); doc.setTextColor(80, 88, 100);
           doc.text(label, MARGIN + 8, cursorY + 4);
           doc.setFont(FONT, 'bold'); doc.setTextColor(color[0], color[1], color[2]);
-          doc.text(amt > 0.5 ? inrAmt(amt) + pct(amt) : RUPEE + '0', bandRight, cursorY + 4, { align: 'right' });
+          doc.text(amt > 0.5 ? inrAmt(amt) : RUPEE + '0', amountRight, cursorY + 4, { align: 'right' });
+          if (amt > 0.5 && ag.total > 0) {
+            doc.setFont(FONT, 'normal'); doc.setFontSize(9); doc.setTextColor(150, 156, 166);
+            doc.text(`(${Math.round(amt / ag.total * 100)}%)`, amountRight + 8, cursorY + 4);
+          }
           cursorY += 14;
         };
         bandLine('0–30 days',  ag.b0, [11, 18, 32]);
         bandLine('31–60 days', ag.b1, ag.b1 > 0.5 ? [184, 124, 0] : [120, 128, 140]);
         bandLine('60+ days',   ag.b2, ag.b2 > 0.5 ? [200, 40, 60] : [120, 128, 140]);
-        cursorY += 2;
+
+        // Total outstanding — inside the block, under an accounting rule.
+        cursorY += 6;
+        doc.setDrawColor(11, 18, 32); doc.setLineWidth(0.7);
+        doc.line(MARGIN, cursorY, amountRight + 52, cursorY);
+        cursorY += 15;
+        doc.setFont(FONT, 'bold'); doc.setFontSize(11); doc.setTextColor(11, 18, 32);
+        doc.text('Total outstanding', MARGIN + 8, cursorY);
+        doc.setFontSize(11.5);
+        doc.text(inrAmt(ag.total), amountRight, cursorY, { align: 'right' });
+        const tSuf = ag.total > 0.5 ? 'Dr' : (ag.total < -0.5 ? 'Cr' : '');
+        if (tSuf) { doc.setFont(FONT, 'normal'); doc.setFontSize(9.5); doc.setTextColor(120, 128, 140); doc.text(tSuf, amountRight + 8, cursorY); }
+        cursorY += 14;
         doc.setFont(FONT, 'normal'); doc.setFontSize(9); doc.setTextColor(120, 128, 140);
         doc.text(`Oldest invoice: ${ag.oldest} days${ag.oldestDate ? ' (' + ag.oldestDate + ')' : ''}`, MARGIN + 8, cursorY + 4);
-        cursorY += 14;
+        cursorY += 18;
 
         if (ag.bills.length) {
-          doc.setFont(FONT, 'bold'); doc.setFontSize(10); doc.setTextColor(11, 18, 32);
-          doc.text('Open invoices', MARGIN, cursorY + 6);
-          cursorY += 10;
-          // Invoice | Date | Age | Billed | Paid | Pending | Balance
-          const cV = 56, cAge = 42, cB = 76, cP = 76, cPend = 76, cBal = 76;
-          const cInv = CONTENT_W - cV - cAge - cB - cP - cPend - cBal;
+          doc.setFont(FONT, 'bold'); doc.setFontSize(10.5); doc.setTextColor(11, 18, 32);
+          doc.text('Open invoices', MARGIN, cursorY + 4);
+          cursorY += 9;
+          // Invoice | Date | Age | Billed | Paid | Balance (no Pending —
+          // Balance already conveys the open amount).
+          const cV = 64, cAge = 46, cB = 88, cP = 88, cBal = 96;
+          const cInv = CONTENT_W - cV - cAge - cB - cP - cBal;
           doc.autoTable({
             startY: cursorY,
             margin: { top: MARGIN + 42, left: MARGIN, right: MARGIN, bottom: MARGIN + 28 },
@@ -20172,39 +20187,27 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
             head: [[
               { content: 'Invoice' }, { content: 'Date' },
               { content: 'Age', styles: { halign: 'right' } }, { content: 'Billed', styles: { halign: 'right' } },
-              { content: 'Paid', styles: { halign: 'right' } }, { content: 'Pending', styles: { halign: 'right' } },
-              { content: 'Balance', styles: { halign: 'right' } }
+              { content: 'Paid', styles: { halign: 'right' } }, { content: 'Balance', styles: { halign: 'right' } }
             ]],
-            headStyles: { fillColor: [245,247,250], textColor: [80,88,100], fontStyle: 'bold', fontSize: 7.5,
-                          cellPadding: { top: 5, right: 5, bottom: 5, left: 5 }, lineColor: [225,228,232], lineWidth: { bottom: 0.5 } },
-            bodyStyles: { fontSize: 8, cellPadding: { top: 3, right: 5, bottom: 3, left: 5 },
+            headStyles: { fillColor: [238,241,245], textColor: [40,48,62], fontStyle: 'bold', fontSize: 8.5,
+                          cellPadding: { top: 5, right: 7, bottom: 5, left: 7 }, lineColor: [210,215,222], lineWidth: { bottom: 0.6 } },
+            bodyStyles: { fontSize: 8.5, cellPadding: { top: 3.5, right: 7, bottom: 3.5, left: 7 },
                           textColor: [11,18,32], lineColor: [240,242,246], lineWidth: { bottom: 0.3 } },
             alternateRowStyles: { fillColor: [250,251,253] },
             columnStyles: { 0: { cellWidth: cInv }, 1: { cellWidth: cV }, 2: { cellWidth: cAge, halign: 'right' },
-                            3: { cellWidth: cB, halign: 'right' }, 4: { cellWidth: cP, halign: 'right' },
-                            5: { cellWidth: cPend, halign: 'right' }, 6: { cellWidth: cBal, halign: 'right' } },
+                            3: { cellWidth: cB, halign: 'right' }, 4: { cellWidth: cP, halign: 'right' }, 5: { cellWidth: cBal, halign: 'right' } },
             body: ag.bills.map(b => [
               { content: b.label, styles: { fontStyle: 'bold' } },
               { content: b.dateStr, styles: { textColor: [80,88,100] } },
               { content: b.age + 'd', styles: { halign: 'right', textColor: b.age > 60 ? [200,40,60] : b.age > 30 ? [184,124,0] : [80,88,100] } },
               { content: inrAmt(b.billed), styles: { halign: 'right' } },
               { content: b.paid > 0.5 ? inrAmt(b.paid) : '—', styles: { halign: 'right', textColor: b.paid > 0.5 ? [0,132,92] : [180,186,196] } },
-              { content: inrAmt(b.rem), styles: { halign: 'right', textColor: [200,40,60], fontStyle: 'bold' } },
               { content: inrAmt(b.rem), styles: { halign: 'right', fontStyle: 'bold' } }
             ]),
             didDrawPage: () => { notePage(); }
           });
           cursorY = doc.lastAutoTable.finalY;
         }
-
-        cursorY += 10;
-        doc.setDrawColor(11, 18, 32); doc.setLineWidth(0.8);
-        doc.line(MARGIN, cursorY, RIGHT_X, cursorY);
-        cursorY += 16;
-        doc.setFont(FONT, 'bold'); doc.setFontSize(11.5); doc.setTextColor(11, 18, 32);
-        doc.text('Total outstanding', MARGIN, cursorY);
-        doc.setFontSize(13);
-        doc.text(fmtBal(ag.total), RIGHT_X - 8, cursorY + 1, { align: 'right' });
       }
 
       // ── Final pass: paint headers + footers now that the page count
