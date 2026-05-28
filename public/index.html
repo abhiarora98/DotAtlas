@@ -20126,58 +20126,46 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         const ag = agingSummary(p);
         // Gap + hairline divider so the summary reads as its own section.
         cursorY += 30;
-        if (cursorY + 180 > H - (MARGIN + 24)) { doc.addPage(); notePage(); cursorY = MARGIN + 42; }
+        if (cursorY + 200 > H - (MARGIN + 24)) { doc.addPage(); notePage(); cursorY = MARGIN + 42; }
         doc.setDrawColor(220, 224, 228); doc.setLineWidth(0.5);
         doc.line(MARGIN, cursorY, RIGHT_X, cursorY);
-        cursorY += 24;
+        cursorY += 26;
 
-        doc.setFont(FONT, 'bold'); doc.setFontSize(12.5); doc.setTextColor(11, 18, 32);
+        doc.setFont(FONT, 'bold'); doc.setFontSize(13); doc.setTextColor(11, 18, 32);
         doc.text('Aging Summary', MARGIN, cursorY);
         const tw = doc.getTextWidth('Aging Summary');
-        doc.setFont(FONT, 'normal'); doc.setFontSize(9); doc.setTextColor(120, 128, 140);
+        doc.setFont(FONT, 'normal'); doc.setFontSize(9.5); doc.setTextColor(120, 128, 140);
         doc.text(`(as on ${dateLong})`, MARGIN + tw + 8, cursorY);
-        cursorY += 16;
+        cursorY += 20;
 
-        // Bands — the ₹ amount right-aligns to one fixed column so the
-        // three line up vertically; the % sits left-aligned just after.
-        const amountRight = MARGIN + 248;
+        // Bands — full width: label left, ₹ right-aligned near the page
+        // edge (so all three line up), % left-aligned just after.
+        const numRight = RIGHT_X - 52;
         const bandLine = (label, amt, color) => {
-          doc.setFont(FONT, 'normal'); doc.setFontSize(10); doc.setTextColor(80, 88, 100);
+          doc.setFont(FONT, 'normal'); doc.setFontSize(10.5); doc.setTextColor(80, 88, 100);
           doc.text(label, MARGIN + 8, cursorY + 4);
           doc.setFont(FONT, 'bold'); doc.setTextColor(color[0], color[1], color[2]);
-          doc.text(amt > 0.5 ? inrAmt(amt) : RUPEE + '0', amountRight, cursorY + 4, { align: 'right' });
+          doc.text(amt > 0.5 ? inrAmt(amt) : RUPEE + '0', numRight, cursorY + 4, { align: 'right' });
           if (amt > 0.5 && ag.total > 0) {
             doc.setFont(FONT, 'normal'); doc.setFontSize(9); doc.setTextColor(150, 156, 166);
-            doc.text(`(${Math.round(amt / ag.total * 100)}%)`, amountRight + 8, cursorY + 4);
+            doc.text(`(${Math.round(amt / ag.total * 100)}%)`, numRight + 8, cursorY + 4);
           }
-          cursorY += 14;
+          cursorY += 17;
         };
         bandLine('0–30 days',  ag.b0, [11, 18, 32]);
         bandLine('31–60 days', ag.b1, ag.b1 > 0.5 ? [184, 124, 0] : [120, 128, 140]);
         bandLine('60+ days',   ag.b2, ag.b2 > 0.5 ? [200, 40, 60] : [120, 128, 140]);
-
-        // Total outstanding — inside the block, under an accounting rule.
-        cursorY += 6;
-        doc.setDrawColor(11, 18, 32); doc.setLineWidth(0.7);
-        doc.line(MARGIN, cursorY, amountRight + 52, cursorY);
-        cursorY += 15;
-        doc.setFont(FONT, 'bold'); doc.setFontSize(11); doc.setTextColor(11, 18, 32);
-        doc.text('Total outstanding', MARGIN + 8, cursorY);
-        doc.setFontSize(11.5);
-        doc.text(inrAmt(ag.total), amountRight, cursorY, { align: 'right' });
-        const tSuf = ag.total > 0.5 ? 'Dr' : (ag.total < -0.5 ? 'Cr' : '');
-        if (tSuf) { doc.setFont(FONT, 'normal'); doc.setFontSize(9.5); doc.setTextColor(120, 128, 140); doc.text(tSuf, amountRight + 8, cursorY); }
-        cursorY += 14;
-        doc.setFont(FONT, 'normal'); doc.setFontSize(9); doc.setTextColor(120, 128, 140);
+        cursorY += 4;
+        doc.setFont(FONT, 'normal'); doc.setFontSize(9.5); doc.setTextColor(120, 128, 140);
         doc.text(`Oldest invoice: ${ag.oldest} days${ag.oldestDate ? ' (' + ag.oldestDate + ')' : ''}`, MARGIN + 8, cursorY + 4);
-        cursorY += 18;
+        cursorY += 24;
 
         if (ag.bills.length) {
           doc.setFont(FONT, 'bold'); doc.setFontSize(10.5); doc.setTextColor(11, 18, 32);
           doc.text('Open invoices', MARGIN, cursorY + 4);
-          cursorY += 9;
-          // Invoice | Date | Age | Billed | Paid | Balance (no Pending —
-          // Balance already conveys the open amount).
+          cursorY += 10;
+          // Invoice | Date | Age | Billed | Paid | Balance (Balance is
+          // the open amount, so no separate Pending column).
           const cV = 64, cAge = 46, cB = 88, cP = 88, cBal = 96;
           const cInv = CONTENT_W - cV - cAge - cB - cP - cBal;
           doc.autoTable({
@@ -20208,6 +20196,18 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
           });
           cursorY = doc.lastAutoTable.finalY;
         }
+
+        // Total outstanding — full-width final line beneath the table.
+        cursorY += 14;
+        doc.setDrawColor(11, 18, 32); doc.setLineWidth(0.8);
+        doc.line(MARGIN, cursorY, RIGHT_X, cursorY);
+        cursorY += 18;
+        doc.setFont(FONT, 'bold'); doc.setFontSize(12); doc.setTextColor(11, 18, 32);
+        doc.text('Total outstanding', MARGIN, cursorY);
+        doc.setFontSize(13.5);
+        if (ag.total < -0.5) doc.setTextColor(0, 132, 92);
+        else                 doc.setTextColor(11, 18, 32);
+        doc.text(fmtBal(ag.total), RIGHT_X - 8, cursorY + 1, { align: 'right' });
       }
 
       // ── Final pass: paint headers + footers now that the page count
