@@ -1398,7 +1398,21 @@
   .mini-bar .s0 { background: var(--blue); }
   .mini-bar .s1 { background: var(--amber); }
   .mini-bar .s2 { background: var(--rose); }
-  .table.ledger tr.party-r .mini-bar { cursor: help; }
+  /* Aging is clickable → pointer + hover brighten + a chevron cue in
+     the cell so it's obviously interactive. */
+  .table.ledger tr.party-r .mini-bar {
+    cursor: pointer; transition: box-shadow 140ms ease, background 140ms ease;
+  }
+  .table.ledger tr.party-r:not(.paid):not(.advance) td:nth-child(2)::after {
+    content: '⌄'; margin-left: 7px; vertical-align: middle;
+    color: var(--text-4); font-size: 13px; line-height: 1;
+    opacity: 0; transition: opacity 140ms ease;
+  }
+  .table.ledger tr.party-r:hover td:nth-child(2)::after { opacity: 1; color: var(--text-2); }
+  .table.ledger tr.party-r .mini-bar:hover {
+    background: rgba(255,255,255,0.16);
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.12);
+  }
   /* DSO numbers (col 3) read faster — heavier + a touch larger; the
      threshold colour is set inline per row (green / amber / red). */
   .table.ledger tbody td:nth-child(3) {
@@ -1435,67 +1449,57 @@
     color: var(--text-2); display: flex; justify-content: space-between; gap: 18px;
   }
   .aging-tip .at-oldest b { color: var(--text); font-weight: 600; }
-  /* 60+ invoice list — the actionable follow-up detail. */
-  .aging-tip { min-width: 268px; }
-  .aging-tip .at-inv-h {
+  .aging-tip { min-width: 232px; }
+  .aging-tip .at-hint {
     margin-top: 8px; padding-top: 7px; border-top: 1px solid var(--line);
-    color: var(--rose); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase;
-    margin-bottom: 2px;
+    color: var(--emerald); font-size: 10px; letter-spacing: 0.04em;
   }
-  .aging-tip .at-inv {
-    display: flex; align-items: baseline; gap: 10px; padding: 2px 0;
-  }
-  .aging-tip .at-inv-n { color: var(--text-2); min-width: 60px; }
-  .aging-tip .at-inv-a {
-    color: var(--text); font-variant-numeric: tabular-nums;
-    margin-left: auto; text-align: right;
-  }
-  .aging-tip .at-inv-d {
-    color: var(--text-3); font-variant-numeric: tabular-nums;
-    min-width: 92px; text-align: right; white-space: nowrap;
-  }
-  .aging-tip .at-inv-d .at-inv-dt { color: var(--text-4); }
-  .aging-tip .at-more { color: var(--text-3); font-size: 10px; padding-top: 3px; }
 
-  /* Pending-invoice panel — click the aging bar to expand it in place
-     of the ledger drawer (data-view toggles between the two). */
-  .table.ledger .detail-inner .pending-panel { display: none; }
-  .table.ledger .detail-inner[data-view="pending"] .drawer-card { display: none; }
-  .table.ledger .detail-inner[data-view="pending"] .pending-panel { display: block; }
-  .table.ledger .detail-inner .pending-panel {
-    border: 1px solid var(--line); background: var(--surface);
+  /* Aging popover — anchored beside the bar on click. Full open-bill
+     detail (Invoice · Date · Age · Billed · Paid · Balance). */
+  .aging-pop {
+    position: fixed; z-index: 9998; left: 0; top: 0;
+    background: var(--surface-2); border: 1px solid var(--line-2);
+    border-radius: 9px; box-shadow: 0 14px 40px rgba(0,0,0,0.5);
+    width: 460px; max-width: calc(100vw - 16px);
+    opacity: 0; pointer-events: none; transition: opacity 90ms ease;
+    font-family: var(--fm);
   }
-  .table.ledger .detail-inner .pending-panel .pp-head {
+  .aging-pop.show { opacity: 1; pointer-events: auto; }
+  .aging-pop .ap-head {
     display: flex; justify-content: space-between; align-items: baseline;
     padding: 12px 16px; border-bottom: 1px solid var(--line);
-    font-family: var(--fb); font-size: 13px; font-weight: 600; color: var(--text);
   }
-  .table.ledger .detail-inner .pending-panel .pp-count {
-    font-family: var(--fm); font-size: 11px; font-weight: 500; color: var(--text-2);
-    letter-spacing: 0.02em;
+  .aging-pop .ap-name { font-family: var(--fb); font-size: 14px; font-weight: 600; color: var(--text); }
+  .aging-pop .ap-tot { font-family: var(--fd); font-size: 14px; font-weight: 600; color: var(--text); }
+  .aging-pop .ap-tot span { font-family: var(--fm); font-size: 10px; color: var(--text-3); margin-left: 4px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .aging-pop .ap-row {
+    display: grid; grid-template-columns: 1fr 64px 52px 78px 78px 84px; gap: 10px;
+    padding: 6px 16px; align-items: baseline;
+    font-size: 11.5px; color: var(--text-2); font-variant-numeric: tabular-nums;
   }
-  .table.ledger .detail-inner .pending-panel .pp-row {
-    display: grid; grid-template-columns: 1fr 90px 84px 120px; gap: 14px;
-    padding: 7px 16px; align-items: baseline;
-    font-family: var(--fm); font-size: 12px; color: var(--text-2);
-  }
-  .table.ledger .detail-inner .pending-panel .pp-hrow {
-    font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase;
+  .aging-pop .ap-hrow {
+    font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
     color: var(--text-3); border-bottom: 1px solid var(--line);
     padding-top: 9px; padding-bottom: 9px;
   }
-  .table.ledger .detail-inner .pending-panel .pp-row:not(.pp-hrow):nth-child(even) {
-    background: rgba(255,255,255,0.02);
+  .aging-pop .ap-body { max-height: 320px; overflow-y: auto; }
+  .aging-pop .ap-body .ap-row:nth-child(even) { background: rgba(255,255,255,0.02); }
+  .aging-pop .ap-no   { color: var(--text); font-family: var(--fb); }
+  .aging-pop .ap-date { color: var(--text-2); }
+  .aging-pop .ap-age,
+  .aging-pop .ap-bill,
+  .aging-pop .ap-paid,
+  .aging-pop .ap-bal  { text-align: right; }
+  .aging-pop .ap-bal  { color: var(--text); font-weight: 600; }
+  .aging-pop .ap-empty { padding: 16px; color: var(--text-3); font-size: 12px; }
+  .aging-pop .ap-foot { padding: 10px 16px; border-top: 1px solid var(--line); text-align: right; }
+  .aging-pop .ap-ledger {
+    background: transparent; border: 0; cursor: pointer;
+    font-family: var(--fm); font-size: 11px; font-weight: 600;
+    letter-spacing: 0.04em; color: var(--emerald); padding: 2px 0;
   }
-  .table.ledger .detail-inner .pending-panel .pp-no { color: var(--text); font-family: var(--fb); }
-  .table.ledger .detail-inner .pending-panel .pp-date { color: var(--text-2); }
-  .table.ledger .detail-inner .pending-panel .pp-age { text-align: right; font-variant-numeric: tabular-nums; }
-  .table.ledger .detail-inner .pending-panel .pp-amt {
-    text-align: right; color: var(--text); font-variant-numeric: tabular-nums; font-weight: 500;
-  }
-  .table.ledger .detail-inner .pending-panel .pp-empty {
-    padding: 14px 16px; color: var(--text-3); font-size: 12px;
-  }
+  .aging-pop .ap-ledger:hover { text-decoration: underline; }
 
   /* Risk badge — minimal: small dot + label. No pill. */
   .risk-cluster {
@@ -18935,7 +18939,9 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         : '';
       const footer = yearOpts.length
         ? `<div class="drawer-footer">`
-          + `<div class="dl-years">${selectAllBox}${yearChecks}</div>`
+          + `<div class="dl-years">${selectAllBox}${yearChecks}`
+          +   `<label class="dl-year dl-opt"><input type="checkbox" class="dl-aging-cb" checked><span>Include aging summary</span></label>`
+          + `</div>`
           + `<button type="button" class="dl-btn" data-pid="${esc(pid)}">Download statement PDF</button>`
           + `</div>`
         : '';
@@ -19114,14 +19120,16 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     function computeOpenBills(p){
       const bf24 = p.bf24 || 0;
       const bills = []; let credit = 0;
-      if (bf24 > 0.5) bills.push({ date: new Date(2025,2,31), label: 'Opening B/F', rem: bf24 });
+      if (bf24 > 0.5) bills.push({ date: new Date(2025,2,31), label: 'Opening B/F', billed: bf24, rem: bf24 });
       else if (bf24 < -0.5) credit = -bf24;
       [...(p.fy25||[]), ...(p.fy26||[])].forEach(v => {
         const dr = v.dr || 0, cr = v.cr || 0;
         if (dr > 0) {
           let amt = dr;
           if (credit > 0) { const u = Math.min(credit, amt); credit -= u; amt -= u; }
-          if (amt > 0.5) bills.push({ date: agParseDate(v.d), label: 'Vch ' + (v.v||''), rem: amt });
+          // billed records the full original invoice; rem is the unpaid
+          // portion (so paid = billed − rem, incl. any advance applied).
+          bills.push({ date: agParseDate(v.d), label: 'Vch ' + (v.v||''), billed: dr, rem: amt });
         }
         if (cr > 0) {
           let pay = cr;
@@ -19131,9 +19139,23 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       });
       return bills
         .filter(b => b.rem > 0.5 && b.date)
-        .map(b => ({ label: b.label, rem: b.rem, age: Math.round((AG_TODAY - b.date) / 86400000),
+        .map(b => ({ label: b.label, billed: b.billed, paid: Math.max(0, b.billed - b.rem), rem: b.rem,
+                     age: Math.round((AG_TODAY - b.date) / 86400000),
                      dateStr: b.date.getDate() + ' ' + AG_MON[b.date.getMonth()] }))
         .sort((a,b) => b.age - a.age);
+    }
+    // Aging buckets + oldest, derived from the open bills. Shared by the
+    // popover header and the PDF aging-summary block.
+    function agingSummary(p){
+      const bills = computeOpenBills(p);
+      let b0 = 0, b1 = 0, b2 = 0, oldest = 0;
+      bills.forEach(b => {
+        if (b.age > 60)      b2 += b.rem;
+        else if (b.age > 30) b1 += b.rem;
+        else                 b0 += b.rem;
+        if (b.age > oldest) oldest = b.age;
+      });
+      return { bills, b0, b1, b2, total: b0 + b1 + b2, oldest };
     }
     // Exposed for the hover-tooltip block (separate IIFE).
     window.__recvOpenBills = (pid) => {
@@ -19148,31 +19170,84 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       if (a >= 1e3) return '₹' + Math.round(a/1e3) + 'k';
       return '₹' + Math.round(a);
     }
-    // Click-to-expand pending-invoice panel (collections detail).
-    function renderPendingPanel(inner, p){
-      const bills = computeOpenBills(p);
-      const old = inner.querySelector('.pending-panel');
-      if (old) old.remove();
-      const total = bills.reduce((s,b)=>s+b.rem, 0);
-      const rows = bills.map(b => {
-        const c = b.age > 60 ? 'var(--rose)' : b.age > 30 ? 'var(--amber)' : 'var(--text-2)';
-        return `<div class="pp-row">`
-          + `<span class="pp-no">${esc(b.label)}</span>`
-          + `<span class="pp-date">${esc(b.dateStr)}</span>`
-          + `<span class="pp-age" style="color:${c}">${b.age}d</span>`
-          + `<span class="pp-amt">${fmtBillAmt(b.rem)}</span>`
-          + `</div>`;
-      }).join('');
-      const panel = document.createElement('div');
-      panel.className = 'pending-panel';
-      panel.innerHTML =
-        `<div class="pp-head"><span>Pending invoices</span>`
-        + `<span class="pp-count">${bills.length} open · ${fmtBillAmt(total)}</span></div>`
-        + `<div class="pp-row pp-hrow"><span>Invoice</span><span>Date</span>`
-        + `<span class="pp-age">Age</span><span class="pp-amt">Amount</span></div>`
-        + (rows || '<div class="pp-empty">No open invoices.</div>');
-      inner.appendChild(panel);
+
+    // ── Aging popover — anchored beside the bar on click ───────
+    // Shows the full open-bill list (Invoice · Date · Age · Billed ·
+    // Paid · Balance) without pushing the table rows down. One popover
+    // at a time; closes on outside click / scroll / Escape.
+    const agingPop = document.createElement('div');
+    agingPop.className = 'aging-pop';
+    document.body.appendChild(agingPop);
+    let agingPopOpen = false;
+
+    function closeAgingPop(){
+      agingPop.classList.remove('show');
+      agingPopOpen = false;
     }
+    function openAgingPop(bar, row){
+      const pid = row.dataset.pid;
+      const render = (p) => {
+        const sum = agingSummary(p);
+        const name = row.querySelector('.pri')?.textContent.trim() || '';
+        const rowsHtml = sum.bills.map(b => {
+          const ageC  = b.age > 60 ? 'var(--rose)' : b.age > 30 ? 'var(--amber)' : 'var(--text-2)';
+          const paidC = b.paid > 0.5 ? 'var(--emerald)' : 'var(--text-4)';
+          return `<div class="ap-row">`
+            + `<span class="ap-no">${esc(b.label)}</span>`
+            + `<span class="ap-date">${esc(b.dateStr)}</span>`
+            + `<span class="ap-age" style="color:${ageC}">${b.age}d</span>`
+            + `<span class="ap-bill">${fmtBillAmt(b.billed)}</span>`
+            + `<span class="ap-paid" style="color:${paidC}">${b.paid > 0.5 ? fmtBillAmt(b.paid) : '—'}</span>`
+            + `<span class="ap-bal">${fmtBillAmt(b.rem)}</span>`
+            + `</div>`;
+        }).join('');
+        agingPop.innerHTML =
+          `<div class="ap-head"><div class="ap-name">${esc(name)}</div>`
+          + `<div class="ap-tot">${fmtBillAmt(sum.total)} <span>outstanding</span></div></div>`
+          + `<div class="ap-row ap-hrow"><span class="ap-no">Invoice</span><span class="ap-date">Date</span>`
+          + `<span class="ap-age">Age</span><span class="ap-bill">Billed</span>`
+          + `<span class="ap-paid">Paid</span><span class="ap-bal">Balance</span></div>`
+          + `<div class="ap-body">${rowsHtml || '<div class="ap-empty">No open invoices.</div>'}</div>`
+          + `<div class="ap-foot"><button type="button" class="ap-ledger" data-pid="${esc(pid)}">Open full ledger →</button></div>`;
+        // Position beside the bar (right side, flip left if no room).
+        agingPop.style.visibility = 'hidden';
+        agingPop.classList.add('show');
+        const r = bar.getBoundingClientRect();
+        const pr = agingPop.getBoundingClientRect();
+        const vw = window.innerWidth, vh = window.innerHeight;
+        let x = r.right + 12;
+        if (x + pr.width > vw - 8) x = r.left - pr.width - 12;
+        if (x < 8) x = 8;
+        let y = r.top - 6;
+        if (y + pr.height > vh - 8) y = vh - pr.height - 8;
+        if (y < 8) y = 8;
+        agingPop.style.left = x + 'px';
+        agingPop.style.top  = y + 'px';
+        agingPop.style.visibility = '';
+        agingPopOpen = true;
+      };
+      const p = dataCache && dataCache[pid];
+      if (p) render(p);
+      else loadData().then(() => { const pp = dataCache[pid]; if (pp) render(pp); });
+    }
+
+    // Outside click / scroll / Escape → close. The bar's own click is
+    // capture-phase + stopPropagation, so it never reaches here.
+    document.addEventListener('click', (e) => {
+      if (!agingPopOpen) return;
+      if (e.target.closest('.aging-pop')) return;
+      closeAgingPop();
+    });
+    window.addEventListener('scroll', () => { if (agingPopOpen) closeAgingPop(); }, true);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAgingPop(); });
+    // "Open full ledger →" inside the popover.
+    agingPop.addEventListener('click', (e) => {
+      const btn = e.target.closest('.ap-ledger');
+      if (!btn) return;
+      const row = document.querySelector(`tr.party-r[data-pid="${btn.dataset.pid}"]`);
+      closeAgingPop();
+      if (row) { openLedgerRow(row); if (row.scrollIntoView) row.scrollIntoView({ behavior:'smooth', block:'center' }); }
+    });
 
     const partyRows = Array.from(document.querySelectorAll('table.ledger tr.party-r'));
 
@@ -19255,61 +19330,60 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       });
     }
 
+    // Accordion: only one party ledger open at a time. Closes any other
+    // open row, then opens (and lazy-renders) the requested one.
+    function closeAllRowsExcept(keepRow){
+      partyRows.forEach(r => {
+        if (r === keepRow) return;
+        if (r.classList.contains('open')) {
+          r.classList.remove('open');
+          const dr = r.nextElementSibling;
+          if (dr && dr.classList.contains('detail-r')) dr.classList.remove('open');
+        }
+      });
+    }
+    function openLedgerRow(row){
+      const detail = row.nextElementSibling;
+      if (!detail || !detail.classList.contains('detail-r')) return;
+      const inner = detail.querySelector('.detail-inner');
+      closeAllRowsExcept(row);
+      row.classList.add('open');
+      detail.classList.add('open');
+      if (inner && inner.dataset.loaded !== '1') {
+        if (dataCache) renderFromCache(inner, row.dataset.pid);
+        else loadData().then(() => renderFromCache(inner, row.dataset.pid));
+      }
+    }
+
     partyRows.forEach(row => {
       row.addEventListener('click', (e) => {
         if (e.target.closest('button, input')) return;
         const detail = row.nextElementSibling;
         if (!detail || !detail.classList.contains('detail-r')) return;
-        const inner = detail.querySelector('.detail-inner');
-        // If the drawer is open in the pending-invoice view (opened via
-        // the aging bar), a name click switches it to the full ledger
-        // rather than collapsing.
-        if (detail.classList.contains('open') && inner && inner.dataset.view === 'pending') {
-          inner.dataset.view = 'ledger';
-          if (inner.dataset.loaded !== '1') {
-            if (dataCache) renderFromCache(inner, row.dataset.pid);
-            else loadData().then(() => renderFromCache(inner, row.dataset.pid));
-          }
-          return;
+        // Toggle: clicking the open row closes it; otherwise accordion-open.
+        if (row.classList.contains('open')) {
+          row.classList.remove('open');
+          detail.classList.remove('open');
+        } else {
+          openLedgerRow(row);
         }
-        const isOpen = row.classList.toggle('open');
-        detail.classList.toggle('open', isOpen);
-        if (inner) inner.dataset.view = 'ledger';
-        if (!isOpen) return;
-        // Drawer is already in the DOM thanks to the idle pre-render —
-        // CSS toggle is the only work here.
-        if (!inner || inner.dataset.loaded === '1') return;
-        // Fallback: user beat the pre-renderer. Render this one now.
-        if (dataCache) renderFromCache(inner, row.dataset.pid);
-        else loadData().then(() => renderFromCache(inner, row.dataset.pid));
       });
     });
 
-    // Aging-bar click → expand the pending-invoice panel (collections
-    // detail), distinct from the name click that opens the ledger.
-    // Capture phase so it intercepts before the row's own handler.
+    // Aging-bar click → anchored popover (collections detail), independent
+    // of the ledger accordion. Capture phase so it intercepts before the
+    // row's own handler (the bar must never open the ledger).
     document.querySelector('table.ledger').addEventListener('click', (e) => {
       const bar = e.target.closest('.mini-bar');
       if (!bar) return;
       const row = bar.closest('tr.party-r');
       if (!row) return;
-      e.stopPropagation();   // don't let the row's ledger toggle fire
-      const detail = row.nextElementSibling;
-      if (!detail || !detail.classList.contains('detail-r')) return;
-      const inner = detail.querySelector('.detail-inner');
-      // Toggle off if already showing pending for this row.
-      if (detail.classList.contains('open') && inner.dataset.view === 'pending') {
-        detail.classList.remove('open'); row.classList.remove('open');
-        return;
-      }
-      const openPanel = (p) => {
-        renderPendingPanel(inner, p);
-        inner.dataset.view = 'pending';
-        row.classList.add('open'); detail.classList.add('open');
-      };
-      const p = dataCache && dataCache[row.dataset.pid];
-      if (p) openPanel(p);
-      else loadData().then(() => { const pp = dataCache[row.dataset.pid]; if (pp) openPanel(pp); });
+      e.stopPropagation();
+      if (+row.dataset.out <= 0.5) return;   // paid / advance — nothing to show
+      // Toggle off if the popover is already open for this party.
+      if (agingPopOpen && agingPop.dataset.pid === row.dataset.pid) { closeAgingPop(); return; }
+      agingPop.dataset.pid = row.dataset.pid;
+      openAgingPop(bar, row);
     }, true);
 
     // Delegated FY-head toggle — clicking an FY head expands or
@@ -19330,7 +19404,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
           const selected = Array.from(footer.querySelectorAll('input[type="checkbox"][data-fy]:checked'))
             .map(cb => cb.dataset.fy);
           if (!selected.length) return;
-          generateStatementPDF(pid, selected, dlBtn);
+          const includeAging = !!footer.querySelector('.dl-aging-cb')?.checked;
+          generateStatementPDF(pid, selected, dlBtn, { includeAging });
           return;
         }
         // "Select all" toggle inside the footer.
@@ -19481,9 +19556,10 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       }
     }
 
-    function generateStatementPDF(pid, selectedFYs, btnEl) {
+    function generateStatementPDF(pid, selectedFYs, btnEl, opts) {
       const p = dataCache && dataCache[pid];
       if (!p || !window.jspdf) return;
+      opts = opts || {};
 
       // Disable the button briefly so a double-click can't queue two
       // exports while jsPDF builds the doc.
@@ -19495,7 +19571,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       // breaking the export — missing logo → header without it;
       // missing fonts → "Rs." instead of "₹".
       Promise.all([loadLogo(), loadFonts()])
-        .then(([logo]) => buildPDF(p, selectedFYs, logo))
+        .then(([logo]) => buildPDF(p, selectedFYs, logo, opts))
         .catch(err => console.error('PDF generation failed:', err))
         .finally(() => {
           if (btnEl) {
@@ -19524,7 +19600,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       return (n < 0 ? '-' : '') + RUPEE + inrNumber(Math.abs(n));
     }
 
-    function buildPDF(p, selectedFYs, logoDataURL) {
+    function buildPDF(p, selectedFYs, logoDataURL, opts) {
+      opts = opts || {};
       const doc = new (window.jspdf.jsPDF)({ unit: 'pt', format: 'a4' });
       // Apply Unicode font (Roboto) if available; otherwise fall back
       // to Helvetica + "Rs." literal. The font choice propagates to
@@ -19730,6 +19807,49 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
           didDrawPage: () => { notePage(); }
         });
         cursorY = doc.lastAutoTable.finalY + 8;
+      }
+
+      // ── Optional Aging Summary (before the ledger) ───────────
+      // Snapshot of current dues by age band so the reader sees the
+      // exposure before reading entries. Toggled by the footer option.
+      if (opts.includeAging) {
+        const ag = agingSummary(p);
+        doc.setFont(FONT, 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(11, 18, 32);
+        doc.text(`Aging Summary (as on ${dateLong})`, MARGIN, cursorY);
+        cursorY += 6;
+        const band = (label, amt, color) => [
+          { content: label, styles: { textColor: [80,88,100], fontSize: 10 } },
+          { content: inrAmt(amt), styles: { halign: 'right', textColor: color, fontStyle: 'bold', fontSize: 10 } }
+        ];
+        doc.autoTable({
+          startY: cursorY + 4,
+          margin: { top: MARGIN + 42, left: MARGIN, right: MARGIN, bottom: MARGIN + 28 },
+          tableWidth: CONTENT_W,
+          theme: 'plain',
+          body: [
+            band('0–30 days',  ag.b0, [11,18,32]),
+            band('31–60 days', ag.b1, ag.b1 > 0.5 ? [184,124,0] : [11,18,32]),
+            band('60+ days',   ag.b2, ag.b2 > 0.5 ? [200,40,60] : [11,18,32]),
+            [ { content: 'Total Outstanding', styles: { textColor: [11,18,32], fontStyle: 'bold', fontSize: 10.5 } },
+              { content: fmtBal(ag.total),    styles: { halign: 'right', textColor: [11,18,32], fontStyle: 'bold', fontSize: 11 } } ]
+          ],
+          styles: { font: FONT, cellPadding: { top: 4, right: 8, bottom: 4, left: 8 },
+                    lineColor: [240,242,246], lineWidth: { bottom: 0.3 } },
+          columnStyles: { 0: { cellWidth: CONTENT_W * 0.62 }, 1: { cellWidth: CONTENT_W * 0.38, halign: 'right' } },
+          didDrawPage: () => { notePage(); }
+        });
+        cursorY = doc.lastAutoTable.finalY + 6;
+        doc.setFont(FONT, 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(110, 118, 130);
+        doc.text(`Oldest invoice: ${ag.oldest} days`, MARGIN, cursorY + 4);
+        cursorY += 16;
+        doc.setDrawColor(220, 224, 228);
+        doc.setLineWidth(0.5);
+        doc.line(MARGIN, cursorY, RIGHT_X, cursorY);
+        cursorY += 12;
       }
 
       // ── Optional carry-forward block (FY 24-25) ──────────────
@@ -20285,13 +20405,6 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       const valCell = (v, total) =>
         v > 0 ? `${fmtShort(v)} ${pctStr(v, total)}` : '<span style="color:var(--text-4)">₹0</span>';
 
-      // FIFO open-bill ageing for one party → list of 60+ open invoices,
-      // oldest first. Uses the shared FIFO exposed by the drawer block.
-      function open60(pid){
-        const all = (typeof window.__recvOpenBills === 'function') ? window.__recvOpenBills(pid) : [];
-        return all.filter(b => b.age > 60);   // already oldest-first
-      }
-
       table.addEventListener('mouseover', e => {
         const bar = e.target.closest('.mini-bar');
         if (!bar) return;
@@ -20306,28 +20419,14 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         const blue  = Math.max(0, out - d30);
         const oldest = +row.dataset.oldest || 0;
 
-        // 60+ invoice list (top 4, "+N more" beyond that)
-        let invHtml = '';
-        if (d60 > 0.5) {
-          const list = open60(row.dataset.pid);
-          if (list.length) {
-            const top = list.slice(0, 4);
-            invHtml = '<div class="at-inv-h">60+ invoices</div>'
-              + top.map(b =>
-                  `<div class="at-inv"><span class="at-inv-n">${esc(b.label)}</span>`
-                + `<span class="at-inv-a">${fmtShort(b.rem)}</span>`
-                + `<span class="at-inv-d">${b.age}d <span class="at-inv-dt">(${esc(b.dateStr||'')})</span></span></div>`
-                ).join('')
-              + (list.length > top.length ? `<div class="at-more">+${list.length - top.length} more</div>` : '');
-          }
-        }
-
+        // Quick aggregate scan on hover; click opens the full invoice
+        // popover (Billed / Paid / Balance).
         tip.innerHTML =
           `<div class="at-row"><span class="at-k"><span class="at-dot b"></span>Current (0–30)</span><span class="at-v">${valCell(blue, out)}</span></div>`
         + `<div class="at-row"><span class="at-k"><span class="at-dot a"></span>31–60</span><span class="at-v">${valCell(amber, out)}</span></div>`
         + `<div class="at-row"><span class="at-k"><span class="at-dot r"></span>60+</span><span class="at-v">${valCell(red, out)}</span></div>`
-        + invHtml
-        + `<div class="at-oldest"><span>Oldest invoice</span><b>${oldest} days</b></div>`;
+        + `<div class="at-oldest"><span>Oldest invoice</span><b>${oldest} days</b></div>`
+        + `<div class="at-hint">Click for invoice details →</div>`;
         tip.classList.add('show');
       });
       table.addEventListener('mousemove', e => {
