@@ -19925,7 +19925,11 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
           const balColor = running < -0.5 ? [0,132,92] : [11,18,32];
           // Pending marker — open balance on this invoice (FIFO), if any.
           const pend = pendingMap['Vch ' + (v.v || '')] || 0;
-          const pendCell = pend > 0.5 ? RUPEE + inrNumber(pend) : '';
+          // Pending column: open balance for debit vouchers (red when
+          // open, muted em-dash when settled); blank for receipts/credits.
+          const isDebit = dr > 0;
+          const pendCell  = !isDebit ? '' : (pend > 0.5 ? RUPEE + inrNumber(pend) : '—');
+          const pendColor = (isDebit && pend > 0.5) ? [200,40,60] : [180,186,196];
           return [
             { content: v.d, styles: { textColor: [80, 88, 100] } },
             { content: 'Vch ' + (v.v || ''),
@@ -19942,7 +19946,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
             { content: fmtBal(running),
               styles: { halign: 'right', textColor: balColor, fontStyle: 'bold' } },
             { content: pendCell,
-              styles: { halign: 'right', textColor: [200,40,60], fontStyle: 'bold' } }
+              styles: { halign: 'right', textColor: pendColor, fontStyle: (isDebit && pend > 0.5) ? 'bold' : 'normal' } }
           ];
         });
 
@@ -20120,16 +20124,20 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       // by the footer "Include aging summary" option.
       if (opts.includeAging) {
         const ag = agingSummary(p);
-        // Keep the card header + bands together on the page.
+        // Generous gap, a hairline divider, then more space so the
+        // summary reads as its own section — not crammed under the ledger.
+        cursorY += 30;
+        if (cursorY + 170 > H - (MARGIN + 24)) { doc.addPage(); notePage(); cursorY = MARGIN + 42; }
+        doc.setDrawColor(220, 224, 228); doc.setLineWidth(0.5);
+        doc.line(MARGIN, cursorY, RIGHT_X, cursorY);
         cursorY += 26;
-        if (cursorY + 150 > H - (MARGIN + 24)) { doc.addPage(); notePage(); cursorY = MARGIN + 42; }
 
         doc.setFont(FONT, 'bold'); doc.setFontSize(12); doc.setTextColor(11, 18, 32);
         doc.text('Aging Summary', MARGIN, cursorY);
         const tw = doc.getTextWidth('Aging Summary');
         doc.setFont(FONT, 'normal'); doc.setFontSize(9); doc.setTextColor(120, 128, 140);
         doc.text(`as on ${dateLong}`, MARGIN + tw + 8, cursorY);
-        cursorY += 16;
+        cursorY += 20;
 
         const pct = v => ag.total > 0 ? '  (' + Math.round(v / ag.total * 100) + '%)' : '';
         const bandLine = (label, amt, color) => {
