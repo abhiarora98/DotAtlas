@@ -1,0 +1,22 @@
+{
+  "tallyHost": "localhost",
+  "tallyPort": 9000,
+  "atlasUrl": "https://your-atlas.vercel.app/api/tally/sync",
+  "apiKey": "paste-your-atlas-api-key-here",
+  "company": "",
+  "pollMinutes": 5,
+  "uiPort": 8765,
+
+  "moduleIntervals": {
+    "receivables": 5,
+    "sales": 5,
+    "receipts": 5,
+    "ledgers": 15,
+    "purchases": 20
+  },
+  "fullSyncWindowStart": 22,
+  "fullSyncWindowEnd": 6,
+  "fullSyncMinGapHours": 20,
+  "fullSyncLookbackDays": 366,
+  "requestSpacingMs": 400
+}

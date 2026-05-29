@@ -1,0 +1,19 @@
+{
+  "name": "atlas-tally-connector",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local desktop connector that syncs TallyPrime accounting data to the Atlas backend",
+  "main": "src/index.js",
+  "bin": {
+    "atlas-tally-connector": "src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "fast-xml-parser": "^4.5.0"
+  }
+}

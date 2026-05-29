@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Atlas · Tally Connector</title>
+  <style>
+    :root { --bg:#0f1419; --card:#1a2129; --line:#2a323c; --fg:#e6edf3; --muted:#8b98a5; --accent:#3b82f6; --ok:#22c55e; --err:#ef4444; --warn:#f59e0b; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); color:var(--fg); }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 24px 16px 64px; }
+    h1 { font-size: 20px; margin: 0 0 4px; }
+    .sub { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px; margin-bottom:16px; }
+    .card h2 { font-size:14px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); margin:0 0 14px; }
+    label { display:block; font-size:12px; color:var(--muted); margin:10px 0 4px; }
+    input, select { width:100%; padding:9px 10px; background:#0d1117; border:1px solid var(--line); border-radius:8px; color:var(--fg); font-size:14px; }
+    .row { display:flex; gap:12px; }
+    .row > div { flex:1; }
+    .btns { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+    button { padding:10px 16px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; }
+    button.primary { background:var(--accent); color:#fff; }
+    button.ghost { background:transparent; border:1px solid var(--line); color:var(--fg); }
+    button:disabled { opacity:.5; cursor:default; }
+    .status-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+    .stat { background:#0d1117; border:1px solid var(--line); border-radius:8px; padding:12px; }
+    .stat .k { font-size:11px; color:var(--muted); text-transform:uppercase; }
+    .stat .v { font-size:18px; font-weight:700; margin-top:4px; }
+    .pill { display:inline-block; padding:3px 10px; border-radius:999px; font-size:12px; font-weight:600; }
+    .pill.ok{background:rgba(34,197,94,.15);color:var(--ok)} .pill.error{background:rgba(239,68,68,.15);color:var(--err)}
+    .pill.running{background:rgba(59,130,246,.15);color:var(--accent)} .pill.never{background:rgba(139,152,165,.15);color:var(--muted)}
+    .counts { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+    .counts span { font-size:12px; background:#0d1117; border:1px solid var(--line); padding:4px 9px; border-radius:6px; }
+    .msg { margin-top:12px; font-size:13px; padding:10px 12px; border-radius:8px; display:none; }
+    .msg.ok{background:rgba(34,197,94,.12);color:var(--ok);display:block}
+    .msg.err{background:rgba(239,68,68,.12);color:var(--err);display:block}
+    pre.logs { background:#0d1117; border:1px solid var(--line); border-radius:8px; padding:12px; font-size:11px; line-height:1.5; max-height:240px; overflow:auto; color:var(--muted); white-space:pre-wrap; margin:0; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Atlas · TallyPrime Connector</h1>
+    <div class="sub">Syncs accounting data from TallyPrime on this machine to Atlas.</div>
+
+    <div class="card">
+      <h2>Connection settings</h2>
+      <div class="row">
+        <div><label>Tally host</label><input id="tallyHost" placeholder="localhost" /></div>
+        <div><label>Tally port</label><input id="tallyPort" placeholder="9000" /></div>
+      </div>
+      <label>Atlas API URL</label>
+      <input id="atlasUrl" placeholder="https://your-atlas.vercel.app/api/tally/sync" />
+      <label>Atlas API key</label>
+      <input id="apiKey" type="password" placeholder="leave blank to keep saved key" />
+      <div class="row">
+        <div>
+          <label>Company</label>
+          <select id="company"><option value="">(company open in Tally)</option></select>
+        </div>
+        <div><label>Poll interval (minutes)</label><input id="pollMinutes" placeholder="5" /></div>
+      </div>
+      <div class="btns">
+        <button class="ghost" id="saveBtn">Save settings</button>
+        <button class="ghost" id="testBtn">Test connection</button>
+        <button class="primary" id="syncBtn">Sync now</button>
+        <button class="ghost" id="fullSyncBtn" title="Heavy — run on first setup or after hours">Full sync</button>
+      </div>
+      <div class="msg" id="msg"></div>
+    </div>
+
+    <div class="card">
+      <h2>Sync status</h2>
+      <div class="status-grid">
+        <div class="stat"><div class="k">Status</div><div class="v"><span id="statusPill" class="pill never">never</span></div></div>
+        <div class="stat"><div class="k">Last sync</div><div class="v" id="lastSync" style="font-size:13px">—</div></div>
+        <div class="stat"><div class="k">Total syncs</div><div class="v" id="totalSyncs">0</div></div>
+      </div>
+      <div class="counts" id="counts"></div>
+      <div class="msg" id="errMsg"></div>
+    </div>
+
+    <div class="card">
+      <h2>Recent activity</h2>
+      <pre class="logs" id="logs">Loading…</pre>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
