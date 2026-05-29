@@ -159,6 +159,42 @@
   .nav-item .badge.live { color: var(--emerald); background: var(--emerald-soft); }
   .nav-item .badge.warn { color: var(--amber); background: var(--amber-soft); }
 
+  /* Primary items we're actively building — larger, green border */
+  .nav-item.primary {
+    padding: 13px 14px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    border: 1.5px solid var(--emerald);
+    background: var(--emerald-soft);
+    margin-bottom: 8px;
+  }
+  .nav-item.primary .glyph { color: var(--emerald); }
+  .nav-item.primary:hover { background: var(--emerald-mute); transform: translateX(2px); }
+  .nav-item.primary .badge { font-size: 9.5px; }
+
+  /* "To Do" folder — everything parked for later, collapsible */
+  .nav-folder {
+    display: grid; grid-template-columns: 16px 1fr auto;
+    gap: 11px; align-items: center;
+    padding: 8px 12px; margin-top: 12px;
+    border-radius: 6px;
+    font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--text-3); cursor: pointer; user-select: none;
+    transition: color 200ms var(--ease);
+  }
+  .nav-folder:hover { color: var(--text-2); }
+  .nav-folder .fold-caret { transition: transform 200ms var(--ease); }
+  .nav-folder.open .fold-caret { transform: rotate(90deg); }
+  .nav-folder-items { display: flex; flex-direction: column; gap: 4px; padding-left: 4px; }
+  .nav-folder-items.collapsed { display: none; }
+  /* Parked items get a red border to signal "not yet" */
+  .nav-folder-items .nav-item {
+    border: 1px solid var(--rose);
+    opacity: 0.7;
+  }
+  .nav-folder-items .nav-item:hover { opacity: 1; }
+
   .rail-foot {
     margin-top: auto;
     padding-top: 16px;
@@ -1256,49 +1292,51 @@
       <div class="ws-caret">⌄</div>
     </div>
 
-    <div class="rail-section">Operate</div>
-    <div class="nav-item active" data-page="today">
-      <span class="glyph">◆</span><span>Today</span><span class="badge live">LIVE</span>
+    <div class="rail-section">Building now</div>
+    <div class="nav-item primary" data-page="create-pi">
+      <span class="glyph">+</span><span>Generate Quote</span><span class="badge live">NEW</span>
     </div>
-    <div class="nav-item" data-page="orders">
-      <span class="glyph">◇</span><span>Orders</span><span class="badge">74</span>
-    </div>
-    <div class="nav-item" data-page="parties">
-      <span class="glyph">○</span><span>Parties</span>
-    </div>
-    <div class="nav-item" data-page="inventory">
-      <span class="glyph">▢</span><span>Inventory</span><span class="badge warn">8</span>
-    </div>
-    <div class="nav-item" data-page="dispatch">
-      <span class="glyph">→</span><span>Dispatch</span>
-    </div>
-    <div class="nav-item" data-page="create-pi">
-      <span class="glyph">+</span><span>Create PI</span><span class="badge live">NEW</span>
-    </div>
-    <div class="nav-item" data-page="pi-history">
-      <span class="glyph">≡</span><span>PI History</span>
-    </div>
-
-    <div class="rail-section">Sense</div>
-    <div class="nav-item" data-page="cash">
-      <span class="glyph">◔</span><span>Cash &amp; finance</span>
-    </div>
-    <div class="nav-item" data-page="receivables">
+    <div class="nav-item primary" data-page="receivables">
       <span class="glyph">⋮</span><span>Receivables</span><span class="badge warn">3</span>
     </div>
-    <div class="nav-item" data-page="intel">
-      <span class="glyph">◈</span><span>Intelligence</span>
-    </div>
-    <div class="nav-item" data-page="reports">
-      <span class="glyph">≡</span><span>Reports</span>
-    </div>
 
-    <div class="rail-section">Studio</div>
-    <div class="nav-item" data-page="workflows">
-      <span class="glyph">◇</span><span>Workflows</span>
+    <div class="nav-folder" id="todo-folder" role="button" tabindex="0">
+      <span class="glyph fold-caret">▸</span><span>To Do</span><span class="badge">later</span>
     </div>
-    <div class="nav-item" data-page="settings">
-      <span class="glyph">⚙</span><span>Settings</span>
+    <div class="nav-folder-items collapsed" id="todo-items">
+      <div class="nav-item" data-page="today">
+        <span class="glyph">◆</span><span>Today</span><span class="badge live">LIVE</span>
+      </div>
+      <div class="nav-item" data-page="orders">
+        <span class="glyph">◇</span><span>Orders</span><span class="badge">74</span>
+      </div>
+      <div class="nav-item" data-page="parties">
+        <span class="glyph">○</span><span>Parties</span>
+      </div>
+      <div class="nav-item" data-page="inventory">
+        <span class="glyph">▢</span><span>Inventory</span><span class="badge warn">8</span>
+      </div>
+      <div class="nav-item" data-page="dispatch">
+        <span class="glyph">→</span><span>Dispatch</span>
+      </div>
+      <div class="nav-item" data-page="pi-history">
+        <span class="glyph">≡</span><span>PI History</span>
+      </div>
+      <div class="nav-item" data-page="cash">
+        <span class="glyph">◔</span><span>Cash &amp; finance</span>
+      </div>
+      <div class="nav-item" data-page="intel">
+        <span class="glyph">◈</span><span>Intelligence</span>
+      </div>
+      <div class="nav-item" data-page="reports">
+        <span class="glyph">≡</span><span>Reports</span>
+      </div>
+      <div class="nav-item" data-page="workflows">
+        <span class="glyph">◇</span><span>Workflows</span>
+      </div>
+      <div class="nav-item" data-page="settings">
+        <span class="glyph">⚙</span><span>Settings</span>
+      </div>
     </div>
 
     <div class="rail-foot">
@@ -1863,7 +1901,7 @@
     <section class="page" data-page="create-pi" hidden>
       <div class="hero-h">
         <div>
-          <div class="eb"><span class="live-dot"></span>Operate · create PI · <span id="pi-eb-status">draft</span></div>
+          <div class="eb"><span class="live-dot"></span>Operate · generate quote · <span id="pi-eb-status">draft</span></div>
           <h1>One <span class="em">proforma invoice</span>, <span class="accent">many lines</span>.</h1>
         </div>
         <div class="when">WORKSPACE · <b>COMFORT INDUSTRIES</b><br/>SHEET · <b>MASTERS</b><br/>REF# · <b id="pi-eb-ref">—</b></div>
@@ -1968,11 +2006,11 @@
           </div>
           <div class="card-b">
             <div class="pi-note">
-              Clicking <i>Create PI</i> appends one row per line to the Comfort_atlas sheet. The button enables once you've selected a party, entered a REF#, and have at least one line with quantity and rate.
+              Clicking <i>Generate Quote</i> appends one row per line to the Comfort_atlas sheet. The button enables once you've selected a party, entered a REF#, and have at least one line with quantity and rate.
             </div>
             <div class="pi-actions">
               <button class="pi-btn" id="pi-save-draft">Save draft</button>
-              <button class="pi-btn prime" id="pi-submit">Create PI →</button>
+              <button class="pi-btn prime" id="pi-submit">Generate Quote →</button>
             </div>
             <div class="pi-status" id="pi-status"></div>
           </div>
@@ -2182,7 +2220,7 @@
   // ── Routing ──────────────────────────────────────────────
   const pageTitleMap = {
     today:'Today', orders:'Orders', parties:'Parties', inventory:'Inventory',
-    dispatch:'Dispatch', 'create-pi':'Create PI', 'pi-history':'PI History',
+    dispatch:'Dispatch', 'create-pi':'Generate Quote', 'pi-history':'PI History',
     cash:'Cash & finance', receivables:'Receivables',
     intel:'Intelligence', reports:'Reports', workflows:'Workflows', settings:'Settings'
   };
@@ -2216,6 +2254,26 @@
     const p = location.hash.slice(1);
     if (p && pageTitleMap[p]) setPage(p);
   });
+
+  // "To Do" folder collapse/expand (parked pages live in here for now).
+  const todoFolder = document.getElementById('todo-folder');
+  const todoItems = document.getElementById('todo-items');
+  if (todoFolder && todoItems) {
+    const toggleTodo = () => {
+      const open = !todoItems.classList.toggle('collapsed');
+      todoFolder.classList.toggle('open', open);
+    };
+    todoFolder.addEventListener('click', toggleTodo);
+    todoFolder.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTodo(); }
+    });
+  }
+
+  // Default to Generate Quote (or the page named in the URL hash).
+  (function initPage() {
+    const h = location.hash.slice(1);
+    setPage(pageTitleMap[h] ? h : 'create-pi');
+  })();
   // initial
   (function(){ const p = location.hash.slice(1); if (p && pageTitleMap[p]) setPage(p); })();
 
@@ -2882,7 +2940,7 @@
 
     $('pi-save-draft').addEventListener('click', () => {
       saveDraft();
-      setStatus('ok', 'Draft saved locally. It will restore the next time you open Create PI on this browser.');
+      setStatus('ok', 'Draft saved locally. It will restore the next time you open Generate Quote on this browser.');
     });
 
     $('pi-submit').addEventListener('click', onSubmit);
@@ -3303,7 +3361,7 @@
     const url = (window.ATLAS_APPS_SCRIPT_URL ||
                  localStorage.getItem('atlas-apps-script-url') || '').trim();
     if (!url){
-      setStatus('ok', 'Added ' + name + ' locally. It will appear in Create PI suggestions. (Apps Script not yet wired — not written to Parties sheet.)');
+      setStatus('ok', 'Added ' + name + ' locally. It will appear in Generate Quote suggestions. (Apps Script not yet wired — not written to Parties sheet.)');
       setTimeout(closeModal, 1100);
       return;
     }
@@ -3319,7 +3377,7 @@
       .then(r => r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)))
       .then(res => {
         if (!res.ok) throw new Error(res.error || 'Apps Script returned ok:false');
-        setStatus('ok', 'Added ' + name + ' to Parties sheet and Create PI suggestions.');
+        setStatus('ok', 'Added ' + name + ' to Parties sheet and Generate Quote suggestions.');
         setTimeout(closeModal, 900);
       })
       .catch(err => {
@@ -3670,7 +3728,7 @@
   function renderList(pis){
     const host = document.getElementById('ph-list-host');
     if (!pis.length){
-      host.innerHTML = '<div class="ph-empty">No PIs match. Try clearing filters or creating one from <b>Create PI</b>.</div>';
+      host.innerHTML = '<div class="ph-empty">No PIs match. Try clearing filters or creating one from <b>Generate Quote</b>.</div>';
       return;
     }
     // Group by status. Order: Pending, Ready to Dispatch, Dispatched, then anything else.
