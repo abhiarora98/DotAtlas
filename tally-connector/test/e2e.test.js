@@ -103,6 +103,11 @@ const FIXTURES = {
   </COLLECTION></DATA></BODY></ENVELOPE>`,
 };
 
+// Date of the single voucher in each voucher fixture (YYYYMMDD), so the mock
+// can honour the SVFROMDATE/SVTODATE window like real Tally does.
+const VOUCHER_DATE = { AtlasSales: '20260510', AtlasReceipts: '20260512', AtlasPurchases: '20260508' };
+const EMPTY = '<ENVELOPE><BODY><DATA><COLLECTION/></DATA></BODY></ENVELOPE>';
+
 const tallyRequests = {}; // last request body seen, keyed by <ID>
 function fakeTally() {
   return http.createServer((req, res) => {
@@ -113,18 +118,32 @@ function fakeTally() {
       const id = m ? m[1] : '';
       tallyRequests[id] = body;
       res.writeHead(200, { 'Content-Type': 'text/xml' });
-      res.end(FIXTURES[id] || '<ENVELOPE><BODY><DATA><COLLECTION/></DATA></BODY></ENVELOPE>');
+
+      // For windowed (full) voucher pulls, only return the voucher when its
+      // date falls inside the requested window — otherwise the connector would
+      // see the same record duplicated across every monthly window.
+      if (VOUCHER_DATE[id]) {
+        const from = (body.match(/<SVFROMDATE>(\d{8})<\/SVFROMDATE>/) || [])[1];
+        const to = (body.match(/<SVTODATE>(\d{8})<\/SVTODATE>/) || [])[1];
+        if (from && to && !(VOUCHER_DATE[id] >= from && VOUCHER_DATE[id] <= to)) {
+          return res.end(EMPTY);
+        }
+      }
+      res.end(FIXTURES[id] || EMPTY);
     });
   });
 }
 
 let captured = null;
+let atlasPosts = []; // every chunk POST received (chunking sends >=1)
 function fakeAtlas() {
   return http.createServer((req, res) => {
     let body = '';
     req.on('data', (c) => (body += c));
     req.on('end', () => {
-      captured = { auth: req.headers.authorization, payload: JSON.parse(body) };
+      const payload = JSON.parse(body);
+      captured = { auth: req.headers.authorization, payload };
+      atlasPosts.push(payload);
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ ok: true }));
     });
@@ -239,11 +258,24 @@ function listen(server) {
       'incremental sales request must filter by AlterID > 12'
     );
     // gst_summary is full-sync-only, so it is absent from an incremental run.
-    assert.strictEqual(captured.payload.gst_summary.length, 0, 'no GST summary on incremental');
+    assert.strictEqual((captured.payload.gst_summary || []).length, 0, 'no GST summary on incremental');
+
+    // --- Tally down: every fetch fails → status MUST be error, not OK ---
+    tallyServer.close();
+    await new Promise((res) => setTimeout(res, 50));
+    atlasPosts = [];
+    const down = await runSync({ source: 'manual' });
+    assert.ok(!down.ok, 'sync must fail when Tally is unreachable');
+    assert.match(down.error, /Tally/i, 'error mentions Tally');
+    assert.strictEqual(atlasPosts.length, 0, 'nothing sent to Atlas when Tally is down');
+    const stateDown = JSON.parse(fs.readFileSync(statePath, 'utf-8'));
+    assert.strictEqual(stateDown.lastStatus, 'error', 'status recorded as error');
+    // Checkpoints from the earlier good sync are preserved (not corrupted).
+    assert.strictEqual(stateDown.checkpoints.sales.alterId, 12, 'checkpoint preserved on failure');
 
     console.log('\n✅ All e2e assertions passed.');
   } finally {
-    tallyServer.close();
+    try { tallyServer.close(); } catch { /* may already be closed by a test */ }
     atlasServer.close();
     // Restore prior config; remove the test state file.
     if (backup != null) fs.writeFileSync(cfgPath, backup);

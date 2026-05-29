@@ -8,7 +8,10 @@
     "atlas-tally-connector": "src/index.js"
   },
   "scripts": {
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "dry-run": "node src/index.js --dry-run",
+    "benchmark": "node src/index.js --benchmark",
+    "test": "node test/unit.test.js && node test/e2e.test.js"
   },
   "engines": {
     "node": ">=18"

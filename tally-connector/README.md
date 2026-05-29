@@ -60,6 +60,15 @@ Payload posted to `POST {atlasUrl}`:
 - **Checkpoint on success.** Checkpoints advance only after Atlas confirms
   receipt. A failed sync (Tally down, network blip) safely re-pulls the same
   delta next time — no data lost, no duplicates of the checkpoint.
+- **Fail loud.** If *every* module fails to fetch (Tally closed/unreachable),
+  the sync is marked **error** in the UI — never a misleading "OK, 0 records".
+- **Chunked full sync.** Vouchers are pulled **one month at a time**
+  (`fullSyncWindowDays`) so a single XML response never balloons in memory, and
+  Atlas POSTs are capped at `rowsPerRequest` rows (default 800) so request
+  bodies stay small even for a 100k-voucher first sync.
+- **Upsert, not append.** The Atlas endpoint matches each record by a **natural
+  key** and overwrites in place — re-syncs and edited invoices update the
+  existing row instead of duplicating it.
 
 > Dashboards and WhatsApp queries should read from the **Atlas database**, never
 > from Tally directly. The connector is the only thing that talks to Tally, and
@@ -139,8 +148,28 @@ The UI binds to `127.0.0.1` only — it is not exposed to the network.
 
 On the Atlas side, set `ATLAS_TALLY_API_KEY` (or comma-separated
 `ATLAS_TALLY_API_KEYS`) to the same secret. The receiver lives at
-[`api/tally/sync.js`](../api/tally/sync.js) and writes each module to its own
-tab in the Atlas Google Sheet.
+[`api/tally/sync.js`](../api/tally/sync.js) and **upserts** each module into its
+own tab in the Atlas Google Sheet (matched by natural key + company), with
+exponential-backoff retry on Sheets rate limits (HTTP 429).
+
+---
+
+## Diagnostics: dry-run & benchmark
+
+Two CLI modes help you validate against a real Tally without touching Atlas:
+
+```bat
+npm run dry-run      :: fetch + parse ALL modules, print clean JSON, exit
+npm run benchmark    :: measure each module's request cost, exit
+node src/index.js --benchmark --runs=3   :: average over 3 passes
+```
+
+- **Dry-run** prints the exact JSON that *would* be sent — use it to eyeball
+  GSTINs, tax breakup, invoice references, and bill allocations against Tally.
+- **Benchmark** reports per-module request duration, response size, parse time,
+  record count, plus process CPU time and peak RSS. Run it three times — while
+  Tally is **idle**, while **entering a voucher**, and while **generating a
+  report** — and compare `req(ms)` to gauge Tally-side load.
 
 ---
 
@@ -170,20 +199,26 @@ To force a fresh full baseline, stop the connector and delete `state.json`.
 | `fullSyncWindowStart`/`End` | `22` / `6` | Overnight full-sync hours |
 | `fullSyncMinGapHours` | `20` | Min gap between full syncs |
 | `fullSyncLookbackDays` | `366` | History pulled on a full sync |
+| `fullSyncWindowDays` | `31` | Month-size of each full-sync voucher window |
+| `rowsPerRequest` | `800` | Max rows per Atlas POST (chunking) |
 | `requestSpacingMs` | `400` | Pause between Tally requests |
 
 ---
 
 ## Test
 
-A no-Tally, no-Atlas end-to-end test (fake servers + the real code path):
+No-Tally, no-Atlas tests (fake servers + the real code path):
 
 ```bat
-node test/e2e.test.js
+npm test                  :: unit + e2e
+node test/unit.test.js    :: pure logic: upsert/dedupe + chunking
+node test/e2e.test.js     :: full flow against fake Tally + Atlas
 ```
 
-It verifies XML parsing, the tax breakup, AlterID checkpointing, full-vs-
-incremental gating, and the assembled payload shape.
+They verify XML parsing, the tax breakup, AlterID checkpointing, full-vs-
+incremental gating, month-windowed full sync, row-capped chunking, upsert
+(update-in-place + intra-batch de-dupe + company scoping), and the
+fail-loud-when-Tally-down behaviour.
 
 ---
 

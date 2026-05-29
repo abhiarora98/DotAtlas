@@ -68,4 +68,48 @@ async function sendSync({ atlasUrl, apiKey, payload, retries = 3 }) {
   throw lastErr;
 }
 
-module.exports = { sendSync, isAllowedUrl };
+// Split a multi-module payload into POST-sized chunks. Each chunk carries the
+// shared base (company, synced_at, mode) plus a slice of rows totalling at most
+// `rowsPerRequest`. A module's rows never span chunks awkwardly — we just fill
+// each chunk module-by-module until it's full. Returns [] when there are no
+// rows at all (caller decides whether to send a heartbeat).
+function chunkPayload(base, modules, rowsPerRequest = 800) {
+  const limit = Math.max(1, rowsPerRequest);
+  const chunks = [];
+  let current = null;
+  let currentCount = 0;
+
+  const flush = () => {
+    if (current) chunks.push(current);
+    current = null;
+    currentCount = 0;
+  };
+
+  for (const [module, rows] of Object.entries(modules)) {
+    if (!Array.isArray(rows) || rows.length === 0) continue;
+    for (let i = 0; i < rows.length; i += limit) {
+      const slice = rows.slice(i, i + limit);
+      if (currentCount && currentCount + slice.length > limit) flush();
+      if (!current) current = { ...base };
+      current[module] = (current[module] || []).concat(slice);
+      currentCount += slice.length;
+      if (currentCount >= limit) flush();
+    }
+  }
+  flush();
+  return chunks;
+}
+
+// Send a full module map to Atlas in row-capped chunks, sequentially so we
+// never hold or transmit an oversized body. Aggregates per-chunk results.
+async function sendSyncChunked({ atlasUrl, apiKey, base, modules, rowsPerRequest, retries }) {
+  const chunks = chunkPayload(base, modules, rowsPerRequest);
+  if (!chunks.length) return { ok: true, chunks: 0, results: [] };
+  const results = [];
+  for (let i = 0; i < chunks.length; i++) {
+    results.push(await sendSync({ atlasUrl, apiKey, payload: chunks[i], retries }));
+  }
+  return { ok: true, chunks: chunks.length, results };
+}
+
+module.exports = { sendSync, sendSyncChunked, chunkPayload, isAllowedUrl };

@@ -46,6 +46,11 @@ const DEFAULT_CONFIG = {
   // Pause between consecutive Tally requests so we never burst the server
   // and the Tally UI stays responsive while a sync runs.
   requestSpacingMs: 400,
+  // Full sync fetches vouchers one calendar month at a time so a single XML
+  // response never balloons in memory, regardless of total book size.
+  fullSyncWindowDays: 31,
+  // Atlas POSTs are capped to this many rows so request bodies stay small.
+  rowsPerRequest: 800,
 };
 
 const DEFAULT_STATE = {
