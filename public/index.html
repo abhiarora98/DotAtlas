@@ -19154,7 +19154,10 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       const year = parts[2] ? 2000 + parseInt(parts[2]) : (month >= 3 ? 2026 : 2027);
       return new Date(year, month, day);
     }
+    const _openBillsCache = new WeakMap();   // per-party memo (read-only result)
     function computeOpenBills(p){
+      const cached = _openBillsCache.get(p);
+      if (cached) return cached;
       const bf24 = p.bf24 || 0;
       const bills = []; let credit = 0;
       if (bf24 > 0.5) bills.push({ date: new Date(2025,2,31), label: 'Opening B/F', billed: bf24, rem: bf24 });
@@ -19174,12 +19177,14 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
           if (pay > 0) credit += pay;
         }
       });
-      return bills
+      const out = bills
         .filter(b => b.rem > 0.5 && b.date)
         .map(b => ({ label: b.label, billed: b.billed, paid: Math.max(0, b.billed - b.rem), rem: b.rem,
                      age: Math.round((AG_TODAY - b.date) / 86400000),
                      dateStr: b.date.getDate() + ' ' + AG_MON[b.date.getMonth()] }))
         .sort((a,b) => b.age - a.age);
+      _openBillsCache.set(p, out);
+      return out;
     }
     // Aging buckets + oldest, derived from the open bills. Shared by the
     // popover header and the PDF aging-summary block.
@@ -20471,6 +20476,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       const tip = document.createElement('div');
       tip.className = 'aging-tip';
       document.body.appendChild(tip);
+      let tipW = 232, tipH = 120;   // cached dims, refreshed on each hover-enter
       const fmtShort = n => {
         const a = Math.abs(n);
         if (a >= 1e7) return '₹' + (a/1e7).toFixed(2) + ' Cr';
@@ -20506,14 +20512,17 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         + `<div class="at-oldest"><span>Oldest invoice</span><b>${oldest} days</b></div>`
         + `<div class="at-hint">Click for invoice details →</div>`;
         tip.classList.add('show');
+        // Measure once per hover-enter (not per mousemove) so we never
+        // force a full-document layout flush on the huge ledger DOM.
+        const m = tip.getBoundingClientRect();
+        tipW = m.width; tipH = m.height;
       });
       table.addEventListener('mousemove', e => {
         if (!tip.classList.contains('show')) return;
         const pad = 14;
-        const r = tip.getBoundingClientRect();
         let x = e.clientX + pad, y = e.clientY + pad;
-        if (x + r.width  > window.innerWidth)  x = e.clientX - r.width  - pad;
-        if (y + r.height > window.innerHeight) y = e.clientY - r.height - pad;
+        if (x + tipW > window.innerWidth)  x = e.clientX - tipW - pad;
+        if (y + tipH > window.innerHeight) y = e.clientY - tipH - pad;
         tip.style.left = x + 'px';
         tip.style.top  = y + 'px';
       });
