@@ -4,4 +4,4 @@ Allow: /
 # Do not index the serverless API
 Disallow: /api/
 
-Sitemap: https://www.native.ai/sitemap.xml
+Sitemap: https://www.native8.ai/sitemap.xml

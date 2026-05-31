@@ -4,8 +4,8 @@
   "redirects": [
     {
       "source": "/:path*",
-      "has": [{ "type": "host", "value": "native.ai" }],
-      "destination": "https://www.native.ai/:path*",
+      "has": [{ "type": "host", "value": "native8.ai" }],
+      "destination": "https://www.native8.ai/:path*",
       "permanent": true
     }
   ]
