@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Native8.ai — WhatsApp-first AI CRM · Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+<style>
+/* ============================================================
+   Native8.ai — Clickable UI Prototype
+   Self-contained. No backend. No external JS.
+   ============================================================ */
+:root{
+  --bg:#F4F6F8;
+  --panel:#FFFFFF;
+  --panel-2:#FBFCFD;
+  --ink:#0D1626;
+  --ink-2:#475569;
+  --ink-3:#7C8BA0;
+  --line:#E7EBF0;
+  --line-2:#DCE2E9;
+
+  /* Native brand */
+  --brand:#12A36B;        /* native green */
+  --brand-600:#0E8C5C;
+  --brand-700:#0B7049;
+  --brand-soft:#E6F7EF;
+  --brand-glow:rgba(18,163,107,.18);
+
+  /* AI accent */
+  --ai:#6D5AE6;
+  --ai-2:#9B6BF0;
+  --ai-soft:#EFEBFE;
+
+  /* WhatsApp surfaces */
+  --wa-chat:#EAE3DB;
+  --wa-out:#D6FBD0;
+  --wa-in:#FFFFFF;
+  --wa-header:#F6F7F8;
+
+  /* stage palette */
+  --new:#3B82F6;     --new-soft:#E8F0FE;
+  --warm:#F59E0B;    --warm-soft:#FEF3E2;
+  --hot:#EF4444;     --hot-soft:#FDECEC;
+  --won:#16A34A;     --won-soft:#E7F7EC;
+  --lost:#94A3B8;    --lost-soft:#EFF2F5;
+
+  --r-s:8px; --r-m:12px; --r-l:16px; --r-xl:22px;
+  --shadow-s:0 1px 2px rgba(13,22,38,.05), 0 1px 3px rgba(13,22,38,.04);
+  --shadow-m:0 4px 14px rgba(13,22,38,.07), 0 2px 6px rgba(13,22,38,.04);
+  --shadow-l:0 18px 50px rgba(13,22,38,.16), 0 6px 16px rgba(13,22,38,.08);
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  background:var(--bg);color:var(--ink);
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  font-size:14px;line-height:1.5;overflow:hidden;
+}
+h1,h2,h3,h4{font-family:'Plus Jakarta Sans','Inter',sans-serif;margin:0;letter-spacing:-.02em;font-weight:700}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:#CFD7E0;border-radius:99px;border:3px solid transparent;background-clip:content-box}
+::-webkit-scrollbar-thumb:hover{background:#B6C0CC;background-clip:content-box}
+.mono{font-variant-numeric:tabular-nums}
+
+/* ===================== APP SHELL ===================== */
+.app{display:flex;height:100vh;width:100vw}
+
+/* Left icon rail */
+.rail{
+  width:74px;flex:0 0 74px;background:#0C1322;color:#fff;
+  display:flex;flex-direction:column;align-items:center;
+  padding:16px 0 14px;gap:6px;z-index:40;
+}
+.rail-logo{
+  width:42px;height:42px;border-radius:13px;margin-bottom:14px;
+  background:linear-gradient(140deg,var(--brand) 0%,#19c07d 50%,var(--ai) 130%);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 18px var(--brand-glow);position:relative;flex:0 0 auto;
+}
+.rail-logo svg{width:24px;height:24px}
+.rail-nav{display:flex;flex-direction:column;gap:4px;width:100%;align-items:center;margin-top:4px}
+.rail-btn{
+  width:48px;height:48px;border-radius:14px;color:#8893A7;
+  display:flex;align-items:center;justify-content:center;position:relative;
+  transition:all .18s var(--ease);
+}
+.rail-btn svg{width:22px;height:22px}
+.rail-btn:hover{background:rgba(255,255,255,.07);color:#fff}
+.rail-btn.on{background:linear-gradient(140deg,var(--brand),var(--brand-600));color:#fff;box-shadow:0 6px 16px var(--brand-glow)}
+.rail-btn .tip{
+  position:absolute;left:58px;top:50%;transform:translateY(-50%) translateX(-6px);
+  background:#0C1322;color:#fff;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:600;
+  white-space:nowrap;opacity:0;pointer-events:none;transition:.16s var(--ease);
+  box-shadow:var(--shadow-m);border:1px solid rgba(255,255,255,.08);z-index:60;
+}
+.rail-btn:hover .tip{opacity:1;transform:translateY(-50%) translateX(0)}
+.rail-badge{position:absolute;top:7px;right:7px;min-width:16px;height:16px;padding:0 4px;border-radius:99px;
+  background:var(--hot);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #0C1322}
+.rail-spacer{flex:1}
+.rail-me{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#f0a35e,#e8736b);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;cursor:pointer;
+  border:2px solid rgba(255,255,255,.12)}
+
+/* Screen host */
+.host{flex:1;min-width:0;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.screen{display:none;flex:1;min-height:0;flex-direction:column;animation:fade .26s var(--ease)}
+.screen.on{display:flex}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ===================== TOPBAR (shared) ===================== */
+.topbar{
+  height:60px;flex:0 0 60px;background:rgba(255,255,255,.82);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;
+  padding:0 22px;z-index:20;
+}
+.topbar h2{font-size:17px}
+.topbar .crumb{color:var(--ink-3);font-weight:600;font-size:13px}
+.tb-spacer{flex:1}
+.tb-search{
+  display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--line);
+  border-radius:99px;padding:8px 14px;width:280px;color:var(--ink-3);font-size:13px;transition:.18s var(--ease)
+}
+.tb-search:focus-within{border-color:var(--brand);box-shadow:0 0 0 4px var(--brand-glow);background:#fff}
+.tb-search input{border:none;background:none;outline:none;flex:1;color:var(--ink);font-size:13px}
+.tb-search svg{width:16px;height:16px}
+.tb-icon{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;color:var(--ink-2);
+  border:1px solid var(--line);background:#fff;transition:.16s var(--ease);position:relative}
+.tb-icon:hover{background:var(--bg);color:var(--ink);border-color:var(--line-2)}
+.tb-icon svg{width:18px;height:18px}
+.tb-icon .dot{position:absolute;top:8px;right:9px;width:7px;height:7px;border-radius:99px;background:var(--hot);border:1.5px solid #fff}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:11px;font-weight:600;font-size:13px;transition:.16s var(--ease)}
+.btn svg{width:16px;height:16px}
+.btn-primary{background:linear-gradient(135deg,var(--brand),var(--brand-600));color:#fff;box-shadow:0 6px 16px var(--brand-glow)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 10px 22px var(--brand-glow)}
+.btn-ghost{background:#fff;border:1px solid var(--line);color:var(--ink-2)}
+.btn-ghost:hover{background:var(--bg);color:var(--ink)}
+.btn-ai{background:linear-gradient(135deg,var(--ai),var(--ai-2));color:#fff;box-shadow:0 6px 16px rgba(109,90,230,.22)}
+.btn-ai:hover{transform:translateY(-1px)}
+
+/* ===================== BADGES / PILLS ===================== */
+.stage{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;letter-spacing:.01em;white-space:nowrap}
+.stage::before{content:"";width:6px;height:6px;border-radius:99px;background:currentColor}
+.stage.new{color:var(--new);background:var(--new-soft)}
+.stage.warm{color:#B45309;background:var(--warm-soft)}
+.stage.hot{color:var(--hot);background:var(--hot-soft)}
+.stage.won{color:var(--won);background:var(--won-soft)}
+.stage.lost{color:#64748B;background:var(--lost-soft)}
+.stage.contacted{color:#7C3AED;background:#F1ECFE}
+.stage.catalog{color:#0891B2;background:#E1F5FA}
+.stage.nego{color:#DB7706;background:#FEF1DD}
+.prio{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--ink-3)}
+.prio .fl{width:13px;height:13px}
+.prio.high{color:var(--hot)} .prio.med{color:var(--warm)} .prio.low{color:var(--ink-3)}
+
+/* =========================================================
+   SCREEN 1 — INBOX
+   ========================================================= */
+.inbox{display:grid;grid-template-columns:344px minmax(0,1fr) 372px;flex:1;min-height:0;background:var(--panel)}
+
+/* --- chat list sidebar --- */
+.chatlist{border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0;background:var(--panel)}
+.cl-head{padding:14px 16px 10px}
+.cl-head .row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cl-head h3{font-size:16px;display:flex;align-items:center;gap:8px}
+.cl-search{display:flex;align-items:center;gap:9px;background:var(--bg);border:1px solid var(--line);border-radius:11px;padding:9px 12px;color:var(--ink-3)}
+.cl-search input{border:none;background:none;outline:none;flex:1;font-size:13px;color:var(--ink)}
+.cl-search svg{width:16px;height:16px}
+.cl-filters{display:flex;gap:7px;padding:10px 16px 12px;overflow-x:auto;scrollbar-width:none}
+.cl-filters::-webkit-scrollbar{display:none}
+.fchip{flex:0 0 auto;padding:6px 12px;border-radius:99px;font-size:12px;font-weight:600;color:var(--ink-2);
+  background:var(--bg);border:1px solid var(--line);transition:.15s var(--ease);white-space:nowrap}
+.fchip:hover{border-color:var(--line-2)}
+.fchip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.fchip .n{opacity:.6;margin-left:4px}
+.cl-scroll{flex:1;overflow-y:auto;min-height:0}
+.chat{display:flex;gap:12px;padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--line);position:relative;transition:background .14s var(--ease)}
+.chat:hover{background:var(--panel-2)}
+.chat.on{background:var(--brand-soft)}
+.chat.on::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--brand)}
+.avatar{width:48px;height:48px;border-radius:14px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:16px;color:#fff;position:relative}
+.avatar .on-dot{position:absolute;bottom:-1px;right:-1px;width:13px;height:13px;border-radius:99px;background:var(--brand);border:2.5px solid #fff}
+.chat-main{flex:1;min-width:0}
+.chat-main .r1{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.chat-main .name{font-weight:600;font-size:14px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-main .time{font-size:11px;color:var(--ink-3);flex:0 0 auto;font-weight:500}
+.chat-main .time.unreadt{color:var(--brand);font-weight:700}
+.chat-main .r2{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:3px}
+.chat-main .preview{font-size:12.5px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+.chat-main .preview .tick{color:var(--new);font-weight:700}
+.unread{min-width:19px;height:19px;padding:0 5px;border-radius:99px;background:var(--brand);color:#fff;font-size:11px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.chat-main .r3{display:flex;align-items:center;gap:6px;margin-top:7px}
+
+/* --- conversation center --- */
+.convo{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--wa-chat);position:relative}
+.convo-head{height:64px;flex:0 0 64px;background:var(--wa-header);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:12px;padding:0 18px;z-index:5}
+.convo-head .avatar{width:42px;height:42px;border-radius:12px;font-size:14px}
+.ch-info{flex:1;min-width:0}
+.ch-info .name{font-weight:700;font-size:14.5px}
+.ch-info .sub{font-size:12px;color:var(--ink-3)}
+.ch-info .sub b{color:var(--brand);font-weight:600}
+.ch-actions{display:flex;gap:6px}
+.ch-actions .tb-icon{width:36px;height:36px;border:none;background:transparent}
+.ch-actions .tb-icon:hover{background:rgba(0,0,0,.05)}
+.msgs{flex:1;overflow-y:auto;padding:20px 8% 14px;min-height:0;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,.5) 0, transparent 38%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='%23000' fill-opacity='0.018'%3E%3Cpath d='M14 16c4-6 10-6 14 0M48 60c4-6 10-6 14 0M60 20l3 6 6 1-4 5 1 6-6-3-6 3 1-6-4-5 6-1zM18 50l2 4 4 1-3 3 1 4-4-2-4 2 1-4-3-3 4-1z'/%3E%3Ccircle cx='40' cy='34' r='3'/%3E%3Ccircle cx='12' cy='70' r='2'/%3E%3C/g%3E%3C/svg%3E");
+}
+.daystamp{display:flex;justify-content:center;margin:6px 0 16px}
+.daystamp span{background:#fff;color:var(--ink-3);font-size:11px;font-weight:600;padding:4px 12px;border-radius:8px;box-shadow:var(--shadow-s)}
+.b-row{display:flex;margin-bottom:8px}
+.b-row.out{justify-content:flex-end}
+.bubble{max-width:72%;padding:8px 11px 6px;border-radius:12px;font-size:13.5px;line-height:1.45;position:relative;box-shadow:0 1px .5px rgba(13,22,38,.08)}
+.b-row.in .bubble{background:var(--wa-in);border-top-left-radius:4px}
+.b-row.out .bubble{background:var(--wa-out);border-top-right-radius:4px}
+.bubble .meta{font-size:10.5px;color:var(--ink-3);float:right;margin:6px 0 -2px 10px;display:inline-flex;align-items:center;gap:3px}
+.bubble .meta .tick{color:#34B7F1}
+.bubble .meta .tick svg{width:15px;height:15px;display:block}
+.bubble.media{padding:5px 5px 6px}
+.bubble .media-prev{width:230px;height:150px;border-radius:9px;overflow:hidden;position:relative;
+  background:linear-gradient(135deg,#cfd8e0,#aeb9c6);display:flex;align-items:center;justify-content:center}
+.bubble .media-prev .pdf{display:flex;flex-direction:column;align-items:center;gap:6px;color:#fff}
+.bubble .media-prev .pdf svg{width:40px;height:40px;opacity:.95}
+.bubble .media-cap{padding:7px 6px 2px;font-size:13px}
+.bubble .doc{display:flex;align-items:center;gap:11px;background:rgba(0,0,0,.04);padding:11px;border-radius:9px;width:248px}
+.bubble .doc .ic{width:38px;height:46px;border-radius:6px;background:#E94B4B;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:800}
+.bubble .doc .dt{flex:1;min-width:0}
+.bubble .doc .dt .nm{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bubble .doc .dt .sz{font-size:11px;color:var(--ink-3)}
+
+/* composer */
+.composer{flex:0 0 auto;background:var(--wa-header);border-top:1px solid var(--line);padding:10px 16px;position:relative}
+.cmp-suggest{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.cmp-suggest .lbl{font-size:11px;font-weight:700;color:var(--ai);display:inline-flex;align-items:center;gap:5px;letter-spacing:.02em}
+.cmp-suggest .lbl svg{width:13px;height:13px}
+.sg-chip{font-size:12.5px;font-weight:500;padding:7px 12px;border-radius:99px;background:#fff;border:1px solid var(--ai-soft);
+  color:var(--ai);box-shadow:var(--shadow-s);transition:.15s var(--ease);max-width:340px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sg-chip:hover{background:var(--ai-soft);transform:translateY(-1px);border-color:#d9cffb}
+.cmp-bar{display:flex;align-items:flex-end;gap:10px}
+.cmp-bar .ic{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--ink-3);flex:0 0 auto}
+.cmp-bar .ic:hover{background:rgba(0,0,0,.05);color:var(--ink-2)}
+.cmp-bar .ic svg{width:21px;height:21px}
+.cmp-input{flex:1;background:#fff;border:1px solid var(--line);border-radius:13px;padding:11px 14px;display:flex;align-items:center;gap:8px}
+.cmp-input input{flex:1;border:none;outline:none;background:none;font-size:13.5px;color:var(--ink)}
+.cmp-send{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--brand),var(--brand-600));
+  color:#fff;display:flex;align-items:center;justify-content:center;flex:0 0 auto;box-shadow:0 6px 16px var(--brand-glow);transition:.15s var(--ease)}
+.cmp-send:hover{transform:translateY(-1px) scale(1.03)}
+.cmp-send svg{width:20px;height:20px}
+
+/* --- AI CRM panel right --- */
+.crm{border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0;background:var(--panel-2)}
+.crm-head{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:9px;background:#fff}
+.crm-head .badge{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--ai),var(--ai-2));
+  display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(109,90,230,.25)}
+.crm-head .badge svg{width:17px;height:17px;color:#fff}
+.crm-head .t{flex:1}
+.crm-head .t .n{font-weight:700;font-size:14px;font-family:'Plus Jakarta Sans';display:flex;align-items:center;gap:6px}
+.crm-head .t .s{font-size:11px;color:var(--ink-3)}
+.live{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:var(--brand);background:var(--brand-soft);padding:2px 7px;border-radius:99px}
+.live .pulse{width:6px;height:6px;border-radius:99px;background:var(--brand);animation:pulse 1.8s infinite}
+@keyframes pulse{0%,100%{opacity:.45}50%{opacity:1}}
+.crm-scroll{flex:1;overflow-y:auto;min-height:0;padding:14px}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--r-m);padding:14px;margin-bottom:12px;box-shadow:var(--shadow-s)}
+.card .ct{font-size:11px;font-weight:700;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:11px;display:flex;align-items:center;justify-content:space-between}
+.card .ct .edit{color:var(--brand);cursor:pointer;font-size:11px;letter-spacing:0;text-transform:none;font-weight:600}
+
+/* customer card */
+.cust-top{display:flex;gap:12px;align-items:center;margin-bottom:14px}
+.cust-top .avatar{width:50px;height:50px;border-radius:14px;font-size:17px}
+.cust-top .nm{font-weight:700;font-size:15.5px;font-family:'Plus Jakarta Sans'}
+.cust-top .co{font-size:12px;color:var(--ink-2)}
+.cust-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cust-field .k{font-size:10.5px;color:var(--ink-3);font-weight:600;letter-spacing:.03em;text-transform:uppercase;margin-bottom:2px}
+.cust-field .v{font-size:13px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:5px}
+.cust-field .v svg{width:13px;height:13px;color:var(--ink-3)}
+
+/* lead status stepper */
+.lead-steps{display:flex;gap:6px}
+.lstep{flex:1;text-align:center;cursor:pointer}
+.lstep .bar{height:5px;border-radius:99px;background:var(--line-2);margin-bottom:7px;transition:.2s var(--ease)}
+.lstep .lb{font-size:11px;font-weight:600;color:var(--ink-3)}
+.lstep.done .bar{background:var(--brand)}
+.lstep.active .bar{background:var(--brand);box-shadow:0 0 0 3px var(--brand-glow)}
+.lstep.active .lb{color:var(--brand)}
+.lstep:hover .bar{background:var(--brand-600)}
+
+/* AI summary */
+.ai-card{background:linear-gradient(150deg,#F6F3FF 0%,#EFFBF5 100%);border:1px solid #E6E0FB;border-radius:var(--r-m);padding:14px;margin-bottom:12px;position:relative;overflow:hidden}
+.ai-card::after{content:"";position:absolute;right:-30px;top:-30px;width:120px;height:120px;border-radius:99px;background:radial-gradient(circle,var(--brand-glow),transparent 70%)}
+.ai-card .ct{color:var(--ai);display:flex;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px}
+.ai-card .ct svg{width:14px;height:14px}
+.ai-card p{margin:0;font-size:13px;line-height:1.55;color:#2A2342}
+.ai-card .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.ai-tag{font-size:11px;font-weight:600;background:#fff;color:var(--ai);padding:3px 9px;border-radius:99px;border:1px solid #E6E0FB}
+.ai-tag.urgent{color:var(--hot);border-color:#F8D4D4;background:#fff}
+
+/* quick actions grid */
+.qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.qa{display:flex;align-items:center;gap:9px;padding:11px 12px;border-radius:11px;background:var(--panel-2);
+  border:1px solid var(--line);font-size:12.5px;font-weight:600;color:var(--ink);transition:.15s var(--ease);text-align:left}
+.qa:hover{border-color:var(--brand);background:var(--brand-soft);transform:translateY(-1px)}
+.qa .ico{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.qa .ico svg{width:15px;height:15px}
+.qa.green .ico{background:var(--brand-soft);color:var(--brand)}
+.qa.blue .ico{background:var(--new-soft);color:var(--new)}
+.qa.violet .ico{background:var(--ai-soft);color:var(--ai)}
+.qa.amber .ico{background:var(--warm-soft);color:#B45309}
+.qa.won-a .ico{background:var(--won-soft);color:var(--won)}
+.qa.lost-a .ico{background:var(--lost-soft);color:#64748B}
+
+/* suggested replies in panel */
+.sr{display:flex;flex-direction:column;gap:8px}
+.sr-item{display:flex;gap:9px;align-items:flex-start;padding:11px;border-radius:11px;background:var(--panel-2);border:1px solid var(--line);
+  cursor:pointer;transition:.15s var(--ease);font-size:12.5px;line-height:1.45;color:var(--ink-2)}
+.sr-item:hover{border-color:var(--ai);background:var(--ai-soft)}
+.sr-item .ai-ico{width:22px;height:22px;border-radius:7px;background:var(--ai-soft);color:var(--ai);display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-top:1px}
+.sr-item .ai-ico svg{width:13px;height:13px}
+.sr-item .send-mini{margin-left:auto;color:var(--ai);flex:0 0 auto;align-self:center;opacity:0;transition:.15s}
+.sr-item:hover .send-mini{opacity:1}
+
+/* timeline */
+.tl{position:relative;padding-left:6px}
+.tl-item{position:relative;padding:0 0 16px 22px}
+.tl-item::before{content:"";position:absolute;left:5px;top:3px;bottom:-3px;width:2px;background:var(--line-2)}
+.tl-item:last-child::before{display:none}
+.tl-item .dot{position:absolute;left:0;top:2px;width:12px;height:12px;border-radius:99px;background:#fff;border:2.5px solid var(--brand)}
+.tl-item.note .dot{border-color:var(--warm)}
+.tl-item.order .dot{border-color:var(--new)}
+.tl-item.ai .dot{border-color:var(--ai)}
+.tl-item .th{font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:2px}
+.tl-item .tm{font-size:11px;color:var(--ink-3);margin-bottom:4px}
+.tl-item .td{font-size:12px;color:var(--ink-2);line-height:1.45;background:var(--panel-2);border:1px solid var(--line);padding:8px 10px;border-radius:9px}
+
+/* =========================================================
+   SCREEN 2 — DASHBOARD
+   ========================================================= */
+.page{flex:1;overflow-y:auto;min-height:0;padding:24px 28px 40px}
+.page-hero{margin-bottom:22px}
+.page-hero .eyebrow{font-size:11px;font-weight:700;color:var(--brand);letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.page-hero h1{font-size:26px;margin-bottom:4px}
+.page-hero p{margin:0;color:var(--ink-2);font-size:13.5px}
+.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:18px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:var(--r-m);padding:16px;box-shadow:var(--shadow-s);transition:.18s var(--ease);position:relative;overflow:hidden}
+.kpi:hover{box-shadow:var(--shadow-m);transform:translateY(-2px)}
+.kpi .ico{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.kpi .ico svg{width:18px;height:18px}
+.kpi .lab{font-size:11.5px;color:var(--ink-2);font-weight:600;margin-bottom:5px}
+.kpi .val{font-size:28px;font-weight:800;font-family:'Plus Jakarta Sans';letter-spacing:-.03em;line-height:1}
+.kpi .delta{font-size:11.5px;font-weight:600;margin-top:8px;display:inline-flex;align-items:center;gap:3px}
+.kpi .delta.up{color:var(--won)} .kpi .delta.down{color:var(--hot)} .kpi .delta.flat{color:var(--ink-3)}
+.kpi.g .ico{background:var(--brand-soft);color:var(--brand)}
+.kpi.r .ico{background:var(--hot-soft);color:var(--hot)}
+.kpi.a .ico{background:var(--warm-soft);color:#B45309}
+.kpi.b .ico{background:var(--new-soft);color:var(--new)}
+.kpi.v .ico{background:var(--ai-soft);color:var(--ai)}
+.kpi.w .ico{background:var(--won-soft);color:var(--won)}
+
+.dash-charts{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:16px}
+.panel-card{background:#fff;border:1px solid var(--line);border-radius:var(--r-l);padding:18px;box-shadow:var(--shadow-s)}
+.panel-card .pc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.panel-card .pc-head h3{font-size:15px}
+.panel-card .pc-head .sub{font-size:12px;color:var(--ink-3)}
+.seg{display:flex;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:3px;gap:2px}
+.seg button{padding:5px 11px;border-radius:7px;font-size:12px;font-weight:600;color:var(--ink-3)}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:var(--shadow-s)}
+
+/* rep bars */
+.rep{display:flex;align-items:center;gap:12px;margin-bottom:15px}
+.rep .ra{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:12px;flex:0 0 auto}
+.rep .rn{width:88px;font-size:12.5px;font-weight:600;flex:0 0 auto}
+.rep .track{flex:1;height:9px;background:var(--bg);border-radius:99px;overflow:hidden}
+.rep .fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--brand),#1bcb86)}
+.rep .rv{width:64px;text-align:right;font-size:12.5px;font-weight:700;flex:0 0 auto}
+
+/* donut */
+.donut-wrap{display:flex;align-items:center;gap:20px}
+.donut{width:150px;height:150px;flex:0 0 auto;position:relative}
+.donut .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.donut .ctr .big{font-size:30px;font-weight:800;font-family:'Plus Jakarta Sans'}
+.donut .ctr .sm{font-size:11px;color:var(--ink-3);font-weight:600}
+.legend{flex:1;display:flex;flex-direction:column;gap:11px}
+.lg{display:flex;align-items:center;gap:9px;font-size:12.5px}
+.lg .sw{width:11px;height:11px;border-radius:4px;flex:0 0 auto}
+.lg .lt{flex:1;color:var(--ink-2);font-weight:500}
+.lg .lv{font-weight:700}
+
+/* pipeline funnel bars */
+.funnel{display:flex;flex-direction:column;gap:10px}
+.fn{display:flex;align-items:center;gap:12px}
+.fn .fnl{width:96px;font-size:12.5px;font-weight:600;flex:0 0 auto}
+.fn .fnt{flex:1;height:30px;background:var(--bg);border-radius:8px;overflow:hidden;position:relative}
+.fn .fnf{height:100%;border-radius:8px;display:flex;align-items:center;padding-left:12px;color:#fff;font-size:12px;font-weight:700}
+.dash-bottom{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.todo{display:flex;align-items:center;gap:12px;padding:11px;border-radius:11px;border:1px solid var(--line);margin-bottom:9px;transition:.15s var(--ease)}
+.todo:hover{background:var(--panel-2);border-color:var(--line-2)}
+.todo .ck{width:20px;height:20px;border-radius:6px;border:2px solid var(--line-2);flex:0 0 auto;cursor:pointer;transition:.15s}
+.todo .ck:hover{border-color:var(--brand)}
+.todo.due .lt{color:var(--hot)}
+.todo .tinfo{flex:1}.todo .tinfo .tt{font-size:13px;font-weight:600}.todo .tinfo .ts{font-size:11.5px;color:var(--ink-3)}
+.todo .when{font-size:11px;font-weight:700;padding:4px 9px;border-radius:99px;background:var(--bg);color:var(--ink-2)}
+.todo .when.over{background:var(--hot-soft);color:var(--hot)}
+
+/* =========================================================
+   SCREEN 3 — PIPELINE (kanban)
+   ========================================================= */
+.kanban{flex:1;overflow-x:auto;overflow-y:hidden;min-height:0;padding:20px 24px;display:flex;gap:16px}
+.kcol{flex:0 0 282px;display:flex;flex-direction:column;min-height:0;background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r-l)}
+.kcol-head{padding:14px 14px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line)}
+.kcol-head .dot{width:9px;height:9px;border-radius:99px;flex:0 0 auto}
+.kcol-head .kt{font-weight:700;font-size:13.5px;flex:1}
+.kcol-head .kn{font-size:12px;font-weight:700;color:var(--ink-3);background:#fff;border:1px solid var(--line);border-radius:99px;padding:1px 9px}
+.kcol-head .kval{font-size:11px;color:var(--ink-3);font-weight:600}
+.kcol-body{flex:1;overflow-y:auto;min-height:0;padding:12px;display:flex;flex-direction:column;gap:11px}
+.kcard{background:#fff;border:1px solid var(--line);border-radius:var(--r-m);padding:13px;box-shadow:var(--shadow-s);cursor:grab;transition:.16s var(--ease)}
+.kcard:hover{box-shadow:var(--shadow-m);transform:translateY(-2px);border-color:var(--line-2)}
+.kcard:active{cursor:grabbing}
+.kcard .kc-top{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+.kcard .kc-top .avatar{width:32px;height:32px;border-radius:9px;font-size:12px}
+.kcard .kc-top .kn2{font-weight:700;font-size:13px;line-height:1.2}
+.kcard .kc-top .kcity{font-size:11px;color:var(--ink-3)}
+.kcard .kprod{font-size:12.5px;color:var(--ink);background:var(--bg);border-radius:8px;padding:7px 10px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.kcard .kprod .qty{font-weight:700;color:var(--brand)}
+.kcard .kc-foot{display:flex;align-items:center;justify-content:space-between}
+.kfu{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--ink-2)}
+.kfu svg{width:13px;height:13px}
+.kfu.soon{color:var(--warm)} .kfu.over{color:var(--hot)}
+.kval-tag{font-size:11.5px;font-weight:700;color:var(--ink)}
+
+/* =========================================================
+   SCREEN 4 — CUSTOMER DETAIL
+   ========================================================= */
+.cust-page{flex:1;overflow-y:auto;min-height:0}
+.cust-banner{background:linear-gradient(120deg,#0C1322 0%,#143b30 60%,#0e7048 130%);padding:26px 28px 26px;color:#fff;position:relative;overflow:hidden}
+.cust-banner::after{content:"";position:absolute;right:-60px;top:-60px;width:260px;height:260px;border-radius:99px;background:radial-gradient(circle,rgba(18,163,107,.4),transparent 70%)}
+.cust-banner .back{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:rgba(255,255,255,.7);margin-bottom:16px;cursor:pointer}
+.cust-banner .back:hover{color:#fff}
+.cb-main{display:flex;align-items:center;gap:18px;position:relative;z-index:2}
+.cb-main .avatar{width:72px;height:72px;border-radius:20px;font-size:26px;border:3px solid rgba(255,255,255,.15)}
+.cb-info h1{font-size:24px;color:#fff;margin-bottom:5px;display:flex;align-items:center;gap:10px}
+.cb-info .meta{display:flex;gap:18px;flex-wrap:wrap;color:rgba(255,255,255,.78);font-size:13px}
+.cb-info .meta span{display:inline-flex;align-items:center;gap:6px}
+.cb-info .meta svg{width:14px;height:14px;opacity:.8}
+.cb-actions{margin-left:auto;display:flex;gap:9px;position:relative;z-index:2}
+.cb-stats{display:flex;gap:0;margin-top:22px;position:relative;z-index:2;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:14px;overflow:hidden}
+.cb-stat{flex:1;padding:14px 18px;border-right:1px solid rgba(255,255,255,.12)}
+.cb-stat:last-child{border-right:none}
+.cb-stat .v{font-size:21px;font-weight:800;font-family:'Plus Jakarta Sans'}
+.cb-stat .l{font-size:11px;color:rgba(255,255,255,.65);font-weight:600;margin-top:2px}
+.cust-body{padding:22px 28px 40px;display:grid;grid-template-columns:1.55fr 1fr;gap:18px}
+.cust-col{display:flex;flex-direction:column;gap:16px}
+.sec-title{font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.sec-title svg{width:16px;height:16px;color:var(--brand)}
+.order-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.order-row:last-child{border-bottom:none}
+.order-row .oic{width:40px;height:40px;border-radius:11px;background:var(--bg);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.order-row .oic svg{width:18px;height:18px;color:var(--ink-2)}
+.order-row .oinf{flex:1}.order-row .oinf .on{font-weight:600;font-size:13.5px}.order-row .oinf .od{font-size:11.5px;color:var(--ink-3)}
+.order-row .oval{text-align:right}.order-row .oval .ov{font-weight:700;font-size:14px}
+.pay-pill{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:99px}
+.pay-pill.paid{background:var(--won-soft);color:var(--won)}
+.pay-pill.partial{background:var(--warm-soft);color:#B45309}
+.pay-pill.due{background:var(--hot-soft);color:var(--hot)}
+.note-item{display:flex;gap:11px;padding:11px;border-radius:11px;background:var(--panel-2);border:1px solid var(--line);margin-bottom:10px}
+.note-item .na{width:28px;height:28px;border-radius:8px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:11px}
+.note-item .nb{flex:1}.note-item .nb .nh{font-size:12px;color:var(--ink-3);margin-bottom:3px}.note-item .nb .nh b{color:var(--ink)}
+.note-item .nb .ntext{font-size:13px;color:var(--ink)}
+.insight{display:flex;gap:11px;padding:13px;border-radius:12px;background:linear-gradient(140deg,#F6F3FF,#fff);border:1px solid #ECE6FB;margin-bottom:11px}
+.insight .iic{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--ai),var(--ai-2));color:#fff;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.insight .iic svg{width:16px;height:16px}
+.insight .it{flex:1}.insight .it .ih{font-weight:700;font-size:13px;margin-bottom:3px}.insight .it p{margin:0;font-size:12.5px;color:var(--ink-2);line-height:1.5}
+.fu-item{display:flex;align-items:center;gap:11px;padding:11px;border:1px solid var(--line);border-radius:11px;margin-bottom:9px}
+.fu-item .fck{width:19px;height:19px;border-radius:6px;border:2px solid var(--line-2);flex:0 0 auto;cursor:pointer}
+.fu-item.done .fck{background:var(--brand);border-color:var(--brand);display:flex;align-items:center;justify-content:center}
+.fu-item.done .ft{text-decoration:line-through;color:var(--ink-3)}
+.fu-item .fi{flex:1}.fu-item .ft{font-size:13px;font-weight:600}.fu-item .fs{font-size:11.5px;color:var(--ink-3)}
+
+/* =========================================================
+   SCREEN 5 — EXTENSION CONCEPT
+   ========================================================= */
+.ext-wrap{flex:1;overflow-y:auto;min-height:0;background:linear-gradient(160deg,#0C1322,#101a2e);padding:24px 28px 40px}
+.ext-hero{text-align:center;color:#fff;max-width:680px;margin:6px auto 26px}
+.ext-hero .eyebrow{justify-content:center;color:#3ee0a0}
+.ext-hero h1{font-size:27px;color:#fff;margin-bottom:8px}
+.ext-hero p{color:rgba(255,255,255,.62);font-size:14px;margin:0}
+.ext-states{display:flex;gap:8px;justify-content:center;margin-bottom:22px}
+.estate{padding:9px 16px;border-radius:99px;font-size:13px;font-weight:600;color:rgba(255,255,255,.65);
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);transition:.16s var(--ease)}
+.estate:hover{background:rgba(255,255,255,.1);color:#fff}
+.estate.on{background:linear-gradient(135deg,var(--brand),var(--brand-600));color:#fff;border-color:transparent;box-shadow:0 6px 18px var(--brand-glow)}
+
+/* fake whatsapp web window */
+.wa-window{max-width:1020px;margin:0 auto;border-radius:16px;overflow:hidden;box-shadow:var(--shadow-l);border:1px solid rgba(255,255,255,.1);background:#fff}
+.wa-bar{height:38px;background:#1f2c33;display:flex;align-items:center;gap:8px;padding:0 14px}
+.wa-bar .dots{display:flex;gap:7px}.wa-bar .dots i{width:11px;height:11px;border-radius:99px;display:block}
+.wa-bar .dots i:nth-child(1){background:#ff5f57}.wa-bar .dots i:nth-child(2){background:#febc2e}.wa-bar .dots i:nth-child(3){background:#28c840}
+.wa-bar .url{flex:1;margin:0 14px;background:#0f181d;border-radius:7px;height:22px;display:flex;align-items:center;padding:0 12px;color:#7f8c95;font-size:11px;gap:7px}
+.wa-bar .url svg{width:12px;height:12px}
+.wa-body{display:grid;grid-template-columns:340px 1fr;height:560px}
+.wa-left{border-right:1px solid #e9edef;background:#fff;display:flex;flex-direction:column}
+.wa-lhead{height:56px;background:#f0f2f5;display:flex;align-items:center;padding:0 16px;gap:10px;border-bottom:1px solid #e9edef}
+.wa-lhead .me{width:34px;height:34px;border-radius:99px;background:linear-gradient(135deg,#f0a35e,#e8736b)}
+.wa-lhead .ttl{font-weight:700;font-size:14px;flex:1}
+.wa-search{padding:8px 12px;background:#fff;border-bottom:1px solid #e9edef}
+.wa-search .b{background:#f0f2f5;border-radius:8px;height:34px;display:flex;align-items:center;padding:0 12px;color:#8696a0;font-size:13px;gap:8px}
+.wa-search .b svg{width:15px;height:15px}
+.wa-chats{flex:1;overflow:hidden}
+.wa-ci{display:flex;gap:12px;padding:11px 14px;border-bottom:1px solid #f0f2f5;align-items:center}
+.wa-ci.sel{background:#f0f2f5}
+.wa-ci .av{width:46px;height:46px;border-radius:99px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px}
+.wa-ci .ct2{flex:1;min-width:0}
+.wa-ci .ct2 .r1{display:flex;justify-content:space-between}.wa-ci .ct2 .nm{font-weight:600;font-size:14px}.wa-ci .ct2 .tm{font-size:11px;color:#667781}
+.wa-ci .ct2 .pv{font-size:12.5px;color:#667781;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wa-right{display:flex;flex-direction:column;background:var(--wa-chat);position:relative;min-width:0}
+.wa-rhead{height:56px;background:#f0f2f5;display:flex;align-items:center;gap:12px;padding:0 16px;border-bottom:1px solid #e9edef}
+.wa-rhead .av{width:38px;height:38px;border-radius:99px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px}
+.wa-rhead .nm{font-weight:700;font-size:14px}.wa-rhead .st{font-size:11.5px;color:#667781}
+.wa-msgs{flex:1;padding:18px 30px;overflow:hidden;position:relative;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cg fill='%23000' fill-opacity='0.02'%3E%3Ccircle cx='40' cy='40' r='3'/%3E%3Cpath d='M14 16c4-6 10-6 14 0'/%3E%3C/g%3E%3C/svg%3E")}
+.wa-msgs .b-row{margin-bottom:7px}
+.wa-compose{background:#f0f2f5;padding:9px 16px;display:flex;align-items:center;gap:12px;position:relative}
+.wa-compose .ic{color:#54656f;display:flex}.wa-compose .ic svg{width:24px;height:24px}
+.wa-compose .field{flex:1;background:#fff;border-radius:9px;height:42px;display:flex;align-items:center;padding:0 14px;color:#3b4a54;font-size:13.5px}
+
+/* Native floating popup */
+.native-pop{position:absolute;left:24px;bottom:74px;width:344px;background:#fff;border-radius:16px;
+  box-shadow:var(--shadow-l);border:1px solid rgba(13,22,38,.08);overflow:hidden;z-index:30;
+  animation:popin .3s var(--ease)}
+@keyframes popin{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
+.np-head{display:flex;align-items:center;gap:9px;padding:12px 14px;background:linear-gradient(135deg,#0C1322,#143b30)}
+.np-head .lg{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,var(--brand),var(--ai));display:flex;align-items:center;justify-content:center}
+.np-head .lg svg{width:15px;height:15px;color:#fff}
+.np-head .nt{flex:1;color:#fff;font-weight:700;font-size:13px;font-family:'Plus Jakarta Sans';display:flex;align-items:center;gap:6px}
+.np-head .nt .v{font-size:9px;font-weight:700;color:#3ee0a0;background:rgba(62,224,160,.15);padding:1px 6px;border-radius:99px;letter-spacing:.04em}
+.np-head .x{color:rgba(255,255,255,.55);cursor:pointer}.np-head .x svg{width:16px;height:16px}
+.np-body{padding:14px}
+.np-tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px;margin-bottom:11px}
+.np-tag svg{width:13px;height:13px}
+.np-tag.lead{background:var(--brand-soft);color:var(--brand)}
+.np-tag.reply{background:var(--ai-soft);color:var(--ai)}
+.np-tag.remind{background:var(--warm-soft);color:#B45309}
+.np-body h4{font-size:14px;margin-bottom:6px}
+.np-body p{margin:0 0 12px;font-size:12.5px;color:var(--ink-2);line-height:1.5}
+.np-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:13px}
+.np-f{background:var(--panel-2);border:1px solid var(--line);border-radius:9px;padding:8px 10px}
+.np-f .k{font-size:9.5px;color:var(--ink-3);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.np-f .v{font-size:12.5px;font-weight:600;margin-top:1px}
+.np-reply{background:var(--ai-soft);border:1px solid #E0D8FB;border-radius:11px;padding:11px;font-size:12.5px;color:#2A2342;line-height:1.5;margin-bottom:12px}
+.np-actions{display:flex;gap:8px}
+.np-btn{flex:1;padding:9px;border-radius:10px;font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px}
+.np-btn svg{width:14px;height:14px}
+.np-btn.primary{background:linear-gradient(135deg,var(--brand),var(--brand-600));color:#fff;box-shadow:0 5px 14px var(--brand-glow)}
+.np-btn.ai{background:linear-gradient(135deg,var(--ai),var(--ai-2));color:#fff}
+.np-btn.ghost{flex:0 0 auto;width:42px;background:var(--bg);color:var(--ink-2);border:1px solid var(--line)}
+.np-remind{display:flex;align-items:center;gap:11px;background:var(--warm-soft);border:1px solid #F6E3C4;border-radius:11px;padding:11px;margin-bottom:12px}
+.np-remind .rc{width:34px;height:34px;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;color:#B45309;flex:0 0 auto}
+.np-remind .rc svg{width:17px;height:17px}
+.np-remind .rt{flex:1}.np-remind .rt .rd{font-size:13px;font-weight:700}.np-remind .rt .rs{font-size:11.5px;color:#92653A}
+.ext-note{text-align:center;color:rgba(255,255,255,.4);font-size:12px;margin-top:20px}
+
+/* toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);z-index:200;
+  background:var(--ink);color:#fff;padding:12px 18px;border-radius:13px;font-size:13px;font-weight:600;
+  display:flex;align-items:center;gap:10px;box-shadow:var(--shadow-l);opacity:0;transition:.32s var(--ease);pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast .ti{width:22px;height:22px;border-radius:7px;background:var(--brand);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.toast .ti svg{width:14px;height:14px;color:#fff}
+
+/* =========================================================
+   QUOTATION — modal, lead form, tables (shared)
+   ========================================================= */
+.modal-overlay{position:fixed;inset:0;background:rgba(8,14,26,.55);backdrop-filter:blur(3px);z-index:150;
+  display:none;align-items:center;justify-content:center;padding:24px;animation:fade .2s var(--ease)}
+.modal-overlay.show{display:flex}
+.qmodal{width:560px;max-width:100%;max-height:92vh;background:#fff;border-radius:20px;overflow:hidden;
+  box-shadow:var(--shadow-l);display:flex;flex-direction:column;animation:popin .28s var(--ease)}
+.qm-head{display:flex;align-items:center;gap:12px;padding:18px 20px;border-bottom:1px solid var(--line);
+  background:linear-gradient(120deg,#0C1322,#143b30);color:#fff}
+.qm-head .lg{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--brand),var(--ai));display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.qm-head .lg svg{width:19px;height:19px;color:#fff}
+.qm-head .tt{flex:1}
+.qm-head .tt h3{font-size:16px;color:#fff}
+.qm-head .tt .qno{font-size:11.5px;color:rgba(255,255,255,.6);font-weight:600;margin-top:1px;font-variant-numeric:tabular-nums}
+.qm-head .x{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.7);background:rgba(255,255,255,.08)}
+.qm-head .x:hover{background:rgba(255,255,255,.16);color:#fff}
+.qm-head .x svg{width:17px;height:17px}
+.qm-body{padding:18px 20px;overflow-y:auto}
+.qm-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.qf{display:flex;flex-direction:column;gap:6px}
+.qf.full{grid-column:1/-1}
+.qf label{font-size:11px;font-weight:700;color:var(--ink-2);letter-spacing:.02em}
+.qf input,.qf select,.qf textarea{border:1px solid var(--line-2);border-radius:10px;padding:10px 12px;font-size:13.5px;
+  font-family:inherit;color:var(--ink);background:#fff;outline:none;transition:.15s var(--ease);width:100%}
+.qf input:focus,.qf select:focus,.qf textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-glow)}
+.qf textarea{resize:vertical;min-height:54px}
+.qf .with-unit{position:relative}
+.qf .with-unit .u{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--ink-3);font-weight:600;pointer-events:none}
+.qm-summary{margin-top:16px;background:var(--panel-2);border:1px solid var(--line);border-radius:13px;padding:14px 16px}
+.qm-line{display:flex;align-items:center;justify-content:space-between;font-size:13px;padding:5px 0;color:var(--ink-2)}
+.qm-line b{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+.qm-line.disc b{color:var(--won)}
+.qm-total{display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-top:12px;border-top:1.5px dashed var(--line-2)}
+.qm-total .lbl{font-size:14px;font-weight:700}
+.qm-total .amt{font-size:24px;font-weight:800;font-family:'Plus Jakarta Sans';letter-spacing:-.02em;color:var(--brand);font-variant-numeric:tabular-nums}
+.qm-foot{display:flex;gap:9px;padding:16px 20px;border-top:1px solid var(--line);background:var(--panel-2)}
+.qm-foot .btn{flex:1;justify-content:center}
+.btn-wa{background:linear-gradient(135deg,#25D366,#1FAE54);color:#fff;box-shadow:0 6px 16px rgba(37,211,102,.25)}
+.btn-wa:hover{transform:translateY(-1px)}
+
+/* quotations table (customer page) */
+.qtable{width:100%;border-collapse:collapse}
+.qtable th{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);font-weight:700;text-align:left;padding:0 10px 10px;border-bottom:1px solid var(--line)}
+.qtable th.r,.qtable td.r{text-align:right}
+.qtable td{padding:13px 10px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:middle}
+.qtable tr:last-child td{border-bottom:none}
+.qtable tr:hover td{background:var(--panel-2)}
+.qtable .qn{font-weight:700;font-variant-numeric:tabular-nums}
+.qtable .qamt{font-weight:700;font-variant-numeric:tabular-nums}
+.qstat{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px}
+.qstat::before{content:"";width:6px;height:6px;border-radius:99px;background:currentColor}
+.qstat.sent{color:var(--new);background:var(--new-soft)}
+.qstat.accepted{color:var(--won);background:var(--won-soft)}
+.qstat.pending{color:#B45309;background:var(--warm-soft)}
+.qstat.expired{color:#64748B;background:var(--lost-soft)}
+.qstat.draft{color:#64748B;background:var(--lost-soft)}
+.conv-yes{color:var(--won);font-weight:700;font-size:12px;display:inline-flex;align-items:center;gap:4px}
+.conv-no{color:var(--ink-3);font-weight:600;font-size:12px}
+.qactions{display:flex;gap:5px;justify-content:flex-end}
+.qact{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;color:var(--ink-2);transition:.14s var(--ease)}
+.qact:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-soft)}
+.qact svg{width:15px;height:15px}
+.qact.wa:hover{border-color:#25D366;color:#1FAE54;background:rgba(37,211,102,.08)}
+
+/* dashboard quotation stat tiles */
+.qstats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.qtile{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:13px 14px}
+.qtile .ql{font-size:11.5px;color:var(--ink-2);font-weight:600;display:flex;align-items:center;gap:6px;margin-bottom:7px}
+.qtile .ql .d{width:8px;height:8px;border-radius:99px;flex:0 0 auto}
+.qtile .qv{font-size:23px;font-weight:800;font-family:'Plus Jakarta Sans';letter-spacing:-.02em}
+.qtile .qs{font-size:11px;color:var(--ink-3);margin-top:3px}
+
+/* extension lead form */
+.np-form{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:13px}
+.np-form .npf{display:flex;flex-direction:column;gap:4px}
+.np-form .npf.full{grid-column:1/-1}
+.np-form .npf label{font-size:9.5px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em}
+.np-form .npf input,.np-form .npf textarea{border:1px solid var(--line-2);border-radius:8px;padding:7px 9px;font-size:12.5px;font-family:inherit;color:var(--ink);outline:none;width:100%}
+.np-form .npf input:focus,.np-form .npf textarea:focus{border-color:var(--brand);box-shadow:0 0 0 2px var(--brand-glow)}
+.np-form .npf textarea{resize:none;min-height:38px}
+.np-quotebar{position:absolute;left:24px;bottom:74px;z-index:29}
+
+/* AI create-quote nudge chip */
+.sg-chip.quote{background:linear-gradient(135deg,var(--brand-soft),#fff);border-color:#bfe9d6;color:var(--brand);font-weight:700}
+.sg-chip.quote:hover{background:var(--brand-soft)}
+
+/* responsive guard */
+@media(max-width:1180px){
+  .inbox{grid-template-columns:300px minmax(0,1fr) 340px}
+  .kpi-grid{grid-template-columns:repeat(3,1fr)}
+  .dash-charts,.dash-bottom,.cust-body{grid-template-columns:1fr}
+}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- ============ LEFT RAIL ============ -->
+  <nav class="rail">
+    <div class="rail-logo" title="Native8.ai">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M5 19V5l14 14V5" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="19" cy="5" r="2.3" fill="#3ee0a0"/></svg>
+    </div>
+    <div class="rail-nav">
+      <button class="rail-btn on" data-screen="inbox" onclick="nav('inbox',this)">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="rail-badge">7</span><span class="tip">Inbox</span>
+      </button>
+      <button class="rail-btn" data-screen="dashboard" onclick="nav('dashboard',this)">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="12" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="3" y="16" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="2"/></svg>
+        <span class="tip">Dashboard</span>
+      </button>
+      <button class="rail-btn" data-screen="pipeline" onclick="nav('pipeline',this)">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="5" height="16" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="9.5" y="4" width="5" height="11" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="16" y="4" width="5" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/></svg>
+        <span class="tip">Pipeline</span>
+      </button>
+      <button class="rail-btn" data-screen="customer" onclick="nav('customer',this)">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="2"/><path d="M5 20a7 7 0 0 1 14 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span class="tip">Customers</span>
+      </button>
+      <button class="rail-btn" data-screen="extension" onclick="nav('extension',this)">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M14 7h5a2 2 0 0 1 2 2v5m0 4a2 2 0 0 1-2 2h-5M7 21H5a2 2 0 0 1-2-2v-2m0-7V5a2 2 0 0 1 2-2h2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="2.5" stroke="currentColor" stroke-width="2"/></svg>
+        <span class="tip">Extension Concept</span>
+      </button>
+    </div>
+    <div class="rail-spacer"></div>
+    <button class="rail-btn"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" stroke-width="1.6"/></svg><span class="tip">Settings</span></button>
+    <div class="rail-me" title="Aarav Mehta · Sales">AM</div>
+  </nav>
+
+  <div class="host">
+
+    <!-- ============================================= -->
+    <!-- SCREEN 1 — INBOX                              -->
+    <!-- ============================================= -->
+    <section class="screen on" id="screen-inbox">
+      <div class="inbox">
+        <!-- chat list -->
+        <aside class="chatlist">
+          <div class="cl-head">
+            <div class="row">
+              <h3>Inbox <span class="live"><span class="pulse"></span>WhatsApp</span></h3>
+              <button class="tb-icon" style="border:none;background:transparent" title="New chat">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+            <div class="cl-search">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <input placeholder="Search name, phone, product…" />
+            </div>
+          </div>
+          <div class="cl-filters">
+            <button class="fchip on">All<span class="n">24</span></button>
+            <button class="fchip">Unread<span class="n">7</span></button>
+            <button class="fchip">🔥 Hot<span class="n">5</span></button>
+            <button class="fchip">Follow-ups<span class="n">9</span></button>
+            <button class="fchip">Quotes<span class="n">3</span></button>
+            <button class="fchip">Unassigned</button>
+          </div>
+          <div class="cl-scroll" id="chatlist"></div>
+        </aside>
+
+        <!-- conversation -->
+        <main class="convo">
+          <div class="convo-head">
+            <div class="avatar" style="background:linear-gradient(135deg,#1f9d6b,#34c98a)">RE</div>
+            <div class="ch-info">
+              <div class="name" id="cv-name">Ravi Enterprises</div>
+              <div class="sub"><b>● online</b> &nbsp;·&nbsp; +91 98765 43210</div>
+            </div>
+            <div class="ch-actions">
+              <button class="tb-icon" title="Search in chat"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+              <button class="tb-icon" title="Call"><svg viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              <button class="tb-icon" title="More"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="5" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="19" r="1.6" fill="currentColor"/></svg></button>
+            </div>
+          </div>
+
+          <div class="msgs" id="msgs">
+            <div class="daystamp"><span>TODAY</span></div>
+
+            <div class="b-row in"><div class="bubble">Hi, do you make outdoor entrance mats? Saw your catalog on IndiaMART.<span class="meta">10:02 AM</span></div></div>
+            <div class="b-row out"><div class="bubble">Hello! Yes 👋 Native Mats makes premium coir, rubber &amp; nylon entrance mats. May I know the requirement and city?<span class="meta">10:04 AM <span class="tick"><svg viewBox="0 0 24 24" fill="none"><path d="m1 13 4 4L13 7M9 13l4 4L23 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></div></div>
+            <div class="b-row in"><div class="bubble">We need <b>20 outdoor mats</b> for a new hotel lobby. Heavy footfall area. We're in <b>Panipat</b>.<span class="meta">10:06 AM</span></div></div>
+            <div class="b-row in"><div class="bubble media">
+                <div class="media-prev"><div class="pdf"><svg viewBox="0 0 24 24" fill="none"><path d="M9 2h7l5 5v13a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="1.8"/><path d="M16 2v5h5M12 18v-5m-2.5 2.5L12 13l2.5 2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-size:11px">Lobby reference photo</span></div></div>
+                <div class="media-cap">Here's the entrance we're matting 👆<span class="meta">10:07 AM</span></div>
+            </div></div>
+            <div class="b-row out"><div class="bubble">Perfect. For high-footfall hotel entrances I'd recommend our <b>Heavy-Duty Rubber-Backed Coir (3×5 ft)</b>. Sharing the catalog + price list now.<span class="meta">10:11 AM <span class="tick"><svg viewBox="0 0 24 24" fill="none"><path d="m1 13 4 4L13 7M9 13l4 4L23 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></div></div>
+            <div class="b-row out"><div class="bubble media" style="background:var(--wa-out)">
+                <div class="doc"><div class="ic">PDF</div><div class="dt"><div class="nm">Native_Mats_Catalog_2026.pdf</div><div class="sz">4.2 MB · 12 pages</div></div></div>
+                <div class="media-cap" style="padding-top:8px">Catalog + pricing inside.<span class="meta">10:11 AM <span class="tick"><svg viewBox="0 0 24 24" fill="none"><path d="m1 13 4 4L13 7M9 13l4 4L23 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></div>
+            </div></div>
+            <div class="b-row in"><div class="bubble">Got it, thanks. What's the per-piece price for 20 units? And can you deliver to Panipat by <b>Friday</b>? Opening is this weekend.<span class="meta">10:18 AM</span></div></div>
+            <div class="b-row in"><div class="bubble">Also do you do custom logo branding on the mat?<span class="meta">10:18 AM</span></div></div>
+          </div>
+
+          <div class="composer">
+            <div class="cmp-suggest" id="suggest-chips">
+              <span class="lbl"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2 9.2 9.2 2 12l7.2 2.8L12 22l2.8-7.2L22 12l-7.2-2.8L12 2z" fill="currentColor"/></svg>Suggested replies</span>
+              <button class="sg-chip quote" onclick="openQuote({customer:'Ravi Enterprises',product:'Heavy-Duty Rubber-Backed Coir Mat (3×5 ft)',qty:20,rate:1180})">✨ Create quotation? · 20 × Heavy-Duty Coir</button>
+              <button class="sg-chip" onclick="useReply('For 20 units the price is ₹1,180/piece (₹23,600 total). Yes, we can deliver to Panipat by Friday — and we do custom logo branding too! 🎨')">₹1,180/pc · delivers Friday · logo branding ✓</button>
+              <button class="sg-chip" onclick="useReply('I can lock a Panipat delivery by Friday if we confirm the order by tomorrow. Shall I prepare a formal quote for 20 units?')">Offer to send a formal quote</button>
+              <button class="sg-chip" onclick="useReply('Yes! We brand mats with your hotel logo at ₹250/mat extra. Want me to share a logo mockup?')">Pitch custom logo branding</button>
+            </div>
+            <div class="cmp-bar">
+              <button class="ic" title="Emoji"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="9" cy="9.5" r="1.1" fill="currentColor"/><circle cx="15" cy="9.5" r="1.1" fill="currentColor"/></svg></button>
+              <button class="ic" title="Attach"><svg viewBox="0 0 24 24" fill="none"><path d="M21.44 11.05 12.25 20.24a5.5 5.5 0 0 1-7.78-7.78l8.49-8.49a3.5 3.5 0 0 1 4.95 4.95l-8.49 8.49a1.5 1.5 0 0 1-2.12-2.12l7.78-7.78" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              <div class="cmp-input"><input id="composer-input" placeholder="Type a message…" /></div>
+              <button class="cmp-send" onclick="sendMsg()" title="Send"><svg viewBox="0 0 24 24" fill="none"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            </div>
+          </div>
+        </main>
+
+        <!-- AI CRM panel -->
+        <aside class="crm">
+          <div class="crm-head">
+            <div class="badge"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2 9.2 9.2 2 12l7.2 2.8L12 22l2.8-7.2L22 12l-7.2-2.8L12 2z" fill="currentColor"/></svg></div>
+            <div class="t"><div class="n">Native AI <span class="live"><span class="pulse"></span>live</span></div><div class="s">Customer context &amp; actions</div></div>
+          </div>
+          <div class="crm-scroll">
+            <!-- customer card -->
+            <div class="card">
+              <div class="ct">Customer <span class="edit">Edit</span></div>
+              <div class="cust-top">
+                <div class="avatar" style="background:linear-gradient(135deg,#1f9d6b,#34c98a)">RE</div>
+                <div><div class="nm">Ravi Sharma</div><div class="co">Ravi Enterprises</div></div>
+              </div>
+              <div class="cust-grid">
+                <div class="cust-field"><div class="k">Phone</div><div class="v"><svg viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" stroke="currentColor" stroke-width="2"/></svg>+91 98765 43210</div></div>
+                <div class="cust-field"><div class="k">City</div><div class="v"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10" r="2.5" stroke="currentColor" stroke-width="2"/></svg>Panipat</div></div>
+                <div class="cust-field"><div class="k">Company</div><div class="v">Ravi Enterprises</div></div>
+                <div class="cust-field"><div class="k">Source</div><div class="v">IndiaMART</div></div>
+              </div>
+            </div>
+
+            <!-- lead status -->
+            <div class="card">
+              <div class="ct">Lead Status</div>
+              <div class="lead-steps" id="lead-steps">
+                <div class="lstep done" onclick="setStage(this,'New')"><div class="bar"></div><div class="lb">New</div></div>
+                <div class="lstep done" onclick="setStage(this,'Warm')"><div class="bar"></div><div class="lb">Warm</div></div>
+                <div class="lstep active" onclick="setStage(this,'Hot')"><div class="bar"></div><div class="lb">Hot</div></div>
+                <div class="lstep" onclick="setStage(this,'Won')"><div class="bar"></div><div class="lb">Won</div></div>
+              </div>
+            </div>
+
+            <!-- AI summary -->
+            <div class="ai-card">
+              <div class="ct"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2 9.2 9.2 2 12l7.2 2.8L12 22l2.8-7.2L22 12l-7.2-2.8L12 2z" fill="currentColor"/></svg>AI Summary</div>
+              <p>Customer wants <b>20 entrance mats</b> for a new hotel lobby in Panipat (high footfall). Catalog &amp; pricing already shared. Needs <b>per-unit price confirmation</b>, <b>delivery by Friday</b>, and asked about <b>custom logo branding</b>. High intent — opening is this weekend.</p>
+              <div class="tags">
+                <span class="ai-tag urgent">⏱ Deliver by Fri</span>
+                <span class="ai-tag">₹23,600 est. value</span>
+                <span class="ai-tag">Logo branding ask</span>
+              </div>
+            </div>
+
+            <!-- quick actions -->
+            <div class="card">
+              <div class="ct">Quick Actions</div>
+              <div class="qa-grid">
+                <button class="qa green" onclick="toast('Lead added to pipeline')"><span class="ico"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>Add Lead</button>
+                <button class="qa blue" onclick="toast('Stage updated → Negotiation')"><span class="ico"><svg viewBox="0 0 24 24" fill="none"><path d="M3 7h13l-3-3m3 3-3 3M21 17H8l3-3m-3 3 3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Update Stage</button>
+                <button class="qa amber" onclick="toast('Follow-up set for tomorrow 10 AM')"><span class="ico"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M8 3v4M16 3v4M12 13v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>Follow-up</button>
+                <button class="qa violet" onclick="openQuote({customer:'Ravi Enterprises',product:'Heavy-Duty Rubber-Backed Coir Mat (3×5 ft)',qty:20,rate:1180})"><span class="ico"><svg viewBox="0 0 24 24" fill="none"><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="2"/><path d="M14 2v5h5M9 13h6M9 17h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>Create Quote</button>
+                <button class="qa won-a" onclick="toast('🎉 Marked as Won! ₹23,600')"><span class="ico"><svg viewBox="0 0 24 24" fill="none"><path d="m20 6-11 11-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Mark Won</button>
+                <button class="qa lost-a" onclick="toast('Marked as Lost')"><span class="ico"><svg viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>Mark Lost</button>
+              </div>
+            </div>
+
+            <!-- suggested replies -->
+            <div class="card">
+              <div class="ct">Suggested Replies</div>
+              <div class="sr">
+                <div class="sr-item" onclick="useReply('For 20 units the price is ₹1,180/piece (₹23,600 total). Yes, we can deliver to Panipat by Friday — and we do custom logo branding too! 🎨')">
+                  <span class="ai-ico"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2 9.2 9.2 2 12l7.2 2.8L12 22l2.8-7.2L22 12l-7.2-2.8L12 2z" fill="currentColor"/></svg></span>
+                  <span>Quote ₹1,180/pc, confirm Friday delivery &amp; logo branding</span>
+                  <span class="send-mini"><svg viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </div>
+                <div class="sr-item" onclick="useReply('I can lock a Panipat delivery by Friday if we confirm the order by tomorrow. Shall I prepare a formal quote for 20 units?')">
+                  <span class="ai-ico"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2 9.2 9.2 2 12l7.2 2.8L12 22l2.8-7.2L22 12l-7.2-2.8L12 2z" fill="currentColor"/></svg></span>
+                  <span>Create urgency + offer formal quote</span>
+                  <span class="send-mini"><svg viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </div>
+                <div class="sr-item" onclick="useReply('Yes! We brand mats with your hotel logo at ₹250/mat extra. Want me to share a logo mockup?')">
+                  <span class="ai-ico"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2 9.2 9.2 2 12l7.2 2.8L12 22l2.8-7.2L22 12l-7.2-2.8L12 2z" fill="currentColor"/></svg></span>
+                  <span>Upsell logo branding with mockup offer</span>
+                  <span class="send-mini"><svg viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- timeline -->
+            <div class="card">
+              <div class="ct">Customer Timeline</div>
+              <div class="tl">
+                <div class="tl-item ai"><div class="dot"></div><div class="th">AI summary generated</div><div class="tm">Today · 10:18 AM</div><div class="td">High-intent lead · 20 mats · delivery Friday · asked for logo branding.</div></div>
+                <div class="tl-item"><div class="dot"></div><div class="th">Catalog + price list shared</div><div class="tm">Today · 10:11 AM</div></div>
+                <div class="tl-item note"><div class="dot"></div><div class="th">Note added by Aarav</div><div class="tm">Today · 10:09 AM</div><div class="td">Hotel opening this weekend — treat as priority, push for Friday close.</div></div>
+                <div class="tl-item order"><div class="dot"></div><div class="th">Past order · Coir doormats ×8</div><div class="tm">12 Mar 2026</div><div class="td">₹6,400 · Delivered · Paid in full.</div></div>
+                <div class="tl-item"><div class="dot"></div><div class="th">Lead created from IndiaMART</div><div class="tm">Today · 10:02 AM</div></div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============================================= -->
+    <!-- SCREEN 2 — DASHBOARD                          -->
+    <!-- ============================================= -->
+    <section class="screen" id="screen-dashboard">
+      <div class="topbar">
+        <h2>Dashboard</h2><span class="crumb">/ Sales overview</span>
+        <div class="tb-spacer"></div>
+        <div class="seg"><button class="on">This month</button><button>This week</button><button>Today</button></div>
+        <button class="tb-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2"/></svg></button>
+      </div>
+      <div class="page">
+        <div class="page-hero">
+          <div class="eyebrow"><span class="live"><span class="pulse"></span></span>Native AI · synced 2 min ago</div>
+          <h1>Good morning, Aarav 👋</h1>
+          <p>You have <b>5 hot leads</b> and <b>3 overdue follow-ups</b>. Closing the hotel mats deal by Friday adds ₹23,600 to this month.</p>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi g"><div class="ico"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div><div class="lab">Active Leads</div><div class="val">48</div><div class="delta up">▲ 12% vs last mo</div></div>
+          <div class="kpi r"><div class="ico"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2s6 5 6 11a6 6 0 0 1-12 0c0-2 1-3 1-3s1 1 2 1c0-3 3-5 3-9z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></div><div class="lab">Hot Leads</div><div class="val">5</div><div class="delta up">▲ 2 today</div></div>
+          <div class="kpi a"><div class="ico"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="2"/></svg></div><div class="lab">Today's Follow-ups</div><div class="val">9</div><div class="delta flat">6 done · 3 left</div></div>
+          <div class="kpi r"><div class="ico"><svg viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="lab">Overdue Follow-ups</div><div class="val">3</div><div class="delta down">needs attention</div></div>
+          <div class="kpi v"><div class="ico"><svg viewBox="0 0 24 24" fill="none"><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="2"/><path d="M14 2v5h5M9 13h6M9 17h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div><div class="lab">Pending Quotes</div><div class="val">7</div><div class="delta flat">₹2.4L value</div></div>
+          <div class="kpi w"><div class="ico"><svg viewBox="0 0 24 24" fill="none"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="lab">Won This Month</div><div class="val">₹8.6L</div><div class="delta up">▲ 23% · 31 deals</div></div>
+        </div>
+
+        <div class="dash-charts">
+          <div class="panel-card">
+            <div class="pc-head"><div><h3>Sales by Rep</h3><div class="sub">Revenue closed · this month</div></div><div class="seg"><button class="on">Revenue</button><button>Deals</button></div></div>
+            <div class="rep"><div class="ra" style="background:#f0a35e">AM</div><div class="rn">Aarav Mehta</div><div class="track"><div class="fill" style="width:92%"></div></div><div class="rv">₹3.1L</div></div>
+            <div class="rep"><div class="ra" style="background:#5b8def">PK</div><div class="rn">Priya Kapoor</div><div class="track"><div class="fill" style="width:74%"></div></div><div class="rv">₹2.5L</div></div>
+            <div class="rep"><div class="ra" style="background:#9b6bf0">RV</div><div class="rn">Rohan Verma</div><div class="track"><div class="fill" style="width:58%"></div></div><div class="rv">₹1.9L</div></div>
+            <div class="rep"><div class="ra" style="background:#2bb673">SN</div><div class="rn">Sneha Nair</div><div class="track"><div class="fill" style="width:34%"></div></div><div class="rv">₹1.1L</div></div>
+          </div>
+          <div class="panel-card">
+            <div class="pc-head"><div><h3>Conversion</h3><div class="sub">Leads → Won</div></div></div>
+            <div class="donut-wrap">
+              <div class="donut">
+                <svg viewBox="0 0 36 36" width="150" height="150">
+                  <circle cx="18" cy="18" r="15.9" fill="none" stroke="#EEF1F4" stroke-width="3.6"/>
+                  <circle cx="18" cy="18" r="15.9" fill="none" stroke="url(#cg)" stroke-width="3.6" stroke-linecap="round" stroke-dasharray="34 100" transform="rotate(-90 18 18)"/>
+                  <defs><linearGradient id="cg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#12A36B"/><stop offset="1" stop-color="#1bcb86"/></linearGradient></defs>
+                </svg>
+                <div class="ctr"><div class="big">34%</div><div class="sm">conversion</div></div>
+              </div>
+              <div class="legend">
+                <div class="lg"><span class="sw" style="background:#12A36B"></span><span class="lt">Won</span><span class="lv">31</span></div>
+                <div class="lg"><span class="sw" style="background:#F59E0B"></span><span class="lt">In progress</span><span class="lv">48</span></div>
+                <div class="lg"><span class="sw" style="background:#E7EBF0"></span><span class="lt">Lost</span><span class="lv">12</span></div>
+                <div class="lg" style="margin-top:6px;border-top:1px solid var(--line);padding-top:10px"><span class="lt" style="color:var(--ink-3)">vs last month</span><span class="lv" style="color:var(--won)">▲ 6%</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-card" style="margin-bottom:16px">
+          <div class="pc-head"><div><h3>Quotations</h3><div class="sub">This month · ₹4.1L quoted</div></div><button class="btn btn-primary" onclick="openQuote({customer:'',product:'',qty:1,rate:0})"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>New Quote</button></div>
+          <div class="qstats">
+            <div class="qtile"><div class="ql"><span class="d" style="background:#3B82F6"></span>Sent</div><div class="qv">34</div><div class="qs">₹4.1L total value</div></div>
+            <div class="qtile"><div class="ql"><span class="d" style="background:#F59E0B"></span>Pending</div><div class="qv">11</div><div class="qs">₹1.6L awaiting reply</div></div>
+            <div class="qtile"><div class="ql"><span class="d" style="background:#16A34A"></span>Accepted</div><div class="qv">19</div><div class="qs">₹2.1L converted</div></div>
+            <div class="qtile"><div class="ql"><span class="d" style="background:#6D5AE6"></span>Conversion</div><div class="qv">56%</div><div class="qs">▲ 9% vs last month</div></div>
+          </div>
+        </div>
+
+        <div class="dash-bottom">
+          <div class="panel-card">
+            <div class="pc-head"><div><h3>Pipeline Stages</h3><div class="sub">91 active opportunities</div></div></div>
+            <div class="funnel">
+              <div class="fn"><div class="fnl">New</div><div class="fnt"><div class="fnf" style="width:100%;background:#3B82F6">24</div></div></div>
+              <div class="fn"><div class="fnl">Contacted</div><div class="fnt"><div class="fnf" style="width:80%;background:#7C3AED">19</div></div></div>
+              <div class="fn"><div class="fnl">Catalog Sent</div><div class="fnt"><div class="fnf" style="width:62%;background:#0891B2">15</div></div></div>
+              <div class="fn"><div class="fnl">Negotiation</div><div class="fnt"><div class="fnf" style="width:42%;background:#F59E0B">10</div></div></div>
+              <div class="fn"><div class="fnl">Won</div><div class="fnt"><div class="fnf" style="width:30%;background:#16A34A">7</div></div></div>
+            </div>
+          </div>
+          <div class="panel-card">
+            <div class="pc-head"><div><h3>Today's Follow-ups</h3><div class="sub">3 remaining · 3 overdue</div></div><button class="btn btn-ghost" onclick="nav('inbox',document.querySelector('.rail-btn'))">Open inbox</button></div>
+            <div class="todo due"><div class="ck"></div><div class="tinfo"><div class="tt lt">Ravi Enterprises — confirm Friday delivery</div><div class="ts">20 outdoor mats · ₹23,600</div></div><span class="when over">Overdue</span></div>
+            <div class="todo"><div class="ck"></div><div class="tinfo"><div class="tt">Grand Hyatt Sonipat — send revised quote</div><div class="ts">Anti-fatigue mats · ₹48,000</div></div><span class="when">10:00</span></div>
+            <div class="todo"><div class="ck"></div><div class="tinfo"><div class="tt">Sharma Textiles — call on bulk pricing</div><div class="ts">Industrial rolls · ₹1.2L</div></div><span class="when">14:30</span></div>
+            <div class="todo"><div class="ck"></div><div class="tinfo"><div class="tt">Mittal Hospitality — share logo mockup</div><div class="ts">Branded entrance mats · ₹35,000</div></div><span class="when">16:00</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================= -->
+    <!-- SCREEN 3 — PIPELINE                           -->
+    <!-- ============================================= -->
+    <section class="screen" id="screen-pipeline">
+      <div class="topbar">
+        <h2>Leads Pipeline</h2><span class="crumb">/ Kanban</span>
+        <div class="tb-spacer"></div>
+        <div class="tb-search"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><input placeholder="Search leads…" /></div>
+        <button class="btn btn-ghost"><svg viewBox="0 0 24 24" fill="none"><path d="M3 5h18M6 12h12M10 19h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Filter</button>
+        <button class="btn btn-primary"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>New Lead</button>
+      </div>
+      <div class="kanban" id="kanban"></div>
+    </section>
+
+    <!-- ============================================= -->
+    <!-- SCREEN 4 — CUSTOMER DETAIL                    -->
+    <!-- ============================================= -->
+    <section class="screen" id="screen-customer">
+      <div class="cust-page">
+        <div class="cust-banner">
+          <div class="back" onclick="nav('inbox',document.querySelector('.rail-btn'))">← Back to inbox</div>
+          <div class="cb-main">
+            <div class="avatar" style="background:linear-gradient(135deg,#1f9d6b,#34c98a)">RE</div>
+            <div class="cb-info">
+              <h1>Ravi Sharma <span class="stage hot">Hot lead</span></h1>
+              <div class="meta">
+                <span><svg viewBox="0 0 24 24" fill="none"><path d="M3 7l9 6 9-6M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7M3 7l2-2h14l2 2" stroke="currentColor" stroke-width="2"/></svg>Ravi Enterprises</span>
+                <span><svg viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" stroke="currentColor" stroke-width="2"/></svg>+91 98765 43210</span>
+                <span><svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10" r="2.5" stroke="currentColor" stroke-width="2"/></svg>Panipat, Haryana</span>
+                <span><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/></svg>Source: IndiaMART</span>
+              </div>
+            </div>
+            <div class="cb-actions">
+              <button class="btn btn-ghost" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#fff" onclick="nav('inbox',document.querySelector('.rail-btn'))"><svg viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" stroke-width="2"/></svg>Message</button>
+              <button class="btn btn-primary" onclick="toast('Quote draft created · ₹23,600')"><svg viewBox="0 0 24 24" fill="none"><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="2"/></svg>Create Quote</button>
+            </div>
+          </div>
+          <div class="cb-stats">
+            <div class="cb-stat"><div class="v">₹30,000</div><div class="l">Lifetime value</div></div>
+            <div class="cb-stat"><div class="v">2</div><div class="l">Total orders</div></div>
+            <div class="cb-stat"><div class="v">₹23,600</div><div class="l">Open opportunity</div></div>
+            <div class="cb-stat"><div class="v" style="color:#3ee0a0">Paid</div><div class="l">Payment status</div></div>
+            <div class="cb-stat"><div class="v">Fri</div><div class="l">Next follow-up</div></div>
+          </div>
+        </div>
+
+        <div class="cust-body">
+          <div class="cust-col">
+            <div class="panel-card">
+              <div class="sec-title"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2 9.2 9.2 2 12l7.2 2.8L12 22l2.8-7.2L22 12l-7.2-2.8L12 2z" fill="currentColor"/></svg>Chat History Summary</div>
+              <div class="ai-card" style="margin:0">
+                <div class="ct"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2 9.2 9.2 2 12l7.2 2.8L12 22l2.8-7.2L22 12l-7.2-2.8L12 2z" fill="currentColor"/></svg>AI Summary · last 30 days</div>
+                <p>Ravi reached out via IndiaMART for <b>20 outdoor entrance mats</b> for a new hotel lobby in Panipat. Catalog &amp; pricing shared. Currently negotiating per-unit price, needs <b>delivery by Friday</b>, and is interested in <b>custom logo branding</b>. Previously bought 8 coir doormats (₹6,400, paid). Reliable, repeat customer — high close probability.</p>
+              </div>
+            </div>
+
+            <div class="panel-card">
+              <div class="sec-title"><svg viewBox="0 0 24 24" fill="none"><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="2"/></svg>Orders</div>
+              <div class="order-row">
+                <div class="oic"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="7" width="18" height="13" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 7V5a4 4 0 0 1 8 0v2" stroke="currentColor" stroke-width="2"/></svg></div>
+                <div class="oinf"><div class="on">20× Heavy-Duty Rubber-Backed Coir Mat</div><div class="od">Quote sent · Awaiting confirmation · Due Friday</div></div>
+                <div class="oval"><div class="ov">₹23,600</div><span class="pay-pill due">Unpaid</span></div>
+              </div>
+              <div class="order-row">
+                <div class="oic"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="7" width="18" height="13" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 7V5a4 4 0 0 1 8 0v2" stroke="currentColor" stroke-width="2"/></svg></div>
+                <div class="oinf"><div class="on">8× Coir Doormat (Natural)</div><div class="od">12 Mar 2026 · Delivered</div></div>
+                <div class="oval"><div class="ov">₹6,400</div><span class="pay-pill paid">Paid</span></div>
+              </div>
+            </div>
+
+            <div class="panel-card">
+              <div class="pc-head" style="margin-bottom:14px">
+                <div class="sec-title" style="margin:0"><svg viewBox="0 0 24 24" fill="none"><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="2"/><path d="M14 2v5h5M9 13h6M9 17h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Quotations</div>
+                <button class="btn btn-primary" onclick="openQuote({customer:'Ravi Enterprises',product:'Heavy-Duty Rubber-Backed Coir Mat (3×5 ft)',qty:20,rate:1180})"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>New Quote</button>
+              </div>
+              <table class="qtable">
+                <thead><tr><th>Quote #</th><th>Product</th><th class="r">Amount</th><th>Date</th><th>Status</th><th>Converted</th><th class="r">Actions</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td class="qn">QT-2026-0042</td><td>20× Coir Mat</td><td class="r qamt">₹26,456</td><td>Today</td>
+                    <td><span class="qstat sent">Sent</span></td><td><span class="conv-no">Pending</span></td>
+                    <td><div class="qactions">
+                      <button class="qact" title="Edit" onclick="openQuote({customer:'Ravi Enterprises',product:'Heavy-Duty Rubber-Backed Coir Mat (3×5 ft)',qty:20,rate:1180,no:'QT-2026-0042'})"><svg viewBox="0 0 24 24" fill="none"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2"/></svg></button>
+                      <button class="qact" title="Duplicate" onclick="toast('Quote duplicated → draft')"><svg viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="12" height="12" rx="2" stroke="currentColor" stroke-width="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="2"/></svg></button>
+                      <button class="qact wa" title="Send again on WhatsApp" onclick="toast('Quote re-sent on WhatsApp ✓')"><svg viewBox="0 0 24 24" fill="none"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                    </div></td>
+                  </tr>
+                  <tr>
+                    <td class="qn">QT-2026-0018</td><td>8× Coir Doormat</td><td class="r qamt">₹6,400</td><td>12 Mar</td>
+                    <td><span class="qstat accepted">Accepted</span></td><td><span class="conv-yes"><svg viewBox="0 0 24 24" fill="none" width="13" height="13"><path d="m20 6-11 11-5-5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Converted</span></td>
+                    <td><div class="qactions">
+                      <button class="qact" title="Edit" onclick="openQuote({customer:'Ravi Enterprises',product:'Coir Doormat (Natural)',qty:8,rate:800,no:'QT-2026-0018'})"><svg viewBox="0 0 24 24" fill="none"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2"/></svg></button>
+                      <button class="qact" title="Duplicate" onclick="toast('Quote duplicated → draft')"><svg viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="12" height="12" rx="2" stroke="currentColor" stroke-width="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="2"/></svg></button>
+                      <button class="qact wa" title="Send again on WhatsApp" onclick="toast('Quote re-sent on WhatsApp ✓')"><svg viewBox="0 0 24 24" fill="none"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                    </div></td>
+                  </tr>
+                  <tr>
+                    <td class="qn">QT-2026-0009</td><td>Logo branding add-on</td><td class="r qamt">₹5,000</td><td>10 Mar</td>
+                    <td><span class="qstat draft">Draft</span></td><td><span class="conv-no">—</span></td>
+                    <td><div class="qactions">
+                      <button class="qact" title="Edit" onclick="openQuote({customer:'Ravi Enterprises',product:'Custom logo branding add-on',qty:20,rate:250,no:'QT-2026-0009'})"><svg viewBox="0 0 24 24" fill="none"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2"/></svg></button>
+                      <button class="qact" title="Duplicate" onclick="toast('Quote duplicated → draft')"><svg viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="12" height="12" rx="2" stroke="currentColor" stroke-width="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="2"/></svg></button>
+                      <button class="qact wa" title="Send on WhatsApp" onclick="toast('Quote sent on WhatsApp ✓')"><svg viewBox="0 0 24 24" fill="none"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                    </div></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="panel-card">
+              <div class="sec-title"><svg viewBox="0 0 24 24" fill="none"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2"/></svg>Notes</div>
+              <div class="note-item"><div class="na" style="background:#f0a35e">AM</div><div class="nb"><div class="nh"><b>Aarav Mehta</b> · Today 10:09 AM</div><div class="ntext">Hotel opening this weekend — push for Friday close. Customer is price-sensitive but values fast delivery.</div></div></div>
+              <div class="note-item"><div class="na" style="background:#5b8def">PK</div><div class="nb"><div class="nh"><b>Priya Kapoor</b> · 12 Mar 2026</div><div class="ntext">Smooth first order. Pays on time via UPI. Good for repeat business.</div></div></div>
+            </div>
+          </div>
+
+          <div class="cust-col">
+            <div class="panel-card">
+              <div class="sec-title"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2 9.2 9.2 2 12l7.2 2.8L12 22l2.8-7.2L22 12l-7.2-2.8L12 2z" fill="currentColor"/></svg>AI Insights</div>
+              <div class="insight"><div class="iic"><svg viewBox="0 0 24 24" fill="none"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></div><div class="it"><div class="ih">Close-ready signal</div><p>High intent + repeat buyer + urgent deadline. Offer Friday delivery guarantee to close today.</p></div></div>
+              <div class="insight"><div class="iic"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2v4M12 18v4M2 12h4M18 12h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/></svg></div><div class="it"><div class="ih">Upsell opportunity</div><p>Asked about logo branding — add ₹250/mat (+₹5,000). Likely to accept given premium hotel use.</p></div></div>
+              <div class="insight"><div class="iic"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="2"/></svg></div><div class="it"><div class="ih">Best time to follow up</div><p>Ravi replies fastest between 10–11 AM. Schedule the delivery confirmation now.</p></div></div>
+            </div>
+
+            <div class="panel-card">
+              <div class="sec-title"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M8 3v4M16 3v4M9 14l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Follow-ups</div>
+              <div class="fu-item"><div class="fck"></div><div class="fi"><div class="ft">Confirm Friday delivery + final price</div><div class="fs">Due today · 11:00 AM</div></div><span class="stage hot">Urgent</span></div>
+              <div class="fu-item"><div class="fck"></div><div class="fi"><div class="ft">Share logo branding mockup</div><div class="fs">Tomorrow · 10:00 AM</div></div></div>
+              <div class="fu-item done"><div class="fck"><svg viewBox="0 0 24 24" fill="none" width="12" height="12"><path d="m20 6-11 11-5-5" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="fi"><div class="ft">Send catalog &amp; price list</div><div class="fs">Today · 10:11 AM</div></div></div>
+            </div>
+
+            <div class="panel-card">
+              <div class="sec-title"><svg viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="M2 10h20" stroke="currentColor" stroke-width="2"/></svg>Payment Status</div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0"><span style="color:var(--ink-2);font-size:13px">Previous orders</span><span class="pay-pill paid">All paid</span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line)"><span style="color:var(--ink-2);font-size:13px">Current opportunity</span><span class="pay-pill due">₹23,600 unpaid</span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line)"><span style="color:var(--ink-2);font-size:13px">Preferred method</span><span style="font-weight:700;font-size:13px">UPI · GPay</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================= -->
+    <!-- SCREEN 5 — EXTENSION CONCEPT                  -->
+    <!-- ============================================= -->
+    <section class="screen" id="screen-extension">
+      <div class="ext-wrap">
+        <div class="ext-hero">
+          <div class="eyebrow"><svg viewBox="0 0 24 24" fill="none" width="13" height="13"><path d="M12 2 9.2 9.2 2 12l7.2 2.8L12 22l2.8-7.2L22 12l-7.2-2.8L12 2z" fill="currentColor"/></svg>Chrome Extension · Concept</div>
+          <h1>Native, right inside WhatsApp Web</h1>
+          <p>A Grammarly-style assistant that lives in the composer. It detects leads, drafts replies, and reminds you to follow up — without leaving the chat.</p>
+        </div>
+
+        <div class="ext-states">
+          <button class="estate on" onclick="extState('lead',this)">① Lead detected</button>
+          <button class="estate" onclick="extState('reply',this)">② Suggested reply</button>
+          <button class="estate" onclick="extState('remind',this)">③ Follow-up reminder</button>
+        </div>
+
+        <div class="wa-window">
+          <div class="wa-bar"><div class="dots"><i></i><i></i><i></i></div>
+            <div class="url"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="currentColor" stroke-width="2"/></svg>web.whatsapp.com</div>
+          </div>
+          <div class="wa-body">
+            <div class="wa-left">
+              <div class="wa-lhead"><div class="me"></div><div class="ttl">WhatsApp</div></div>
+              <div class="wa-search"><div class="b"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3-3" stroke="currentColor" stroke-width="2"/></svg>Search or start new chat</div></div>
+              <div class="wa-chats">
+                <div class="wa-ci sel"><div class="av" style="background:linear-gradient(135deg,#1f9d6b,#34c98a)">RE</div><div class="ct2"><div class="r1"><span class="nm">Ravi Enterprises</span><span class="tm">10:18</span></div><div class="pv">Can you deliver to Panipat by Friday?</div></div></div>
+                <div class="wa-ci"><div class="av" style="background:#5b8def">GH</div><div class="ct2"><div class="r1"><span class="nm">Grand Hyatt Sonipat</span><span class="tm">09:54</span></div><div class="pv">Please share revised quote</div></div></div>
+                <div class="wa-ci"><div class="av" style="background:#9b6bf0">ST</div><div class="ct2"><div class="r1"><span class="nm">Sharma Textiles</span><span class="tm">Yest</span></div><div class="pv">What's bulk pricing for rolls?</div></div></div>
+                <div class="wa-ci"><div class="av" style="background:#e8736b">MH</div><div class="ct2"><div class="r1"><span class="nm">Mittal Hospitality</span><span class="tm">Yest</span></div><div class="pv">Need branded mats</div></div></div>
+              </div>
+            </div>
+            <div class="wa-right">
+              <div class="wa-rhead"><div class="av" style="background:linear-gradient(135deg,#1f9d6b,#34c98a)">RE</div><div><div class="nm">Ravi Enterprises</div><div class="st">online</div></div></div>
+              <div class="wa-msgs">
+                <div class="b-row in"><div class="bubble">We need 20 outdoor mats for a new hotel lobby. We're in Panipat.<span class="meta">10:06 AM</span></div></div>
+                <div class="b-row out"><div class="bubble">Sharing catalog + price list now.<span class="meta">10:11 AM</span></div></div>
+                <div class="b-row in"><div class="bubble">What's the price for 20 units? Can you deliver to Panipat by Friday?<span class="meta">10:18 AM</span></div></div>
+
+                <!-- NATIVE FLOATING POPUP -->
+                <div class="native-pop" id="native-pop"><!-- injected by JS --></div>
+              </div>
+              <div class="wa-compose">
+                <button class="ic" onclick="showNativePopup()" title="Open Native" style="color:#12A36B;background:#E6F7EF;border-radius:10px"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2 9.2 9.2 2 12l7.2 2.8L12 22l2.8-7.2L22 12l-7.2-2.8L12 2z" fill="currentColor"/></svg></button>
+                <span class="ic"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="9" cy="9.5" r="1.1" fill="currentColor"/><circle cx="15" cy="9.5" r="1.1" fill="currentColor"/></svg></span>
+                <span class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M21.44 11.05 12.25 20.24a5.5 5.5 0 0 1-7.78-7.78l8.49-8.49a3.5 3.5 0 0 1 4.95 4.95l-8.49 8.49a1.5 1.5 0 0 1-2.12-2.12l7.78-7.78" stroke="currentColor" stroke-width="2"/></svg></span>
+                <div class="field">Type a message</div>
+                <span class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" stroke="currentColor" stroke-width="2"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4" stroke="currentColor" stroke-width="2"/></svg></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="ext-note">Concept preview · The extension overlays Native on top of WhatsApp Web — no data leaves the rep's browser without consent.</div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<!-- ============ QUOTATION MODAL (shared) ============ -->
+<div class="modal-overlay" id="quote-modal">
+  <div class="qmodal">
+    <div class="qm-head">
+      <div class="lg"><svg viewBox="0 0 24 24" fill="none"><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="2"/><path d="M14 2v5h5M9 13h6M9 17h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+      <div class="tt"><h3>New Quotation</h3><div class="qno" id="qm-no">QT-2026-0042 · Draft</div></div>
+      <button class="x" onclick="closeQuote()"><svg viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+    </div>
+    <div class="qm-body">
+      <div class="qm-grid">
+        <div class="qf full"><label>Customer</label><input id="q-customer" value="Ravi Enterprises" /></div>
+        <div class="qf"><label>Product</label><input id="q-product" value="Heavy-Duty Rubber-Backed Coir Mat (3×5 ft)" /></div>
+        <div class="qf"><label>Quantity</label><div class="with-unit"><input id="q-qty" type="number" value="20" oninput="recalcQuote()" /><span class="u">units</span></div></div>
+        <div class="qf"><label>Rate (per unit)</label><div class="with-unit"><input id="q-rate" type="number" value="1180" oninput="recalcQuote()" /><span class="u">₹</span></div></div>
+        <div class="qf"><label>Discount</label><div class="with-unit"><input id="q-disc" type="number" value="5" oninput="recalcQuote()" /><span class="u">%</span></div></div>
+        <div class="qf"><label>Tax (GST)</label><div class="with-unit"><input id="q-tax" type="number" value="18" oninput="recalcQuote()" /><span class="u">%</span></div></div>
+        <div class="qf"><label>Delivery timeline</label><input id="q-delivery" value="By Friday, 5 Jun" /></div>
+        <div class="qf full"><label>Notes</label><textarea id="q-notes">Custom hotel logo branding available at ₹250/mat extra. Free delivery within Panipat.</textarea></div>
+      </div>
+      <div class="qm-summary">
+        <div class="qm-line"><span>Subtotal</span><b id="q-subtotal">₹23,600</b></div>
+        <div class="qm-line disc"><span>Discount (<span id="q-disc-lbl">5</span>%)</span><b id="q-disc-amt">−₹1,180</b></div>
+        <div class="qm-line"><span>GST (<span id="q-tax-lbl">18</span>%)</span><b id="q-tax-amt">₹4,036</b></div>
+        <div class="qm-total"><span class="lbl">Total</span><span class="amt" id="q-total">₹26,456</span></div>
+      </div>
+    </div>
+    <div class="qm-foot">
+      <button class="btn btn-ghost" onclick="quoteAction('draft')"><svg viewBox="0 0 24 24" fill="none"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" stroke="currentColor" stroke-width="2"/><path d="M17 21v-8H7v8M7 3v5h8" stroke="currentColor" stroke-width="2"/></svg>Save Draft</button>
+      <button class="btn btn-primary" onclick="quoteAction('generate')"><svg viewBox="0 0 24 24" fill="none"><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="2"/></svg>Generate Quote</button>
+      <button class="btn btn-wa" onclick="quoteAction('whatsapp')"><svg viewBox="0 0 24 24" fill="none"><path d="M17.5 14.4c-.3-.2-1.7-.9-2-1-.3-.1-.5-.1-.6.2-.2.3-.7.9-.8 1-.2.2-.3.2-.6.1-1.4-.7-2.3-1.3-3.3-2.9-.2-.4.2-.4.6-1.2.1-.2 0-.4 0-.5l-.9-2.1c-.2-.5-.4-.5-.6-.5h-.5c-.2 0-.5.1-.7.3-.8.8-1 1.9-.8 3 .5 2.5 2.6 4.9 5.5 6 2.7 1.1 3.3.8 3.9.7.6-.1 1.7-.7 1.9-1.4.2-.6.2-1.2.2-1.3-.1-.2-.3-.2-.6-.4z" fill="currentColor"/><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.8-1.4A10 10 0 1 0 12 2z" stroke="currentColor" stroke-width="1.8"/></svg>Send on WhatsApp</button>
+    </div>
+  </div>
+</div>
+
+<!-- toast -->
+<div class="toast" id="toast"><span class="ti"><svg viewBox="0 0 24 24" fill="none"><path d="m20 6-11 11-5-5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span id="toast-text">Done</span></div>
+
+<script>
+/* ============ NAV ============ */
+function nav(screen, btn){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById('screen-'+screen).classList.add('on');
+  document.querySelectorAll('.rail-btn').forEach(b=>b.classList.remove('on'));
+  const target = btn && btn.dataset.screen ? btn : document.querySelector('.rail-btn[data-screen="'+screen+'"]');
+  if(target) target.classList.add('on');
+  document.querySelectorAll('.page, .cust-page, .kanban, .crm-scroll').forEach(el=>el.scrollTop=0);
+}
+
+/* ============ TOAST ============ */
+let toastTimer;
+function toast(msg){
+  const t=document.getElementById('toast');
+  document.getElementById('toast-text').textContent=msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2600);
+}
+
+/* ============ INBOX: chat list data ============ */
+const chats=[
+  {id:1,name:'Ravi Enterprises',av:'RE',c1:'#1f9d6b',c2:'#34c98a',preview:'Can you deliver to Panipat by Friday?',time:'10:18',unread:2,stage:'hot',prio:'high',online:true,sent:false,on:true},
+  {id:2,name:'Grand Hyatt Sonipat',av:'GH',c1:'#5b8def',c2:'#7ba4f2',preview:'Please share the revised quote',time:'09:54',unread:1,stage:'warm',prio:'high',sent:false},
+  {id:3,name:'Sharma Textiles',av:'ST',c1:'#9b6bf0',c2:'#b48ef5',preview:'You: I\'ll check bulk pricing and revert',time:'09:30',unread:0,stage:'nego',prio:'med',sent:true},
+  {id:4,name:'Mittal Hospitality',av:'MH',c1:'#e8736b',c2:'#f0978f',preview:'Need branded entrance mats for 3 hotels',time:'Yest',unread:3,stage:'new',prio:'high'},
+  {id:5,name:'Comfort Living Décor',av:'CL',c1:'#f0a35e',c2:'#f5bd87',preview:'You: Catalog sent ✓ Let me know',time:'Yest',unread:0,stage:'catalog',prio:'med',sent:true},
+  {id:6,name:'Anand Builders',av:'AB',c1:'#2bb673',c2:'#4fcf93',preview:'Thanks, order received 🎉',time:'Yest',unread:0,stage:'won',prio:'low'},
+  {id:7,name:'Royal Stay Hotels',av:'RS',c1:'#5b8def',c2:'#7ba4f2',preview:'What sizes do you have in rubber mats?',time:'Mon',unread:1,stage:'contacted',prio:'med'},
+  {id:8,name:'Verma Interiors',av:'VI',c1:'#9b6bf0',c2:'#b48ef5',preview:'Budget is tight, any discount?',time:'Mon',unread:0,stage:'warm',prio:'low',sent:true},
+  {id:9,name:'Singh Carpets',av:'SC',c1:'#e8736b',c2:'#f0978f',preview:'You: No worries, reach out anytime',time:'Sun',unread:0,stage:'lost',prio:'low',sent:true},
+];
+const stageLabel={hot:'Hot',warm:'Warm',new:'New',won:'Won',lost:'Lost',nego:'Negotiation',catalog:'Catalog Sent',contacted:'Contacted'};
+function prioIcon(p){
+  if(p==='high')return '<svg class="fl" viewBox="0 0 24 24" fill="none"><path d="M4 21V4m0 0h11l-2 4 2 4H4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>High';
+  if(p==='med')return '<svg class="fl" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>Medium';
+  return '<svg class="fl" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Low';
+}
+function renderChats(){
+  document.getElementById('chatlist').innerHTML=chats.map(c=>`
+    <div class="chat ${c.on?'on':''}" onclick="selectChat(${c.id},this)">
+      <div class="avatar" style="background:linear-gradient(135deg,${c.c1},${c.c2})">${c.av}${c.online?'<span class="on-dot"></span>':''}</div>
+      <div class="chat-main">
+        <div class="r1"><span class="name">${c.name}</span><span class="time ${c.unread?'unreadt':''}">${c.time}</span></div>
+        <div class="r2"><span class="preview">${c.sent?'<span class="tick">✓✓ </span>':''}${c.preview}</span>${c.unread?`<span class="unread">${c.unread}</span>`:''}</div>
+        <div class="r3"><span class="stage ${c.stage}">${stageLabel[c.stage]}</span><span class="prio ${c.prio}">${prioIcon(c.prio)}</span></div>
+      </div>
+    </div>`).join('');
+}
+function selectChat(id,el){
+  document.querySelectorAll('.chat').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  const c=chats.find(x=>x.id===id);
+  if(c){ document.getElementById('cv-name').textContent=c.name; }
+}
+renderChats();
+
+/* filter chips */
+document.querySelectorAll('.cl-filters .fchip').forEach(f=>f.addEventListener('click',()=>{
+  document.querySelectorAll('.cl-filters .fchip').forEach(x=>x.classList.remove('on'));
+  f.classList.add('on');
+}));
+
+/* ============ INBOX: composer ============ */
+function useReply(text){
+  const inp=document.getElementById('composer-input');
+  inp.value=text; inp.focus();
+  nav('inbox',document.querySelector('.rail-btn[data-screen="inbox"]'));
+  document.querySelector('.composer').scrollIntoView({block:'nearest'});
+  inp.style.transition='background .3s'; inp.parentElement.style.boxShadow='0 0 0 4px var(--brand-glow)';
+  setTimeout(()=>inp.parentElement.style.boxShadow='',700);
+}
+function sendMsg(){
+  const inp=document.getElementById('composer-input');
+  const v=inp.value.trim(); if(!v)return;
+  const msgs=document.getElementById('msgs');
+  const now=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  const row=document.createElement('div'); row.className='b-row out';
+  row.innerHTML=`<div class="bubble">${v.replace(/</g,'&lt;')}<span class="meta">${now} <span class="tick"><svg viewBox="0 0 24 24" fill="none"><path d="m1 13 4 4L13 7M9 13l4 4L23 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></div>`;
+  msgs.appendChild(row); inp.value=''; msgs.scrollTop=msgs.scrollHeight;
+}
+document.getElementById('composer-input').addEventListener('keydown',e=>{if(e.key==='Enter')sendMsg();});
+
+/* lead stage stepper */
+function setStage(el,stage){
+  const steps=[...document.querySelectorAll('#lead-steps .lstep')];
+  const idx=steps.indexOf(el);
+  steps.forEach((s,i)=>{s.classList.remove('done','active');if(i<idx)s.classList.add('done');if(i===idx)s.classList.add('active');});
+  toast('Lead stage → '+stage);
+}
+
+/* ============ PIPELINE: kanban data ============ */
+const cols=[
+  {key:'new',title:'New',color:'#3B82F6',val:'₹1.4L',cards:[
+    {name:'Mittal Hospitality',av:'MH',c:'#e8736b',city:'Karnal',prod:'Branded entrance mats',qty:'×30',fu:'Today',fuc:'over',val:'₹35,000'},
+    {name:'Royal Stay Hotels',av:'RS',c:'#5b8def',city:'Delhi',prod:'Rubber mats (assorted)',qty:'×18',fu:'Tomorrow',fuc:'',val:'₹21,000'},
+  ]},
+  {key:'contacted',title:'Contacted',color:'#7C3AED',val:'₹92K',cards:[
+    {name:'Sharma Textiles',av:'ST',c:'#9b6bf0',city:'Panipat',prod:'Industrial floor rolls',qty:'×6',fu:'2:30 PM',fuc:'soon',val:'₹1.2L'},
+    {name:'Green Valley Resort',av:'GV',c:'#2bb673',city:'Manesar',prod:'Anti-slip pool mats',qty:'×40',fu:'Fri',fuc:'',val:'₹52,000'},
+  ]},
+  {key:'catalog',title:'Catalog Sent',color:'#0891B2',val:'₹78K',cards:[
+    {name:'Comfort Living Décor',av:'CL',c:'#f0a35e',city:'Sonipat',prod:'Designer doormats',qty:'×25',fu:'Thu',fuc:'',val:'₹18,000'},
+    {name:'Verma Interiors',av:'VI',c:'#9b6bf0',city:'Rohtak',prod:'Coir + rubber combo',qty:'×15',fu:'Mon',fuc:'',val:'₹14,000'},
+  ]},
+  {key:'nego',title:'Negotiation',color:'#F59E0B',val:'₹71K',cards:[
+    {name:'Ravi Enterprises',av:'RE',c:'#1f9d6b',city:'Panipat',prod:'Heavy-duty coir mats',qty:'×20',fu:'Fri',fuc:'soon',val:'₹23,600',hot:true},
+    {name:'Grand Hyatt Sonipat',av:'GH',c:'#5b8def',city:'Sonipat',prod:'Anti-fatigue mats',qty:'×24',fu:'10 AM',fuc:'soon',val:'₹48,000'},
+  ]},
+  {key:'won',title:'Won',color:'#16A34A',val:'₹62K',cards:[
+    {name:'Anand Builders',av:'AB',c:'#2bb673',city:'Gurgaon',prod:'Entrance + utility mats',qty:'×35',fu:'Delivered',fuc:'',val:'₹42,000'},
+    {name:'Lotus Banquets',av:'LB',c:'#f0a35e',city:'Panipat',prod:'Red carpet runners',qty:'×12',fu:'Delivered',fuc:'',val:'₹20,000'},
+  ]},
+  {key:'lost',title:'Lost',color:'#94A3B8',val:'₹0',cards:[
+    {name:'Singh Carpets',av:'SC',c:'#e8736b',city:'Ambala',prod:'Bulk nylon mats',qty:'×50',fu:'Closed',fuc:'',val:'₹—'},
+  ]},
+];
+function fuIcon(){return '<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="2"/></svg>';}
+function renderKanban(){
+  document.getElementById('kanban').innerHTML=cols.map(col=>`
+    <div class="kcol">
+      <div class="kcol-head"><span class="dot" style="background:${col.color}"></span><span class="kt">${col.title}</span><span class="kval">${col.val}</span><span class="kn">${col.cards.length}</span></div>
+      <div class="kcol-body">
+        ${col.cards.map(c=>`
+          <div class="kcard" draggable="true" onclick="${c.name==='Ravi Enterprises'?"nav('customer',document.querySelector('.rail-btn[data-screen=\\'customer\\']'))":"toast('Opening "+c.name+"…')"}">
+            <div class="kc-top"><div class="avatar" style="background:linear-gradient(135deg,${c.c},${c.c})">${c.av}</div><div><div class="kn2">${c.name}${c.hot?' 🔥':''}</div><div class="kcity">${c.city}</div></div></div>
+            <div class="kprod"><span>${c.prod}</span><span class="qty">${c.qty}</span></div>
+            <div class="kc-foot"><span class="kfu ${c.fuc}">${fuIcon()}${c.fu}</span><span class="kval-tag">${c.val}</span></div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+  enableDrag();
+}
+/* simple drag & drop between columns */
+let dragEl=null;
+function enableDrag(){
+  document.querySelectorAll('.kcard').forEach(card=>{
+    card.addEventListener('dragstart',e=>{dragEl=card;setTimeout(()=>card.style.opacity='.4',0);});
+    card.addEventListener('dragend',()=>{if(dragEl)dragEl.style.opacity='';dragEl=null;});
+  });
+  document.querySelectorAll('.kcol-body').forEach(body=>{
+    body.addEventListener('dragover',e=>{e.preventDefault();body.style.background='var(--brand-soft)';});
+    body.addEventListener('dragleave',()=>body.style.background='');
+    body.addEventListener('drop',e=>{e.preventDefault();body.style.background='';if(dragEl){body.appendChild(dragEl);toast('Lead moved');}});
+  });
+}
+renderKanban();
+
+/* ============ EXTENSION states ============ */
+const extStates={
+  lead:`
+    <div class="np-head"><div class="lg"><svg viewBox="0 0 24 24" fill="none"><path d="M5 19V5l14 14V5" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="nt">Native <span class="v">LEAD DETECTED</span></div><div class="x" onclick="toast('Dismissed')"><svg viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="2"/></svg></div></div>
+    <div class="np-body">
+      <div class="np-tag lead"><svg viewBox="0 0 24 24" fill="none"><path d="m20 6-11 11-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>Auto-filled from this chat</div>
+      <h4 style="margin-bottom:11px">Add Lead</h4>
+      <div class="np-form">
+        <div class="npf"><label>Name</label><input value="Ravi Sharma" /></div>
+        <div class="npf"><label>Phone</label><input value="+91 98765 43210" /></div>
+        <div class="npf"><label>City</label><input value="Panipat" /></div>
+        <div class="npf"><label>Product</label><input value="Outdoor mats" /></div>
+        <div class="npf"><label>Quantity</label><input value="20 units" /></div>
+        <div class="npf"><label>Deadline</label><input value="Friday" /></div>
+        <div class="npf full"><label>Notes</label><textarea>Hotel lobby · high footfall · opening this weekend. Asked about logo branding.</textarea></div>
+      </div>
+      <div class="np-actions">
+        <button class="np-btn primary" onclick="toast('Lead saved to pipeline ✓')"><svg viewBox="0 0 24 24" fill="none"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" stroke="currentColor" stroke-width="2"/><path d="M17 21v-8H7v8M7 3v5h8" stroke="currentColor" stroke-width="2"/></svg>Save Lead</button>
+        <button class="np-btn ai" onclick="openQuote({customer:'Ravi Enterprises',product:'Heavy-Duty Rubber-Backed Coir Mat (3×5 ft)',qty:20,rate:1180})"><svg viewBox="0 0 24 24" fill="none"><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="2"/></svg>Make Quotation</button>
+      </div>
+    </div>`,
+  reply:`
+    <div class="np-head"><div class="lg"><svg viewBox="0 0 24 24" fill="none"><path d="M5 19V5l14 14V5" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="nt">Native <span class="v" style="color:#bda4ff;background:rgba(155,107,240,.2)">AI REPLY</span></div><div class="x"><svg viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="2"/></svg></div></div>
+    <div class="np-body">
+      <div class="np-tag reply"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2 9.2 9.2 2 12l7.2 2.8L12 22l2.8-7.2L22 12l-7.2-2.8L12 2z" fill="currentColor"/></svg>Suggested reply</div>
+      <h4>Answer price + delivery</h4>
+      <div class="np-reply">"For 20 units the price is <b>₹1,180/piece (₹23,600 total)</b>. Yes — we can deliver to Panipat by <b>Friday</b>, and we also offer custom logo branding. 🎨"</div>
+      <div class="np-actions">
+        <button class="np-btn ai" onclick="toast('Inserted into composer ✓')"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Insert reply</button>
+        <button class="np-btn ghost" onclick="toast('Regenerating…')"><svg viewBox="0 0 24 24" fill="none"><path d="M21 12a9 9 0 1 1-3-6.7L21 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 4v4h-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      </div>
+    </div>`,
+  remind:`
+    <div class="np-head"><div class="lg"><svg viewBox="0 0 24 24" fill="none"><path d="M5 19V5l14 14V5" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="nt">Native <span class="v" style="color:#f3c98a;background:rgba(245,158,11,.2)">REMINDER</span></div><div class="x"><svg viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="2"/></svg></div></div>
+    <div class="np-body">
+      <div class="np-tag remind"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Follow-up due</div>
+      <h4>Don't lose this deal</h4>
+      <p>Ravi asked about Friday delivery and hasn't been answered. The hotel opens this weekend.</p>
+      <div class="np-remind"><div class="rc"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 9h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="2"/></svg></div><div class="rt"><div class="rd">Reply today · before 5 PM</div><div class="rs">₹23,600 · Hot lead · SLA breaching</div></div></div>
+      <div class="np-actions">
+        <button class="np-btn primary" onclick="toast('Snoozed 1 hour')"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Reply now</button>
+        <button class="np-btn ghost" onclick="toast('Snoozed')"><svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      </div>
+    </div>`
+};
+function extState(state,btn){
+  document.querySelectorAll('.estate').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const pop=document.getElementById('native-pop');
+  pop.style.animation='none'; pop.offsetHeight; pop.style.animation='';
+  pop.innerHTML=extStates[state];
+}
+extState('lead',document.querySelector('.estate'));
+function showNativePopup(){
+  extState('lead',document.querySelector('.estate'));
+  const pop=document.getElementById('native-pop');
+  pop.style.animation='none';pop.offsetHeight;pop.style.animation='popin .3s var(--ease)';
+}
+
+/* ============ QUOTATION MODAL ============ */
+const fmt=n=>'₹'+Math.round(n).toLocaleString('en-IN');
+function openQuote(p){
+  p=p||{};
+  if(p.customer!==undefined)document.getElementById('q-customer').value=p.customer;
+  if(p.product!==undefined)document.getElementById('q-product').value=p.product;
+  if(p.qty!==undefined)document.getElementById('q-qty').value=p.qty;
+  if(p.rate!==undefined)document.getElementById('q-rate').value=p.rate;
+  document.getElementById('qm-no').textContent=(p.no||'QT-2026-00'+(42+Math.floor(Math.random()*9)))+' · Draft';
+  recalcQuote();
+  document.getElementById('quote-modal').classList.add('show');
+}
+function closeQuote(){document.getElementById('quote-modal').classList.remove('show');}
+function recalcQuote(){
+  const qty=+document.getElementById('q-qty').value||0;
+  const rate=+document.getElementById('q-rate').value||0;
+  const disc=+document.getElementById('q-disc').value||0;
+  const tax=+document.getElementById('q-tax').value||0;
+  const subtotal=qty*rate;
+  const discAmt=subtotal*disc/100;
+  const taxed=(subtotal-discAmt)*tax/100;
+  const total=subtotal-discAmt+taxed;
+  document.getElementById('q-subtotal').textContent=fmt(subtotal);
+  document.getElementById('q-disc-lbl').textContent=disc;
+  document.getElementById('q-disc-amt').textContent='−'+fmt(discAmt);
+  document.getElementById('q-tax-lbl').textContent=tax;
+  document.getElementById('q-tax-amt').textContent=fmt(taxed);
+  document.getElementById('q-total').textContent=fmt(total);
+}
+function quoteAction(kind){
+  const total=document.getElementById('q-total').textContent;
+  const cust=document.getElementById('q-customer').value;
+  const product=document.getElementById('q-product').value;
+  const qty=document.getElementById('q-qty').value;
+  const delivery=document.getElementById('q-delivery').value;
+  const no=document.getElementById('qm-no').textContent.split(' · ')[0];
+  if(kind==='draft'){toast('Quote saved as draft');}
+  else if(kind==='generate'){toast('Quote PDF generated · '+total);}
+  else if(kind==='whatsapp'){
+    // If the extension mock is open, drop a formatted quote into the chat
+    const extOpen=document.getElementById('screen-extension').classList.contains('on');
+    if(extOpen){
+      const m=document.querySelector('.wa-msgs');
+      const pop=document.getElementById('native-pop'); if(pop)pop.innerHTML='';
+      const row=document.createElement('div');row.className='b-row out';
+      row.innerHTML=`<div class="bubble media" style="background:var(--wa-out);max-width:78%">
+        <div class="doc"><div class="ic">PDF</div><div class="dt"><div class="nm">Quote_${no}.pdf</div><div class="sz">${qty} × ${product.split('(')[0].trim()}</div></div></div>
+        <div class="media-cap" style="padding-top:8px">Here's your quotation 📄 <b>${total}</b> · delivery ${delivery}.<span class="meta">now <span class="tick">✓✓</span></span></div></div>`;
+      m.appendChild(row);m.scrollTop=m.scrollHeight;
+    }
+    toast('Quote sent on WhatsApp ✓ '+total);
+  }
+  closeQuote();
+}
+document.getElementById('quote-modal').addEventListener('click',e=>{if(e.target.id==='quote-modal')closeQuote();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeQuote();});
+</script>
+</body>
+</html>
