@@ -6,7 +6,7 @@
 <title>Native8.ai — WhatsApp-first AI CRM · Prototype</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet" />
 <style>
 /* ============================================================
    Native8.ai — Clickable UI Prototype
@@ -78,12 +78,13 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   padding:16px 0 14px;gap:6px;z-index:40;
 }
 .rail-logo{
-  width:42px;height:42px;border-radius:13px;margin-bottom:14px;
-  background:linear-gradient(140deg,var(--brand) 0%,#19c07d 50%,var(--ai) 130%);
+  width:44px;height:44px;border-radius:14px;margin-bottom:14px;
+  background:#11192B;border:1px solid rgba(255,255,255,.12);
   display:flex;align-items:center;justify-content:center;
-  box-shadow:0 6px 18px var(--brand-glow);position:relative;flex:0 0 auto;
+  box-shadow:0 6px 18px rgba(0,0,0,.3);position:relative;flex:0 0 auto;color:#fff;
 }
-.rail-logo svg{width:24px;height:24px}
+.rail-logo svg{width:27px;height:27px}
+.brandword{font-family:'Quicksand',sans-serif;font-weight:600;letter-spacing:-.01em}
 .rail-nav{display:flex;flex-direction:column;gap:4px;width:100%;align-items:center;margin-top:4px}
 .rail-btn{
   width:48px;height:48px;border-radius:14px;color:#8893A7;
@@ -674,8 +675,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 <div class="app">
   <!-- ============ LEFT RAIL ============ -->
   <nav class="rail">
-    <div class="rail-logo" title="Native8.ai">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M5 19V5l14 14V5" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="19" cy="5" r="2.3" fill="#3ee0a0"/></svg>
+    <div class="rail-logo" title="native — Native8.ai">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M9.83 9.17a4 4 0 1 0 0 5.66 10 10 0 0 0 2.17-2.83 10 10 0 0 1 2.17-2.83 4 4 0 1 1 0 5.66 10 10 0 0 1-2.17-2.83 10 10 0 0 0-2.17-2.83" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
     <div class="rail-nav">
       <button class="rail-btn on" data-screen="inbox" onclick="nav('inbox',this)">
@@ -1117,6 +1118,10 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
     <section class="screen" id="screen-extension">
       <div class="ext-wrap">
         <div class="ext-hero">
+          <div style="display:inline-flex;align-items:center;gap:11px;color:#fff;margin-bottom:18px">
+            <svg viewBox="0 0 24 24" fill="none" width="34" height="34"><path d="M9.83 9.17a4 4 0 1 0 0 5.66 10 10 0 0 0 2.17-2.83 10 10 0 0 1 2.17-2.83 4 4 0 1 1 0 5.66 10 10 0 0 1-2.17-2.83 10 10 0 0 0-2.17-2.83" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="brandword" style="font-size:28px;font-weight:600">native</span>
+          </div>
           <div class="eyebrow"><svg viewBox="0 0 24 24" fill="none" width="13" height="13"><path d="M12 2 9.2 9.2 2 12l7.2 2.8L12 22l2.8-7.2L22 12l-7.2-2.8L12 2z" fill="currentColor"/></svg>Chrome Extension · Concept</div>
           <h1>Native, right inside WhatsApp Web</h1>
           <p>A Grammarly-style assistant that lives in the composer. It detects leads, drafts replies, and reminds you to follow up — without leaving the chat.</p>
@@ -1359,7 +1364,7 @@ renderKanban();
 /* ============ EXTENSION states ============ */
 const extStates={
   lead:`
-    <div class="np-head"><div class="lg"><svg viewBox="0 0 24 24" fill="none"><path d="M5 19V5l14 14V5" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="nt">Native <span class="v">LEAD DETECTED</span></div><div class="x" onclick="toast('Dismissed')"><svg viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="2"/></svg></div></div>
+    <div class="np-head"><div class="lg"><svg viewBox="0 0 24 24" fill="none"><path d="M9.83 9.17a4 4 0 1 0 0 5.66 10 10 0 0 0 2.17-2.83 10 10 0 0 1 2.17-2.83 4 4 0 1 1 0 5.66 10 10 0 0 1-2.17-2.83 10 10 0 0 0-2.17-2.83" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="nt">Native <span class="v">LEAD DETECTED</span></div><div class="x" onclick="toast('Dismissed')"><svg viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="2"/></svg></div></div>
     <div class="np-body">
       <div class="np-tag lead"><svg viewBox="0 0 24 24" fill="none"><path d="m20 6-11 11-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>Auto-filled from this chat</div>
       <h4 style="margin-bottom:11px">Add Lead</h4>
@@ -1378,7 +1383,7 @@ const extStates={
       </div>
     </div>`,
   reply:`
-    <div class="np-head"><div class="lg"><svg viewBox="0 0 24 24" fill="none"><path d="M5 19V5l14 14V5" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="nt">Native <span class="v" style="color:#bda4ff;background:rgba(155,107,240,.2)">AI REPLY</span></div><div class="x"><svg viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="2"/></svg></div></div>
+    <div class="np-head"><div class="lg"><svg viewBox="0 0 24 24" fill="none"><path d="M9.83 9.17a4 4 0 1 0 0 5.66 10 10 0 0 0 2.17-2.83 10 10 0 0 1 2.17-2.83 4 4 0 1 1 0 5.66 10 10 0 0 1-2.17-2.83 10 10 0 0 0-2.17-2.83" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="nt">Native <span class="v" style="color:#bda4ff;background:rgba(155,107,240,.2)">AI REPLY</span></div><div class="x"><svg viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="2"/></svg></div></div>
     <div class="np-body">
       <div class="np-tag reply"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2 9.2 9.2 2 12l7.2 2.8L12 22l2.8-7.2L22 12l-7.2-2.8L12 2z" fill="currentColor"/></svg>Suggested reply</div>
       <h4>Answer price + delivery</h4>
@@ -1389,7 +1394,7 @@ const extStates={
       </div>
     </div>`,
   remind:`
-    <div class="np-head"><div class="lg"><svg viewBox="0 0 24 24" fill="none"><path d="M5 19V5l14 14V5" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="nt">Native <span class="v" style="color:#f3c98a;background:rgba(245,158,11,.2)">REMINDER</span></div><div class="x"><svg viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="2"/></svg></div></div>
+    <div class="np-head"><div class="lg"><svg viewBox="0 0 24 24" fill="none"><path d="M9.83 9.17a4 4 0 1 0 0 5.66 10 10 0 0 0 2.17-2.83 10 10 0 0 1 2.17-2.83 4 4 0 1 1 0 5.66 10 10 0 0 1-2.17-2.83 10 10 0 0 0-2.17-2.83" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="nt">Native <span class="v" style="color:#f3c98a;background:rgba(245,158,11,.2)">REMINDER</span></div><div class="x"><svg viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="2"/></svg></div></div>
     <div class="np-body">
       <div class="np-tag remind"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Follow-up due</div>
       <h4>Don't lose this deal</h4>
