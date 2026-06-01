@@ -63,4 +63,25 @@ npx serve public      # then open http://localhost:3000/native8/
 Minimal, modern, premium SaaS. Native green (`#12A36B`) for action, indigo/violet
 (`#6D5AE6`) for AI, authentic WhatsApp chat surfaces. Inter + Plus Jakarta Sans.
 
+## Next-level features (added)
+
+- **∞ Native Memory** — persistent, auto-learned facts per customer (decision-maker,
+  pays via UPI, price-sensitive, replies 10–11 AM). In the Inbox AI panel and on
+  the Customer page. This is the ∞ brand promise made literal.
+- **AI auto-draft** — a full reply pre-written in the composer with an
+  **EN / हिं / Hinglish** language toggle, Use draft + Regenerate.
+- **Response SLA** — countdown badge in the conversation header, a team SLA health
+  strip on the Dashboard, and breach tracking on the Team screen.
+- **Auto follow-up sequences** — toggleable multi-step nudge sequence in the AI
+  panel (sent → scheduled → final), so no lead goes cold.
+- **Money loop** — Quote → Accepted → Invoice → Paid stepper on the Customer page,
+  a "Send Payment Link (UPI)" action, and a UPI payment card that drops into chat.
+- **Team / Manager view** — leaderboard (revenue/deals/speed), lead routing
+  (round-robin with capacity), and AI "where deals leak" diagnostics.
+
+## Brand
+
+Logo is the **∞ (infinity)** mark — the "8" in Native8 — with the lowercase
+`native` wordmark (Quicksand). Monochrome, premium, infinitely scalable.
+
 > Prototype only — visualize the product before building the Chrome extension.

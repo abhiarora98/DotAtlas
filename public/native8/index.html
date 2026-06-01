@@ -662,6 +662,124 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .sg-chip.quote{background:linear-gradient(135deg,var(--brand-soft),#fff);border-color:#bfe9d6;color:var(--brand);font-weight:700}
 .sg-chip.quote:hover{background:var(--brand-soft)}
 
+/* =========================================================
+   NEXT-LEVEL FEATURES — memory, auto-draft, SLA, sequences,
+   money loop, team leaderboard
+   ========================================================= */
+
+/* AI auto-draft banner (composer) */
+.ai-draft{background:linear-gradient(135deg,#F6F3FF 0%,#EFFBF5 100%);border:1px solid #E3DBFB;border-radius:14px;padding:12px;margin-bottom:10px}
+.ai-draft .adh{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.ai-draft .adh .lbl{font-size:11px;font-weight:800;color:var(--ai);display:inline-flex;align-items:center;gap:5px;letter-spacing:.03em;text-transform:uppercase}
+.ai-draft .adh .lbl svg{width:13px;height:13px}
+.ai-draft .lang{display:flex;gap:3px;margin-left:auto;background:#fff;border:1px solid var(--line);border-radius:9px;padding:3px}
+.ai-draft .lang button{font-size:11px;font-weight:700;padding:4px 9px;border-radius:6px;color:var(--ink-3);transition:.14s var(--ease)}
+.ai-draft .lang button.on{background:var(--ai);color:#fff}
+.ai-draft .draft-text{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.55;color:var(--ink);margin-bottom:9px;min-height:42px}
+.ai-draft .ad-actions{display:flex;gap:8px}
+.ai-draft .adb{flex:1;justify-content:center;display:inline-flex;align-items:center;gap:6px;padding:8px;border-radius:10px;font-size:12.5px;font-weight:700;transition:.15s var(--ease)}
+.ai-draft .adb svg{width:14px;height:14px}
+.ai-draft .adb.use{background:linear-gradient(135deg,var(--ai),var(--ai-2));color:#fff;box-shadow:0 5px 13px rgba(109,90,230,.22)}
+.ai-draft .adb.use:hover{transform:translateY(-1px)}
+.ai-draft .adb.regen{flex:0 0 auto;background:#fff;border:1px solid var(--line);color:var(--ink-2)}
+.ai-draft .adb.regen:hover{color:var(--ai);border-color:var(--ai)}
+
+/* SLA badges */
+.sla{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;white-space:nowrap}
+.sla svg{width:12px;height:12px}
+.sla.ok{color:var(--won);background:var(--won-soft)}
+.sla.warn{color:#B45309;background:var(--warm-soft)}
+.sla.breach{color:var(--hot);background:var(--hot-soft)}
+.cl-sla{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;margin-left:auto}
+.cl-sla.warn{color:#B45309}.cl-sla.breach{color:var(--hot)}
+.cl-sla svg{width:11px;height:11px}
+
+/* ∞ Memory card */
+.mem-head{display:flex;align-items:center;gap:7px}
+.mem-head .inf{color:var(--ai)}
+.mem-head .inf svg{width:15px;height:15px;display:block}
+.mem-list .mem{display:flex;gap:9px;padding:9px 0;border-bottom:1px solid var(--line)}
+.mem-list .mem:last-child{border-bottom:none}
+.mem-list .mem .mi{width:22px;height:22px;border-radius:7px;background:var(--ai-soft);color:var(--ai);display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-top:1px}
+.mem-list .mem .mi svg{width:12px;height:12px}
+.mem-list .mem .mt{flex:1}
+.mem-list .mem .mt .mtext{font-size:12.5px;color:var(--ink);line-height:1.4}
+.mem-list .mem .mt .msrc{font-size:10.5px;color:var(--ink-3);margin-top:2px}
+.mem-add{display:flex;align-items:center;gap:7px;width:100%;margin-top:10px;padding:8px;border-radius:9px;border:1px dashed var(--line-2);color:var(--ink-3);font-size:12px;font-weight:600;justify-content:center;transition:.15s var(--ease)}
+.mem-add:hover{border-color:var(--ai);color:var(--ai)}
+.mem-add svg{width:14px;height:14px}
+
+/* Auto follow-up sequence */
+.seq-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+.toggle{width:38px;height:22px;border-radius:99px;background:var(--brand);position:relative;cursor:pointer;transition:.2s var(--ease);flex:0 0 auto}
+.toggle::after{content:"";position:absolute;top:2px;left:18px;width:18px;height:18px;border-radius:99px;background:#fff;transition:.2s var(--ease);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle.off{background:var(--line-2)}
+.toggle.off::after{left:2px}
+.seq{position:relative;padding-left:4px}
+.seq-step{position:relative;padding:0 0 13px 24px}
+.seq-step::before{content:"";position:absolute;left:8px;top:4px;bottom:-2px;width:2px;background:var(--line-2)}
+.seq-step:last-child::before{display:none}
+.seq-step .sd{position:absolute;left:2px;top:2px;width:14px;height:14px;border-radius:99px;background:#fff;border:2.5px solid var(--line-2);display:flex;align-items:center;justify-content:center}
+.seq-step.done .sd{border-color:var(--brand);background:var(--brand)}
+.seq-step.done .sd svg{width:8px;height:8px;color:#fff}
+.seq-step.next .sd{border-color:var(--ai)}
+.seq-step .sh{font-size:12.5px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:7px}
+.seq-step .stag{font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:99px;letter-spacing:.03em}
+.seq-step .stag.sent{background:var(--won-soft);color:var(--won)}
+.seq-step .stag.sched{background:var(--ai-soft);color:var(--ai)}
+.seq-step .sb{font-size:11.5px;color:var(--ink-3);margin-top:2px;line-height:1.4}
+
+/* Money loop stepper */
+.money-loop{display:flex;align-items:flex-start;margin:4px 0 2px}
+.mstep{flex:1;display:flex;flex-direction:column;align-items:center;position:relative;text-align:center}
+.mstep .mc{width:38px;height:38px;border-radius:99px;background:#fff;border:2px solid var(--line-2);display:flex;align-items:center;justify-content:center;color:var(--ink-3);z-index:2}
+.mstep .mc svg{width:17px;height:17px}
+.mstep.done .mc{background:var(--brand);border-color:var(--brand);color:#fff}
+.mstep.active .mc{border-color:var(--brand);color:var(--brand);box-shadow:0 0 0 4px var(--brand-glow)}
+.mstep::before{content:"";position:absolute;top:18px;left:-50%;width:100%;height:2.5px;background:var(--line-2);z-index:1}
+.mstep:first-child::before{display:none}
+.mstep.done::before,.mstep.active::before{background:var(--brand)}
+.mstep .ml{font-size:11px;font-weight:700;margin-top:7px;color:var(--ink)}
+.mstep .mv{font-size:10.5px;color:var(--ink-3);margin-top:1px}
+.mstep.active .ml{color:var(--brand)}
+
+/* payment bubble */
+.pay-card{background:#fff;border-radius:9px;overflow:hidden;width:250px;border:1px solid rgba(0,0,0,.05)}
+.pay-card .pch{background:linear-gradient(135deg,#5f259f,#7b2fb5);color:#fff;padding:10px 12px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700}
+.pay-card .pch svg{width:16px;height:16px}
+.pay-card .pcb{padding:11px 12px}
+.pay-card .amt{font-size:20px;font-weight:800;font-family:'Plus Jakarta Sans'}
+.pay-card .sub{font-size:11px;color:var(--ink-3);margin-bottom:9px}
+.pay-card .paybtn{display:block;text-align:center;background:#5f259f;color:#fff;font-weight:700;font-size:12.5px;padding:8px;border-radius:8px}
+
+/* Team / leaderboard screen */
+.team-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:16px}
+.lb-row{display:flex;align-items:center;gap:13px;padding:12px;border-radius:12px;border:1px solid var(--line);margin-bottom:10px;transition:.15s var(--ease)}
+.lb-row:hover{border-color:var(--line-2);background:var(--panel-2)}
+.lb-row.top{background:linear-gradient(120deg,#FFFBF0,#fff);border-color:#F6E3C4}
+.lb-rank{width:26px;font-size:15px;font-weight:800;font-family:'Plus Jakarta Sans';color:var(--ink-3);text-align:center;flex:0 0 auto}
+.lb-row.top .lb-rank{color:#D9A441}
+.lb-row .ra{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex:0 0 auto}
+.lb-info{flex:1;min-width:0}
+.lb-info .ln{font-weight:700;font-size:13.5px}
+.lb-info .lbar{height:7px;background:var(--bg);border-radius:99px;overflow:hidden;margin-top:6px;max-width:200px}
+.lb-info .lfill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--brand),#1bcb86)}
+.lb-metrics{display:flex;gap:22px;flex:0 0 auto;text-align:right}
+.lb-metric .lv{font-weight:800;font-size:15px;font-family:'Plus Jakarta Sans'}
+.lb-metric .ll{font-size:10px;color:var(--ink-3);font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.leak{display:flex;align-items:flex-start;gap:11px;padding:12px;border-radius:11px;border:1px solid var(--line);margin-bottom:10px}
+.leak .lic{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.leak .lic svg{width:16px;height:16px}
+.leak.warn .lic{background:var(--warm-soft);color:#B45309}
+.leak.bad .lic{background:var(--hot-soft);color:var(--hot)}
+.leak .lt{flex:1}.leak .lt .lh{font-weight:700;font-size:13px}.leak .lt p{margin:2px 0 0;font-size:12px;color:var(--ink-2);line-height:1.45}
+.route{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--line)}
+.route:last-child{border-bottom:none}
+.route .ra{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:12px;flex:0 0 auto}
+.route .rt{flex:1}.route .rt .rn{font-weight:600;font-size:13px}.route .rt .rc{font-size:11px;color:var(--ink-3)}
+.route .rcap{font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;background:var(--won-soft);color:var(--won)}
+.route .rcap.full{background:var(--hot-soft);color:var(--hot)}
+
 /* responsive guard */
 @media(max-width:1180px){
   .inbox{grid-template-columns:300px minmax(0,1fr) 340px}
@@ -694,6 +812,10 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
       <button class="rail-btn" data-screen="customer" onclick="nav('customer',this)">
         <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="2"/><path d="M5 20a7 7 0 0 1 14 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         <span class="tip">Customers</span>
+      </button>
+      <button class="rail-btn" data-screen="team" onclick="nav('team',this)">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="2"/><path d="M3 19a6 6 0 0 1 12 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M16 5.2a3 3 0 0 1 0 5.6M18 19a6 6 0 0 0-3-5.2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span class="tip">Team</span>
       </button>
       <button class="rail-btn" data-screen="extension" onclick="nav('extension',this)">
         <svg viewBox="0 0 24 24" fill="none"><path d="M14 7h5a2 2 0 0 1 2 2v5m0 4a2 2 0 0 1-2 2h-5M7 21H5a2 2 0 0 1-2-2v-2m0-7V5a2 2 0 0 1 2-2h2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="2.5" stroke="currentColor" stroke-width="2"/></svg>
@@ -745,6 +867,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
               <div class="name" id="cv-name">Ravi Enterprises</div>
               <div class="sub"><b>● online</b> &nbsp;·&nbsp; +91 98765 43210</div>
             </div>
+            <div class="sla warn" title="Respond before SLA breach"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>SLA · reply in 48m</div>
             <div class="ch-actions">
               <button class="tb-icon" title="Search in chat"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
               <button class="tb-icon" title="Call"><svg viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -772,6 +895,21 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
           </div>
 
           <div class="composer">
+            <div class="ai-draft">
+              <div class="adh">
+                <span class="lbl"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2 9.2 9.2 2 12l7.2 2.8L12 22l2.8-7.2L22 12l-7.2-2.8L12 2z" fill="currentColor"/></svg>Native auto-draft</span>
+                <div class="lang">
+                  <button class="on" onclick="setLang('en',this)">EN</button>
+                  <button onclick="setLang('hi',this)">हिं</button>
+                  <button onclick="setLang('hinglish',this)">Hinglish</button>
+                </div>
+              </div>
+              <div class="draft-text" id="draft-text"></div>
+              <div class="ad-actions">
+                <button class="adb use" onclick="useDraft()"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Use draft</button>
+                <button class="adb regen" onclick="regenDraft()" title="Regenerate"><svg viewBox="0 0 24 24" fill="none"><path d="M21 12a9 9 0 1 1-3-6.7L21 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 4v4h-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              </div>
+            </div>
             <div class="cmp-suggest" id="suggest-chips">
               <span class="lbl"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2 9.2 9.2 2 12l7.2 2.8L12 22l2.8-7.2L22 12l-7.2-2.8L12 2z" fill="currentColor"/></svg>Suggested replies</span>
               <button class="sg-chip quote" onclick="openQuote({customer:'Ravi Enterprises',product:'Heavy-Duty Rubber-Backed Coir Mat (3×5 ft)',qty:20,rate:1180})">✨ Create quotation? · 20 × Heavy-Duty Coir</button>
@@ -832,6 +970,18 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
               </div>
             </div>
 
+            <!-- ∞ Native Memory -->
+            <div class="card">
+              <div class="ct"><span class="mem-head"><span class="inf"><svg viewBox="0 0 24 24" fill="none"><path d="M9.83 9.17a4 4 0 1 0 0 5.66 10 10 0 0 0 2.17-2.83 10 10 0 0 1 2.17-2.83 4 4 0 1 1 0 5.66 10 10 0 0 1-2.17-2.83 10 10 0 0 0-2.17-2.83" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Native Memory</span><span class="edit">Auto-learned</span></div>
+              <div class="mem-list">
+                <div class="mem"><span class="mi"><svg viewBox="0 0 24 24" fill="none"><path d="M3 7l9 6 9-6" stroke="currentColor" stroke-width="2"/><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2"/></svg></span><div class="mt"><div class="mtext">Decision-maker is the <b>owner</b>, not the purchase manager.</div><div class="msrc">Learned from chat · 12 Mar</div></div></div>
+                <div class="mem"><span class="mi"><svg viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="M2 10h20" stroke="currentColor" stroke-width="2"/></svg></span><div class="mt"><div class="mtext">Pays fast via <b>UPI / GPay</b>. Never needs credit terms.</div><div class="msrc">From 1 past order</div></div></div>
+                <div class="mem"><span class="mi"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2v20M5 7l7-5 7 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div class="mt"><div class="mtext"><b>Price-sensitive</b> but values fast delivery over discount.</div><div class="msrc">Inferred · 3 conversations</div></div></div>
+                <div class="mem"><span class="mi"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><div class="mt"><div class="mtext">Replies fastest <b>10–11 AM</b>. Prefers Hinglish.</div><div class="msrc">Behaviour pattern</div></div></div>
+              </div>
+              <button class="mem-add" onclick="toast('Add a memory…')"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>Teach Native something</button>
+            </div>
+
             <!-- quick actions -->
             <div class="card">
               <div class="ct">Quick Actions</div>
@@ -842,6 +992,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
                 <button class="qa violet" onclick="openQuote({customer:'Ravi Enterprises',product:'Heavy-Duty Rubber-Backed Coir Mat (3×5 ft)',qty:20,rate:1180})"><span class="ico"><svg viewBox="0 0 24 24" fill="none"><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="2"/><path d="M14 2v5h5M9 13h6M9 17h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>Create Quote</button>
                 <button class="qa won-a" onclick="toast('🎉 Marked as Won! ₹23,600')"><span class="ico"><svg viewBox="0 0 24 24" fill="none"><path d="m20 6-11 11-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Mark Won</button>
                 <button class="qa lost-a" onclick="toast('Marked as Lost')"><span class="ico"><svg viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>Mark Lost</button>
+                <button class="qa green" style="grid-column:1/-1" onclick="sendPaymentLink()"><span class="ico"><svg viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="M2 10h20M6 15h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>Send Payment Link (UPI) · ₹26,456</button>
               </div>
             </div>
 
@@ -864,6 +1015,16 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
                   <span>Upsell logo branding with mockup offer</span>
                   <span class="send-mini"><svg viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
                 </div>
+              </div>
+            </div>
+
+            <!-- auto follow-up sequence -->
+            <div class="card">
+              <div class="seq-head"><div class="ct" style="margin:0">Auto Follow-up</div><div class="toggle" id="seq-toggle" onclick="toggleSeq(this)"></div></div>
+              <div class="seq">
+                <div class="seq-step done"><span class="sd"><svg viewBox="0 0 24 24" fill="none"><path d="m20 6-11 11-5-5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div class="sh">Catalog + quote sent <span class="stag sent">SENT</span></div><div class="sb">Today · 10:11 AM</div></div>
+                <div class="seq-step next"><span class="sd"></span><div class="sh">Gentle nudge if no reply <span class="stag sched">AUTO · TMRW 10 AM</span></div><div class="sb">“Hi Ravi, just checking on the 20 mats — shall I lock Friday delivery?”</div></div>
+                <div class="seq-step"><span class="sd"></span><div class="sh">Final follow-up + offer <span class="stag sched">AUTO · +2 DAYS</span></div><div class="sb">Last touch before marking cold. Adds a small-discount nudge.</div></div>
               </div>
             </div>
 
@@ -898,6 +1059,17 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
           <div class="eyebrow"><span class="live"><span class="pulse"></span></span>Native AI · synced 2 min ago</div>
           <h1>Good morning, Aarav 👋</h1>
           <p>You have <b>5 hot leads</b> and <b>3 overdue follow-ups</b>. Closing the hotel mats deal by Friday adds ₹23,600 to this month.</p>
+        </div>
+
+        <div class="panel-card" style="margin-bottom:18px;display:flex;align-items:center;gap:18px;padding:14px 18px">
+          <div style="display:flex;align-items:center;gap:10px"><svg viewBox="0 0 24 24" fill="none" width="20" height="20" style="color:var(--brand)"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div><div style="font-weight:700;font-size:13.5px">Response SLA</div><div style="font-size:11.5px;color:var(--ink-3)">Target: reply within 2h</div></div></div>
+          <div style="width:1px;height:34px;background:var(--line)"></div>
+          <div style="display:flex;gap:10px;flex:1;flex-wrap:wrap">
+            <span class="sla ok"><svg viewBox="0 0 24 24" fill="none"><path d="m20 6-11 11-5-5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>41 within SLA · 94%</span>
+            <span class="sla warn"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2"/></svg>2 nearing breach</span>
+            <span class="sla breach"><svg viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>1 breached</span>
+          </div>
+          <button class="btn btn-ghost" onclick="nav('inbox')">View at-risk</button>
         </div>
 
         <div class="kpi-grid">
@@ -1088,6 +1260,26 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 
           <div class="cust-col">
             <div class="panel-card">
+              <div class="sec-title"><svg viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="M2 10h20M6 15h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Money Loop</div>
+              <div class="money-loop">
+                <div class="mstep done"><div class="mc"><svg viewBox="0 0 24 24" fill="none"><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="2"/></svg></div><div class="ml">Quote</div><div class="mv">₹26,456</div></div>
+                <div class="mstep active"><div class="mc"><svg viewBox="0 0 24 24" fill="none"><path d="m20 6-11 11-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="ml">Accepted</div><div class="mv">awaiting</div></div>
+                <div class="mstep"><div class="mc"><svg viewBox="0 0 24 24" fill="none"><path d="M9 2h7l5 5v13a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="2"/><path d="M9 13h6M9 17h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div><div class="ml">Invoice</div><div class="mv">—</div></div>
+                <div class="mstep"><div class="mc"><svg viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="M2 10h20" stroke="currentColor" stroke-width="2"/></svg></div><div class="ml">Paid</div><div class="mv">UPI</div></div>
+              </div>
+              <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:16px" onclick="nav('inbox');setTimeout(sendPaymentLink,300)"><svg viewBox="0 0 24 24" fill="none"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Send UPI Payment Link on WhatsApp</button>
+            </div>
+
+            <div class="panel-card">
+              <div class="sec-title"><span class="inf" style="color:var(--ai);display:inline-flex"><svg viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M9.83 9.17a4 4 0 1 0 0 5.66 10 10 0 0 0 2.17-2.83 10 10 0 0 1 2.17-2.83 4 4 0 1 1 0 5.66 10 10 0 0 1-2.17-2.83 10 10 0 0 0-2.17-2.83" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Native Memory</div>
+              <div class="mem-list">
+                <div class="mem"><span class="mi"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="2"/><path d="M5 20a7 7 0 0 1 14 0" stroke="currentColor" stroke-width="2"/></svg></span><div class="mt"><div class="mtext">Owner is the decision-maker — loop him in directly.</div><div class="msrc">Learned · 12 Mar</div></div></div>
+                <div class="mem"><span class="mi"><svg viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="M2 10h20" stroke="currentColor" stroke-width="2"/></svg></span><div class="mt"><div class="mtext">Always pays on time via UPI — no credit needed.</div><div class="msrc">From 1 order</div></div></div>
+                <div class="mem"><span class="mi"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2"/></svg></span><div class="mt"><div class="mtext">Values fast delivery over discount. Replies 10–11 AM, in Hinglish.</div><div class="msrc">Behaviour pattern</div></div></div>
+              </div>
+            </div>
+
+            <div class="panel-card">
               <div class="sec-title"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2 9.2 9.2 2 12l7.2 2.8L12 22l2.8-7.2L22 12l-7.2-2.8L12 2z" fill="currentColor"/></svg>AI Insights</div>
               <div class="insight"><div class="iic"><svg viewBox="0 0 24 24" fill="none"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></div><div class="it"><div class="ih">Close-ready signal</div><p>High intent + repeat buyer + urgent deadline. Offer Friday delivery guarantee to close today.</p></div></div>
               <div class="insight"><div class="iic"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2v4M12 18v4M2 12h4M18 12h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/></svg></div><div class="it"><div class="ih">Upsell opportunity</div><p>Asked about logo branding — add ₹250/mat (+₹5,000). Likely to accept given premium hotel use.</p></div></div>
@@ -1106,6 +1298,69 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
               <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0"><span style="color:var(--ink-2);font-size:13px">Previous orders</span><span class="pay-pill paid">All paid</span></div>
               <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line)"><span style="color:var(--ink-2);font-size:13px">Current opportunity</span><span class="pay-pill due">₹23,600 unpaid</span></div>
               <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line)"><span style="color:var(--ink-2);font-size:13px">Preferred method</span><span style="font-weight:700;font-size:13px">UPI · GPay</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================= -->
+    <!-- TEAM — manager view / leaderboard             -->
+    <!-- ============================================= -->
+    <section class="screen" id="screen-team">
+      <div class="topbar">
+        <h2>Team</h2><span class="crumb">/ Manager view</span>
+        <div class="tb-spacer"></div>
+        <div class="seg"><button class="on">This month</button><button>This week</button><button>Today</button></div>
+        <button class="btn btn-ghost"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2"/></svg>Invite rep</button>
+      </div>
+      <div class="page">
+        <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+          <div class="kpi g"><div class="ico"><svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="2"/><path d="M3 19a6 6 0 0 1 12 0M16 5.2a3 3 0 0 1 0 5.6M18 19a6 6 0 0 0-3-5.2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div><div class="lab">Active Reps</div><div class="val">4</div><div class="delta flat">all online today</div></div>
+          <div class="kpi w"><div class="ico"><svg viewBox="0 0 24 24" fill="none"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="lab">Team Revenue</div><div class="val">₹8.6L</div><div class="delta up">▲ 23% vs last mo</div></div>
+          <div class="kpi v"><div class="ico"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2"/></svg></div><div class="lab">Avg Response</div><div class="val">1h 4m</div><div class="delta up">▲ 18% faster</div></div>
+          <div class="kpi r"><div class="ico"><svg viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="lab">SLA Breaches</div><div class="val">1</div><div class="delta down">this week</div></div>
+        </div>
+
+        <div class="team-grid">
+          <div class="panel-card">
+            <div class="pc-head"><div><h3>Leaderboard</h3><div class="sub">Revenue closed · this month</div></div><div class="seg"><button class="on">Revenue</button><button>Deals</button><button>Speed</button></div></div>
+            <div class="lb-row top">
+              <div class="lb-rank">1</div><div class="ra" style="background:#f0a35e">AM</div>
+              <div class="lb-info"><div class="ln">Aarav Mehta 🏆</div><div class="lbar"><div class="lfill" style="width:92%"></div></div></div>
+              <div class="lb-metrics"><div class="lb-metric"><div class="lv">₹3.1L</div><div class="ll">Revenue</div></div><div class="lb-metric"><div class="lv">12</div><div class="ll">Won</div></div><div class="lb-metric"><div class="lv">38%</div><div class="ll">Conv</div></div></div>
+            </div>
+            <div class="lb-row">
+              <div class="lb-rank">2</div><div class="ra" style="background:#5b8def">PK</div>
+              <div class="lb-info"><div class="ln">Priya Kapoor</div><div class="lbar"><div class="lfill" style="width:74%"></div></div></div>
+              <div class="lb-metrics"><div class="lb-metric"><div class="lv">₹2.5L</div><div class="ll">Revenue</div></div><div class="lb-metric"><div class="lv">9</div><div class="ll">Won</div></div><div class="lb-metric"><div class="lv">34%</div><div class="ll">Conv</div></div></div>
+            </div>
+            <div class="lb-row">
+              <div class="lb-rank">3</div><div class="ra" style="background:#9b6bf0">RV</div>
+              <div class="lb-info"><div class="ln">Rohan Verma</div><div class="lbar"><div class="lfill" style="width:58%"></div></div></div>
+              <div class="lb-metrics"><div class="lb-metric"><div class="lv">₹1.9L</div><div class="ll">Revenue</div></div><div class="lb-metric"><div class="lv">7</div><div class="ll">Won</div></div><div class="lb-metric"><div class="lv">29%</div><div class="ll">Conv</div></div></div>
+            </div>
+            <div class="lb-row">
+              <div class="lb-rank">4</div><div class="ra" style="background:#2bb673">SN</div>
+              <div class="lb-info"><div class="ln">Sneha Nair</div><div class="lbar"><div class="lfill" style="width:34%"></div></div></div>
+              <div class="lb-metrics"><div class="lb-metric"><div class="lv">₹1.1L</div><div class="ll">Revenue</div></div><div class="lb-metric"><div class="lv">3</div><div class="ll">Won</div></div><div class="lb-metric"><div class="lv">22%</div><div class="ll">Conv</div></div></div>
+            </div>
+          </div>
+
+          <div class="cust-col">
+            <div class="panel-card">
+              <div class="sec-title"><svg viewBox="0 0 24 24" fill="none"><path d="M3 7h13l-3-3m3 3-3 3M21 17H8l3-3m-3 3 3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Lead Routing</div>
+              <div class="route"><div class="ra" style="background:#f0a35e">AM</div><div class="rt"><div class="rn">Aarav Mehta</div><div class="rc">14 open leads</div></div><span class="rcap full">At capacity</span></div>
+              <div class="route"><div class="ra" style="background:#5b8def">PK</div><div class="rt"><div class="rn">Priya Kapoor</div><div class="rc">9 open leads</div></div><span class="rcap">Available</span></div>
+              <div class="route"><div class="ra" style="background:#9b6bf0">RV</div><div class="rt"><div class="rn">Rohan Verma</div><div class="rc">7 open leads</div></div><span class="rcap">Available</span></div>
+              <div class="route"><div class="ra" style="background:#2bb673">SN</div><div class="rt"><div class="rn">Sneha Nair</div><div class="rc">5 open leads</div></div><span class="rcap">Available</span></div>
+              <p style="font-size:12px;color:var(--ink-3);margin:12px 0 0;line-height:1.5">Native auto-routes new WhatsApp leads round-robin, skipping reps at capacity.</p>
+            </div>
+
+            <div class="panel-card">
+              <div class="sec-title"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2 9.2 9.2 2 12l7.2 2.8L12 22l2.8-7.2L22 12l-7.2-2.8L12 2z" fill="currentColor"/></svg>Where deals leak</div>
+              <div class="leak bad"><div class="lic"><svg viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="lt"><div class="lh">Negotiation → Won drop-off</div><p>32% of quotes stall after sending. Suggest auto follow-up at 48h.</p></div></div>
+              <div class="leak warn"><div class="lic"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2"/></svg></div><div class="lt"><div class="lh">Slow first response on weekends</div><p>Avg reply 4h+ Sat–Sun. Consider a shared weekend queue.</p></div></div>
             </div>
           </div>
         </div>
@@ -1295,6 +1550,45 @@ function sendMsg(){
   msgs.appendChild(row); inp.value=''; msgs.scrollTop=msgs.scrollHeight;
 }
 document.getElementById('composer-input').addEventListener('keydown',e=>{if(e.key==='Enter')sendMsg();});
+
+/* ============ AI AUTO-DRAFT (with language toggle) ============ */
+const drafts={
+  en:[
+    "For 20 units it's ₹1,180/piece — ₹23,600 total. Yes, we can deliver to Panipat by Friday, and we offer custom hotel-logo branding at ₹250/mat. Shall I send the formal quote?",
+    "Happy to help! 20 mats come to ₹23,600 (₹1,180 each). Friday delivery to Panipat is doable, and logo branding is just ₹250/mat extra. Want me to lock it in?"
+  ],
+  hi:[
+    "20 यूनिट के लिए ₹1,180 प्रति पीस — कुल ₹23,600। जी हाँ, हम पानीपत शुक्रवार तक डिलीवर कर देंगे, और कस्टम होटल-लोगो ब्रांडिंग ₹250/मैट में उपलब्ध है। क्या मैं फॉर्मल कोट भेज दूँ?",
+    "जी, 20 मैट का कुल ₹23,600 (₹1,180 प्रति पीस) होगा। शुक्रवार तक पानीपत डिलीवरी हो जाएगी, लोगो ब्रांडिंग ₹250/मैट एक्स्ट्रा। ऑर्डर कन्फर्म कर दूँ?"
+  ],
+  hinglish:[
+    "20 units ka rate ₹1,180/piece — total ₹23,600. Haan ji, Panipat Friday tak delivery ho jayegi, aur custom hotel logo branding bhi ₹250/mat me. Formal quote bhej doon?",
+    "Bilkul! 20 mats ke ₹23,600 (₹1,180 each). Friday tak Panipat deliver kar denge, logo branding sirf ₹250/mat extra. Confirm kar doon?"
+  ]
+};
+let draftLang='en', draftIdx=0;
+function renderDraft(){document.getElementById('draft-text').textContent=drafts[draftLang][draftIdx%drafts[draftLang].length];}
+function setLang(l,btn){draftLang=l;document.querySelectorAll('.ai-draft .lang button').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderDraft();}
+function regenDraft(){draftIdx++;renderDraft();toast('Native rewrote the draft');}
+function useDraft(){const inp=document.getElementById('composer-input');inp.value=document.getElementById('draft-text').textContent;inp.focus();inp.parentElement.style.boxShadow='0 0 0 4px var(--brand-glow)';setTimeout(()=>inp.parentElement.style.boxShadow='',700);}
+renderDraft();
+
+/* ============ Auto follow-up toggle ============ */
+function toggleSeq(el){el.classList.toggle('off');toast(el.classList.contains('off')?'Auto follow-up paused':'Auto follow-up active');}
+
+/* ============ Money loop · UPI payment link ============ */
+function sendPaymentLink(){
+  nav('inbox');
+  const msgs=document.getElementById('msgs');
+  const now=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  const row=document.createElement('div');row.className='b-row out';
+  row.innerHTML=`<div class="bubble media" style="background:var(--wa-out);max-width:78%;padding:5px 5px 6px">
+    <div class="pay-card"><div class="pch"><svg viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="M2 10h20" stroke="currentColor" stroke-width="2"/></svg>Native Payments · UPI</div>
+      <div class="pcb"><div class="amt">₹26,456</div><div class="sub">Quote QT-2026-0042 · Ravi Enterprises</div><span class="paybtn">Pay securely →</span></div></div>
+    <div class="media-cap">Here's the secure payment link 🔒 Pay via any UPI app.<span class="meta">${now} <span class="tick">✓✓</span></span></div></div>`;
+  msgs.appendChild(row);msgs.scrollTop=msgs.scrollHeight;
+  toast('UPI payment link sent ✓');
+}
 
 /* lead stage stepper */
 function setStage(el,stage){
