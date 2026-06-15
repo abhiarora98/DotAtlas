@@ -80,16 +80,21 @@ function pocInitials(poc) {
   return out;
 }
 
-// First *letter* of the party name, uppercased (skips leading digits/punctuation).
-function firstLetter(name) {
+// Initials of the party name — first letter of every word.
+// "ABHITEX FURNISHINGS" → "AF", "SUNNY SYNTHETIC" → "SS".
+function nameInitials(name) {
   const s = String(name || '').trim();
-  const m = s.match(/[A-Za-z]/);
-  return (m ? m[0] : s.charAt(0)).toUpperCase();
+  let out = '';
+  for (const word of s.split(/\s+/)) {
+    const m = word.match(/[A-Za-z]/);
+    if (m) out += m[0].toUpperCase();
+  }
+  return out || s.charAt(0).toUpperCase();
 }
 
-// Build the prefix that all running numbers share, e.g. "S-PBVS".
+// Build the prefix that all running numbers share, e.g. "AF-HRVS".
 function partyCodePrefix(name, state, poc) {
-  return firstLetter(name) + '-' + stateToCode(state) + pocInitials(poc);
+  return nameInitials(name) + '-' + stateToCode(state) + pocInitials(poc);
 }
 
 // Given the prefix and all existing codes, return the next zero-padded code.

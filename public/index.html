@@ -21475,7 +21475,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       <div class="pi-field">
         <label for="ap-code">Party Code <span class="ap-auto">auto · read-only</span></label>
         <input class="pi-input mono" id="ap-code" placeholder="Generated from name · state · POC" autocomplete="off" readonly>
-        <span class="ap-hint" id="ap-code-hint">System-generated &amp; unique — e.g. S-PBVS001.</span>
+        <span class="ap-hint" id="ap-code-hint">System-generated &amp; unique — e.g. AF-HRVS001.</span>
       </div>
 
       <div class="ap-row-2">
@@ -21605,10 +21605,16 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   }
 
   // ----- Party code generation (mirrors the backend) -----
-  function firstLetter(name){
+  // Initials of the party name — first letter of every word.
+  // "ABHITEX FURNISHINGS" → "AF", "SUNNY SYNTHETIC" → "SS".
+  function nameInitials(name){
     const s = String(name || '').trim();
-    const m = s.match(/[A-Za-z]/);
-    return (m ? m[0] : s.charAt(0)).toUpperCase();
+    let out = '';
+    for (const word of s.split(/\s+/)){
+      const m = word.match(/[A-Za-z]/);
+      if (m) out += m[0].toUpperCase();
+    }
+    return out || s.charAt(0).toUpperCase();
   }
   function pocInitials(poc){
     const parts = String(poc || '').trim().split(/\s+/).filter(Boolean);
@@ -21625,9 +21631,9 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     return out;
   }
   function codePrefix(name, state, poc){
-    const fl = firstLetter(name), sc = stateCode(state), pi = pocInitials(poc);
-    if (!fl || !sc || !pi) return '';
-    return fl + '-' + sc + pi;
+    const ni = nameInitials(name), sc = stateCode(state), pi = pocInitials(poc);
+    if (!ni || !sc || !pi) return '';
+    return ni + '-' + sc + pi;
   }
   function nextSeqForPrefix(prefix){
     const re = new RegExp('^' + prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(\\d{3})$', 'i');

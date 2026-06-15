@@ -90,8 +90,9 @@ in ~300ms.
   object accepts `name`, `poc`, `state`, `gst`, `aadhaar`, `phone`,
   `city`. One of `gst` / `aadhaar` is required (Aadhaar must be 12
   digits). The **Party Code** is system-generated, unique and read-only
-  — `[First letter of name]-[State code][POC initials][3-digit running
-  number]` (e.g. `S-PBVS001`) — and returned as `code` in the response.
+  — `[Name initials]-[State code][POC initials][3-digit running
+  number]` (e.g. `AF-HRVS001` for "Abhitex Furnishings") — and returned
+  as `code` in the response.
   Parties columns: `CreatedAt · Party Name · Party Code · Sales POC ·
   GSTIN · Aadhaar · State · Phone · City`.
 

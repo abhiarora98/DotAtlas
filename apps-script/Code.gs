@@ -218,14 +218,21 @@ function pocInitials_(poc) {
   return out;
 }
 
-function firstLetter_(name) {
+// Initials of the party name — first letter of every word.
+// "ABHITEX FURNISHINGS" → "AF", "SUNNY SYNTHETIC" → "SS".
+function nameInitials_(name) {
   var s = String(name || '').trim();
-  var m = s.match(/[A-Za-z]/);
-  return (m ? m[0] : s.charAt(0)).toUpperCase();
+  var words = s.split(/\s+/);
+  var out = '';
+  for (var i = 0; i < words.length; i++) {
+    var m = words[i].match(/[A-Za-z]/);
+    if (m) out += m[0].toUpperCase();
+  }
+  return out || s.charAt(0).toUpperCase();
 }
 
 function partyCodePrefix_(name, state, poc) {
-  return firstLetter_(name) + '-' + stateToCode_(state) + pocInitials_(poc);
+  return nameInitials_(name) + '-' + stateToCode_(state) + pocInitials_(poc);
 }
 
 function nextPartyCode_(prefix, existingCodes) {
