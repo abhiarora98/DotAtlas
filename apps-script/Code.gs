@@ -135,9 +135,11 @@ function handleParty(payload) {
   const state = String(p.state || '').trim();
   const gst   = String(p.gst || '').trim().toUpperCase();
   const aadhaar = String(p.aadhaar || '').replace(/\D/g, '');
+  const city  = String(p.city || '').trim();
 
   if (!name) return jsonResponse({ ok: false, error: 'Party name is required.' });
   if (!poc)  return jsonResponse({ ok: false, error: 'Sales POC is required to generate the party code.' });
+  if (!city) return jsonResponse({ ok: false, error: 'City is required.' });
 
   const stateCode = stateToCode_(state);
   if (!stateCode) return jsonResponse({ ok: false, error: 'A valid State is required to generate the party code.' });
@@ -170,7 +172,7 @@ function handleParty(payload) {
     aadhaar,
     state,
     String(p.phone || '').trim(),
-    String(p.city || '').trim(),
+    city,
   ]);
 
   return jsonResponse({ ok: true, party: name, code: code });
@@ -205,9 +207,15 @@ function stateToCode_(state) {
 
 function pocInitials_(poc) {
   var parts = String(poc || '').trim().split(/\s+/).filter(function (x) { return x; });
-  if (!parts.length) return '';
-  if (parts.length === 1) return parts[0].replace(/[^A-Za-z]/g, '').toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  var out = '';
+  for (var i = 0; i < parts.length; i++) {
+    var letters = parts[i].replace(/[^A-Za-z]/g, '');
+    if (!letters) continue;
+    out += (letters.length > 1 && letters === letters.toUpperCase())
+      ? letters.toUpperCase()
+      : letters[0].toUpperCase();
+  }
+  return out;
 }
 
 function firstLetter_(name) {

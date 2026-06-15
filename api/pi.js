@@ -64,13 +64,20 @@ function stateToCode(state) {
   return STATE_CODE_MAP[s] || '';
 }
 
-// Sales POC initials. Full names ("Vishal Sharma") → first+last initial ("VS").
-// Values that are already initials ("VS", "SPM") pass through uppercased.
+// Sales POC initials. Full names ("Vishal Sharma") → first letter of each
+// token ("VS"). Already-uppercase abbreviations are kept whole, so
+// "SP Mehta" → "SPM" and a bare "VS"/"SPM" passes through unchanged.
 function pocInitials(poc) {
   const parts = String(poc || '').trim().split(/\s+/).filter(Boolean);
-  if (!parts.length) return '';
-  if (parts.length === 1) return parts[0].replace(/[^A-Za-z]/g, '').toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  let out = '';
+  for (const p of parts) {
+    const letters = p.replace(/[^A-Za-z]/g, '');
+    if (!letters) continue;
+    out += (letters.length > 1 && letters === letters.toUpperCase())
+      ? letters.toUpperCase()
+      : letters[0].toUpperCase();
+  }
+  return out;
 }
 
 // First *letter* of the party name, uppercased (skips leading digits/punctuation).
@@ -354,9 +361,11 @@ async function handleParty(sheets, spreadsheetId, payload, res) {
   const state = String(p.state || '').trim();
   const gst   = String(p.gst || '').trim().toUpperCase();
   const aadhaar = String(p.aadhaar || '').replace(/\D/g, '');
+  const city  = String(p.city || '').trim();
 
   if (!name)  return res.status(400).json({ ok: false, error: 'Party name is required' });
   if (!poc)   return res.status(400).json({ ok: false, error: 'Sales POC is required to generate the party code' });
+  if (!city)  return res.status(400).json({ ok: false, error: 'City is required' });
 
   const stateCode = stateToCode(state);
   if (!stateCode) return res.status(400).json({ ok: false, error: 'A valid State is required to generate the party code' });
@@ -426,7 +435,7 @@ async function handleParty(sheets, spreadsheetId, payload, res) {
         new Date().toISOString(),
         name, code, poc,
         gst, aadhaar, state,
-        String(p.phone || '').trim(), String(p.city || '').trim(),
+        String(p.phone || '').trim(), city,
       ]],
     },
   });

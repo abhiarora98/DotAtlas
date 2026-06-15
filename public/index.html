@@ -21484,8 +21484,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
           <input class="pi-input mono" id="ap-phone" placeholder="10-digit mobile" autocomplete="off" inputmode="tel" maxlength="15">
         </div>
         <div class="pi-field">
-          <label for="ap-city">City</label>
-          <input class="pi-input" id="ap-city" placeholder="optional" autocomplete="off">
+          <label for="ap-city">City <span class="ap-req">*</span></label>
+          <input class="pi-input" id="ap-city" placeholder="e.g. PANIPAT" autocomplete="off">
         </div>
       </div>
 
@@ -21612,9 +21612,17 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   }
   function pocInitials(poc){
     const parts = String(poc || '').trim().split(/\s+/).filter(Boolean);
-    if (!parts.length) return '';
-    if (parts.length === 1) return parts[0].replace(/[^A-Za-z]/g, '').toUpperCase();
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    let out = '';
+    for (const p of parts){
+      const letters = p.replace(/[^A-Za-z]/g, '');
+      if (!letters) continue;
+      // Keep already-uppercase abbreviations whole ("SP" → "SP"), otherwise
+      // take just the first letter ("Vishal" → "V").
+      out += (letters.length > 1 && letters === letters.toUpperCase())
+        ? letters.toUpperCase()
+        : letters[0].toUpperCase();
+    }
+    return out;
   }
   function codePrefix(name, state, poc){
     const fl = firstLetter(name), sc = stateCode(state), pi = pocInitials(poc);
@@ -21696,6 +21704,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     if (!poc)   { setStatus('err', 'Sales POC is required to generate the party code.'); $('ap-poc').focus(); return; }
     if (!state) { setStatus('err', 'State is required to generate the party code.'); $('ap-state').focus(); return; }
     if (!phone) { setStatus('err', 'Phone is required.'); $('ap-phone').focus(); return; }
+    if (!city)  { setStatus('err', 'City is required.'); $('ap-city').focus(); return; }
 
     // GST or Aadhaar — at least one is mandatory.
     if (!gst && !aadhaar){
