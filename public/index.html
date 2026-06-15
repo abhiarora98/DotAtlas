@@ -21454,8 +21454,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
           <select class="pi-select" id="ap-poc"></select>
         </div>
         <div class="pi-field">
-          <label for="ap-state">State <span class="ap-req">*</span> <span class="ap-auto">auto from GST</span></label>
-          <select class="pi-select" id="ap-state"></select>
+          <label for="ap-phone">Phone <span class="ap-req">*</span></label>
+          <input class="pi-input mono" id="ap-phone" placeholder="10-digit mobile" autocomplete="off" inputmode="tel" maxlength="15">
         </div>
       </div>
 
@@ -21480,8 +21480,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 
       <div class="ap-row-2">
         <div class="pi-field">
-          <label for="ap-phone">Phone <span class="ap-req">*</span></label>
-          <input class="pi-input mono" id="ap-phone" placeholder="10-digit mobile" autocomplete="off" inputmode="tel" maxlength="15">
+          <label for="ap-state">State <span class="ap-req">*</span> <span class="ap-auto">auto from GST</span></label>
+          <select class="pi-select" id="ap-state"></select>
         </div>
         <div class="pi-field">
           <label for="ap-city">City <span class="ap-req">*</span></label>
@@ -21831,7 +21831,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     $('ap-state').addEventListener('change', computeCode);
 
     // Enter inside the modal advances to next; on the last field, submits.
-    const order = ['ap-name','ap-poc','ap-state','ap-gst','ap-aadhaar','ap-phone','ap-city'];
+    const order = ['ap-name','ap-poc','ap-phone','ap-gst','ap-aadhaar','ap-state','ap-city'];
     document.querySelector('.ap-modal').addEventListener('keydown', (e) => {
       if (e.key === 'Escape'){ e.preventDefault(); closeModal(); return; }
       if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey){
