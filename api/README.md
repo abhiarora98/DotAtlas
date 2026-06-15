@@ -94,11 +94,18 @@ in ~300ms.
   system-generated, unique and read-only — `[Name initials]-[State
   code][POC initials][3-digit running number]` (e.g. `AF-HRVS001` for
   "Abhitex Furnishings") — and returned as `code` in the response.
-  Parties columns: `CreatedAt · Party Name · Party Code · Sales POC ·
-  GSTIN · Aadhaar · State · Phone · City · Type · Status`.
+  Also accepts `email`, `billingAddress`, `shippingAddress`,
+  `creditLimit`. Parties columns: `CreatedAt · Party Name · Party Code ·
+  Sales POC · GSTIN · Aadhaar · State · Phone · City · Type · Status ·
+  Email · Billing Address · Shipping Address · Credit Limit · UpdatedAt`.
 - **`POST /api/pi`** with body `{ kind: 'listParties' }` → returns
   `{ ok, count, parties: [...] }`, every row of the `Parties` tab as
   objects. Powers the live All Parties list + search/filters in the UI.
+- **`POST /api/pi`** with body `{ kind: 'updateParty', party }` → finds
+  the row by `party.code` and updates the editable fields in place,
+  preserving `CreatedAt` and the (read-only) code and stamping
+  `UpdatedAt`. Returns `{ ok, code, record }`. Powers the Party Details
+  drawer's Edit action.
 
 ## Why this is faster than Apps Script
 

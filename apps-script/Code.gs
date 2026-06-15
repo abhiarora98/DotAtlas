@@ -28,6 +28,7 @@ function doPost(e) {
     const kind = payload.kind || 'pi';
     if (kind === 'pi')          return handlePi(payload);
     if (kind === 'party')       return handleParty(payload);
+    if (kind === 'updateParty') return handleUpdateParty(payload);
     if (kind === 'listParties') return handleListParties();
     return jsonResponse({ ok: false, error: 'Unknown kind: ' + kind });
   } catch (err) {
@@ -125,9 +126,10 @@ function handleParty(payload) {
     sheet.appendRow([
       'CreatedAt', 'Party Name', 'Party Code', 'Sales POC',
       'GSTIN', 'Aadhaar', 'State', 'Phone', 'City', 'Type', 'Status',
+      'Email', 'Billing Address', 'Shipping Address', 'Credit Limit', 'UpdatedAt',
     ]);
     sheet.setFrozenRows(1);
-    sheet.getRange('A1:K1').setFontWeight('bold');
+    sheet.getRange('A1:P1').setFontWeight('bold');
   }
 
   const p = payload.party || {};
@@ -140,6 +142,11 @@ function handleParty(payload) {
   const phone = normalizePhone_(p.phone);
   const type   = normPartyType_(p.type);
   const status = normPartyStatus_(p.status);
+  const email = String(p.email || '').trim();
+  const billing = String(p.billingAddress || '').trim();
+  const shipping = String(p.shippingAddress || '').trim();
+  const creditLimit = (p.creditLimit != null && String(p.creditLimit).trim() !== '')
+    ? String(Number(String(p.creditLimit).replace(/[^0-9.]/g, '')) || 0) : '';
 
   if (!name) return jsonResponse({ ok: false, error: 'Party name is required.' });
   if (!poc)  return jsonResponse({ ok: false, error: 'Sales POC is required to generate the party code.' });
@@ -168,24 +175,78 @@ function handleParty(payload) {
   const prefix = partyCodePrefix_(name, state, poc);
   const code = nextPartyCode_(prefix, existingCodes);
 
+  var now = new Date();
   sheet.appendRow([
-    new Date(),
-    name,
-    code,
-    poc,
-    gst,
-    aadhaar,
-    state,
-    phone,
-    city,
-    type,
-    status,
+    now, name, code, poc, gst, aadhaar, state, phone, city, type, status,
+    email, billing, shipping, creditLimit, now,
   ]);
 
   return jsonResponse({
     ok: true, party: name, code: code,
-    record: { name: name, code: code, poc: poc, gst: gst, aadhaar: aadhaar,
-              state: state, phone: phone, city: city, type: type, status: status },
+    record: { createdAt: now, name: name, code: code, poc: poc, gst: gst,
+              aadhaar: aadhaar, state: state, phone: phone, city: city,
+              type: type, status: status, email: email, billingAddress: billing,
+              shippingAddress: shipping, creditLimit: creditLimit, updatedAt: now },
+  });
+}
+
+function handleUpdateParty(payload) {
+  const p = payload.party || {};
+  const code = String(p.code || '').trim();
+  if (!code) return jsonResponse({ ok: false, error: 'Party code is required to update.' });
+  const name = String(p.name || '').trim();
+  if (!name) return jsonResponse({ ok: false, error: 'Party name is required.' });
+  const phone = p.phone != null ? normalizePhone_(p.phone) : '';
+  if (p.phone != null && p.phone !== '' && !isValidPhone_(phone)) {
+    return jsonResponse({ ok: false, error: 'Phone must be a valid 10-digit Indian mobile number.' });
+  }
+
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(PARTIES_SHEET_NAME);
+  if (!sheet) return jsonResponse({ ok: false, error: 'Parties sheet not found.' });
+  const last = sheet.getLastRow();
+  if (last < 2) return jsonResponse({ ok: false, error: 'No party found with code ' + code });
+
+  const codes = sheet.getRange(2, 3, last - 1, 1).getValues();
+  var rowNum = -1;
+  for (var i = 0; i < codes.length; i++) {
+    if (String(codes[i][0] || '').trim().toUpperCase() === code.toUpperCase()) { rowNum = i + 2; break; }
+  }
+  if (rowNum < 2) return jsonResponse({ ok: false, error: 'No party found with code ' + code });
+
+  const r = sheet.getRange(rowNum, 1, 1, 16).getValues()[0];
+  function keep(v, old) { return v != null ? v : (old || ''); }
+  const createdAt = r[0] || '';
+  const rec = {
+    name: name,
+    poc: keep(p.poc, r[3]),
+    gst: p.gst != null ? String(p.gst).trim().toUpperCase() : (r[4] || ''),
+    aadhaar: p.aadhaar != null ? String(p.aadhaar).replace(/\D/g, '') : (r[5] || ''),
+    state: keep(p.state, r[6]),
+    phone: p.phone != null ? phone : (r[7] || ''),
+    city: keep(p.city, r[8]),
+    type: p.type != null ? normPartyType_(p.type) : (r[9] || 'Customer'),
+    status: p.status != null ? normPartyStatus_(p.status) : (r[10] || 'Active'),
+    email: keep(p.email, r[11]),
+    billing: keep(p.billingAddress, r[12]),
+    shipping: keep(p.shippingAddress, r[13]),
+    creditLimit: p.creditLimit != null
+      ? (String(p.creditLimit).trim() === '' ? '' : String(Number(String(p.creditLimit).replace(/[^0-9.]/g, '')) || 0))
+      : (r[14] || ''),
+  };
+  const updatedAt = new Date();
+  sheet.getRange(rowNum, 1, 1, 16).setValues([[
+    createdAt, rec.name, code, rec.poc, rec.gst, rec.aadhaar, rec.state,
+    rec.phone, rec.city, rec.type, rec.status, rec.email, rec.billing,
+    rec.shipping, rec.creditLimit, updatedAt,
+  ]]);
+
+  return jsonResponse({
+    ok: true, code: code,
+    record: { createdAt: createdAt, name: rec.name, code: code, poc: rec.poc,
+              gst: rec.gst, aadhaar: rec.aadhaar, state: rec.state, phone: rec.phone,
+              city: rec.city, type: rec.type, status: rec.status, email: rec.email,
+              billingAddress: rec.billing, shippingAddress: rec.shipping,
+              creditLimit: rec.creditLimit, updatedAt: updatedAt },
   });
 }
 
@@ -194,7 +255,7 @@ function handleListParties() {
   if (!sheet) return jsonResponse({ ok: true, count: 0, parties: [] });
   const last = sheet.getLastRow();
   if (last < 2) return jsonResponse({ ok: true, count: 0, parties: [] });
-  const rows = sheet.getRange(2, 1, last - 1, 11).getValues();
+  const rows = sheet.getRange(2, 1, last - 1, 16).getValues();
   const parties = [];
   for (var i = 0; i < rows.length; i++) {
     var r = rows[i];
@@ -203,6 +264,8 @@ function handleListParties() {
       createdAt: r[0] || '', name: r[1] || '', code: r[2] || '', poc: r[3] || '',
       gst: r[4] || '', aadhaar: r[5] || '', state: r[6] || '', phone: r[7] || '',
       city: r[8] || '', type: r[9] || 'Customer', status: r[10] || 'Active',
+      email: r[11] || '', billingAddress: r[12] || '', shippingAddress: r[13] || '',
+      creditLimit: r[14] || '', updatedAt: r[15] || '',
     });
   }
   return jsonResponse({ ok: true, count: parties.length, parties: parties });

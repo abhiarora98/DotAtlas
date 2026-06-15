@@ -31,12 +31,14 @@ const PI_HEADERS = [
 ];
 
 // Parties tab columns. Aadhaar sits right after GSTIN (column F); Type
-// (Customer/Supplier/Both) and Status (Active/Inactive) trail at the end.
+// (Customer/Supplier/Both) and Status (Active/Inactive) trail at the end,
+// followed by Email, addresses, Credit Limit and the last-updated stamp.
 const PARTIES_HEADERS = [
   'CreatedAt', 'Party Name', 'Party Code', 'Sales POC',
   'GSTIN', 'Aadhaar', 'State', 'Phone', 'City', 'Type', 'Status',
+  'Email', 'Billing Address', 'Shipping Address', 'Credit Limit', 'UpdatedAt',
 ];
-const PARTIES_RANGE = PARTIES_SHEET + '!A:K';
+const PARTIES_RANGE = PARTIES_SHEET + '!A:P';
 
 function normPartyType(t) {
   const v = String(t || '').trim().toLowerCase();
@@ -163,6 +165,7 @@ module.exports = async (req, res) => {
 
     if (kind === 'pi')           return await handlePi(sheets, spreadsheetId, payload, res);
     if (kind === 'party')        return await handleParty(sheets, spreadsheetId, payload, res);
+    if (kind === 'updateParty')  return await handleUpdateParty(sheets, spreadsheetId, payload, res);
     if (kind === 'list')         return await handleList(sheets, spreadsheetId, payload, res);
     if (kind === 'listParties')  return await handleListParties(sheets, spreadsheetId, payload, res);
     if (kind === 'updateStatus') return await handleUpdateStatus(sheets, spreadsheetId, payload, res);
@@ -391,6 +394,11 @@ async function handleParty(sheets, spreadsheetId, payload, res) {
   const phone = normalizePhone(p.phone);
   const type   = normPartyType(p.type);
   const status = normPartyStatus(p.status);
+  const email = String(p.email || '').trim();
+  const billing = String(p.billingAddress || '').trim();
+  const shipping = String(p.shippingAddress || '').trim();
+  const creditLimit = p.creditLimit != null && String(p.creditLimit).trim() !== ''
+    ? String(Number(String(p.creditLimit).replace(/[^0-9.]/g, '')) || 0) : '';
 
   if (!name)  return res.status(400).json({ ok: false, error: 'Party name is required' });
   if (!poc)   return res.status(400).json({ ok: false, error: 'Sales POC is required to generate the party code' });
@@ -427,7 +435,7 @@ async function handleParty(sheets, spreadsheetId, payload, res) {
     });
     await sheets.spreadsheets.values.update({
       spreadsheetId,
-      range: PARTIES_SHEET + '!A1:K1',
+      range: PARTIES_SHEET + '!A1:P1',
       valueInputOption: 'USER_ENTERED',
       requestBody: { values: [PARTIES_HEADERS] },
     });
@@ -455,6 +463,7 @@ async function handleParty(sheets, spreadsheetId, payload, res) {
   const prefix = partyCodePrefix(name, state, poc);
   const code = nextPartyCode(prefix, existingCodes);
 
+  const now = new Date().toISOString();
   await sheets.spreadsheets.values.append({
     spreadsheetId,
     range: PARTIES_RANGE,
@@ -462,18 +471,91 @@ async function handleParty(sheets, spreadsheetId, payload, res) {
     insertDataOption: 'INSERT_ROWS',
     requestBody: {
       values: [[
-        new Date().toISOString(),
+        now,
         name, code, poc,
         gst, aadhaar, state,
         phone, city, type, status,
+        email, billing, shipping, creditLimit, now,
       ]],
     },
   });
 
   return res.status(200).json({
     ok: true, party: name, code,
-    record: { createdAt: new Date().toISOString(), name, code, poc, gst,
-              aadhaar, state, phone, city, type, status },
+    record: { createdAt: now, name, code, poc, gst, aadhaar, state, phone,
+              city, type, status, email, billingAddress: billing,
+              shippingAddress: shipping, creditLimit, updatedAt: now },
+  });
+}
+
+async function handleUpdateParty(sheets, spreadsheetId, payload, res) {
+  const p = payload.party || {};
+  const code = String(p.code || '').trim();
+  if (!code) return res.status(400).json({ ok: false, error: 'Party code is required to update' });
+
+  const name = String(p.name || '').trim();
+  if (!name) return res.status(400).json({ ok: false, error: 'Party name is required' });
+  const phone = p.phone != null ? normalizePhone(p.phone) : '';
+  if (p.phone != null && p.phone !== '' && !isValidPhone(phone)) {
+    return res.status(400).json({ ok: false, error: 'Phone must be a valid 10-digit Indian mobile number' });
+  }
+
+  // Locate the row by Party Code (column C).
+  const colC = await sheets.spreadsheets.values.get({ spreadsheetId, range: PARTIES_SHEET + '!C:C' });
+  const vals = colC.data.values || [];
+  let rowNum = -1;
+  for (let i = 0; i < vals.length; i++) {
+    if (String(vals[i][0] || '').trim().toUpperCase() === code.toUpperCase()) { rowNum = i + 1; break; }
+  }
+  if (rowNum < 1) return res.status(404).json({ ok: false, error: 'No party found with code ' + code });
+
+  // Read the current row so unspecified fields (and CreatedAt) are preserved.
+  const cur = await sheets.spreadsheets.values.get({
+    spreadsheetId, range: PARTIES_SHEET + '!A' + rowNum + ':P' + rowNum });
+  const r = (cur.data.values && cur.data.values[0]) || [];
+  const keep = (v, old) => (v != null ? v : (old || ''));
+
+  const createdAt = r[0] || '';
+  const rec = {
+    name,
+    poc: keep(p.poc, r[3]),
+    gst: p.gst != null ? String(p.gst).trim().toUpperCase() : (r[4] || ''),
+    aadhaar: p.aadhaar != null ? String(p.aadhaar).replace(/\D/g, '') : (r[5] || ''),
+    state: keep(p.state, r[6]),
+    phone: p.phone != null ? phone : (r[7] || ''),
+    city: keep(p.city, r[8]),
+    type: p.type != null ? normPartyType(p.type) : (r[9] || 'Customer'),
+    status: p.status != null ? normPartyStatus(p.status) : (r[10] || 'Active'),
+    email: keep(p.email, r[11]),
+    billing: keep(p.billingAddress, r[12]),
+    shipping: keep(p.shippingAddress, r[13]),
+    creditLimit: p.creditLimit != null
+      ? (String(p.creditLimit).trim() === '' ? '' : String(Number(String(p.creditLimit).replace(/[^0-9.]/g, '')) || 0))
+      : (r[14] || ''),
+  };
+  const updatedAt = new Date().toISOString();
+
+  await sheets.spreadsheets.values.update({
+    spreadsheetId,
+    range: PARTIES_SHEET + '!A' + rowNum + ':P' + rowNum,
+    valueInputOption: 'USER_ENTERED',
+    requestBody: {
+      values: [[
+        createdAt, rec.name, code, rec.poc, rec.gst, rec.aadhaar, rec.state,
+        rec.phone, rec.city, rec.type, rec.status, rec.email, rec.billing,
+        rec.shipping, rec.creditLimit, updatedAt,
+      ]],
+    },
+  });
+
+  return res.status(200).json({
+    ok: true, code,
+    record: { createdAt, name: rec.name, code, poc: rec.poc, gst: rec.gst,
+              aadhaar: rec.aadhaar, state: rec.state, phone: rec.phone,
+              city: rec.city, type: rec.type, status: rec.status,
+              email: rec.email, billingAddress: rec.billing,
+              shippingAddress: rec.shipping, creditLimit: rec.creditLimit,
+              updatedAt },
   });
 }
 
@@ -498,6 +580,8 @@ async function handleListParties(sheets, spreadsheetId, _payload, res) {
       createdAt: r[0] || '', name: r[1] || '', code: r[2] || '', poc: r[3] || '',
       gst: r[4] || '', aadhaar: r[5] || '', state: r[6] || '', phone: r[7] || '',
       city: r[8] || '', type: r[9] || 'Customer', status: r[10] || 'Active',
+      email: r[11] || '', billingAddress: r[12] || '', shippingAddress: r[13] || '',
+      creditLimit: r[14] || '', updatedAt: r[15] || '',
     });
   }
   return res.status(200).json({ ok: true, count: parties.length, parties });

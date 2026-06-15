@@ -21514,6 +21514,28 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         </div>
       </div>
 
+      <div class="ap-row-2">
+        <div class="pi-field">
+          <label for="ap-email">Email</label>
+          <input class="pi-input no-upper" id="ap-email" type="email" placeholder="optional" autocomplete="off">
+        </div>
+        <div class="pi-field">
+          <label for="ap-credit">Credit Limit (₹)</label>
+          <input class="pi-input mono no-upper" id="ap-credit" inputmode="numeric" placeholder="optional" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="ap-row-2">
+        <div class="pi-field">
+          <label for="ap-billing">Billing Address</label>
+          <input class="pi-input" id="ap-billing" placeholder="optional" autocomplete="off">
+        </div>
+        <div class="pi-field">
+          <label for="ap-shipping">Shipping Address</label>
+          <input class="pi-input" id="ap-shipping" placeholder="optional" autocomplete="off">
+        </div>
+      </div>
+
       <div class="ap-status" id="ap-status"></div>
 
       <div class="ap-actions">
@@ -21701,7 +21723,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     populatePoc();
     populateStates();
     setStatus('', '');
-    ['ap-name','ap-code','ap-poc','ap-gst','ap-aadhaar','ap-state','ap-phone','ap-city'].forEach(id => {
+    ['ap-name','ap-code','ap-poc','ap-gst','ap-aadhaar','ap-state','ap-phone','ap-city',
+     'ap-email','ap-credit','ap-billing','ap-shipping'].forEach(id => {
       const e = $(id); if (e) e.value = '';
     });
     $('ap-gst-hint').textContent = 'Two-letter state prefix auto-selects the State.';
@@ -21784,7 +21807,14 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 
     const type   = $('ap-type').value || 'Customer';
     const status = $('ap-status-field').value || 'Active';
-    const entry = { name, code, poc, gst, aadhaar, state, phone, city, type, status, createdAt: new Date().toISOString() };
+    const email  = $('ap-email').value.trim();
+    const creditLimit = $('ap-credit').value.replace(/[^0-9.]/g, '');
+    const billingAddress  = $('ap-billing').value.trim().toUpperCase();
+    const shippingAddress = $('ap-shipping').value.trim().toUpperCase();
+    const nowIso = new Date().toISOString();
+    const entry = { name, code, poc, gst, aadhaar, state, phone, city, type, status,
+      email, creditLimit, billingAddress, shippingAddress,
+      createdAt: nowIso, updatedAt: nowIso };
 
     // Always save locally first as fallback.
     const list = loadCustom();
@@ -21921,12 +21951,53 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 })();
 </script>
 
+<!-- Party Details drawer -->
+<div class="pd-overlay" id="pd-overlay" hidden>
+  <div class="pd-drawer" role="dialog" aria-modal="true" aria-labelledby="pd-name">
+    <div class="pd-head">
+      <div class="pd-head-main">
+        <div class="eb" style="margin-bottom:6px;"><span class="live-dot"></span>Party · profile</div>
+        <h2 id="pd-name">—</h2>
+        <div class="pd-code" id="pd-code">—</div>
+      </div>
+      <div class="pd-head-acts">
+        <button class="pi-btn" id="pd-edit">Edit</button>
+        <button class="ap-close" id="pd-close" aria-label="Close">×</button>
+      </div>
+    </div>
+    <div class="pd-body">
+      <div class="pd-stats" id="pd-stats"></div>
+      <div class="pd-section-t">Details</div>
+      <div class="pd-details" id="pd-details"></div>
+      <div class="pd-edit" id="pd-edit-form" hidden></div>
+      <div class="ap-status" id="pd-status" style="margin-top:12px;"></div>
+      <div class="pd-edit-acts" id="pd-edit-acts" hidden>
+        <button class="pi-btn" id="pd-cancel">Cancel</button>
+        <button class="pi-btn prime" id="pd-save">Save changes →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ===== Parties module: live list, search, filters, computed watchlist ===== */
 (function(){
   const V = window.PI_VOCAB || { parties: [], pocs: [] };
   const $ = (id) => document.getElementById(id);
   const HOLDS_KEY = 'atlas-party-holds';
+  const STATES = ['Andaman & Nicobar','Andhra Pradesh','Arunachal Pradesh','Assam','Bihar',
+    'Chandigarh','Chhattisgarh','Dadra & Nagar Haveli','Daman & Diu','Delhi','Goa','Gujarat',
+    'Haryana','Himachal Pradesh','Jammu & Kashmir','Jharkhand','Karnataka','Kerala','Ladakh',
+    'Lakshadweep','Madhya Pradesh','Maharashtra','Manipur','Meghalaya','Mizoram','Nagaland',
+    'Odisha','Puducherry','Punjab','Rajasthan','Sikkim','Tamil Nadu','Telangana','Tripura',
+    'Uttar Pradesh','Uttarakhand','West Bengal'];
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function fmtDate(d){
+    if (!d) return '—';
+    const dt = (d instanceof Date) ? d : new Date(d);
+    if (isNaN(dt)) return '—';
+    return dt.getDate() + ' ' + MONTHS[dt.getMonth()] + ' ' + dt.getFullYear();
+  }
 
   // ---------- small helpers ----------
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -21979,8 +22050,21 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       name: r.name || '', code: r.code || '', poc: r.poc || '', gst: r.gst || '',
       aadhaar: r.aadhaar || '', state: r.state || '', phone: r.phone || '',
       city: r.city || '', type: r.type || 'Customer', status: r.status || 'Active',
+      email: r.email || '', billingAddress: r.billingAddress || '',
+      shippingAddress: r.shippingAddress || '', creditLimit: r.creditLimit || '',
+      createdAt: r.createdAt || '', updatedAt: r.updatedAt || '',
     }));
-    store.sort((a, b) => a.name.localeCompare(b.name));
+    sortStore();
+  }
+
+  // Newest-created first; legacy rows with no createdAt fall back to alpha.
+  function sortStore(){
+    store.sort((a, b) => {
+      const ta = a.createdAt ? Date.parse(a.createdAt) || 0 : 0;
+      const tb = b.createdAt ? Date.parse(b.createdAt) || 0 : 0;
+      if (tb !== ta) return tb - ta;
+      return a.name.localeCompare(b.name);
+    });
   }
 
   async function fetchSheetParties(){
@@ -22024,13 +22108,14 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     for (const pi of pis){
       const key = normName(pi.party);
       if (!key) continue;
-      const e = piByParty.get(key) || { count: 0, pending: 0, refs: [] };
+      const e = piByParty.get(key) || { count: 0, pending: 0, value: 0, refs: [], lastDate: null };
       e.count++;
+      e.value += Number(pi.totalIncGst) || 0;
       const st = String(pi.status || '').toLowerCase();
       if (st !== 'dispatched' && st !== 'cancelled') { e.pending++; if (pi.ref) e.refs.push(pi.ref); }
-      piByParty.set(key, e);
       const d = pi.date ? new Date(pi.date) : null;
-      if (d && !isNaN(d) && d.getTime() > maxD) maxD = d.getTime();
+      if (d && !isNaN(d)){ if (!e.lastDate || d > e.lastDate) e.lastDate = d; if (d.getTime() > maxD) maxD = d.getTime(); }
+      piByParty.set(key, e);
     }
     return maxD;
   }
@@ -22079,25 +22164,44 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     });
   }
 
-  function rowHtml(p){
+  // Colour-coded account health for a row: green healthy, yellow needs
+  // attention, red outstanding/watchlist; plus new + high-value flags.
+  function partyHealth(p){
+    const isNew = p.createdAt && (Date.now() - (Date.parse(p.createdAt) || 0)) < 5 * 864e5;
     const rec = receivables && receivables.parties && receivables.parties[slug(p.name)];
-    const out = rec && rec.outstanding ? rec.outstanding : 0;
+    const out = rec ? Number(rec.outstanding) || 0 : 0;
+    const billed = rec ? Number(rec.billed) || 0 : 0;
+    const pi = piByParty.get(normName(p.name));
+    const isHighValue = billed > 10000000 || out > 500000 || (pi && pi.value > 5000000);
+    let level = 'green';
+    if (out > 50000 || (pi && pi.pending > 0 && out > 0)) level = 'red';
+    else if ((p.status || 'Active') === 'Inactive' || out > 0) level = 'yellow';
+    return { level, isNew, isHighValue, out };
+  }
+
+  function rowHtml(p){
+    const h = partyHealth(p);
     const meta = [p.poc, p.state, p.city].filter(Boolean).join(' · ');
-    const tags = [];
-    if ((p.type || 'Customer') === 'Supplier') tags.push('<span class="pl-pill sup">SUPPLIER</span>');
-    else if (p.type === 'Both') tags.push('<span class="pl-pill sup">BOTH</span>');
-    if ((p.status || 'Active') === 'Inactive') tags.push('<span class="pl-pill muted">INACTIVE</span>');
-    return '<div class="pl-row" role="listitem">' +
+    const chips = [];
+    if (h.isNew) chips.push('<span class="pl-pill new">NEW</span>');
+    if ((p.type || 'Customer') === 'Supplier') chips.push('<span class="pl-pill sup">SUPPLIER</span>');
+    else if (p.type === 'Both') chips.push('<span class="pl-pill sup">BOTH</span>');
+    if (h.isHighValue) chips.push('<span class="pl-pill hv">HIGH-VALUE</span>');
+    if ((p.status || 'Active') === 'Inactive') chips.push('<span class="pl-pill muted">INACTIVE</span>');
+    return '<div class="pl-row h-' + h.level + '" role="listitem" data-name="' + esc(normName(p.name)) + '">' +
+      '<span class="pl-dot ' + h.level + '"></span>' +
       '<div class="pl-main">' +
-        '<div class="pl-name">' + esc(p.name) + ' ' + tags.join(' ') + '</div>' +
+        '<div class="pl-name-row"><span class="pl-name">' + esc(p.name) + '</span>' + chips.join(' ') + '</div>' +
         '<div class="pl-meta">' + (esc(meta) || '—') + (p.phone ? ' · ' + esc(p.phone) : '') + '</div>' +
       '</div>' +
       '<div class="pl-side">' +
         '<div class="pl-code">' + (esc(p.code) || '—') + '</div>' +
-        (out ? '<div class="pl-out">' + inr(out) + '<small>outstanding</small></div>' : '') +
+        (h.out ? '<div class="pl-out">' + inr(h.out) + '<small>outstanding</small></div>' : '') +
       '</div>' +
     '</div>';
   }
+
+  function findParty(nm){ return store.find(p => normName(p.name) === nm); }
 
   function renderList(){
     const list = $('pl-list'), empty = $('pl-empty'), count = $('pl-count');
@@ -22231,8 +22335,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const it = _wlItems[i]; if (!it) return;
     const ph = (it.party && it.party.phone || '').replace(/\D/g, '');
     if (act === 'party'){
-      $('pl-search').value = it.name; renderList();
-      $('pl-search').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const p = findParty(normName(it.name)) || it.party;
+      if (p && p.name) openDrawer(p);
     } else if (act === 'pi'){
       const nav = document.querySelector('.nav-item[data-page="pi-history"]');
       if (nav) nav.click();
@@ -22248,6 +22352,178 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       toast(it.name + ' placed on hold — removed from watchlist.');
       renderWatchlist();
     }
+  }
+
+  // ---------- Party details drawer ----------
+  let drawerParty = null;
+
+  function partyStats(p){
+    const rec = receivables && receivables.parties && receivables.parties[slug(p.name)];
+    const pi = piByParty.get(normName(p.name));
+    let lastOrder = pi && pi.lastDate ? pi.lastDate : null, lastPay = null;
+    if (rec){
+      for (const tx of (rec.fy25 || [])){
+        const d = parseRecDate(tx.d); if (!d) continue;
+        if (tx.t === 'Sales' && (!lastOrder || d > lastOrder)) lastOrder = d;
+        if (tx.t === 'Receipt' && (!lastPay || d > lastPay)) lastPay = d;
+      }
+    }
+    return {
+      totalPis: pi ? pi.count : 0,
+      businessValue: rec && rec.billed ? Number(rec.billed) : (pi ? pi.value : 0),
+      outstanding: rec ? Number(rec.outstanding) || 0 : 0,
+      lastOrder, lastPay,
+      watch: _wlItems.find(it => normName(it.name) === normName(p.name)) || null,
+    };
+  }
+
+  function renderStats(p){
+    const s = partyStats(p);
+    const wlTxt = s.watch ? (s.watch.sev >= 3 ? 'Critical' : s.watch.sev === 2 ? 'Watch' : 'Monitor') : 'Clear';
+    const wlCls = s.watch ? (s.watch.sev >= 3 ? 'rose' : 'amber') : 'emerald';
+    const cells = [
+      ['Total PIs', s.totalPis || '0', ''],
+      ['Business value', inr(s.businessValue), 'sm'],
+      ['Outstanding', inr(s.outstanding), 'sm ' + (s.outstanding > 0 ? 'amber' : 'emerald')],
+      ['Last order', fmtDate(s.lastOrder), 'sm'],
+      ['Last payment', fmtDate(s.lastPay), 'sm'],
+      ['Watchlist', wlTxt, 'sm ' + wlCls],
+      ['Sales POC', esc(p.poc) || '—', 'sm'],
+    ];
+    return cells.map(c => '<div class="pd-stat"><div class="k">' + c[0] + '</div><div class="v ' + (c[2] || '') + '">' + c[1] + '</div></div>').join('');
+  }
+
+  function kv(k, v, mono){ return '<div class="pd-kv"><span class="k">' + k + '</span><span class="v ' + (mono ? 'mono' : '') + '">' + (v ? esc(v) : '—') + '</span></div>'; }
+
+  function renderDetails(p){
+    const s = partyStats(p);
+    return [
+      kv('Party Name', p.name),
+      kv('Party Code', p.code, true),
+      kv('GST Number', p.gst, true),
+      kv('Aadhaar Number', p.aadhaar, true),
+      kv('Phone', p.phone ? '+91 ' + p.phone : '', true),
+      kv('Email', p.email),
+      kv('Billing Address', p.billingAddress),
+      kv('Shipping Address', p.shippingAddress),
+      kv('City', p.city),
+      kv('State', p.state),
+      kv('Sales POC', p.poc),
+      kv('Type', p.type || 'Customer'),
+      kv('Status', p.status || 'Active'),
+      kv('Credit Limit', p.creditLimit ? inr(p.creditLimit) : ''),
+      kv('Outstanding', s.outstanding ? inr(s.outstanding) : '₹0'),
+      kv('Date Created', fmtDate(p.createdAt)),
+      kv('Last Updated', fmtDate(p.updatedAt)),
+    ].join('');
+  }
+
+  function sel(id, val, opts){
+    const list = (val && opts.indexOf(val) === -1) ? [val, ...opts] : opts;
+    return '<select class="pi-select" id="' + id + '">' +
+      list.map(o => '<option' + (o === val ? ' selected' : '') + '>' + esc(o) + '</option>').join('') + '</select>';
+  }
+  function fld(label, inner){ return '<div class="pi-field"><label>' + label + '</label>' + inner + '</div>'; }
+  function inp(id, val, attrs){ return '<input class="pi-input ' + (attrs && attrs.cls || '') + '" id="' + id + '" value="' + esc(val || '') + '" ' + (attrs && attrs.extra || '') + '>'; }
+
+  function renderEditForm(p){
+    return '' +
+      fld('Party Name', inp('pde-name', p.name)) +
+      '<div class="ap-row-2">' + fld('Sales POC', sel('pde-poc', p.poc, ['—', ...(V.pocs || [])])) +
+        fld('Type', sel('pde-type', p.type || 'Customer', ['Customer', 'Supplier', 'Both'])) + '</div>' +
+      '<div class="ap-row-2">' + fld('Status', sel('pde-status', p.status || 'Active', ['Active', 'Inactive'])) +
+        fld('Phone', inp('pde-phone', p.phone, { cls: 'mono no-upper', extra: 'inputmode="tel" maxlength="12"' })) + '</div>' +
+      '<div class="ap-row-2">' + fld('GST Number', inp('pde-gst', p.gst, { cls: 'mono' })) +
+        fld('Aadhaar Number', inp('pde-aadhaar', p.aadhaar, { cls: 'mono no-upper', extra: 'inputmode="numeric" maxlength="12"' })) + '</div>' +
+      '<div class="ap-row-2">' + fld('State', sel('pde-state', p.state, ['—', ...STATES])) +
+        fld('City', inp('pde-city', p.city)) + '</div>' +
+      '<div class="ap-row-2">' + fld('Email', inp('pde-email', p.email, { cls: 'no-upper', extra: 'type="email"' })) +
+        fld('Credit Limit (₹)', inp('pde-credit', p.creditLimit, { cls: 'mono no-upper', extra: 'inputmode="numeric"' })) + '</div>' +
+      fld('Billing Address', inp('pde-billing', p.billingAddress)) +
+      fld('Shipping Address', inp('pde-shipping', p.shippingAddress));
+  }
+
+  function openDrawer(p){
+    if (!p) return;
+    drawerParty = p;
+    setEditMode(false);
+    $('pd-name').textContent = p.name;
+    $('pd-code').textContent = p.code || '—';
+    $('pd-stats').innerHTML = renderStats(p);
+    $('pd-details').innerHTML = renderDetails(p);
+    $('pd-status').className = 'ap-status'; $('pd-status').textContent = '';
+    $('pd-overlay').hidden = false;
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDrawer(){ $('pd-overlay').hidden = true; document.body.style.overflow = ''; drawerParty = null; }
+
+  function setEditMode(on){
+    $('pd-details').hidden = on;
+    $('pd-edit-form').hidden = !on;
+    $('pd-edit-acts').hidden = !on;
+    $('pd-edit').textContent = on ? 'Viewing' : 'Edit';
+    $('pd-edit').disabled = on;
+    if (on && drawerParty) $('pd-edit-form').innerHTML = renderEditForm(drawerParty);
+  }
+
+  function pdStatus(kind, msg){ const s = $('pd-status'); s.className = 'ap-status' + (kind ? ' ' + kind : ''); s.textContent = msg || ''; }
+
+  async function saveEdit(){
+    if (!drawerParty) return;
+    const g = (id) => { const e = $(id); return e ? e.value.trim() : ''; };
+    const name = g('pde-name').toUpperCase();
+    const phoneRaw = g('pde-phone');
+    const phone = phoneRaw.replace(/\D/g, '');
+    if (!name){ pdStatus('err', 'Party name is required.'); return; }
+    if (phoneRaw && !/^[6-9]\d{9}$/.test(phone)){ pdStatus('err', 'Phone must be a valid 10-digit mobile.'); return; }
+
+    const upd = {
+      code: drawerParty.code, name,
+      poc: g('pde-poc') === '—' ? '' : g('pde-poc'),
+      type: g('pde-type'), status: g('pde-status'),
+      gst: g('pde-gst').toUpperCase(), aadhaar: g('pde-aadhaar').replace(/\D/g, ''),
+      state: g('pde-state') === '—' ? '' : g('pde-state'), city: g('pde-city').toUpperCase(),
+      email: g('pde-email'), creditLimit: g('pde-credit').replace(/[^0-9.]/g, ''),
+      billingAddress: g('pde-billing').toUpperCase(), shippingAddress: g('pde-shipping').toUpperCase(),
+    };
+
+    // Apply optimistically to local state so the UI is instant + consistent.
+    function applyRecord(rec){
+      const idx = store.findIndex(p => normName(p.code ? p.code : '') === normName(rec.code) || normName(p.name) === normName(drawerParty.name));
+      const merged = Object.assign({}, drawerParty, rec);
+      if (idx >= 0) store[idx] = merged; else store.push(merged);
+      drawerParty = merged;
+      // keep local cache + Create PI vocab in sync (reflect name/code edits)
+      try {
+        const list = loadCustom().map(e => (normName(e.code) === normName(rec.code) || normName(e.name) === normName(merged.name)) ? Object.assign({}, e, merged) : e);
+        localStorage.setItem('atlas-custom-parties', JSON.stringify(list));
+      } catch(e){}
+      const vp = (V.parties || []).find(x => normName(x.code) === normName(merged.code));
+      if (vp){ vp.name = merged.name; vp.code = merged.code; }
+      sortStore(); renderFilters(); renderList(); renderWatchlist();
+      openDrawer(merged);
+    }
+
+    const local = Object.assign({}, drawerParty, upd, { phone: phoneRaw ? phone : drawerParty.phone, updatedAt: new Date().toISOString() });
+    const url = (window.ATLAS_APPS_SCRIPT_URL || localStorage.getItem('atlas-apps-script-url') || '').trim();
+    if (!url){ applyRecord(local); toast('Party updated (saved locally — backend not wired).'); return; }
+
+    pdStatus('warn', 'Saving…'); $('pd-save').disabled = true;
+    try {
+      const res = await fetch(url, { method: 'POST', mode: 'cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ kind: 'updateParty', party: upd }) });
+      const j = await res.json();
+      if (!j.ok) throw new Error(j.error || 'Update failed');
+      applyRecord(Object.assign({}, local, j.record || {}));
+      toast('Party updated successfully.');
+    } catch(err){
+      applyRecord(local);
+      pdStatus('warn', 'Saved locally, but sheet update failed: ' + err.message);
+      $('pd-save').disabled = false;
+      return;
+    }
+    $('pd-save').disabled = false;
   }
 
   // ---------- load orchestration ----------
@@ -22267,13 +22543,17 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   // Called by the Add Party modal right after a successful create.
   window.atlasOnPartyCreated = function(entry){
     const key = normName(entry.name);
+    const now = new Date().toISOString();
     const rec = { name: entry.name, code: entry.code || '', poc: entry.poc || '',
       gst: entry.gst || '', aadhaar: entry.aadhaar || '', state: entry.state || '',
       phone: entry.phone || '', city: entry.city || '', type: entry.type || 'Customer',
-      status: entry.status || 'Active' };
+      status: entry.status || 'Active', email: entry.email || '',
+      billingAddress: entry.billingAddress || '', shippingAddress: entry.shippingAddress || '',
+      creditLimit: entry.creditLimit || '', createdAt: entry.createdAt || now,
+      updatedAt: entry.updatedAt || now };
     const idx = store.findIndex(p => normName(p.name) === key);
-    if (idx >= 0) store[idx] = Object.assign(store[idx], rec); else store.push(rec);
-    store.sort((a, b) => a.name.localeCompare(b.name));
+    if (idx >= 0) store[idx] = Object.assign(store[idx], rec); else store.unshift(rec);
+    sortStore();                 // newest-created first → new party leads
     renderFilters(); renderList();
     toast('Party created successfully.');
   };
@@ -22292,6 +22572,21 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       const b = e.target.closest('button[data-act]'); if (!b) return;
       wlAction(b.getAttribute('data-act'), parseInt(b.getAttribute('data-i'), 10));
     });
+
+    // Row click → open the party details drawer.
+    $('pl-list').addEventListener('click', (e) => {
+      const row = e.target.closest('.pl-row[data-name]'); if (!row) return;
+      const p = findParty(row.getAttribute('data-name')); if (p) openDrawer(p);
+    });
+
+    // Drawer controls.
+    $('pd-close').addEventListener('click', closeDrawer);
+    $('pd-overlay').addEventListener('click', (e) => { if (e.target.id === 'pd-overlay') closeDrawer(); });
+    $('pd-edit').addEventListener('click', () => setEditMode(true));
+    $('pd-cancel').addEventListener('click', () => setEditMode(false));
+    $('pd-save').addEventListener('click', saveEdit);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('pd-overlay').hidden) closeDrawer(); });
+
     // If the Parties page is the current route, load now.
     if (location.hash.slice(1) === 'parties') loadParties(false);
   }
@@ -22319,10 +22614,21 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   .pl-list { display: flex; flex-direction: column; max-height: 540px; overflow-y: auto; }
   .pl-row {
     display: flex; align-items: center; justify-content: space-between; gap: 12px;
-    padding: 11px 4px; border-bottom: 1px solid var(--line);
+    padding: 11px 10px; border-bottom: 1px solid var(--line);
+    border-left: 3px solid transparent; border-radius: 6px;
+    cursor: pointer; transition: background 150ms var(--ease);
   }
+  .pl-row:hover { background: var(--surface-2); }
+  .pl-row.h-green  { border-left-color: rgba(78,222,163,0.55);  background: rgba(78,222,163,0.04); }
+  .pl-row.h-yellow { border-left-color: rgba(255,176,121,0.6);  background: rgba(255,176,121,0.05); }
+  .pl-row.h-red    { border-left-color: rgba(255,138,168,0.6);  background: rgba(255,138,168,0.05); }
   .pl-row:last-child { border-bottom: 0; }
-  .pl-main { min-width: 0; }
+  .pl-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .pl-dot.green { background: var(--emerald); } .pl-dot.yellow { background: var(--amber); } .pl-dot.red { background: var(--rose); }
+  .pl-name-row { display: flex; align-items: center; gap: 8px; }
+  .pl-pill.new { background: rgba(124,168,255,0.14); color: var(--blue); }
+  .pl-pill.hv  { background: rgba(183,139,255,0.14); color: #b78bff; }
+  .pl-main { min-width: 0; flex: 1; }
   .pl-name { font-size: 13px; font-weight: 500; color: var(--text); display: flex; align-items: center; gap: 8px; }
   .pl-meta { font-family: var(--fm); font-size: 10.5px; color: var(--text-3); letter-spacing: 0.03em; margin-top: 3px; text-transform: uppercase; }
   .pl-side { text-align: right; flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
@@ -22354,6 +22660,50 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   .wl-acts button:hover:not(:disabled) { color: var(--text); border-color: var(--text-3); }
   .wl-acts button.prime { background: var(--emerald-soft); color: var(--emerald); border-color: rgba(78,222,163,0.3); }
   .wl-acts button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ===== Party Details drawer ===== */
+  .pd-overlay {
+    position: fixed; inset: 0; z-index: 1100;
+    background: rgba(5,9,18,0.6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    display: flex; justify-content: flex-end; animation: ap-fade 180ms var(--ease);
+  }
+  .pd-overlay[hidden] { display: none; }
+  .pd-drawer {
+    width: 100%; max-width: 560px; height: 100%; overflow-y: auto;
+    background: var(--surface); border-left: 1px solid var(--line-2);
+    box-shadow: -16px 0 48px rgba(0,0,0,0.4); animation: pd-slide 240ms var(--ease);
+    display: flex; flex-direction: column;
+  }
+  @keyframes pd-slide { from { transform: translateX(24px); opacity: 0.6; } to { transform: translateX(0); opacity: 1; } }
+  .pd-head {
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
+    padding: 22px 24px 16px; border-bottom: 1px solid var(--line);
+    background: radial-gradient(ellipse 500px 180px at 0% 0%, rgba(78,222,163,0.06), transparent 70%);
+    position: sticky; top: 0; z-index: 2;
+  }
+  .pd-head h2 { margin: 0; font-family: var(--fd); font-size: 21px; font-weight: 600; letter-spacing: -0.02em; color: var(--text); }
+  .pd-code { font-family: var(--fm); font-size: 12px; color: var(--emerald); letter-spacing: 0.06em; margin-top: 5px; }
+  .pd-head-acts { display: flex; align-items: center; gap: 8px; flex: none; }
+  .pd-head-acts .pi-btn { padding: 6px 14px; font-size: 11px; }
+  .pd-body { padding: 18px 24px 28px; }
+  .pd-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 22px; }
+  .pd-stat { border: 1px solid var(--line); border-radius: 9px; padding: 11px 13px; background: var(--surface-2); }
+  .pd-stat .k { font-family: var(--fm); font-size: 9.5px; letter-spacing: 0.1em; color: var(--text-3); text-transform: uppercase; }
+  .pd-stat .v { font-family: var(--fd); font-size: 16px; color: var(--text); margin-top: 5px; font-variant-numeric: tabular-nums; }
+  .pd-stat .v.sm { font-size: 13px; }
+  .pd-stat .v.amber { color: var(--amber); } .pd-stat .v.rose { color: var(--rose); } .pd-stat .v.emerald { color: var(--emerald); }
+  .pd-section-t { font-family: var(--fm); font-size: 10px; letter-spacing: 0.12em; color: var(--text-3); text-transform: uppercase; margin: 6px 0 10px; }
+  .pd-details { display: flex; flex-direction: column; }
+  .pd-kv { display: flex; justify-content: space-between; gap: 16px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .pd-kv:last-child { border-bottom: 0; }
+  .pd-kv .k { color: var(--text-3); flex: none; font-size: 12px; }
+  .pd-kv .v { color: var(--text); text-align: right; word-break: break-word; }
+  .pd-kv .v.mono { font-family: var(--fm); font-size: 12px; }
+  .pd-edit { display: flex; flex-direction: column; gap: 13px; }
+  .pd-edit .ap-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+  .pd-edit-acts { display: flex; gap: 10px; margin-top: 16px; }
+  .pd-edit-acts .pi-btn { flex: 1; }
+  body[data-mode="light"] .pd-overlay { background: rgba(11,18,32,0.35); }
 
   /* Toast */
   .atlas-toast {
