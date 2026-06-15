@@ -2761,31 +2761,31 @@
         <div class="kpi"><div class="lbl"><span>New parties</span><span class="ind"></span></div><div class="v">8</div><div class="d"><span class="arr">↑</span>this month</div></div>
         <div class="kpi"><div class="lbl"><span>Watchlist</span><span class="ind a"></span></div><div class="v">5</div><div class="d dn"><span class="arr">→</span>2 slipped this week</div></div>
       </div>
-      <div class="row-2" style="grid-template-columns:1.5fr 1fr;">
+      <div class="row-2" style="grid-template-columns:1.5fr 1fr; align-items:start;">
         <div class="card">
           <div class="card-h">
-            <div class="t"><span class="ic">○</span><h3>All parties</h3><span class="sub">BY 90-DAY VOLUME · <span id="parties-custom-count">0 added</span></span></div>
-            <div style="display:flex; gap:10px; align-items:center;">
-              <div class="seg"><button class="on">ALL</button><button>CUSTOMERS</button><button>SUPPLIERS</button></div>
-              <button class="pi-btn prime" id="parties-add-btn" style="padding: 7px 14px; flex: none; font-size: 10.5px;">+ New party</button>
-            </div>
+            <div class="t"><span class="ic">○</span><h3>All parties</h3><span class="sub"><span id="pl-count">0</span> SHOWN · <span id="parties-custom-count">0 added</span></span></div>
+            <button class="pi-btn prime" id="parties-add-btn" style="padding: 7px 14px; flex: none; font-size: 10.5px;">+ New party</button>
           </div>
           <div class="card-b">
-            <div class="party-row"><div class="nm">Goyal Carpets<small>PANIPAT · 92% on-time · 41 orders</small></div><div class="bar"><div style="width:92%;"></div></div><div class="num">₹68.4L<small>+18%</small></div></div>
-            <div class="party-row"><div class="nm">Khanna Bros.<small>LUDHIANA · 88% on-time · 33 orders</small></div><div class="bar"><div style="width:78%;"></div></div><div class="num">₹52.1L<small>+8%</small></div></div>
-            <div class="party-row"><div class="nm">Rajesh Mats<small>JAIPUR · 84% on-time · 28 orders</small></div><div class="bar"><div style="width:62%;"></div></div><div class="num">₹41.2L<small>+4%</small></div></div>
-            <div class="party-row"><div class="nm">Vinod Trading<small>DELHI · slipping · 48d aging</small></div><div class="bar"><div class="warn" style="width:48%;"></div></div><div class="num">₹38.6L<small style="color:var(--amber);">−6%</small></div></div>
-            <div class="party-row"><div class="nm">Sai Industries<small>PUNE · slipping · 52d aging</small></div><div class="bar"><div class="bad" style="width:36%;"></div></div><div class="num">₹27.9L<small style="color:var(--rose);">−14%</small></div></div>
-            <div class="party-row"><div class="nm">Pune Auto Mats<small>PUNE · steady · 18 orders</small></div><div class="bar"><div style="width:30%;"></div></div><div class="num">₹22.4L<small>+2%</small></div></div>
-            <div class="party-row"><div class="nm">Bombay Hospitality<small>MUMBAI · new · 6 orders</small></div><div class="bar"><div style="width:18%;"></div></div><div class="num">₹12.8L<small>new</small></div></div>
+            <div class="pl-controls">
+              <input type="text" id="pl-search" class="pl-search" placeholder="Search name, code, GST, Aadhaar, phone, city, state, POC…" autocomplete="off" spellcheck="false">
+              <div class="pl-filters">
+                <select class="pl-filter" id="pl-f-type"><option value="">All types</option><option>Customer</option><option>Supplier</option><option>Both</option></select>
+                <select class="pl-filter" id="pl-f-state"><option value="">All states</option></select>
+                <select class="pl-filter" id="pl-f-poc"><option value="">All POCs</option></select>
+                <select class="pl-filter" id="pl-f-status"><option value="">All status</option><option>Active</option><option>Inactive</option></select>
+              </div>
+            </div>
+            <div id="pl-list" class="pl-list" role="list"></div>
+            <div id="pl-empty" class="pl-empty" hidden>No parties match your search or filters.</div>
           </div>
         </div>
         <div class="card">
-          <div class="card-h"><div class="t"><span class="ic">◇</span><h3>Watchlist</h3><span class="sub">NATIVE · 5 SLIPS</span></div><span class="more">⋯</span></div>
+          <div class="card-h"><div class="t"><span class="ic">◇</span><h3>Watchlist</h3><span class="sub">AUTO · <span id="wl-count">0</span> NEED ATTENTION</span></div><span class="more" id="wl-refresh" title="Recompute" style="cursor:pointer;">⟳</span></div>
           <div class="card-b">
-            <div class="signal"><span class="pip a"></span><div><div class="title">Vinod Trading · <b>48 days</b> past due. <span style="color:var(--text-2);">First slip in 7 months. Owner WhatsApp seen 2h ago.</span></div><div class="acts"><button class="prime">Send reminder</button><button>Open file</button></div></div></div>
-            <div class="signal"><span class="pip r"></span><div><div class="title">Sai Industries · <b>52 days</b> past due. <span style="color:var(--text-2);">Credit limit hit. Hold all open POs.</span></div><div class="acts"><button class="prime">Place on hold</button><button>Call</button></div></div></div>
-            <div class="signal"><span class="pip b"></span><div><div class="title">Pune Auto Mats · <b>cadence break</b>. <span style="color:var(--text-2);">No PO in 21 days · normal cycle is 14d.</span></div><div class="acts"><button>Reach out</button></div></div></div>
+            <div id="wl-list" class="wl-list"></div>
+            <div id="wl-empty" class="pl-empty" hidden>All clear — nothing needs attention right now.</div>
           </div>
         </div>
       </div>
@@ -18750,6 +18750,9 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     if (p === 'pi-history' && typeof window.atlasLoadHistory === 'function') {
       window.atlasLoadHistory();
     }
+    if (p === 'parties' && typeof window.atlasLoadParties === 'function') {
+      window.atlasLoadParties();
+    }
   }
   document.querySelectorAll('.nav-item[data-page]').forEach(n => {
     n.style.cursor = 'pointer';
@@ -21493,6 +21496,24 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         </div>
       </div>
 
+      <div class="ap-row-2">
+        <div class="pi-field">
+          <label for="ap-type">Type</label>
+          <select class="pi-select" id="ap-type">
+            <option value="Customer">Customer</option>
+            <option value="Supplier">Supplier</option>
+            <option value="Both">Both</option>
+          </select>
+        </div>
+        <div class="pi-field">
+          <label for="ap-status-field">Status</label>
+          <select class="pi-select" id="ap-status-field">
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+
       <div class="ap-status" id="ap-status"></div>
 
       <div class="ap-actions">
@@ -21687,6 +21708,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     $('ap-gst-hint').style.color = '';
     $('ap-phone-hint').textContent = '';
     $('ap-phone-hint').style.color = '';
+    $('ap-type').value = 'Customer';
+    $('ap-status-field').value = 'Active';
     $('ap-overlay').hidden = false;
     document.body.style.overflow = 'hidden';
     setTimeout(() => $('ap-name').focus(), 30);
@@ -21759,7 +21782,9 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       return;
     }
 
-    const entry = { name, code, poc, gst, aadhaar, state, phone, city, createdAt: new Date().toISOString() };
+    const type   = $('ap-type').value || 'Customer';
+    const status = $('ap-status-field').value || 'Active';
+    const entry = { name, code, poc, gst, aadhaar, state, phone, city, type, status, createdAt: new Date().toISOString() };
 
     // Always save locally first as fallback.
     const list = loadCustom();
@@ -21771,13 +21796,15 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     V.parties.push(vocabEntry);
     V.parties.sort((a, b) => a.name.localeCompare(b.name));
     refreshCustomCount();
+    // Surface the new party in the All Parties list instantly (no refresh).
+    if (typeof window.atlasOnPartyCreated === 'function') window.atlasOnPartyCreated(entry);
 
     // If the backend is wired, write to the Parties sheet and adopt the
     // authoritative code it returns (handles concurrent sequence collisions).
     const url = (window.ATLAS_APPS_SCRIPT_URL ||
                  localStorage.getItem('atlas-apps-script-url') || '').trim();
     if (!url){
-      setStatus('ok', 'Added ' + name + ' (' + code + ') locally. It will appear in Create PI suggestions. (Backend not wired — not written to Parties sheet.)');
+      setStatus('ok', 'Party created successfully. ' + name + ' (' + code + ') saved locally and added to suggestions.');
       setTimeout(closeModal, 1300);
       return;
     }
@@ -21800,8 +21827,9 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
           saveCustom(loadCustom().map(e =>
             (e.createdAt === entry.createdAt && e.name === entry.name) ? entry : e));
           $('ap-code').value = res.code;
+          if (typeof window.atlasOnPartyCreated === 'function') window.atlasOnPartyCreated(entry);
         }
-        setStatus('ok', 'Added ' + name + ' (' + (res.code || code) + ') to Parties sheet and Create PI suggestions.');
+        setStatus('ok', 'Party created successfully. ' + name + ' (' + (res.code || code) + ') saved to the Parties sheet.');
         setTimeout(closeModal, 1100);
       })
       .catch(err => {
@@ -21893,7 +21921,450 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 })();
 </script>
 
+<script>
+/* ===== Parties module: live list, search, filters, computed watchlist ===== */
+(function(){
+  const V = window.PI_VOCAB || { parties: [], pocs: [] };
+  const $ = (id) => document.getElementById(id);
+  const HOLDS_KEY = 'atlas-party-holds';
+
+  // ---------- small helpers ----------
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function normName(n){ return String(n || '').trim().toLowerCase(); }
+  function slug(s){ return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
+  function inr(n){
+    n = Number(n) || 0; const neg = n < 0; n = Math.abs(n); let s;
+    if (n >= 1e7) s = '₹' + (n / 1e7).toFixed(2).replace(/\.00$/, '') + 'Cr';
+    else if (n >= 1e5) s = '₹' + (n / 1e5).toFixed(2).replace(/\.00$/, '') + 'L';
+    else s = '₹' + Math.round(n).toLocaleString('en-IN');
+    return (neg ? '-' : '') + s;
+  }
+  function endpoint(){
+    return (window.ATLAS_APPS_SCRIPT_URL || localStorage.getItem('atlas-apps-script-url') || '/api/pi').trim();
+  }
+  function loadCustom(){ try { return JSON.parse(localStorage.getItem('atlas-custom-parties') || '[]'); } catch(e){ return []; } }
+  function loadHolds(){ try { return new Set(JSON.parse(localStorage.getItem(HOLDS_KEY) || '[]')); } catch(e){ return new Set(); } }
+  function saveHolds(set){ localStorage.setItem(HOLDS_KEY, JSON.stringify([...set])); }
+
+  let _toastT = null;
+  function toast(msg){
+    let t = document.querySelector('.atlas-toast');
+    if (!t){ t = document.createElement('div'); t.className = 'atlas-toast'; document.body.appendChild(t); }
+    t.textContent = msg;
+    requestAnimationFrame(() => t.classList.add('show'));
+    clearTimeout(_toastT);
+    _toastT = setTimeout(() => t.classList.remove('show'), 2600);
+  }
+
+  // ---------- data ----------
+  let store = [];          // merged party records
+  let receivables = null;  // receivables.json
+  let piByParty = new Map(); // normName -> { count, pending, refs:[] }
+  let dataNow = new Date();
+  let enriched = false;
+
+  function prune(o){ const x = {}; for (const k in o){ if (o[k] !== '' && o[k] != null) x[k] = o[k]; } return x; }
+
+  function buildStore(sheetParties){
+    const map = new Map();
+    const put = (rec) => {
+      const key = normName(rec.name);
+      if (!key) return;
+      map.set(key, Object.assign({}, map.get(key) || {}, prune(rec)));
+    };
+    for (const p of (V.parties || [])) put({ name: p.name, code: p.code || '' }); // lowest priority
+    for (const p of loadCustom()) put(p);                                          // local full records
+    for (const p of (sheetParties || [])) put(p);                                  // sheet wins
+    store = [...map.values()].map(r => ({
+      name: r.name || '', code: r.code || '', poc: r.poc || '', gst: r.gst || '',
+      aadhaar: r.aadhaar || '', state: r.state || '', phone: r.phone || '',
+      city: r.city || '', type: r.type || 'Customer', status: r.status || 'Active',
+    }));
+    store.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  async function fetchSheetParties(){
+    try {
+      const res = await fetch(endpoint(), { method: 'POST', mode: 'cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ kind: 'listParties' }) });
+      if (!res.ok) return [];
+      const j = await res.json();
+      return (j && j.ok && Array.isArray(j.parties)) ? j.parties : [];
+    } catch(e){ return []; }
+  }
+  async function fetchReceivables(){
+    if (receivables) return receivables;
+    try { const r = await fetch('data/receivables.json'); receivables = r.ok ? await r.json() : null; }
+    catch(e){ receivables = null; }
+    return receivables;
+  }
+  async function fetchPiList(){
+    try {
+      const res = await fetch(endpoint(), { method: 'POST', mode: 'cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ kind: 'list' }) });
+      if (!res.ok) return [];
+      const j = await res.json();
+      return (j && j.ok && Array.isArray(j.pis)) ? j.pis : [];
+    } catch(e){ return []; }
+  }
+
+  function parseRecDate(s){
+    const m = String(s).match(/(\d{1,2})\s+([A-Za-z]{3})\s+(\d{2,4})/);
+    if (!m) return null;
+    const mo = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11}[m[2].toLowerCase()];
+    if (mo == null) return null;
+    let y = parseInt(m[3], 10); if (y < 100) y += 2000;
+    return new Date(y, mo, parseInt(m[1], 10));
+  }
+
+  function indexPis(pis){
+    piByParty = new Map(); let maxD = 0;
+    for (const pi of pis){
+      const key = normName(pi.party);
+      if (!key) continue;
+      const e = piByParty.get(key) || { count: 0, pending: 0, refs: [] };
+      e.count++;
+      const st = String(pi.status || '').toLowerCase();
+      if (st !== 'dispatched' && st !== 'cancelled') { e.pending++; if (pi.ref) e.refs.push(pi.ref); }
+      piByParty.set(key, e);
+      const d = pi.date ? new Date(pi.date) : null;
+      if (d && !isNaN(d) && d.getTime() > maxD) maxD = d.getTime();
+    }
+    return maxD;
+  }
+
+  // Compute the "current" reference date from the latest data we have, so a
+  // historical dataset doesn't flag every party as overdue against the wall clock.
+  function computeDataNow(){
+    let maxD = 0;
+    if (receivables && receivables.parties){
+      for (const k in receivables.parties){
+        for (const tx of (receivables.parties[k].fy25 || [])){
+          const d = parseRecDate(tx.d); if (d && d.getTime() > maxD) maxD = d.getTime();
+        }
+      }
+    }
+    // Align "today" to the freshest record so a historical dataset doesn't
+    // read as universally overdue; fall back to the wall clock if empty.
+    dataNow = maxD ? new Date(maxD) : new Date();
+  }
+
+  // ---------- All parties list ----------
+  let _renderT = null;
+  function renderFilters(){
+    const stSel = $('pl-f-state'), pocSel = $('pl-f-poc');
+    if (!stSel || !pocSel) return;
+    const keep = { st: stSel.value, poc: pocSel.value };
+    const states = [...new Set(store.map(p => p.state).filter(Boolean))].sort();
+    const pocs = [...new Set([...(V.pocs || []), ...store.map(p => p.poc).filter(Boolean)])].sort();
+    stSel.innerHTML = '<option value="">All states</option>' + states.map(s => `<option>${esc(s)}</option>`).join('');
+    pocSel.innerHTML = '<option value="">All POCs</option>' + pocs.map(s => `<option>${esc(s)}</option>`).join('');
+    stSel.value = keep.st; pocSel.value = keep.poc;
+  }
+
+  function filtered(){
+    const q = ($('pl-search').value || '').trim().toLowerCase();
+    const fType = $('pl-f-type').value, fState = $('pl-f-state').value,
+          fPoc = $('pl-f-poc').value, fStatus = $('pl-f-status').value;
+    return store.filter(p => {
+      if (fType && (p.type || 'Customer') !== fType) return false;
+      if (fState && p.state !== fState) return false;
+      if (fPoc && p.poc !== fPoc) return false;
+      if (fStatus && (p.status || 'Active') !== fStatus) return false;
+      if (!q) return true;
+      const hay = [p.name, p.code, p.gst, p.aadhaar, p.phone, p.city, p.state, p.poc, p.type, p.status].join(' ').toLowerCase();
+      return hay.indexOf(q) !== -1;
+    });
+  }
+
+  function rowHtml(p){
+    const rec = receivables && receivables.parties && receivables.parties[slug(p.name)];
+    const out = rec && rec.outstanding ? rec.outstanding : 0;
+    const meta = [p.poc, p.state, p.city].filter(Boolean).join(' · ');
+    const tags = [];
+    if ((p.type || 'Customer') === 'Supplier') tags.push('<span class="pl-pill sup">SUPPLIER</span>');
+    else if (p.type === 'Both') tags.push('<span class="pl-pill sup">BOTH</span>');
+    if ((p.status || 'Active') === 'Inactive') tags.push('<span class="pl-pill muted">INACTIVE</span>');
+    return '<div class="pl-row" role="listitem">' +
+      '<div class="pl-main">' +
+        '<div class="pl-name">' + esc(p.name) + ' ' + tags.join(' ') + '</div>' +
+        '<div class="pl-meta">' + (esc(meta) || '—') + (p.phone ? ' · ' + esc(p.phone) : '') + '</div>' +
+      '</div>' +
+      '<div class="pl-side">' +
+        '<div class="pl-code">' + (esc(p.code) || '—') + '</div>' +
+        (out ? '<div class="pl-out">' + inr(out) + '<small>outstanding</small></div>' : '') +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderList(){
+    const list = $('pl-list'), empty = $('pl-empty'), count = $('pl-count');
+    if (!list) return;
+    const rows = filtered();
+    if (count) count.textContent = rows.length;
+    if (!rows.length){ list.innerHTML = ''; if (empty) empty.hidden = false; return; }
+    if (empty) empty.hidden = true;
+    const CAP = 200;
+    list.innerHTML = rows.slice(0, CAP).map(rowHtml).join('') +
+      (rows.length > CAP ? '<div class="pl-more">+' + (rows.length - CAP) + ' more — refine your search</div>' : '');
+  }
+  function renderListDebounced(){ clearTimeout(_renderT); _renderT = setTimeout(renderList, 90); }
+
+  // ---------- Watchlist ----------
+  function daysBetween(a, b){ return Math.round((a - b) / 864e5); }
+
+  function computeWatchlist(){
+    const holds = loadHolds();
+    const items = [];
+    const byName = new Map(store.map(p => [normName(p.name), p]));
+
+    // Receivables-driven signals.
+    if (receivables && receivables.parties){
+      for (const key in receivables.parties){
+        const rec = receivables.parties[key];
+        const nm = rec.name || key;
+        if (holds.has(normName(nm))) continue;
+        const p = byName.get(normName(nm)) || {};
+        const reasons = []; let sev = 0;
+        const out = Number(rec.outstanding) || 0;
+        const billed = Number(rec.billed) || 0;
+
+        let lastSale = null, lastReceipt = null;
+        for (const tx of (rec.fy25 || [])){
+          const d = parseRecDate(tx.d); if (!d) continue;
+          if (tx.t === 'Sales' && (!lastSale || d > lastSale)) lastSale = d;
+          if (tx.t === 'Receipt' && (!lastReceipt || d > lastReceipt)) lastReceipt = d;
+        }
+        const ageDays = lastReceipt ? daysBetween(dataNow, lastReceipt) : (lastSale ? daysBetween(dataNow, lastSale) : null);
+        const idleDays = lastSale ? daysBetween(dataNow, lastSale) : null;
+
+        // 1. Outstanding / overdue receivable.
+        if (out > 50000){
+          const s = out > 1000000 ? 3 : out > 300000 ? 2 : 1;
+          sev = Math.max(sev, s);
+          reasons.push('<b>' + inr(out) + '</b> outstanding' + (ageDays != null ? ' · last receipt <b>' + ageDays + 'd</b> ago' : ''));
+        }
+        // 2. PI issued but payment still pending (open PI + balance due).
+        const pi = piByParty.get(normName(nm));
+        if (pi && pi.pending > 0 && out > 0){
+          sev = Math.max(sev, 2);
+          reasons.push(pi.pending + ' open PI' + (pi.pending > 1 ? 's' : '') + ' with payment pending');
+        }
+        // 3. High-value customer going inactive.
+        if (billed > 1000000 && idleDays != null && idleDays > 60){
+          sev = Math.max(sev, 2);
+          reasons.push('high-value customer idle <b>' + idleDays + 'd</b> (billed ' + inr(billed) + ')');
+        } else if (idleDays != null && idleDays > 75 && billed > 0){
+          // 4. No orders for longer than a normal buying cycle.
+          sev = Math.max(sev, 1);
+          reasons.push('no orders in <b>' + idleDays + 'd</b>');
+        }
+
+        if (reasons.length){
+          items.push({ name: nm, party: p, sev, reasons,
+            sub: [p.state, p.city, p.poc].filter(Boolean).join(' · '),
+            canHold: out > 50000 });
+        }
+      }
+    }
+
+    // PI-driven signal for parties without receivables rows: payment in but
+    // dispatch pending (open PI but little/no outstanding).
+    for (const [key, pi] of piByParty){
+      if (loadHolds().has(key)) continue;
+      if (items.some(it => normName(it.name) === key)) continue;
+      if (pi.pending > 0){
+        const p = byName.get(key) || {};
+        const rec = receivables && receivables.parties && receivables.parties[slug(p.name || key)];
+        const out = rec ? Number(rec.outstanding) || 0 : 0;
+        const reason = out <= 50000
+          ? 'payment received · <b>' + pi.pending + '</b> dispatch pending'
+          : '<b>' + pi.pending + '</b> open PI' + (pi.pending > 1 ? 's' : '') + ' awaiting dispatch';
+        items.push({ name: p.name || key, party: p, sev: out <= 50000 ? 2 : 1,
+          reasons: [reason], sub: [p.state, p.city, p.poc].filter(Boolean).join(' · '),
+          refs: pi.refs, canHold: false });
+      }
+    }
+
+    items.sort((a, b) => b.sev - a.sev);
+    return items;
+  }
+
+  function wlCardHtml(it, i){
+    const pipCls = it.sev >= 3 ? 'r' : it.sev === 2 ? 'a' : 'b';
+    const ph = (it.party && it.party.phone || '').replace(/\D/g, '');
+    const disPhone = ph ? '' : 'disabled';
+    const acts = [
+      '<button data-act="party" data-i="' + i + '">Open party</button>',
+      '<button data-act="pi" data-i="' + i + '">Open PI</button>',
+      '<button data-act="wa" data-i="' + i + '" ' + disPhone + '>WhatsApp</button>',
+      '<button data-act="call" data-i="' + i + '" ' + disPhone + '>Call</button>',
+      '<button class="prime" data-act="remind" data-i="' + i + '">Send reminder</button>',
+    ];
+    if (it.canHold) acts.push('<button data-act="hold" data-i="' + i + '">Put on hold</button>');
+    return '<div class="wl-card">' +
+      '<span class="wl-pip ' + pipCls + '"></span>' +
+      '<div class="wl-body">' +
+        '<div class="wl-title"><b>' + esc(it.name) + '</b> · <span class="wl-why">' + it.reasons.join(' · ') + '</span></div>' +
+        (it.sub ? '<div class="wl-sub">' + esc(it.sub) + '</div>' : '') +
+        '<div class="wl-acts">' + acts.join('') + '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  let _wlItems = [];
+  function renderWatchlist(){
+    const list = $('wl-list'), empty = $('wl-empty'), count = $('wl-count');
+    if (!list) return;
+    _wlItems = computeWatchlist();
+    if (count) count.textContent = _wlItems.length;
+    if (!_wlItems.length){ list.innerHTML = ''; if (empty) empty.hidden = false; return; }
+    if (empty) empty.hidden = true;
+    const CAP = 40;
+    list.innerHTML = _wlItems.slice(0, CAP).map(wlCardHtml).join('') +
+      (_wlItems.length > CAP ? '<div class="pl-more">+' + (_wlItems.length - CAP) + ' more flagged — resolve the top ones first</div>' : '');
+  }
+
+  function wlAction(act, i){
+    const it = _wlItems[i]; if (!it) return;
+    const ph = (it.party && it.party.phone || '').replace(/\D/g, '');
+    if (act === 'party'){
+      $('pl-search').value = it.name; renderList();
+      $('pl-search').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else if (act === 'pi'){
+      const nav = document.querySelector('.nav-item[data-page="pi-history"]');
+      if (nav) nav.click();
+      setTimeout(() => { const s = document.getElementById('ph-search'); if (s){ s.value = it.name; s.dispatchEvent(new Event('input', { bubbles: true })); } }, 120);
+    } else if (act === 'wa'){
+      if (ph) window.open('https://wa.me/91' + ph, '_blank');
+    } else if (act === 'call'){
+      if (ph) window.location.href = 'tel:+91' + ph;
+    } else if (act === 'remind'){
+      toast('Reminder queued for ' + it.name + '.');
+    } else if (act === 'hold'){
+      const h = loadHolds(); h.add(normName(it.name)); saveHolds(h);
+      toast(it.name + ' placed on hold — removed from watchlist.');
+      renderWatchlist();
+    }
+  }
+
+  // ---------- load orchestration ----------
+  function ensureBase(){ if (!store.length) buildStore([]); }
+
+  async function loadParties(force){
+    ensureBase();
+    renderFilters(); renderList();
+    if (enriched && !force){ renderWatchlist(); return; }
+    const [sheet] = await Promise.all([fetchSheetParties(), fetchReceivables(), fetchPiList().then(p => { dataNow = new Date(); indexPis(p); })]);
+    buildStore(sheet);
+    computeDataNow();
+    enriched = true;
+    renderFilters(); renderList(); renderWatchlist();
+  }
+
+  // Called by the Add Party modal right after a successful create.
+  window.atlasOnPartyCreated = function(entry){
+    const key = normName(entry.name);
+    const rec = { name: entry.name, code: entry.code || '', poc: entry.poc || '',
+      gst: entry.gst || '', aadhaar: entry.aadhaar || '', state: entry.state || '',
+      phone: entry.phone || '', city: entry.city || '', type: entry.type || 'Customer',
+      status: entry.status || 'Active' };
+    const idx = store.findIndex(p => normName(p.name) === key);
+    if (idx >= 0) store[idx] = Object.assign(store[idx], rec); else store.push(rec);
+    store.sort((a, b) => a.name.localeCompare(b.name));
+    renderFilters(); renderList();
+    toast('Party created successfully.');
+  };
+
+  window.atlasLoadParties = function(){ loadParties(false); };
+
+  function init(){
+    const search = $('pl-search'); if (!search) return; // parties page not present
+    search.addEventListener('input', renderListDebounced);
+    ['pl-f-type', 'pl-f-state', 'pl-f-poc', 'pl-f-status'].forEach(id => {
+      const el = $(id); if (el) el.addEventListener('change', renderList);
+    });
+    const wl = $('wl-refresh'); if (wl) wl.addEventListener('click', () => loadParties(true));
+    const wlList = $('wl-list');
+    if (wlList) wlList.addEventListener('click', (e) => {
+      const b = e.target.closest('button[data-act]'); if (!b) return;
+      wlAction(b.getAttribute('data-act'), parseInt(b.getAttribute('data-i'), 10));
+    });
+    // If the Parties page is the current route, load now.
+    if (location.hash.slice(1) === 'parties') loadParties(false);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+
 <style>
+  /* ===== Parties: All parties list + filters ===== */
+  .pl-controls { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+  .pl-search {
+    width: 100%; background: var(--surface); border: 1px solid var(--line);
+    color: var(--text); padding: 9px 12px; border-radius: 7px; font-size: 13px;
+  }
+  .pl-search:focus { outline: none; border-color: var(--emerald); }
+  .pl-filters { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pl-filter {
+    background: var(--surface); border: 1px solid var(--line); color: var(--text-2);
+    padding: 6px 10px; border-radius: 6px; font-size: 11.5px; font-family: var(--fm);
+    letter-spacing: 0.02em; cursor: pointer; flex: 1; min-width: 110px;
+  }
+  .pl-filter:focus { outline: none; border-color: var(--emerald); color: var(--text); }
+  .pl-list { display: flex; flex-direction: column; max-height: 540px; overflow-y: auto; }
+  .pl-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 11px 4px; border-bottom: 1px solid var(--line);
+  }
+  .pl-row:last-child { border-bottom: 0; }
+  .pl-main { min-width: 0; }
+  .pl-name { font-size: 13px; font-weight: 500; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .pl-meta { font-family: var(--fm); font-size: 10.5px; color: var(--text-3); letter-spacing: 0.03em; margin-top: 3px; text-transform: uppercase; }
+  .pl-side { text-align: right; flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+  .pl-code { font-family: var(--fm); font-size: 11px; color: var(--text-2); letter-spacing: 0.04em; }
+  .pl-out { font-family: var(--fd); font-size: 12.5px; color: var(--amber); font-variant-numeric: tabular-nums; }
+  .pl-out small { display: block; font-family: var(--fm); font-size: 9px; color: var(--text-3); letter-spacing: 0.06em; }
+  .pl-pill { font-family: var(--fm); font-size: 9px; letter-spacing: 0.08em; padding: 2px 6px; border-radius: 3px; }
+  .pl-pill.muted { background: var(--surface-2); color: var(--text-3); }
+  .pl-pill.sup { background: rgba(124,168,255,0.12); color: var(--blue); }
+  .pl-empty { padding: 28px 20px; text-align: center; color: var(--text-3); font-size: 12.5px; }
+  .pl-more { padding: 10px; text-align: center; font-size: 11px; color: var(--text-3); font-family: var(--fm); }
+
+  /* ===== Watchlist (computed) ===== */
+  .wl-list { display: flex; flex-direction: column; gap: 10px; max-height: 560px; overflow-y: auto; }
+  .wl-card { display: flex; gap: 10px; padding: 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); }
+  .wl-pip { width: 7px; height: 7px; border-radius: 50%; flex: none; margin-top: 5px; }
+  .wl-pip.r { background: var(--rose); } .wl-pip.a { background: var(--amber); } .wl-pip.b { background: var(--blue); }
+  .wl-body { min-width: 0; flex: 1; }
+  .wl-title { font-size: 12.5px; color: var(--text); line-height: 1.45; }
+  .wl-title b { font-weight: 600; }
+  .wl-why { color: var(--text-2); }
+  .wl-sub { font-family: var(--fm); font-size: 10px; color: var(--text-3); letter-spacing: 0.04em; margin-top: 4px; text-transform: uppercase; }
+  .wl-acts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+  .wl-acts button {
+    background: var(--surface-2); border: 1px solid var(--line); color: var(--text-2);
+    padding: 4px 9px; border-radius: 5px; font-size: 10.5px; font-family: var(--fm);
+    letter-spacing: 0.03em; cursor: pointer; transition: all 160ms var(--ease);
+  }
+  .wl-acts button:hover:not(:disabled) { color: var(--text); border-color: var(--text-3); }
+  .wl-acts button.prime { background: var(--emerald-soft); color: var(--emerald); border-color: rgba(78,222,163,0.3); }
+  .wl-acts button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Toast */
+  .atlas-toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(12px);
+    background: var(--surface); border: 1px solid var(--emerald); color: var(--text);
+    padding: 11px 18px; border-radius: 8px; font-size: 13px; z-index: 2000;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.4); opacity: 0; pointer-events: none;
+    transition: opacity 220ms var(--ease), transform 220ms var(--ease);
+  }
+  .atlas-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
   /* PI History */
   .ph-empty { padding: 40px 20px; text-align: center; color: var(--text-3); font-size: 13px; }
   #ph-search { background: var(--surface); border: 1px solid var(--line); color: var(--text); padding: 8px 12px; border-radius: 6px; font-size: 13px; min-width: 280px; }

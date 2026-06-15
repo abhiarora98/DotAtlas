@@ -88,13 +88,17 @@ in ~300ms.
 - **`POST /api/pi`** with body `{ kind: 'party', party }` → appends one
   row to the `Parties` tab (auto-created on first call). The `party`
   object accepts `name`, `poc`, `state`, `gst`, `aadhaar`, `phone`,
-  `city`. One of `gst` / `aadhaar` is required (Aadhaar must be 12
-  digits). The **Party Code** is system-generated, unique and read-only
-  — `[Name initials]-[State code][POC initials][3-digit running
-  number]` (e.g. `AF-HRVS001` for "Abhitex Furnishings") — and returned
-  as `code` in the response.
+  `city`, `type` (Customer/Supplier/Both), `status` (Active/Inactive).
+  One of `gst` / `aadhaar` is required (Aadhaar must be 12 digits);
+  `phone` must be a valid 10-digit Indian mobile. The **Party Code** is
+  system-generated, unique and read-only — `[Name initials]-[State
+  code][POC initials][3-digit running number]` (e.g. `AF-HRVS001` for
+  "Abhitex Furnishings") — and returned as `code` in the response.
   Parties columns: `CreatedAt · Party Name · Party Code · Sales POC ·
-  GSTIN · Aadhaar · State · Phone · City`.
+  GSTIN · Aadhaar · State · Phone · City · Type · Status`.
+- **`POST /api/pi`** with body `{ kind: 'listParties' }` → returns
+  `{ ok, count, parties: [...] }`, every row of the `Parties` tab as
+  objects. Powers the live All Parties list + search/filters in the UI.
 
 ## Why this is faster than Apps Script
 

@@ -30,12 +30,23 @@ const PI_HEADERS = [
   'Dispatch Status', 'Month', 'STATE', 'REFRENCE ID',
 ];
 
-// Parties tab columns. Aadhaar sits right after GSTIN (column F).
+// Parties tab columns. Aadhaar sits right after GSTIN (column F); Type
+// (Customer/Supplier/Both) and Status (Active/Inactive) trail at the end.
 const PARTIES_HEADERS = [
   'CreatedAt', 'Party Name', 'Party Code', 'Sales POC',
-  'GSTIN', 'Aadhaar', 'State', 'Phone', 'City',
+  'GSTIN', 'Aadhaar', 'State', 'Phone', 'City', 'Type', 'Status',
 ];
-const PARTIES_RANGE = PARTIES_SHEET + '!A:I';
+const PARTIES_RANGE = PARTIES_SHEET + '!A:K';
+
+function normPartyType(t) {
+  const v = String(t || '').trim().toLowerCase();
+  if (v === 'supplier') return 'Supplier';
+  if (v === 'both') return 'Both';
+  return 'Customer';
+}
+function normPartyStatus(s) {
+  return String(s || '').trim().toLowerCase() === 'inactive' ? 'Inactive' : 'Active';
+}
 
 // Indian state / UT → official 2-letter code, used to build the Party Code.
 // These are the standard registration codes (PB, HR, DL…), not the numeric
@@ -153,6 +164,7 @@ module.exports = async (req, res) => {
     if (kind === 'pi')           return await handlePi(sheets, spreadsheetId, payload, res);
     if (kind === 'party')        return await handleParty(sheets, spreadsheetId, payload, res);
     if (kind === 'list')         return await handleList(sheets, spreadsheetId, payload, res);
+    if (kind === 'listParties')  return await handleListParties(sheets, spreadsheetId, payload, res);
     if (kind === 'updateStatus') return await handleUpdateStatus(sheets, spreadsheetId, payload, res);
 
     return res.status(400).json({ ok: false, error: 'Unknown kind: ' + kind });
@@ -377,6 +389,8 @@ async function handleParty(sheets, spreadsheetId, payload, res) {
   const aadhaar = String(p.aadhaar || '').replace(/\D/g, '');
   const city  = String(p.city || '').trim();
   const phone = normalizePhone(p.phone);
+  const type   = normPartyType(p.type);
+  const status = normPartyStatus(p.status);
 
   if (!name)  return res.status(400).json({ ok: false, error: 'Party name is required' });
   if (!poc)   return res.status(400).json({ ok: false, error: 'Sales POC is required to generate the party code' });
@@ -413,7 +427,7 @@ async function handleParty(sheets, spreadsheetId, payload, res) {
     });
     await sheets.spreadsheets.values.update({
       spreadsheetId,
-      range: PARTIES_SHEET + '!A1:I1',
+      range: PARTIES_SHEET + '!A1:K1',
       valueInputOption: 'USER_ENTERED',
       requestBody: { values: [PARTIES_HEADERS] },
     });
@@ -451,10 +465,40 @@ async function handleParty(sheets, spreadsheetId, payload, res) {
         new Date().toISOString(),
         name, code, poc,
         gst, aadhaar, state,
-        phone, city,
+        phone, city, type, status,
       ]],
     },
   });
 
-  return res.status(200).json({ ok: true, party: name, code });
+  return res.status(200).json({
+    ok: true, party: name, code,
+    record: { createdAt: new Date().toISOString(), name, code, poc, gst,
+              aadhaar, state, phone, city, type, status },
+  });
+}
+
+async function handleListParties(sheets, spreadsheetId, _payload, res) {
+  const meta = await sheets.spreadsheets.get({ spreadsheetId });
+  const exists = (meta.data.sheets || []).some(s => s.properties && s.properties.title === PARTIES_SHEET);
+  if (!exists) return res.status(200).json({ ok: true, count: 0, parties: [] });
+
+  const resp = await sheets.spreadsheets.values.get({ spreadsheetId, range: PARTIES_RANGE });
+  const rows = resp.data.values || [];
+  if (!rows.length) return res.status(200).json({ ok: true, count: 0, parties: [] });
+
+  // Skip the header row if present.
+  const first = rows[0] || [];
+  const startIdx = String(first[1] || '').trim().toLowerCase() === 'party name' ? 1 : 0;
+
+  const parties = [];
+  for (let i = startIdx; i < rows.length; i++) {
+    const r = rows[i] || [];
+    if (!r[1] && !r[2]) continue; // skip blank rows
+    parties.push({
+      createdAt: r[0] || '', name: r[1] || '', code: r[2] || '', poc: r[3] || '',
+      gst: r[4] || '', aadhaar: r[5] || '', state: r[6] || '', phone: r[7] || '',
+      city: r[8] || '', type: r[9] || 'Customer', status: r[10] || 'Active',
+    });
+  }
+  return res.status(200).json({ ok: true, count: parties.length, parties });
 }

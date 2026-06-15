@@ -26,8 +26,9 @@ function doPost(e) {
     }
     const payload = JSON.parse(e.postData.contents);
     const kind = payload.kind || 'pi';
-    if (kind === 'pi')    return handlePi(payload);
-    if (kind === 'party') return handleParty(payload);
+    if (kind === 'pi')          return handlePi(payload);
+    if (kind === 'party')       return handleParty(payload);
+    if (kind === 'listParties') return handleListParties();
     return jsonResponse({ ok: false, error: 'Unknown kind: ' + kind });
   } catch (err) {
     return jsonResponse({ ok: false, error: String(err && err.message || err) });
@@ -123,10 +124,10 @@ function handleParty(payload) {
     sheet = ss.insertSheet(PARTIES_SHEET_NAME);
     sheet.appendRow([
       'CreatedAt', 'Party Name', 'Party Code', 'Sales POC',
-      'GSTIN', 'Aadhaar', 'State', 'Phone', 'City',
+      'GSTIN', 'Aadhaar', 'State', 'Phone', 'City', 'Type', 'Status',
     ]);
     sheet.setFrozenRows(1);
-    sheet.getRange('A1:I1').setFontWeight('bold');
+    sheet.getRange('A1:K1').setFontWeight('bold');
   }
 
   const p = payload.party || {};
@@ -137,6 +138,8 @@ function handleParty(payload) {
   const aadhaar = String(p.aadhaar || '').replace(/\D/g, '');
   const city  = String(p.city || '').trim();
   const phone = normalizePhone_(p.phone);
+  const type   = normPartyType_(p.type);
+  const status = normPartyStatus_(p.status);
 
   if (!name) return jsonResponse({ ok: false, error: 'Party name is required.' });
   if (!poc)  return jsonResponse({ ok: false, error: 'Sales POC is required to generate the party code.' });
@@ -175,9 +178,44 @@ function handleParty(payload) {
     state,
     phone,
     city,
+    type,
+    status,
   ]);
 
-  return jsonResponse({ ok: true, party: name, code: code });
+  return jsonResponse({
+    ok: true, party: name, code: code,
+    record: { name: name, code: code, poc: poc, gst: gst, aadhaar: aadhaar,
+              state: state, phone: phone, city: city, type: type, status: status },
+  });
+}
+
+function handleListParties() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(PARTIES_SHEET_NAME);
+  if (!sheet) return jsonResponse({ ok: true, count: 0, parties: [] });
+  const last = sheet.getLastRow();
+  if (last < 2) return jsonResponse({ ok: true, count: 0, parties: [] });
+  const rows = sheet.getRange(2, 1, last - 1, 11).getValues();
+  const parties = [];
+  for (var i = 0; i < rows.length; i++) {
+    var r = rows[i];
+    if (!r[1] && !r[2]) continue;
+    parties.push({
+      createdAt: r[0] || '', name: r[1] || '', code: r[2] || '', poc: r[3] || '',
+      gst: r[4] || '', aadhaar: r[5] || '', state: r[6] || '', phone: r[7] || '',
+      city: r[8] || '', type: r[9] || 'Customer', status: r[10] || 'Active',
+    });
+  }
+  return jsonResponse({ ok: true, count: parties.length, parties: parties });
+}
+
+function normPartyType_(t) {
+  var v = String(t || '').trim().toLowerCase();
+  if (v === 'supplier') return 'Supplier';
+  if (v === 'both') return 'Both';
+  return 'Customer';
+}
+function normPartyStatus_(s) {
+  return String(s || '').trim().toLowerCase() === 'inactive' ? 'Inactive' : 'Active';
 }
 
 // ---------- party code generation ----------
