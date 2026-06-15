@@ -2792,6 +2792,24 @@
       </div>
     </section>
 
+    <!-- PARTY PROFILE PAGE (full page, opened from a party row) -->
+    <section class="page" data-page="party-profile" hidden>
+      <button class="pp-back" id="pp-back">← All parties</button>
+      <div class="pp-head">
+        <div class="pp-avatar" id="pp-avatar">—</div>
+        <div class="pp-head-main">
+          <h1 id="pp-name">—</h1>
+          <div class="pp-subline"><span class="pp-codebadge" id="pp-code">—</span><span id="pp-chips"></span></div>
+          <div class="pp-meta" id="pp-meta"></div>
+        </div>
+        <div class="pp-head-acts" id="pp-acts"></div>
+      </div>
+      <div class="pp-stats" id="pp-stats"></div>
+      <div class="ap-status" id="pp-status" style="margin:10px 0 0;"></div>
+      <div class="pp-tabs" id="pp-tabs"></div>
+      <div class="pp-tabbody" id="pp-tabbody"></div>
+    </section>
+
     <!-- INVENTORY PAGE -->
     <section class="page" data-page="inventory" hidden>
       <div class="hero-h">
@@ -21134,6 +21152,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       if (i === partyTypeahead.cursor) r.scrollIntoView({ block: 'nearest' });
     });
   }
+  window.atlasPickParty = pickParty;
   function pickParty(p){
     if (!p) return;
     const nameU = String(p.name || '').toUpperCase();
@@ -21955,33 +21974,6 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 })();
 </script>
 
-<!-- Party Details drawer -->
-<div class="pd-overlay" id="pd-overlay" hidden>
-  <div class="pd-drawer" role="dialog" aria-modal="true" aria-labelledby="pd-name">
-    <div class="pd-head">
-      <div class="pd-head-main">
-        <div class="eb" style="margin-bottom:6px;"><span class="live-dot"></span>Party · profile</div>
-        <h2 id="pd-name" title="">—</h2>
-        <div class="pd-code" id="pd-code">—</div>
-      </div>
-      <div class="pd-head-acts">
-        <button class="pi-btn" id="pd-edit">Edit</button>
-        <button class="pi-btn pd-arch" id="pd-archive">Archive</button>
-        <button class="pi-btn prime" id="pd-restore" hidden>Restore</button>
-        <button class="pi-btn" id="pd-cancel" hidden>Cancel</button>
-        <button class="pi-btn prime" id="pd-save" hidden>Save</button>
-        <button class="ap-close" id="pd-close" aria-label="Close">×</button>
-      </div>
-    </div>
-    <div class="pd-body">
-      <div class="pd-stats" id="pd-stats"></div>
-      <div id="pd-details"></div>
-      <div id="pd-edit-form" hidden></div>
-      <div class="ap-status" id="pd-status" style="margin-top:12px;"></div>
-    </div>
-  </div>
-</div>
-
 <script>
 /* ===== Parties module: live list, search, filters, computed watchlist ===== */
 (function(){
@@ -22040,6 +22032,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   let store = [];          // merged party records
   let receivables = null;  // receivables.json
   let piByParty = new Map(); // normName -> { count, pending, refs:[] }
+  let piList = [];           // raw PI list (for the profile PIs/Dispatch tabs)
   let dataNow = new Date();
   let enriched = false;
 
@@ -22205,28 +22198,63 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     return { level, isNew, isHighValue, out };
   }
 
+  function relativeFrom(d){
+    if (!d) return '';
+    const days = Math.round((Date.now() - d.getTime()) / 864e5);
+    if (days < 0) return fmtDate(d);
+    if (days === 0) return 'today';
+    if (days === 1) return 'yesterday';
+    if (days < 30) return days + ' days ago';
+    return fmtDate(d);
+  }
+
   function rowHtml(p){
     const h = partyHealth(p);
     const archived = isArchived(p);
+    const ph = (p.phone || '').replace(/\D/g, '');
+    const pi = piByParty.get(normName(p.name));
+    const lastPI = pi && pi.lastDate ? relativeFrom(pi.lastDate) : '';
     const meta = [p.poc, p.state, p.city].filter(Boolean).join(' · ');
-    const chips = [];
-    if (archived) chips.push('<span class="pl-pill arch">ARCHIVED</span>');
-    if (h.isNew && !archived) chips.push('<span class="pl-pill new">NEW</span>');
-    if ((p.type || 'Customer') === 'Supplier') chips.push('<span class="pl-pill sup">SUPPLIER</span>');
-    else if (p.type === 'Both') chips.push('<span class="pl-pill sup">BOTH</span>');
-    if (h.isHighValue) chips.push('<span class="pl-pill hv">HIGH-VALUE</span>');
-    if ((p.status || 'Active') === 'Inactive') chips.push('<span class="pl-pill muted">INACTIVE</span>');
     return '<div class="pl-row h-' + h.level + (archived ? ' archived' : '') + '" role="listitem" data-name="' + esc(normName(p.name)) + '">' +
-      '<span class="pl-dot ' + h.level + '"></span>' +
+      '<span class="pl-av ' + avatarColor(p.name) + '">' + initials(p.name) + '</span>' +
       '<div class="pl-main">' +
-        '<div class="pl-name-row"><span class="pl-name">' + esc(p.name) + '</span>' + chips.join(' ') + '</div>' +
-        '<div class="pl-meta">' + (esc(meta) || '—') + (p.phone ? ' · ' + esc(p.phone) : '') + '</div>' +
+        '<div class="pl-name-row">' +
+          '<span class="pl-name">' + esc(p.name) + '</span>' +
+          (p.code ? '<span class="pl-codebadge">' + esc(p.code) + '</span>' : '') +
+          chipsFor(p) +
+        '</div>' +
+        '<div class="pl-meta">' + (esc(meta) || '—') + (ph ? ' &nbsp;·&nbsp; 📞 ' + esc(p.phone) : '') + '</div>' +
       '</div>' +
       '<div class="pl-side">' +
-        '<div class="pl-code">' + (esc(p.code) || '—') + '</div>' +
-        (h.out ? '<div class="pl-out">' + inr(h.out) + '<small>outstanding</small></div>' : '') +
+        (h.out ? '<div class="pl-out">' + inr(h.out) + '<small>outstanding</small></div>'
+               : '<div class="pl-out ok">₹0<small>outstanding</small></div>') +
+        (lastPI ? '<div class="pl-lastpi">Last PI: ' + esc(lastPI) + '</div>' : '') +
+      '</div>' +
+      '<div class="pl-actions">' +
+        '<button data-qa="edit" title="Edit">✏️</button>' +
+        '<button data-qa="createpi" title="Create PI">📄</button>' +
+        '<button data-qa="wa" title="WhatsApp"' + (ph ? '' : ' disabled') + '>💬</button>' +
+        '<button data-qa="call" title="Call"' + (ph ? '' : ' disabled') + '>📞</button>' +
+        '<button data-qa="archive" title="Archive">🗂️</button>' +
       '</div>' +
     '</div>';
+  }
+
+  function quickAction(act, nm){
+    const p = findParty(nm); if (!p) return;
+    const ph = (p.phone || '').replace(/\D/g, '');
+    if (act === 'edit'){ openPartyPage(p); profileTab = 'edit'; renderProfile(); }
+    else if (act === 'createpi'){
+      const nav = document.querySelector('.nav-item[data-page="create-pi"]'); if (nav) nav.click();
+      setTimeout(() => { if (window.atlasPickParty) window.atlasPickParty({ name: p.name, code: p.code }); }, 140);
+    }
+    else if (act === 'wa'){ if (ph) window.open('https://wa.me/91' + ph, '_blank'); }
+    else if (act === 'call'){ if (ph) window.location.href = 'tel:+91' + ph; }
+    else if (act === 'archive'){
+      if (isArchived(p)) { setPartyArchived(p, false, 'Party restored to active.'); return; }
+      if (confirm('Archive this party? The party will be hidden from active lists but all historical records (PIs, invoices, dispatches, receivables, etc.) will be preserved.'))
+        setPartyArchived(p, true, 'Party archived. It is hidden from active lists; history is preserved.');
+    }
   }
 
   function findParty(nm){ return store.find(p => normName(p.name) === nm); }
@@ -22330,25 +22358,28 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const pipCls = it.sev >= 3 ? 'r' : it.sev === 2 ? 'a' : 'b';
     const ph = (it.party && it.party.phone || '').replace(/\D/g, '');
     const disPhone = ph ? '' : 'disabled';
+    // Keep only the most important line(s): primary reason + one supporting note.
+    const primary = it.reasons[0] || '';
+    const secondary = it.reasons[1] || '';
     const acts = [
-      '<button data-act="party" data-i="' + i + '">Open party</button>',
-      '<button data-act="pi" data-i="' + i + '">Open PI</button>',
+      '<button data-act="party" data-i="' + i + '">Open</button>',
       '<button data-act="wa" data-i="' + i + '" ' + disPhone + '>WhatsApp</button>',
-      '<button data-act="call" data-i="' + i + '" ' + disPhone + '>Call</button>',
-      '<button class="prime" data-act="remind" data-i="' + i + '">Send reminder</button>',
+      '<button class="prime" data-act="remind" data-i="' + i + '">Remind</button>',
     ];
-    if (it.canHold) acts.push('<button data-act="hold" data-i="' + i + '">Put on hold</button>');
+    if (it.canHold) acts.push('<button data-act="hold" data-i="' + i + '">Hold</button>');
     return '<div class="wl-card">' +
       '<span class="wl-pip ' + pipCls + '"></span>' +
       '<div class="wl-body">' +
-        '<div class="wl-title"><b>' + esc(it.name) + '</b> · <span class="wl-why">' + it.reasons.join(' · ') + '</span></div>' +
-        (it.sub ? '<div class="wl-sub">' + esc(it.sub) + '</div>' : '') +
+        '<div class="wl-name">' + esc(it.name) + '</div>' +
+        '<div class="wl-why">' + primary + '</div>' +
+        (secondary ? '<div class="wl-sub2">' + secondary + '</div>' : '') +
         '<div class="wl-acts">' + acts.join('') + '</div>' +
       '</div>' +
     '</div>';
   }
 
   let _wlItems = [];
+  let _wlExpanded = false;
   function renderWatchlist(){
     const list = $('wl-list'), empty = $('wl-empty'), count = $('wl-count');
     if (!list) return;
@@ -22356,9 +22387,17 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     if (count) count.textContent = _wlItems.length;
     if (!_wlItems.length){ list.innerHTML = ''; if (empty) empty.hidden = false; return; }
     if (empty) empty.hidden = true;
-    const CAP = 40;
-    list.innerHTML = _wlItems.slice(0, CAP).map(wlCardHtml).join('') +
-      (_wlItems.length > CAP ? '<div class="pl-more">+' + (_wlItems.length - CAP) + ' more flagged — resolve the top ones first</div>' : '');
+    // Collapsed by default: top 5 most urgent, with a View all toggle.
+    const TOP = 5;
+    const shown = _wlExpanded ? _wlItems.slice(0, 40) : _wlItems.slice(0, TOP);
+    let html = shown.map(wlCardHtml).join('');
+    if (_wlItems.length > TOP){
+      html += '<button class="wl-viewall" id="wl-viewall">' +
+        (_wlExpanded ? 'Show less ↑' : 'View all ' + _wlItems.length + ' →') + '</button>';
+    }
+    list.innerHTML = html;
+    const va = $('wl-viewall');
+    if (va) va.addEventListener('click', (e) => { e.stopPropagation(); _wlExpanded = !_wlExpanded; renderWatchlist(); });
   }
 
   function wlAction(act, i){
@@ -22366,7 +22405,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const ph = (it.party && it.party.phone || '').replace(/\D/g, '');
     if (act === 'party'){
       const p = findParty(normName(it.name)) || it.party;
-      if (p && p.name) openDrawer(p);
+      if (p && p.name) openPartyPage(p);
     } else if (act === 'pi'){
       const nav = document.querySelector('.nav-item[data-page="pi-history"]');
       if (nav) nav.click();
@@ -22384,8 +22423,42 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     }
   }
 
-  // ---------- Party details drawer ----------
-  let drawerParty = null;
+  // ---------- Full-page Party Profile ----------
+  let profileParty = null;
+  let profileTab = 'overview';
+  const PROFILE_TABS = [['overview','Overview'],['pis','PIs'],['receivables','Receivables'],
+    ['dispatch','Dispatch'],['activity','Activity'],['notes','Notes'],['edit','Edit details']];
+
+  function initials(name){
+    const w = String(name || '').trim().split(/\s+/).filter(Boolean);
+    if (!w.length) return '—';
+    return ((w[0][0] || '') + (w[1] ? w[1][0] : '')).toUpperCase();
+  }
+  function avatarColor(name){
+    const colors = ['av-blue','av-green','av-purple','av-amber','av-rose'];
+    let h = 0; const s = String(name || '');
+    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    return colors[h % colors.length];
+  }
+  // Shared colour chips for both the list and the profile header.
+  function chipsFor(p){
+    const h = partyHealth(p); const out = [];
+    if (isArchived(p)) out.push('<span class="chip arch">Archived</span>');
+    else if (h.level === 'red') out.push('<span class="chip red">Outstanding</span>');
+    else if (h.level === 'yellow') out.push('<span class="chip yellow">Follow-up</span>');
+    else out.push('<span class="chip green">Active</span>');
+    if (h.isNew && !isArchived(p)) out.push('<span class="chip blue">New</span>');
+    if (h.isHighValue) out.push('<span class="chip purple">VIP</span>');
+    if ((p.type || 'Customer') === 'Supplier') out.push('<span class="chip neutral">Supplier</span>');
+    else if (p.type === 'Both') out.push('<span class="chip neutral">Both</span>');
+    return out.join('');
+  }
+  function statusPill(s){
+    s = String(s || 'Pending'); const l = s.toLowerCase();
+    const cls = l === 'dispatched' ? 'ok' : l === 'cancelled' ? 'muted' : 'warn';
+    return '<span class="pill-s ' + cls + '">' + esc(s.toUpperCase()) + '</span>';
+  }
+  function emptyTab(msg){ return '<div class="pl-empty">' + esc(msg) + '</div>'; }
 
   function partyStats(p){
     const rec = receivables && receivables.parties && receivables.parties[slug(p.name)];
@@ -22486,57 +22559,131 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       fld('Shipping Address', inp('pde-shipping', p.shippingAddress));
   }
 
-  function openDrawer(p){
-    if (!p) return;
-    drawerParty = p;
-    setEditMode(false);
-    $('pd-name').textContent = p.name;
-    $('pd-name').title = p.name;
-    $('pd-code').textContent = (p.code || '—') + (isArchived(p) ? '  ·  ARCHIVED' : '');
-    $('pd-stats').innerHTML = renderStats(p);
-    $('pd-details').innerHTML = renderDetails(p);
-    $('pd-status').className = 'ap-status'; $('pd-status').textContent = '';
-    $('pd-overlay').hidden = false;
-    document.body.style.overflow = 'hidden';
-    document.querySelector('.pd-drawer').scrollTop = 0;
-  }
-  function closeDrawer(){ $('pd-overlay').hidden = true; document.body.style.overflow = ''; drawerParty = null; }
+  function ppStatus(kind, msg){ const s = $('pp-status'); if (!s) return; s.className = 'ap-status' + (kind ? ' ' + kind : ''); s.textContent = msg || ''; }
 
-  function setEditMode(on){
-    const archived = drawerParty && isArchived(drawerParty);
-    $('pd-details').hidden = on;
-    $('pd-edit-form').hidden = !on;
-    // View-mode buttons: Edit + Archive (or Restore when archived).
-    $('pd-edit').hidden = on;
-    $('pd-archive').hidden = on || archived;
-    $('pd-restore').hidden = on || !archived;
-    // Edit-mode buttons: Cancel + Save.
-    $('pd-cancel').hidden = !on;
-    $('pd-save').hidden = !on;
-    if (on && drawerParty){
-      $('pd-edit-form').innerHTML = renderEditForm(drawerParty);
-      // Smooth-scroll the form into view (clears the sticky header) and focus.
-      requestAnimationFrame(() => {
-        $('pd-edit-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        setTimeout(() => { const f = $('pde-name'); if (f) f.focus({ preventScroll: true }); }, 340);
-      });
+  function openPartyPage(p){
+    if (!p) return;
+    profileParty = p; profileTab = 'overview';
+    document.querySelectorAll('section.page').forEach(s => { s.hidden = s.getAttribute('data-page') !== 'party-profile'; });
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const crumb = document.querySelector('.crumb');
+    if (crumb) crumb.innerHTML = '<b>Native</b> <span class="sep">/</span> Operate <span class="sep">/</span> <b>Party profile</b>';
+    history.replaceState(null, '', '#party-profile');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    renderProfile();
+  }
+
+  function profileActs(p){
+    const ph = (p.phone || '').replace(/\D/g, ''); const arch = isArchived(p);
+    const b = ['<button class="pi-btn" data-pa="edit">✏️ Edit</button>'];
+    if (!arch) b.push('<button class="pi-btn" data-pa="createpi">📄 Create PI</button>');
+    b.push('<button class="pi-btn" data-pa="wa"' + (ph ? '' : ' disabled') + '>💬 WhatsApp</button>');
+    b.push('<button class="pi-btn" data-pa="call"' + (ph ? '' : ' disabled') + '>📞 Call</button>');
+    if (arch) b.push('<button class="pi-btn prime" data-pa="restore">Restore</button>');
+    else b.push('<button class="pi-btn pd-arch" data-pa="archive">🗂️ Archive</button>');
+    return b.join('');
+  }
+
+  function renderProfile(){
+    const p = profileParty; if (!p) return;
+    $('pp-avatar').textContent = initials(p.name);
+    $('pp-avatar').className = 'pp-avatar ' + avatarColor(p.name);
+    $('pp-name').textContent = p.name;
+    $('pp-code').textContent = p.code || '—';
+    $('pp-chips').innerHTML = chipsFor(p);
+    $('pp-meta').innerHTML = [p.poc, p.state, p.city, p.phone ? '📞 ' + p.phone : '', p.email].filter(Boolean).map(esc).join(' &nbsp;·&nbsp; ');
+    $('pp-stats').innerHTML = renderStats(p);
+    $('pp-acts').innerHTML = profileActs(p);
+    ppStatus('', '');
+    $('pp-tabs').innerHTML = PROFILE_TABS.map(t => '<button class="pp-tab' + (t[0] === profileTab ? ' on' : '') + '" data-tab="' + t[0] + '">' + t[1] + '</button>').join('');
+    renderTabBody();
+  }
+
+  function piRowsFor(p){ return (piList || []).filter(x => normName(x.party) === normName(p.name)); }
+
+  function renderTabBody(){
+    const p = profileParty, el = $('pp-tabbody'); if (!el) return;
+    if (profileTab === 'overview'){ el.innerHTML = renderDetails(p); return; }
+    if (profileTab === 'pis'){
+      const rows = piRowsFor(p).sort((a, b) => (b.firstNo || 0) - (a.firstNo || 0));
+      el.innerHTML = rows.length ? table(['REF#','Date','Lines','Total','Status'],
+        rows.map(r => ['<span class="mono">' + esc(r.ref || '') + '</span>', esc(r.date || ''), 'r:' + (r.lines || 0), 'r:' + inr(r.totalIncGst || 0), statusPill(r.status)]))
+        : emptyTab('No PIs found for this party yet.');
+      return;
+    }
+    if (profileTab === 'receivables'){
+      const rec = receivables && receivables.parties && receivables.parties[slug(p.name)];
+      if (!rec){ el.innerHTML = emptyTab('No receivables data for this party.'); return; }
+      const sum = '<div class="pp-stats">' + [['Opening', rec.opening],['Billed', rec.billed],['Received', rec.received],['Outstanding', rec.outstanding]]
+        .map(c => '<div class="pd-stat"><div class="k">' + c[0] + '</div><div class="v sm">' + inr(c[1] || 0) + '</div></div>').join('') + '</div>';
+      const tx = (rec.fy25 || []).slice().reverse();
+      el.innerHTML = sum + '<div class="pd-section-t" style="margin-top:18px;">Ledger</div>' +
+        table(['Date','Type','Debit','Credit'], tx.map(t => [esc(t.d), esc(t.t), 'r:' + (t.dr ? inr(t.dr) : '—'), 'r:' + (t.cr ? inr(t.cr) : '—')]));
+      return;
+    }
+    if (profileTab === 'dispatch'){
+      const rows = piRowsFor(p);
+      el.innerHTML = rows.length ? table(['REF#','Date','Dispatch status'],
+        rows.map(r => ['<span class="mono">' + esc(r.ref || '') + '</span>', esc(r.date || ''), statusPill(r.status)]))
+        : emptyTab('No dispatch records for this party.');
+      return;
+    }
+    if (profileTab === 'activity'){ el.innerHTML = renderActivity(p); return; }
+    if (profileTab === 'notes'){
+      el.innerHTML = '<div class="pd-section-t">Notes</div>' +
+        '<textarea id="pp-notes" class="pp-notes" placeholder="Add private notes about this party…">' + esc(loadNotes(p)) + '</textarea>' +
+        '<div class="pd-edit-acts"><button class="pi-btn prime" data-pa="savenotes">Save note</button></div>';
+      return;
+    }
+    if (profileTab === 'edit'){
+      el.innerHTML = renderEditForm(p) +
+        '<div class="pd-edit-acts"><button class="pi-btn" data-pa="canceledit">Cancel</button><button class="pi-btn prime" id="pp-save" data-pa="save">Save changes</button></div>';
+      requestAnimationFrame(() => { const f = $('pde-name'); if (f) f.focus({ preventScroll: true }); });
     }
   }
 
+  function table(head, rows){
+    const th = head.map(h => '<th' + (/^(Lines|Total|Debit|Credit)$/.test(h) ? ' class="r"' : '') + '>' + h + '</th>').join('');
+    const body = rows.map(r => '<tr>' + r.map(c => {
+      const right = typeof c === 'string' && c.indexOf('r:') === 0;
+      return '<td' + (right ? ' class="r"' : '') + '>' + (right ? c.slice(2) : c) + '</td>';
+    }).join('') + '</tr>').join('');
+    return '<table class="pp-table"><thead><tr>' + th + '</tr></thead><tbody>' + body + '</tbody></table>';
+  }
+
+  function renderActivity(p){
+    const ev = [];
+    if (p.createdAt) ev.push([new Date(p.createdAt), 'Party created']);
+    if (p.updatedAt && p.updatedAt !== p.createdAt) ev.push([new Date(p.updatedAt), 'Details updated']);
+    for (const r of piRowsFor(p)) if (r.date) ev.push([new Date(r.date), 'PI ' + (r.ref || '') + ' · ' + inr(r.totalIncGst || 0)]);
+    const rec = receivables && receivables.parties && receivables.parties[slug(p.name)];
+    if (rec) for (const t of (rec.fy25 || [])){ const d = parseRecDate(t.d); if (d) ev.push([d, t.t + ' · ' + inr((t.dr || t.cr) || 0)]); }
+    ev.sort((a, b) => b[0] - a[0]);
+    if (!ev.length) return emptyTab('No activity recorded yet.');
+    return '<div class="pp-timeline">' + ev.slice(0, 80).map(e =>
+      '<div class="pp-tl"><span class="pp-tl-d">' + fmtDate(e[0]) + '</span><span class="pp-tl-t">' + esc(e[1]) + '</span></div>').join('') + '</div>';
+  }
+
+  function notesKey(p){ return normName(p.code || p.name); }
+  function loadNotes(p){ try { return (JSON.parse(localStorage.getItem('atlas-party-notes') || '{}'))[notesKey(p)] || ''; } catch(e){ return ''; } }
+  function saveNotes(p){
+    try {
+      const all = JSON.parse(localStorage.getItem('atlas-party-notes') || '{}');
+      all[notesKey(p)] = $('pp-notes').value;
+      localStorage.setItem('atlas-party-notes', JSON.stringify(all));
+      toast('Note saved.');
+    } catch(e){}
+  }
+
   function archiveParty(){
-    if (!drawerParty) return;
-    const p = drawerParty;
+    if (!profileParty) return;
     if (!confirm('Archive this party? The party will be hidden from active lists but all historical records (PIs, invoices, dispatches, receivables, etc.) will be preserved.')) return;
-    setPartyArchived(p, true, 'Party archived. It is hidden from active lists; history is preserved.');
+    setPartyArchived(profileParty, true, 'Party archived. It is hidden from active lists; history is preserved.');
   }
-  function restoreParty(){
-    if (!drawerParty) return;
-    setPartyArchived(drawerParty, false, 'Party restored to active.');
-  }
+  function restoreParty(){ if (profileParty) setPartyArchived(profileParty, false, 'Party restored to active.'); }
 
   function setPartyArchived(p, archive, okMsg){
     const status = archive ? 'Archived' : 'Active';
-    // Local persistence so it survives reloads (also covers legacy/offline).
     const set = loadArchived(); const key = normName(p.name);
     if (archive) set.add(key); else set.delete(key);
     saveArchived(set);
@@ -22545,41 +22692,39 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       const idx = store.findIndex(x => normName(x.name) === normName(p.name) || (x.code && normName(x.code) === normName(p.code)));
       const merged = Object.assign({}, store[idx] || p, rec, { status });
       if (idx >= 0) store[idx] = merged; else store.push(merged);
-      drawerParty = merged;
+      profileParty = merged;
       try {
         const list = loadCustom().map(e => (normName(e.code) === normName(p.code) || normName(e.name) === normName(p.name)) ? Object.assign({}, e, { status }) : e);
         localStorage.setItem('atlas-custom-parties', JSON.stringify(list));
       } catch(e){}
       syncArchivedExport();
       renderFilters(); renderList(); renderWatchlist();
-      openDrawer(merged);
+      renderProfile();
       toast(okMsg);
     };
 
     const url = (window.ATLAS_APPS_SCRIPT_URL || localStorage.getItem('atlas-apps-script-url') || '').trim();
     if (!url || !p.code){ apply({}); return; }
-    pdStatus('warn', archive ? 'Archiving…' : 'Restoring…');
+    ppStatus('warn', archive ? 'Archiving…' : 'Restoring…');
     fetch(url, { method: 'POST', mode: 'cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ kind: 'updateParty', party: { code: p.code, name: p.name, status } }) })
       .then(r => r.json())
       .then(j => { if (!j.ok) throw new Error(j.error || 'Failed'); apply(j.record || {}); })
-      .catch(err => { apply({}); pdStatus('warn', 'Saved locally, sheet sync failed: ' + err.message); });
+      .catch(err => { apply({}); ppStatus('warn', 'Saved locally, sheet sync failed: ' + err.message); });
   }
 
-  function pdStatus(kind, msg){ const s = $('pd-status'); s.className = 'ap-status' + (kind ? ' ' + kind : ''); s.textContent = msg || ''; }
-
   async function saveEdit(){
-    if (!drawerParty) return;
+    if (!profileParty) return;
     const g = (id) => { const e = $(id); return e ? e.value.trim() : ''; };
     const name = g('pde-name').toUpperCase();
     const phoneRaw = g('pde-phone');
     const phone = phoneRaw.replace(/\D/g, '');
-    if (!name){ pdStatus('err', 'Party name is required.'); return; }
-    if (phoneRaw && !/^[6-9]\d{9}$/.test(phone)){ pdStatus('err', 'Phone must be a valid 10-digit mobile.'); return; }
+    if (!name){ ppStatus('err', 'Party name is required.'); return; }
+    if (phoneRaw && !/^[6-9]\d{9}$/.test(phone)){ ppStatus('err', 'Phone must be a valid 10-digit mobile.'); return; }
 
     const upd = {
-      code: drawerParty.code, name,
+      code: profileParty.code, name,
       poc: g('pde-poc') === '—' ? '' : g('pde-poc'),
       type: g('pde-type'), status: g('pde-status'),
       gst: g('pde-gst').toUpperCase(), aadhaar: g('pde-aadhaar').replace(/\D/g, ''),
@@ -22588,17 +22733,14 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       billingAddress: g('pde-billing').toUpperCase(), shippingAddress: g('pde-shipping').toUpperCase(),
     };
 
-    // Apply optimistically to local state so the UI is instant + consistent.
     function applyRecord(rec){
-      const idx = store.findIndex(p => normName(p.code ? p.code : '') === normName(rec.code) || normName(p.name) === normName(drawerParty.name));
-      const merged = Object.assign({}, drawerParty, rec);
+      const idx = store.findIndex(p => (p.code && normName(p.code) === normName(rec.code)) || normName(p.name) === normName(profileParty.name));
+      const merged = Object.assign({}, profileParty, rec);
       if (idx >= 0) store[idx] = merged; else store.push(merged);
-      drawerParty = merged;
-      // Keep the archived set in sync if Status was edited to/from Archived.
+      profileParty = merged;
       const set = loadArchived();
       if (merged.status === 'Archived') set.add(normName(merged.name)); else set.delete(normName(merged.name));
       saveArchived(set);
-      // keep local cache + Create PI vocab in sync (reflect name/code edits)
       try {
         const list = loadCustom().map(e => (normName(e.code) === normName(rec.code) || normName(e.name) === normName(merged.name)) ? Object.assign({}, e, merged) : e);
         localStorage.setItem('atlas-custom-parties', JSON.stringify(list));
@@ -22606,14 +22748,15 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       const vp = (V.parties || []).find(x => normName(x.code) === normName(merged.code));
       if (vp){ vp.name = merged.name; vp.code = merged.code; }
       sortStore(); syncArchivedExport(); renderFilters(); renderList(); renderWatchlist();
-      openDrawer(merged);
+      profileTab = 'overview'; renderProfile();
     }
 
-    const local = Object.assign({}, drawerParty, upd, { phone: phoneRaw ? phone : drawerParty.phone, updatedAt: new Date().toISOString() });
+    const local = Object.assign({}, profileParty, upd, { phone: phoneRaw ? phone : profileParty.phone, updatedAt: new Date().toISOString() });
     const url = (window.ATLAS_APPS_SCRIPT_URL || localStorage.getItem('atlas-apps-script-url') || '').trim();
     if (!url){ applyRecord(local); toast('Party updated (saved locally — backend not wired).'); return; }
 
-    pdStatus('warn', 'Saving…'); $('pd-save').disabled = true;
+    ppStatus('warn', 'Saving…');
+    const btn = $('pp-save'); if (btn) btn.disabled = true;
     try {
       const res = await fetch(url, { method: 'POST', mode: 'cors',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -22624,11 +22767,30 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       toast('Party updated successfully.');
     } catch(err){
       applyRecord(local);
-      pdStatus('warn', 'Saved locally, but sheet update failed: ' + err.message);
-      $('pd-save').disabled = false;
-      return;
+      toast('Saved locally, but sheet update failed.');
     }
-    $('pd-save').disabled = false;
+  }
+
+  // Profile action + tab event delegation.
+  function profileClick(e){
+    const tabBtn = e.target.closest('.pp-tab[data-tab]');
+    if (tabBtn){ profileTab = tabBtn.getAttribute('data-tab'); renderProfile(); return; }
+    const ab = e.target.closest('[data-pa]'); if (!ab) return;
+    const act = ab.getAttribute('data-pa'); const p = profileParty; if (!p) return;
+    const ph = (p.phone || '').replace(/\D/g, '');
+    if (act === 'edit'){ profileTab = 'edit'; renderProfile(); }
+    else if (act === 'canceledit'){ profileTab = 'overview'; renderProfile(); }
+    else if (act === 'save'){ saveEdit(); }
+    else if (act === 'savenotes'){ saveNotes(p); }
+    else if (act === 'archive'){ archiveParty(); }
+    else if (act === 'restore'){ restoreParty(); }
+    else if (act === 'wa'){ if (ph) window.open('https://wa.me/91' + ph, '_blank'); }
+    else if (act === 'call'){ if (ph) window.location.href = 'tel:+91' + ph; }
+    else if (act === 'createpi'){
+      const nav = document.querySelector('.nav-item[data-page="create-pi"]');
+      if (nav) nav.click();
+      setTimeout(() => { if (window.atlasPickParty) window.atlasPickParty({ name: p.name, code: p.code }); }, 140);
+    }
   }
 
   // ---------- load orchestration ----------
@@ -22638,7 +22800,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     ensureBase();
     renderFilters(); renderList();
     if (enriched && !force){ renderWatchlist(); return; }
-    const [sheet] = await Promise.all([fetchSheetParties(), fetchReceivables(), fetchPiList().then(p => { dataNow = new Date(); indexPis(p); })]);
+    const [sheet] = await Promise.all([fetchSheetParties(), fetchReceivables(), fetchPiList().then(p => { piList = p || []; indexPis(piList); })]);
     buildStore(sheet);
     computeDataNow();
     enriched = true;
@@ -22678,21 +22840,19 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       wlAction(b.getAttribute('data-act'), parseInt(b.getAttribute('data-i'), 10));
     });
 
-    // Row click → open the party details drawer.
+    // Row click → open the full party profile. Quick-action buttons handled first.
     $('pl-list').addEventListener('click', (e) => {
+      const qa = e.target.closest('button[data-qa]');
       const row = e.target.closest('.pl-row[data-name]'); if (!row) return;
-      const p = findParty(row.getAttribute('data-name')); if (p) openDrawer(p);
+      if (qa){ e.stopPropagation(); quickAction(qa.getAttribute('data-qa'), row.getAttribute('data-name')); return; }
+      const p = findParty(row.getAttribute('data-name')); if (p) openPartyPage(p);
     });
 
-    // Drawer controls.
-    $('pd-close').addEventListener('click', closeDrawer);
-    $('pd-overlay').addEventListener('click', (e) => { if (e.target.id === 'pd-overlay') closeDrawer(); });
-    $('pd-edit').addEventListener('click', () => setEditMode(true));
-    $('pd-cancel').addEventListener('click', () => setEditMode(false));
-    $('pd-save').addEventListener('click', saveEdit);
-    $('pd-archive').addEventListener('click', archiveParty);
-    $('pd-restore').addEventListener('click', restoreParty);
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('pd-overlay').hidden) closeDrawer(); });
+    // Profile page: back button + delegated tab/action clicks.
+    const back = $('pp-back');
+    if (back) back.addEventListener('click', () => { const n = document.querySelector('.nav-item[data-page="parties"]'); if (n) n.click(); });
+    const prof = document.querySelector('section[data-page="party-profile"]');
+    if (prof) prof.addEventListener('click', profileClick);
 
     // If the Parties page is the current route, load now.
     if (location.hash.slice(1) === 'parties') loadParties(false);
@@ -22837,6 +22997,129 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     transition: opacity 220ms var(--ease), transform 220ms var(--ease);
   }
   .atlas-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ===== Shorter KPI cards on the Parties page (item 2) ===== */
+  [data-page="parties"] .kpi { padding: 11px 16px; }
+  [data-page="parties"] .kpi .v { font-size: 22px; margin-top: 2px; }
+  [data-page="parties"] .kpis { margin-bottom: 6px; }
+
+  /* ===== Avatars / initials (shared list + profile) ===== */
+  .av-blue   { background: rgba(124,168,255,0.16); color: var(--blue); }
+  .av-green  { background: rgba(78,222,163,0.16);  color: var(--emerald); }
+  .av-purple { background: rgba(183,139,255,0.16); color: #b78bff; }
+  .av-amber  { background: rgba(255,176,121,0.16); color: var(--amber); }
+  .av-rose   { background: rgba(255,138,168,0.16); color: var(--rose); }
+  .pl-av {
+    flex: none; width: 38px; height: 38px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--fd); font-size: 13px; font-weight: 600; letter-spacing: 0.02em;
+  }
+
+  /* ===== Card-like party rows (items 1,3,7) ===== */
+  .pl-list { gap: 8px; }
+  .pl-row {
+    align-items: center; gap: 12px; padding: 12px 12px;
+    border: 1px solid var(--line); border-radius: 11px; border-bottom: 1px solid var(--line);
+    background: var(--surface);
+  }
+  .pl-row:last-child { border-bottom: 1px solid var(--line); }
+  .pl-row.h-green  { border-left: 3px solid rgba(78,222,163,0.5); }
+  .pl-row.h-yellow { border-left: 3px solid rgba(255,176,121,0.6); }
+  .pl-row.h-red    { border-left: 3px solid rgba(255,138,168,0.6); }
+  .pl-name { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; }
+  .pl-name-row { flex-wrap: wrap; gap: 7px; }
+  .pl-codebadge {
+    font-family: var(--fm); font-size: 10px; letter-spacing: 0.05em; color: var(--text-2);
+    background: var(--surface-3); border: 1px solid var(--line); border-radius: 5px; padding: 2px 7px;
+  }
+  .pl-lastpi { font-family: var(--fm); font-size: 10px; color: var(--text-3); margin-top: 3px; }
+  .pl-out.ok { color: var(--text-3); }
+  .pl-actions {
+    display: flex; gap: 3px; flex: none; opacity: 0; transition: opacity 150ms var(--ease);
+    margin-left: 4px;
+  }
+  .pl-row:hover .pl-actions { opacity: 1; }
+  .pl-actions button {
+    background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px;
+    width: 28px; height: 28px; font-size: 12px; cursor: pointer; line-height: 1;
+    transition: border-color 150ms var(--ease);
+  }
+  .pl-actions button:hover:not(:disabled) { border-color: var(--text-3); }
+  .pl-actions button:disabled { opacity: 0.35; cursor: not-allowed; }
+  @media (hover: none){ .pl-actions { opacity: 1; } }
+
+  /* ===== Status chips (item 4, shared) ===== */
+  .chip { font-family: var(--fm); font-size: 9.5px; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 999px; font-weight: 500; }
+  .chip.green   { background: var(--emerald-soft); color: var(--emerald); }
+  .chip.red     { background: rgba(255,138,168,0.14); color: var(--rose); }
+  .chip.yellow  { background: rgba(255,176,121,0.16); color: var(--amber); }
+  .chip.blue    { background: rgba(124,168,255,0.16); color: var(--blue); }
+  .chip.purple  { background: rgba(183,139,255,0.16); color: #b78bff; }
+  .chip.neutral { background: var(--surface-3); color: var(--text-2); }
+  .chip.arch    { background: var(--surface-3); color: var(--text-3); }
+
+  /* ===== Compact watchlist cards + collapse (items 5,10) ===== */
+  .wl-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .wl-why { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+  .wl-sub2 { font-size: 11px; color: var(--text-3); margin-top: 1px; }
+  .wl-viewall {
+    width: 100%; margin-top: 4px; padding: 9px; background: var(--surface-2);
+    border: 1px dashed var(--line); border-radius: 8px; color: var(--text-2);
+    font-family: var(--fm); font-size: 11px; cursor: pointer; letter-spacing: 0.03em;
+  }
+  .wl-viewall:hover { color: var(--text); border-color: var(--text-3); }
+
+  /* ===== Full-page Party Profile (item 11) ===== */
+  .pp-back {
+    background: transparent; border: 1px solid var(--line); color: var(--text-2);
+    padding: 6px 13px; border-radius: 7px; font-size: 12px; cursor: pointer; margin-bottom: 14px;
+  }
+  .pp-back:hover { color: var(--text); border-color: var(--text-3); }
+  .pp-head { display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
+  .pp-avatar {
+    flex: none; width: 60px; height: 60px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--fd); font-size: 22px; font-weight: 600;
+  }
+  .pp-head-main { flex: 1 1 240px; min-width: 0; }
+  .pp-head-main h1 { margin: 0; font-family: var(--fd); font-size: 26px; font-weight: 600; letter-spacing: -0.02em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pp-subline { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+  .pp-codebadge { font-family: var(--fm); font-size: 12px; letter-spacing: 0.06em; color: var(--emerald);
+    background: var(--emerald-soft); border-radius: 6px; padding: 2px 9px; }
+  .pp-meta { font-family: var(--fm); font-size: 11.5px; color: var(--text-3); margin-top: 8px; }
+  .pp-head-acts { display: flex; gap: 8px; flex-wrap: wrap; flex: 0 0 auto; }
+  .pp-head-acts .pi-btn { padding: 7px 13px; font-size: 11.5px; }
+  .pp-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 6px; }
+  .pp-tabs { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 1px solid var(--line); margin: 18px 0 18px; }
+  .pp-tab {
+    background: transparent; border: 0; border-bottom: 2px solid transparent; color: var(--text-3);
+    padding: 9px 14px; font-size: 12.5px; cursor: pointer; transition: all 150ms var(--ease);
+    margin-bottom: -1px;
+  }
+  .pp-tab:hover { color: var(--text-2); }
+  .pp-tab.on { color: var(--text); border-bottom-color: var(--emerald); }
+  .pp-tabbody { min-height: 200px; }
+  .pp-table { width: 100%; border-collapse: collapse; }
+  .pp-table th { text-align: left; font-family: var(--fm); font-size: 10px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--text-3); padding: 9px 12px; background: var(--surface-2);
+    border-bottom: 1px solid var(--line); }
+  .pp-table th.r, .pp-table td.r { text-align: right; }
+  .pp-table td { padding: 11px 12px; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .pp-table .mono { font-family: var(--fm); font-size: 12px; }
+  .pp-timeline { display: flex; flex-direction: column; }
+  .pp-tl { display: flex; gap: 14px; padding: 10px 4px; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .pp-tl-d { flex: none; width: 110px; font-family: var(--fm); font-size: 11px; color: var(--text-3); }
+  .pp-tl-t { color: var(--text); }
+  .pp-notes { width: 100%; min-height: 180px; resize: vertical; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 9px; color: var(--text); padding: 12px; font-size: 13px; font-family: inherit; line-height: 1.5; }
+  .pp-notes:focus { outline: none; border-color: var(--emerald); }
+  .pp-tabbody .pd-edit-acts { margin-top: 16px; }
+  @media (max-width: 640px){
+    .pp-head-main h1 { font-size: 21px; white-space: normal; }
+    .pp-head-acts { width: 100%; }
+  }
 
   /* PI History */
   .ph-empty { padding: 40px 20px; text-align: center; color: var(--text-3); font-size: 13px; }
