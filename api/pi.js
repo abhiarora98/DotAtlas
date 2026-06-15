@@ -97,6 +97,15 @@ function partyCodePrefix(name, state, poc) {
   return nameInitials(name) + '-' + stateToCode(state) + pocInitials(poc);
 }
 
+// Reduce an Indian mobile number to its 10 core digits (drops +91 / 91 / 0).
+function normalizePhone(raw) {
+  let d = String(raw || '').replace(/\D/g, '');
+  if (d.length === 12 && d.startsWith('91')) d = d.slice(2);
+  else if (d.length === 11 && d.startsWith('0')) d = d.slice(1);
+  return d;
+}
+function isValidPhone(d) { return /^[6-9]\d{9}$/.test(d); }
+
 // Given the prefix and all existing codes, return the next zero-padded code.
 function nextPartyCode(prefix, existingCodes) {
   const re = new RegExp('^' + prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(\\d{3})$', 'i');
@@ -367,10 +376,12 @@ async function handleParty(sheets, spreadsheetId, payload, res) {
   const gst   = String(p.gst || '').trim().toUpperCase();
   const aadhaar = String(p.aadhaar || '').replace(/\D/g, '');
   const city  = String(p.city || '').trim();
+  const phone = normalizePhone(p.phone);
 
   if (!name)  return res.status(400).json({ ok: false, error: 'Party name is required' });
   if (!poc)   return res.status(400).json({ ok: false, error: 'Sales POC is required to generate the party code' });
   if (!city)  return res.status(400).json({ ok: false, error: 'City is required' });
+  if (!isValidPhone(phone)) return res.status(400).json({ ok: false, error: 'A valid 10-digit Indian mobile number is required' });
 
   const stateCode = stateToCode(state);
   if (!stateCode) return res.status(400).json({ ok: false, error: 'A valid State is required to generate the party code' });
@@ -440,7 +451,7 @@ async function handleParty(sheets, spreadsheetId, payload, res) {
         new Date().toISOString(),
         name, code, poc,
         gst, aadhaar, state,
-        String(p.phone || '').trim(), city,
+        phone, city,
       ]],
     },
   });

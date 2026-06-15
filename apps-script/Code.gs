@@ -136,10 +136,12 @@ function handleParty(payload) {
   const gst   = String(p.gst || '').trim().toUpperCase();
   const aadhaar = String(p.aadhaar || '').replace(/\D/g, '');
   const city  = String(p.city || '').trim();
+  const phone = normalizePhone_(p.phone);
 
   if (!name) return jsonResponse({ ok: false, error: 'Party name is required.' });
   if (!poc)  return jsonResponse({ ok: false, error: 'Sales POC is required to generate the party code.' });
   if (!city) return jsonResponse({ ok: false, error: 'City is required.' });
+  if (!isValidPhone_(phone)) return jsonResponse({ ok: false, error: 'A valid 10-digit Indian mobile number is required.' });
 
   const stateCode = stateToCode_(state);
   if (!stateCode) return jsonResponse({ ok: false, error: 'A valid State is required to generate the party code.' });
@@ -171,7 +173,7 @@ function handleParty(payload) {
     gst,
     aadhaar,
     state,
-    String(p.phone || '').trim(),
+    phone,
     city,
   ]);
 
@@ -234,6 +236,15 @@ function nameInitials_(name) {
 function partyCodePrefix_(name, state, poc) {
   return nameInitials_(name) + '-' + stateToCode_(state) + pocInitials_(poc);
 }
+
+// Reduce an Indian mobile number to its 10 core digits (drops +91 / 91 / 0).
+function normalizePhone_(raw) {
+  var d = String(raw || '').replace(/\D/g, '');
+  if (d.length === 12 && d.indexOf('91') === 0) d = d.slice(2);
+  else if (d.length === 11 && d.indexOf('0') === 0) d = d.slice(1);
+  return d;
+}
+function isValidPhone_(d) { return /^[6-9]\d{9}$/.test(d); }
 
 function nextPartyCode_(prefix, existingCodes) {
   var re = new RegExp('^' + prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(\\d{3})$', 'i');

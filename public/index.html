@@ -2080,13 +2080,16 @@
   body[data-mode="light"] .ap-status.ok { background: rgba(44,91,255,0.06); color: var(--emerald); border-color: var(--emerald); }
 
   /* Party typeahead (custom, only shows on type) */
+  /* Let the Party typeahead escape the header card instead of being clipped
+     by the card's overflow:hidden (which hid it behind the Line items card). */
+  .pi-header-card { overflow: visible; position: relative; z-index: 5; }
   .pi-party-wrap { position: relative; }
   .pi-typeahead {
     position: absolute;
     top: calc(100% + 4px);
     left: 0;
     right: 0;
-    z-index: 30;
+    z-index: 1000;
     max-height: 280px;
     overflow-y: auto;
     background: var(--surface);
@@ -2872,7 +2875,7 @@
       </div>
 
       <!-- HEADER CARD -->
-      <div class="card">
+      <div class="card pi-header-card">
         <div class="card-h">
           <div class="t">
             <span class="ic">+</span>
@@ -21455,7 +21458,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         </div>
         <div class="pi-field">
           <label for="ap-phone">Phone <span class="ap-req">*</span></label>
-          <input class="pi-input mono" id="ap-phone" placeholder="10-digit mobile" autocomplete="off" inputmode="tel" maxlength="15">
+          <input class="pi-input mono" id="ap-phone" placeholder="10-digit mobile" autocomplete="off" inputmode="tel" maxlength="12">
+          <span class="ap-hint" id="ap-phone-hint"></span>
         </div>
       </div>
 
@@ -21635,6 +21639,18 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     if (!ni || !sc || !pi) return '';
     return ni + '-' + sc + pi;
   }
+
+  // Normalize an Indian mobile number to its 10 core digits, stripping a
+  // +91 / 91 / leading-0 prefix. Returns '' if it can't be reduced to 10.
+  function normalizePhone(raw){
+    let d = String(raw || '').replace(/\D/g, '');
+    if (d.length === 12 && d.startsWith('91')) d = d.slice(2);
+    else if (d.length === 11 && d.startsWith('0')) d = d.slice(1);
+    return d;
+  }
+  // Valid Indian mobile: 10 digits starting 6-9.
+  function isValidPhone(d){ return /^[6-9]\d{9}$/.test(d); }
+
   function nextSeqForPrefix(prefix){
     const re = new RegExp('^' + prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(\\d{3})$', 'i');
     let max = 0;
@@ -21669,6 +21685,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     });
     $('ap-gst-hint').textContent = 'Two-letter state prefix auto-selects the State.';
     $('ap-gst-hint').style.color = '';
+    $('ap-phone-hint').textContent = '';
+    $('ap-phone-hint').style.color = '';
     $('ap-overlay').hidden = false;
     document.body.style.overflow = 'hidden';
     setTimeout(() => $('ap-name').focus(), 30);
@@ -21703,13 +21721,15 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const state   = $('ap-state').value.trim();
     const gst     = $('ap-gst').value.trim().toUpperCase();
     const aadhaar = $('ap-aadhaar').value.replace(/\D/g, '');
-    const phone   = $('ap-phone').value.trim();
+    const phoneRaw = $('ap-phone').value.trim();
+    const phone   = normalizePhone(phoneRaw);
     const city    = $('ap-city').value.trim().toUpperCase();
 
     if (!name)  { setStatus('err', 'Party name is required.'); $('ap-name').focus();  return; }
     if (!poc)   { setStatus('err', 'Sales POC is required to generate the party code.'); $('ap-poc').focus(); return; }
     if (!state) { setStatus('err', 'State is required to generate the party code.'); $('ap-state').focus(); return; }
-    if (!phone) { setStatus('err', 'Phone is required.'); $('ap-phone').focus(); return; }
+    if (!phoneRaw) { setStatus('err', 'Phone is required.'); $('ap-phone').focus(); return; }
+    if (!isValidPhone(phone)) { setStatus('err', 'Enter a valid 10-digit Indian mobile number (starting 6–9).'); $('ap-phone').focus(); return; }
     if (!city)  { setStatus('err', 'City is required.'); $('ap-city').focus(); return; }
 
     // GST or Aadhaar — at least one is mandatory.
@@ -21829,6 +21849,18 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     $('ap-aadhaar').addEventListener('input', () => {
       const el = $('ap-aadhaar');
       el.value = el.value.replace(/\D/g, '').slice(0, 12);
+    });
+
+    // Phone: digits only, max 12 (allows a 91/0 prefix), validate live.
+    $('ap-phone').addEventListener('input', () => {
+      const el = $('ap-phone');
+      el.value = el.value.replace(/\D/g, '').slice(0, 12);
+      const hint = $('ap-phone-hint');
+      if (!hint) return;
+      const d = normalizePhone(el.value);
+      if (!el.value){ hint.textContent = ''; hint.style.color = ''; }
+      else if (isValidPhone(d)){ hint.textContent = '✓ Valid mobile number.'; hint.style.color = 'var(--emerald)'; }
+      else { hint.textContent = 'Must be a 10-digit number starting 6–9.'; hint.style.color = 'var(--amber)'; }
     });
 
     // Recompute the read-only party code whenever its inputs change.
