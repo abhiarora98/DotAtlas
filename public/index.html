@@ -2774,7 +2774,8 @@
                 <select class="pl-filter" id="pl-f-type"><option value="">All types</option><option>Customer</option><option>Supplier</option><option>Both</option></select>
                 <select class="pl-filter" id="pl-f-state"><option value="">All states</option></select>
                 <select class="pl-filter" id="pl-f-poc"><option value="">All POCs</option></select>
-                <select class="pl-filter" id="pl-f-status"><option value="">All status</option><option>Active</option><option>Inactive</option></select>
+                <select class="pl-filter" id="pl-f-status"><option value="">All active</option><option>Active</option><option>Inactive</option><option>Archived</option></select>
+                <label class="pl-archtoggle"><input type="checkbox" id="pl-f-incarch"> Include archived</label>
               </div>
             </div>
             <div id="pl-list" class="pl-list" role="list"></div>
@@ -21083,9 +21084,12 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     }
     const ql = q.toLowerCase();
     const matches = [];
-    // Prefer prefix matches first, then substring
+    // Prefer prefix matches first, then substring. Archived parties are
+    // excluded so PIs can't be raised against them until restored.
+    const archived = window.ATLAS_ARCHIVED;
     const prefix = [], substring = [];
     for (const p of V.parties){
+      if (archived && archived.has(p.name.trim().toLowerCase())) continue;
       const nm = p.name.toLowerCase();
       const cd = (p.code || '').toLowerCase();
       if (nm.startsWith(ql) || cd.startsWith(ql)) prefix.push(p);
@@ -21957,24 +21961,23 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     <div class="pd-head">
       <div class="pd-head-main">
         <div class="eb" style="margin-bottom:6px;"><span class="live-dot"></span>Party · profile</div>
-        <h2 id="pd-name">—</h2>
+        <h2 id="pd-name" title="">—</h2>
         <div class="pd-code" id="pd-code">—</div>
       </div>
       <div class="pd-head-acts">
         <button class="pi-btn" id="pd-edit">Edit</button>
+        <button class="pi-btn pd-arch" id="pd-archive">Archive</button>
+        <button class="pi-btn prime" id="pd-restore" hidden>Restore</button>
+        <button class="pi-btn" id="pd-cancel" hidden>Cancel</button>
+        <button class="pi-btn prime" id="pd-save" hidden>Save</button>
         <button class="ap-close" id="pd-close" aria-label="Close">×</button>
       </div>
     </div>
     <div class="pd-body">
       <div class="pd-stats" id="pd-stats"></div>
-      <div class="pd-section-t">Details</div>
-      <div class="pd-details" id="pd-details"></div>
-      <div class="pd-edit" id="pd-edit-form" hidden></div>
+      <div id="pd-details"></div>
+      <div id="pd-edit-form" hidden></div>
       <div class="ap-status" id="pd-status" style="margin-top:12px;"></div>
-      <div class="pd-edit-acts" id="pd-edit-acts" hidden>
-        <button class="pi-btn" id="pd-cancel">Cancel</button>
-        <button class="pi-btn prime" id="pd-save">Save changes →</button>
-      </div>
     </div>
   </div>
 </div>
@@ -22016,6 +22019,12 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   function loadCustom(){ try { return JSON.parse(localStorage.getItem('atlas-custom-parties') || '[]'); } catch(e){ return []; } }
   function loadHolds(){ try { return new Set(JSON.parse(localStorage.getItem(HOLDS_KEY) || '[]')); } catch(e){ return new Set(); } }
   function saveHolds(set){ localStorage.setItem(HOLDS_KEY, JSON.stringify([...set])); }
+  // Archived parties: status='Archived' on the record, mirrored locally by
+  // name so legacy/offline parties stay archived across reloads.
+  const ARCHIVED_KEY = 'atlas-archived-parties';
+  function loadArchived(){ try { return new Set(JSON.parse(localStorage.getItem(ARCHIVED_KEY) || '[]')); } catch(e){ return new Set(); } }
+  function saveArchived(set){ localStorage.setItem(ARCHIVED_KEY, JSON.stringify([...set])); }
+  function isArchived(p){ return (p.status || '') === 'Archived'; }
 
   let _toastT = null;
   function toast(msg){
@@ -22046,15 +22055,26 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     for (const p of (V.parties || [])) put({ name: p.name, code: p.code || '' }); // lowest priority
     for (const p of loadCustom()) put(p);                                          // local full records
     for (const p of (sheetParties || [])) put(p);                                  // sheet wins
-    store = [...map.values()].map(r => ({
-      name: r.name || '', code: r.code || '', poc: r.poc || '', gst: r.gst || '',
-      aadhaar: r.aadhaar || '', state: r.state || '', phone: r.phone || '',
-      city: r.city || '', type: r.type || 'Customer', status: r.status || 'Active',
-      email: r.email || '', billingAddress: r.billingAddress || '',
-      shippingAddress: r.shippingAddress || '', creditLimit: r.creditLimit || '',
-      createdAt: r.createdAt || '', updatedAt: r.updatedAt || '',
-    }));
+    const archived = loadArchived();
+    store = [...map.values()].map(r => {
+      let status = r.status || 'Active';
+      if (archived.has(normName(r.name)) && status !== 'Archived') status = 'Archived';
+      return {
+        name: r.name || '', code: r.code || '', poc: r.poc || '', gst: r.gst || '',
+        aadhaar: r.aadhaar || '', state: r.state || '', phone: r.phone || '',
+        city: r.city || '', type: r.type || 'Customer', status,
+        email: r.email || '', billingAddress: r.billingAddress || '',
+        shippingAddress: r.shippingAddress || '', creditLimit: r.creditLimit || '',
+        createdAt: r.createdAt || '', updatedAt: r.updatedAt || '',
+      };
+    });
     sortStore();
+    syncArchivedExport();
+  }
+
+  // Expose archived party names so the Create PI typeahead can exclude them.
+  function syncArchivedExport(){
+    window.ATLAS_ARCHIVED = new Set(store.filter(isArchived).map(p => normName(p.name)));
   }
 
   // Newest-created first; legacy rows with no createdAt fall back to alpha.
@@ -22153,11 +22173,17 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const q = ($('pl-search').value || '').trim().toLowerCase();
     const fType = $('pl-f-type').value, fState = $('pl-f-state').value,
           fPoc = $('pl-f-poc').value, fStatus = $('pl-f-status').value;
+    const incArch = $('pl-f-incarch') && $('pl-f-incarch').checked;
     return store.filter(p => {
+      const archived = isArchived(p);
+      // Archived parties are hidden by default; surfaced only when the
+      // Archived filter is chosen or "Include archived" is ticked.
+      if (fStatus === 'Archived'){ if (!archived) return false; }
+      else if (archived && !incArch) return false;
       if (fType && (p.type || 'Customer') !== fType) return false;
       if (fState && p.state !== fState) return false;
       if (fPoc && p.poc !== fPoc) return false;
-      if (fStatus && (p.status || 'Active') !== fStatus) return false;
+      if (fStatus && fStatus !== 'Archived' && (p.status || 'Active') !== fStatus) return false;
       if (!q) return true;
       const hay = [p.name, p.code, p.gst, p.aadhaar, p.phone, p.city, p.state, p.poc, p.type, p.status].join(' ').toLowerCase();
       return hay.indexOf(q) !== -1;
@@ -22181,14 +22207,16 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 
   function rowHtml(p){
     const h = partyHealth(p);
+    const archived = isArchived(p);
     const meta = [p.poc, p.state, p.city].filter(Boolean).join(' · ');
     const chips = [];
-    if (h.isNew) chips.push('<span class="pl-pill new">NEW</span>');
+    if (archived) chips.push('<span class="pl-pill arch">ARCHIVED</span>');
+    if (h.isNew && !archived) chips.push('<span class="pl-pill new">NEW</span>');
     if ((p.type || 'Customer') === 'Supplier') chips.push('<span class="pl-pill sup">SUPPLIER</span>');
     else if (p.type === 'Both') chips.push('<span class="pl-pill sup">BOTH</span>');
     if (h.isHighValue) chips.push('<span class="pl-pill hv">HIGH-VALUE</span>');
     if ((p.status || 'Active') === 'Inactive') chips.push('<span class="pl-pill muted">INACTIVE</span>');
-    return '<div class="pl-row h-' + h.level + '" role="listitem" data-name="' + esc(normName(p.name)) + '">' +
+    return '<div class="pl-row h-' + h.level + (archived ? ' archived' : '') + '" role="listitem" data-name="' + esc(normName(p.name)) + '">' +
       '<span class="pl-dot ' + h.level + '"></span>' +
       '<div class="pl-main">' +
         '<div class="pl-name-row"><span class="pl-name">' + esc(p.name) + '</span>' + chips.join(' ') + '</div>' +
@@ -22221,15 +22249,17 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 
   function computeWatchlist(){
     const holds = loadHolds();
+    const arch = loadArchived();
     const items = [];
     const byName = new Map(store.map(p => [normName(p.name), p]));
+    const isArch = (nm) => arch.has(nm) || (byName.get(nm) && isArchived(byName.get(nm)));
 
     // Receivables-driven signals.
     if (receivables && receivables.parties){
       for (const key in receivables.parties){
         const rec = receivables.parties[key];
         const nm = rec.name || key;
-        if (holds.has(normName(nm))) continue;
+        if (holds.has(normName(nm)) || isArch(normName(nm))) continue;
         const p = byName.get(normName(nm)) || {};
         const reasons = []; let sev = 0;
         const out = Number(rec.outstanding) || 0;
@@ -22277,7 +22307,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     // PI-driven signal for parties without receivables rows: payment in but
     // dispatch pending (open PI but little/no outstanding).
     for (const [key, pi] of piByParty){
-      if (loadHolds().has(key)) continue;
+      if (loadHolds().has(key) || isArch(key)) continue;
       if (items.some(it => normName(it.name) === key)) continue;
       if (pi.pending > 0){
         const p = byName.get(key) || {};
@@ -22394,28 +22424,37 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   }
 
   function kv(k, v, mono){ return '<div class="pd-kv"><span class="k">' + k + '</span><span class="v ' + (mono ? 'mono' : '') + '">' + (v ? esc(v) : '—') + '</span></div>'; }
+  function group(title, rows){ return '<div class="pd-section-t">' + title + '</div><div class="pd-group">' + rows.join('') + '</div>'; }
 
   function renderDetails(p){
     const s = partyStats(p);
-    return [
-      kv('Party Name', p.name),
-      kv('Party Code', p.code, true),
-      kv('GST Number', p.gst, true),
-      kv('Aadhaar Number', p.aadhaar, true),
-      kv('Phone', p.phone ? '+91 ' + p.phone : '', true),
-      kv('Email', p.email),
-      kv('Billing Address', p.billingAddress),
-      kv('Shipping Address', p.shippingAddress),
-      kv('City', p.city),
-      kv('State', p.state),
-      kv('Sales POC', p.poc),
-      kv('Type', p.type || 'Customer'),
-      kv('Status', p.status || 'Active'),
-      kv('Credit Limit', p.creditLimit ? inr(p.creditLimit) : ''),
-      kv('Outstanding', s.outstanding ? inr(s.outstanding) : '₹0'),
-      kv('Date Created', fmtDate(p.createdAt)),
-      kv('Last Updated', fmtDate(p.updatedAt)),
-    ].join('');
+    const wlTxt = s.watch ? (s.watch.sev >= 3 ? 'Critical' : s.watch.sev === 2 ? 'Watch' : 'Monitor') : 'Clear';
+    return group('Overview', [
+        kv('Party Name', p.name),
+        kv('Party Code', p.code, true),
+        kv('Type', p.type || 'Customer'),
+        kv('Status', isArchived(p) ? 'Archived' : (p.status || 'Active')),
+        kv('Watchlist', wlTxt),
+      ]) +
+      group('Contact details', [
+        kv('Phone', p.phone ? '+91 ' + p.phone : '', true),
+        kv('Email', p.email),
+        kv('Sales POC', p.poc),
+      ]) +
+      group('Business details', [
+        kv('GST Number', p.gst, true),
+        kv('Aadhaar Number', p.aadhaar, true),
+        kv('Credit Limit', p.creditLimit ? inr(p.creditLimit) : ''),
+        kv('Outstanding', s.outstanding ? inr(s.outstanding) : '₹0'),
+        kv('Billing Address', p.billingAddress),
+        kv('Shipping Address', p.shippingAddress),
+        kv('City', p.city),
+        kv('State', p.state),
+      ]) +
+      group('Record', [
+        kv('Date Created', fmtDate(p.createdAt)),
+        kv('Last Updated', fmtDate(p.updatedAt)),
+      ]);
   }
 
   function sel(id, val, opts){
@@ -22427,18 +22466,22 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   function inp(id, val, attrs){ return '<input class="pi-input ' + (attrs && attrs.cls || '') + '" id="' + id + '" value="' + esc(val || '') + '" ' + (attrs && attrs.extra || '') + '>'; }
 
   function renderEditForm(p){
+    const statusOpts = isArchived(p) ? ['Archived', 'Active', 'Inactive'] : ['Active', 'Inactive'];
     return '' +
+      '<div class="pd-section-t">Overview</div>' +
       fld('Party Name', inp('pde-name', p.name)) +
-      '<div class="ap-row-2">' + fld('Sales POC', sel('pde-poc', p.poc, ['—', ...(V.pocs || [])])) +
-        fld('Type', sel('pde-type', p.type || 'Customer', ['Customer', 'Supplier', 'Both'])) + '</div>' +
-      '<div class="ap-row-2">' + fld('Status', sel('pde-status', p.status || 'Active', ['Active', 'Inactive'])) +
-        fld('Phone', inp('pde-phone', p.phone, { cls: 'mono no-upper', extra: 'inputmode="tel" maxlength="12"' })) + '</div>' +
+      '<div class="ap-row-2">' + fld('Type', sel('pde-type', p.type || 'Customer', ['Customer', 'Supplier', 'Both'])) +
+        fld('Status', sel('pde-status', p.status || 'Active', statusOpts)) + '</div>' +
+      '<div class="pd-section-t">Contact details</div>' +
+      '<div class="ap-row-2">' + fld('Phone', inp('pde-phone', p.phone, { cls: 'mono no-upper', extra: 'inputmode="tel" maxlength="12"' })) +
+        fld('Sales POC', sel('pde-poc', p.poc, ['—', ...(V.pocs || [])])) + '</div>' +
+      fld('Email', inp('pde-email', p.email, { cls: 'no-upper', extra: 'type="email"' })) +
+      '<div class="pd-section-t">Business details</div>' +
       '<div class="ap-row-2">' + fld('GST Number', inp('pde-gst', p.gst, { cls: 'mono' })) +
         fld('Aadhaar Number', inp('pde-aadhaar', p.aadhaar, { cls: 'mono no-upper', extra: 'inputmode="numeric" maxlength="12"' })) + '</div>' +
       '<div class="ap-row-2">' + fld('State', sel('pde-state', p.state, ['—', ...STATES])) +
         fld('City', inp('pde-city', p.city)) + '</div>' +
-      '<div class="ap-row-2">' + fld('Email', inp('pde-email', p.email, { cls: 'no-upper', extra: 'type="email"' })) +
-        fld('Credit Limit (₹)', inp('pde-credit', p.creditLimit, { cls: 'mono no-upper', extra: 'inputmode="numeric"' })) + '</div>' +
+      fld('Credit Limit (₹)', inp('pde-credit', p.creditLimit, { cls: 'mono no-upper', extra: 'inputmode="numeric"' })) +
       fld('Billing Address', inp('pde-billing', p.billingAddress)) +
       fld('Shipping Address', inp('pde-shipping', p.shippingAddress));
   }
@@ -22448,22 +22491,80 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     drawerParty = p;
     setEditMode(false);
     $('pd-name').textContent = p.name;
-    $('pd-code').textContent = p.code || '—';
+    $('pd-name').title = p.name;
+    $('pd-code').textContent = (p.code || '—') + (isArchived(p) ? '  ·  ARCHIVED' : '');
     $('pd-stats').innerHTML = renderStats(p);
     $('pd-details').innerHTML = renderDetails(p);
     $('pd-status').className = 'ap-status'; $('pd-status').textContent = '';
     $('pd-overlay').hidden = false;
     document.body.style.overflow = 'hidden';
+    document.querySelector('.pd-drawer').scrollTop = 0;
   }
   function closeDrawer(){ $('pd-overlay').hidden = true; document.body.style.overflow = ''; drawerParty = null; }
 
   function setEditMode(on){
+    const archived = drawerParty && isArchived(drawerParty);
     $('pd-details').hidden = on;
     $('pd-edit-form').hidden = !on;
-    $('pd-edit-acts').hidden = !on;
-    $('pd-edit').textContent = on ? 'Viewing' : 'Edit';
-    $('pd-edit').disabled = on;
-    if (on && drawerParty) $('pd-edit-form').innerHTML = renderEditForm(drawerParty);
+    // View-mode buttons: Edit + Archive (or Restore when archived).
+    $('pd-edit').hidden = on;
+    $('pd-archive').hidden = on || archived;
+    $('pd-restore').hidden = on || !archived;
+    // Edit-mode buttons: Cancel + Save.
+    $('pd-cancel').hidden = !on;
+    $('pd-save').hidden = !on;
+    if (on && drawerParty){
+      $('pd-edit-form').innerHTML = renderEditForm(drawerParty);
+      // Smooth-scroll the form into view (clears the sticky header) and focus.
+      requestAnimationFrame(() => {
+        $('pd-edit-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setTimeout(() => { const f = $('pde-name'); if (f) f.focus({ preventScroll: true }); }, 340);
+      });
+    }
+  }
+
+  function archiveParty(){
+    if (!drawerParty) return;
+    const p = drawerParty;
+    if (!confirm('Archive this party? The party will be hidden from active lists but all historical records (PIs, invoices, dispatches, receivables, etc.) will be preserved.')) return;
+    setPartyArchived(p, true, 'Party archived. It is hidden from active lists; history is preserved.');
+  }
+  function restoreParty(){
+    if (!drawerParty) return;
+    setPartyArchived(drawerParty, false, 'Party restored to active.');
+  }
+
+  function setPartyArchived(p, archive, okMsg){
+    const status = archive ? 'Archived' : 'Active';
+    // Local persistence so it survives reloads (also covers legacy/offline).
+    const set = loadArchived(); const key = normName(p.name);
+    if (archive) set.add(key); else set.delete(key);
+    saveArchived(set);
+
+    const apply = (rec) => {
+      const idx = store.findIndex(x => normName(x.name) === normName(p.name) || (x.code && normName(x.code) === normName(p.code)));
+      const merged = Object.assign({}, store[idx] || p, rec, { status });
+      if (idx >= 0) store[idx] = merged; else store.push(merged);
+      drawerParty = merged;
+      try {
+        const list = loadCustom().map(e => (normName(e.code) === normName(p.code) || normName(e.name) === normName(p.name)) ? Object.assign({}, e, { status }) : e);
+        localStorage.setItem('atlas-custom-parties', JSON.stringify(list));
+      } catch(e){}
+      syncArchivedExport();
+      renderFilters(); renderList(); renderWatchlist();
+      openDrawer(merged);
+      toast(okMsg);
+    };
+
+    const url = (window.ATLAS_APPS_SCRIPT_URL || localStorage.getItem('atlas-apps-script-url') || '').trim();
+    if (!url || !p.code){ apply({}); return; }
+    pdStatus('warn', archive ? 'Archiving…' : 'Restoring…');
+    fetch(url, { method: 'POST', mode: 'cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ kind: 'updateParty', party: { code: p.code, name: p.name, status } }) })
+      .then(r => r.json())
+      .then(j => { if (!j.ok) throw new Error(j.error || 'Failed'); apply(j.record || {}); })
+      .catch(err => { apply({}); pdStatus('warn', 'Saved locally, sheet sync failed: ' + err.message); });
   }
 
   function pdStatus(kind, msg){ const s = $('pd-status'); s.className = 'ap-status' + (kind ? ' ' + kind : ''); s.textContent = msg || ''; }
@@ -22493,6 +22594,10 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       const merged = Object.assign({}, drawerParty, rec);
       if (idx >= 0) store[idx] = merged; else store.push(merged);
       drawerParty = merged;
+      // Keep the archived set in sync if Status was edited to/from Archived.
+      const set = loadArchived();
+      if (merged.status === 'Archived') set.add(normName(merged.name)); else set.delete(normName(merged.name));
+      saveArchived(set);
       // keep local cache + Create PI vocab in sync (reflect name/code edits)
       try {
         const list = loadCustom().map(e => (normName(e.code) === normName(rec.code) || normName(e.name) === normName(merged.name)) ? Object.assign({}, e, merged) : e);
@@ -22500,7 +22605,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       } catch(e){}
       const vp = (V.parties || []).find(x => normName(x.code) === normName(merged.code));
       if (vp){ vp.name = merged.name; vp.code = merged.code; }
-      sortStore(); renderFilters(); renderList(); renderWatchlist();
+      sortStore(); syncArchivedExport(); renderFilters(); renderList(); renderWatchlist();
       openDrawer(merged);
     }
 
@@ -22563,7 +22668,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   function init(){
     const search = $('pl-search'); if (!search) return; // parties page not present
     search.addEventListener('input', renderListDebounced);
-    ['pl-f-type', 'pl-f-state', 'pl-f-poc', 'pl-f-status'].forEach(id => {
+    ['pl-f-type', 'pl-f-state', 'pl-f-poc', 'pl-f-status', 'pl-f-incarch'].forEach(id => {
       const el = $(id); if (el) el.addEventListener('change', renderList);
     });
     const wl = $('wl-refresh'); if (wl) wl.addEventListener('click', () => loadParties(true));
@@ -22585,6 +22690,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     $('pd-edit').addEventListener('click', () => setEditMode(true));
     $('pd-cancel').addEventListener('click', () => setEditMode(false));
     $('pd-save').addEventListener('click', saveEdit);
+    $('pd-archive').addEventListener('click', archiveParty);
+    $('pd-restore').addEventListener('click', restoreParty);
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('pd-overlay').hidden) closeDrawer(); });
 
     // If the Parties page is the current route, load now.
@@ -22611,6 +22718,11 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     letter-spacing: 0.02em; cursor: pointer; flex: 1; min-width: 110px;
   }
   .pl-filter:focus { outline: none; border-color: var(--emerald); color: var(--text); }
+  .pl-archtoggle { display: inline-flex; align-items: center; gap: 6px; font-family: var(--fm); font-size: 11px; color: var(--text-3); letter-spacing: 0.02em; cursor: pointer; white-space: nowrap; }
+  .pl-archtoggle input { accent-color: var(--emerald); cursor: pointer; }
+  .pl-pill.arch { background: var(--surface-3); color: var(--text-3); }
+  .pl-row.archived { opacity: 0.62; }
+  .pl-row.archived .pl-name { color: var(--text-2); }
   .pl-list { display: flex; flex-direction: column; max-height: 540px; overflow-y: auto; }
   .pl-row {
     display: flex; align-items: center; justify-content: space-between; gap: 12px;
@@ -22676,16 +22788,27 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   }
   @keyframes pd-slide { from { transform: translateX(24px); opacity: 0.6; } to { transform: translateX(0); opacity: 1; } }
   .pd-head {
-    display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
-    padding: 22px 24px 16px; border-bottom: 1px solid var(--line);
-    background: radial-gradient(ellipse 500px 180px at 0% 0%, rgba(78,222,163,0.06), transparent 70%);
-    position: sticky; top: 0; z-index: 2;
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 12px 16px; flex-wrap: wrap;
+    padding: 18px 22px 14px; border-bottom: 1px solid var(--line);
+    background: var(--surface);
+    background-image: radial-gradient(ellipse 500px 180px at 0% 0%, rgba(78,222,163,0.06), transparent 70%);
+    position: sticky; top: 0; z-index: 3;
   }
-  .pd-head h2 { margin: 0; font-family: var(--fd); font-size: 21px; font-weight: 600; letter-spacing: -0.02em; color: var(--text); }
+  .pd-head-main { min-width: 0; flex: 1 1 220px; }
+  .pd-head h2 {
+    margin: 0; font-family: var(--fd); font-size: 20px; font-weight: 600;
+    letter-spacing: -0.02em; color: var(--text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+  }
   .pd-code { font-family: var(--fm); font-size: 12px; color: var(--emerald); letter-spacing: 0.06em; margin-top: 5px; }
-  .pd-head-acts { display: flex; align-items: center; gap: 8px; flex: none; }
-  .pd-head-acts .pi-btn { padding: 6px 14px; font-size: 11px; }
+  .pd-head-acts { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; flex-wrap: wrap; justify-content: flex-end; }
+  .pd-head-acts .pi-btn { padding: 6px 13px; font-size: 11px; }
+  .pd-arch { color: var(--amber); border-color: rgba(255,176,121,0.35) !important; }
+  .pd-arch:hover { background: rgba(255,176,121,0.08); border-color: var(--amber) !important; }
   .pd-body { padding: 18px 24px 28px; }
+  .pd-group { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 9px; padding: 4px 12px; margin-bottom: 18px; background: var(--surface-2); }
+  #pd-edit-form { scroll-margin-top: 120px; }
   .pd-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 22px; }
   .pd-stat { border: 1px solid var(--line); border-radius: 9px; padding: 11px 13px; background: var(--surface-2); }
   .pd-stat .k { font-family: var(--fm); font-size: 9.5px; letter-spacing: 0.1em; color: var(--text-3); text-transform: uppercase; }

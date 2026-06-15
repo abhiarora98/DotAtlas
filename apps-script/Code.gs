@@ -278,7 +278,10 @@ function normPartyType_(t) {
   return 'Customer';
 }
 function normPartyStatus_(s) {
-  return String(s || '').trim().toLowerCase() === 'inactive' ? 'Inactive' : 'Active';
+  var v = String(s || '').trim().toLowerCase();
+  if (v === 'archived') return 'Archived';
+  if (v === 'inactive') return 'Inactive';
+  return 'Active';
 }
 
 // ---------- party code generation ----------

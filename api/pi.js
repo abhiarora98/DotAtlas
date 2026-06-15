@@ -47,7 +47,10 @@ function normPartyType(t) {
   return 'Customer';
 }
 function normPartyStatus(s) {
-  return String(s || '').trim().toLowerCase() === 'inactive' ? 'Inactive' : 'Active';
+  const v = String(s || '').trim().toLowerCase();
+  if (v === 'archived') return 'Archived';
+  if (v === 'inactive') return 'Inactive';
+  return 'Active';
 }
 
 // Indian state / UT → official 2-letter code, used to build the Party Code.

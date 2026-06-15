@@ -105,7 +105,9 @@ in ~300ms.
   the row by `party.code` and updates the editable fields in place,
   preserving `CreatedAt` and the (read-only) code and stamping
   `UpdatedAt`. Returns `{ ok, code, record }`. Powers the Party Details
-  drawer's Edit action.
+  drawer's Edit action, and Archive/Restore (which just set
+  `status` to `Archived` / `Active`). Parties are never hard-deleted —
+  archiving hides them from active lists while preserving all history.
 
 ## Why this is faster than Apps Script
 
