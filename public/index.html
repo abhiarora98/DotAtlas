@@ -3121,12 +3121,12 @@
 
       <div class="ap-row-2">
         <div class="pi-field">
-          <label for="ap-code">Party Code <span class="ap-req">*</span></label>
-          <input class="pi-input mono" id="ap-code" placeholder="e.g. RU0663" autocomplete="off" maxlength="12">
+          <label for="ap-poc">Sales POC <span class="ap-req">*</span></label>
+          <select class="pi-select" id="ap-poc"></select>
         </div>
         <div class="pi-field">
-          <label for="ap-poc">Sales POC</label>
-          <select class="pi-select" id="ap-poc"></select>
+          <label for="ap-state">State <span class="ap-req">*</span> <span class="ap-auto">auto from GST</span></label>
+          <select class="pi-select" id="ap-state"></select>
         </div>
       </div>
 
@@ -3134,12 +3134,19 @@
         <div class="pi-field">
           <label for="ap-gst">GST Invoice (GSTIN)</label>
           <input class="pi-input mono" id="ap-gst" placeholder="15-char GSTIN" autocomplete="off" maxlength="15" style="text-transform: uppercase;">
-          <span class="ap-hint" id="ap-gst-hint">Two-letter state prefix auto-fills the State field.</span>
+          <span class="ap-hint" id="ap-gst-hint">Two-letter state prefix auto-selects the State.</span>
         </div>
         <div class="pi-field">
-          <label for="ap-state">State <span class="ap-auto">auto</span></label>
-          <input class="pi-input" id="ap-state" placeholder="Auto-fills from GST" readonly>
+          <label for="ap-aadhaar">Aadhaar Number</label>
+          <input class="pi-input mono no-upper" id="ap-aadhaar" placeholder="12-digit Aadhaar" autocomplete="off" inputmode="numeric" maxlength="12">
+          <span class="ap-hint" id="ap-aadhaar-hint">Required only when the party has no GST.</span>
         </div>
+      </div>
+
+      <div class="pi-field">
+        <label for="ap-code">Party Code <span class="ap-auto">auto · read-only</span></label>
+        <input class="pi-input mono" id="ap-code" placeholder="Generated from name · state · POC" autocomplete="off" readonly>
+        <span class="ap-hint" id="ap-code-hint">System-generated &amp; unique — e.g. S-PBVS001.</span>
       </div>
 
       <div class="ap-row-2">
@@ -3185,6 +3192,32 @@
     '35':'Andaman & Nicobar','36':'Telangana','37':'Andhra Pradesh','38':'Ladakh',
   };
 
+  // State name → official 2-letter registration code (PB, HR, DL…). Keys match
+  // the GST_STATE_MAP spellings so GST auto-selection lines up exactly.
+  const STATE_CODE_MAP = {
+    'Jammu & Kashmir':'JK','Himachal Pradesh':'HP','Punjab':'PB','Chandigarh':'CH',
+    'Uttarakhand':'UK','Haryana':'HR','Delhi':'DL','Rajasthan':'RJ',
+    'Uttar Pradesh':'UP','Bihar':'BR','Sikkim':'SK','Arunachal Pradesh':'AR',
+    'Nagaland':'NL','Manipur':'MN','Mizoram':'MZ','Tripura':'TR',
+    'Meghalaya':'ML','Assam':'AS','West Bengal':'WB','Jharkhand':'JH',
+    'Odisha':'OD','Chhattisgarh':'CG','Madhya Pradesh':'MP','Gujarat':'GJ',
+    'Daman & Diu':'DD','Dadra & Nagar Haveli':'DN','Maharashtra':'MH',
+    'Andhra Pradesh':'AP','Karnataka':'KA','Goa':'GA','Lakshadweep':'LD',
+    'Kerala':'KL','Tamil Nadu':'TN','Puducherry':'PY','Andaman & Nicobar':'AN',
+    'Telangana':'TS','Ladakh':'LA',
+  };
+
+  // Resolve a state name (or an existing 2-letter code) to its 2-letter code.
+  function stateCode(name){
+    const t = String(name || '').trim();
+    if (/^[A-Za-z]{2}$/.test(t)) return t.toUpperCase();
+    const up = t.toUpperCase();
+    for (const k in STATE_CODE_MAP){
+      if (k.toUpperCase() === up) return STATE_CODE_MAP[k];
+    }
+    return '';
+  }
+
   const $ = (id) => document.getElementById(id);
 
   // Merge any locally-added parties so they appear in the Create PI typeahead.
@@ -3218,12 +3251,64 @@
   function populatePoc(){
     const sel = $('ap-poc');
     if (!sel || sel.options.length) return;
-    sel.appendChild(document.createElement('option')).textContent = '—';
+    const blank = document.createElement('option');
+    blank.value = ''; blank.textContent = '—';
+    sel.appendChild(blank);
     for (const p of V.pocs){
       const o = document.createElement('option');
       o.value = p; o.textContent = p;
       sel.appendChild(o);
     }
+  }
+
+  // State select (alphabetical, with 2-letter code shown).
+  function populateStates(){
+    const sel = $('ap-state');
+    if (!sel || sel.options.length) return;
+    const blank = document.createElement('option');
+    blank.value = ''; blank.textContent = '—';
+    sel.appendChild(blank);
+    Object.keys(STATE_CODE_MAP).sort().forEach(name => {
+      const o = document.createElement('option');
+      o.value = name; o.textContent = name + ' (' + STATE_CODE_MAP[name] + ')';
+      sel.appendChild(o);
+    });
+  }
+
+  // ----- Party code generation (mirrors the backend) -----
+  function firstLetter(name){
+    const s = String(name || '').trim();
+    const m = s.match(/[A-Za-z]/);
+    return (m ? m[0] : s.charAt(0)).toUpperCase();
+  }
+  function pocInitials(poc){
+    const parts = String(poc || '').trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return '';
+    if (parts.length === 1) return parts[0].replace(/[^A-Za-z]/g, '').toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+  function codePrefix(name, state, poc){
+    const fl = firstLetter(name), sc = stateCode(state), pi = pocInitials(poc);
+    if (!fl || !sc || !pi) return '';
+    return fl + '-' + sc + pi;
+  }
+  function nextSeqForPrefix(prefix){
+    const re = new RegExp('^' + prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(\\d{3})$', 'i');
+    let max = 0;
+    for (const p of V.parties){
+      const m = re.exec(String(p.code || '').trim());
+      if (m){ const n = parseInt(m[1], 10); if (n > max) max = n; }
+    }
+    return max + 1;
+  }
+  // Preview the code in the read-only field. The backend recomputes the
+  // authoritative (uniqueness-guaranteed) code on save.
+  function computeCode(){
+    const el = $('ap-code');
+    if (!el) return;
+    const prefix = codePrefix($('ap-name').value, $('ap-state').value, $('ap-poc').value);
+    if (!prefix){ el.value = ''; return; }
+    el.value = prefix + String(nextSeqForPrefix(prefix)).padStart(3, '0');
   }
 
   function setStatus(kind, msg){
@@ -3234,10 +3319,13 @@
 
   function openModal(){
     populatePoc();
+    populateStates();
     setStatus('', '');
-    ['ap-name','ap-code','ap-poc','ap-gst','ap-state','ap-phone','ap-city'].forEach(id => {
+    ['ap-name','ap-code','ap-poc','ap-gst','ap-aadhaar','ap-state','ap-phone','ap-city'].forEach(id => {
       const e = $(id); if (e) e.value = '';
     });
+    $('ap-gst-hint').textContent = 'Two-letter state prefix auto-selects the State.';
+    $('ap-gst-hint').style.color = '';
     $('ap-overlay').hidden = false;
     document.body.style.overflow = 'hidden';
     setTimeout(() => $('ap-name').focus(), 30);
@@ -3252,42 +3340,62 @@
     $('ap-gst').value = v;
     const prefix = v.slice(0, 2);
     const state = GST_STATE_MAP[prefix];
-    if (state){
+    if (state && STATE_CODE_MAP[state] !== undefined){
       $('ap-state').value = state;
       $('ap-gst-hint').textContent = 'State → ' + state;
       $('ap-gst-hint').style.color = 'var(--emerald)';
+    } else if (v.length >= 2 && !state){
+      $('ap-gst-hint').textContent = 'Unrecognised state prefix — pick the State manually.';
+      $('ap-gst-hint').style.color = 'var(--amber)';
     } else {
-      $('ap-state').value = '';
-      $('ap-gst-hint').textContent = 'Two-letter state prefix auto-fills the State field.';
+      $('ap-gst-hint').textContent = 'Two-letter state prefix auto-selects the State.';
       $('ap-gst-hint').style.color = '';
     }
+    computeCode();
   }
 
   function submit(){
-    const name  = $('ap-name').value.trim().toUpperCase();
-    const code  = $('ap-code').value.trim().toUpperCase();
-    const poc   = $('ap-poc').value;
-    const gst   = $('ap-gst').value.trim().toUpperCase();
-    const state = $('ap-state').value.trim().toUpperCase();
-    const phone = $('ap-phone').value.trim();
-    const city  = $('ap-city').value.trim().toUpperCase();
+    const name    = $('ap-name').value.trim().toUpperCase();
+    const poc     = $('ap-poc').value;
+    const state   = $('ap-state').value.trim();
+    const gst     = $('ap-gst').value.trim().toUpperCase();
+    const aadhaar = $('ap-aadhaar').value.replace(/\D/g, '');
+    const phone   = $('ap-phone').value.trim();
+    const city    = $('ap-city').value.trim().toUpperCase();
 
     if (!name)  { setStatus('err', 'Party name is required.'); $('ap-name').focus();  return; }
-    if (!code)  { setStatus('err', 'Party code is required.'); $('ap-code').focus();  return; }
-    if (!phone) { setStatus('err', 'Phone is required.');      $('ap-phone').focus(); return; }
-    if (gst && gst.length !== 15) { setStatus('warn', 'GSTIN should be 15 characters. Saved anyway.'); }
+    if (!poc)   { setStatus('err', 'Sales POC is required to generate the party code.'); $('ap-poc').focus(); return; }
+    if (!state) { setStatus('err', 'State is required to generate the party code.'); $('ap-state').focus(); return; }
+    if (!phone) { setStatus('err', 'Phone is required.'); $('ap-phone').focus(); return; }
 
-    // Check duplicate by name or code
-    const existing = V.parties.find(p =>
-      p.name.toLowerCase() === name.toLowerCase() ||
-      (p.code && code && p.code.toLowerCase() === code.toLowerCase())
-    );
-    if (existing){
-      setStatus('err', 'A party already exists with this name or code: ' + (existing.name || existing.code));
+    // GST or Aadhaar — at least one is mandatory.
+    if (!gst && !aadhaar){
+      setStatus('err', 'Provide a GST number or an Aadhaar number (at least one is required).');
+      $('ap-gst').focus(); return;
+    }
+    if (aadhaar && !/^\d{12}$/.test(aadhaar)){
+      setStatus('err', 'Aadhaar must be exactly 12 digits.'); $('ap-aadhaar').focus(); return;
+    }
+    if (gst && gst.length !== 15){
+      setStatus('warn', 'GSTIN should be 15 characters. Saved anyway.');
+    }
+
+    // Regenerate the read-only code from the latest field values.
+    computeCode();
+    const code = $('ap-code').value.trim().toUpperCase();
+    if (!code){
+      setStatus('err', 'Could not generate a party code — check Name, State and Sales POC.');
       return;
     }
 
-    const entry = { name, code, poc, gst, state, phone, city, createdAt: new Date().toISOString() };
+    // Check duplicate by name (codes are system-generated and unique).
+    const existing = V.parties.find(p => p.name.toLowerCase() === name.toLowerCase());
+    if (existing){
+      setStatus('err', 'A party already exists with this name: ' + existing.name);
+      return;
+    }
+
+    const entry = { name, code, poc, gst, aadhaar, state, phone, city, createdAt: new Date().toISOString() };
 
     // Always save locally first as fallback.
     const list = loadCustom();
@@ -3295,16 +3403,18 @@
     saveCustom(list);
 
     // Update vocab so the new party shows up in Create PI typeahead immediately.
-    V.parties.push({ name, code });
+    const vocabEntry = { name, code };
+    V.parties.push(vocabEntry);
     V.parties.sort((a, b) => a.name.localeCompare(b.name));
     refreshCustomCount();
 
-    // If Apps Script is wired, also write to the Parties sheet.
+    // If the backend is wired, write to the Parties sheet and adopt the
+    // authoritative code it returns (handles concurrent sequence collisions).
     const url = (window.ATLAS_APPS_SCRIPT_URL ||
                  localStorage.getItem('atlas-apps-script-url') || '').trim();
     if (!url){
-      setStatus('ok', 'Added ' + name + ' locally. It will appear in Create PI suggestions. (Apps Script not yet wired — not written to Parties sheet.)');
-      setTimeout(closeModal, 1100);
+      setStatus('ok', 'Added ' + name + ' (' + code + ') locally. It will appear in Create PI suggestions. (Backend not wired — not written to Parties sheet.)');
+      setTimeout(closeModal, 1300);
       return;
     }
 
@@ -3318,9 +3428,17 @@
     })
       .then(r => r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)))
       .then(res => {
-        if (!res.ok) throw new Error(res.error || 'Apps Script returned ok:false');
-        setStatus('ok', 'Added ' + name + ' to Parties sheet and Create PI suggestions.');
-        setTimeout(closeModal, 900);
+        if (!res.ok) throw new Error(res.error || 'Backend returned ok:false');
+        // Adopt the server-assigned code if it differs from the preview.
+        if (res.code && res.code !== code){
+          vocabEntry.code = res.code;
+          entry.code = res.code;
+          saveCustom(loadCustom().map(e =>
+            (e.createdAt === entry.createdAt && e.name === entry.name) ? entry : e));
+          $('ap-code').value = res.code;
+        }
+        setStatus('ok', 'Added ' + name + ' (' + (res.code || code) + ') to Parties sheet and Create PI suggestions.');
+        setTimeout(closeModal, 1100);
       })
       .catch(err => {
         console.error(err);
@@ -3363,8 +3481,19 @@
 
     $('ap-gst').addEventListener('input', gstInput);
 
+    // Aadhaar: digits only, max 12.
+    $('ap-aadhaar').addEventListener('input', () => {
+      const el = $('ap-aadhaar');
+      el.value = el.value.replace(/\D/g, '').slice(0, 12);
+    });
+
+    // Recompute the read-only party code whenever its inputs change.
+    $('ap-name').addEventListener('input', computeCode);
+    $('ap-poc').addEventListener('change', computeCode);
+    $('ap-state').addEventListener('change', computeCode);
+
     // Enter inside the modal advances to next; on the last field, submits.
-    const order = ['ap-name','ap-code','ap-poc','ap-gst','ap-phone','ap-city'];
+    const order = ['ap-name','ap-poc','ap-state','ap-gst','ap-aadhaar','ap-phone','ap-city'];
     document.querySelector('.ap-modal').addEventListener('keydown', (e) => {
       if (e.key === 'Escape'){ e.preventDefault(); closeModal(); return; }
       if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey){
