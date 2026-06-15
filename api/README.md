@@ -86,7 +86,14 @@ in ~300ms.
 - **`POST /api/pi`** with body `{ kind: 'pi', header, rows }` → appends
   N rows to the `Comfort_atlas` tab.
 - **`POST /api/pi`** with body `{ kind: 'party', party }` → appends one
-  row to the `Parties` tab (auto-created on first call).
+  row to the `Parties` tab (auto-created on first call). The `party`
+  object accepts `name`, `poc`, `state`, `gst`, `aadhaar`, `phone`,
+  `city`. One of `gst` / `aadhaar` is required (Aadhaar must be 12
+  digits). The **Party Code** is system-generated, unique and read-only
+  — `[First letter of name]-[State code][POC initials][3-digit running
+  number]` (e.g. `S-PBVS001`) — and returned as `code` in the response.
+  Parties columns: `CreatedAt · Party Name · Party Code · Sales POC ·
+  GSTIN · Aadhaar · State · Phone · City`.
 
 ## Why this is faster than Apps Script
 

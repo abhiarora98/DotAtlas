@@ -123,28 +123,111 @@ function handleParty(payload) {
     sheet = ss.insertSheet(PARTIES_SHEET_NAME);
     sheet.appendRow([
       'CreatedAt', 'Party Name', 'Party Code', 'Sales POC',
-      'GSTIN', 'State', 'Phone', 'City',
+      'GSTIN', 'Aadhaar', 'State', 'Phone', 'City',
     ]);
     sheet.setFrozenRows(1);
-    sheet.getRange('A1:H1').setFontWeight('bold');
+    sheet.getRange('A1:I1').setFontWeight('bold');
   }
 
   const p = payload.party || {};
-  if (!p.name) return jsonResponse({ ok: false, error: 'Party name is required.' });
-  if (!p.code) return jsonResponse({ ok: false, error: 'Party code is required.' });
+  const name  = String(p.name || '').trim();
+  const poc   = String(p.poc || '').trim();
+  const state = String(p.state || '').trim();
+  const gst   = String(p.gst || '').trim().toUpperCase();
+  const aadhaar = String(p.aadhaar || '').replace(/\D/g, '');
+
+  if (!name) return jsonResponse({ ok: false, error: 'Party name is required.' });
+  if (!poc)  return jsonResponse({ ok: false, error: 'Sales POC is required to generate the party code.' });
+
+  const stateCode = stateToCode_(state);
+  if (!stateCode) return jsonResponse({ ok: false, error: 'A valid State is required to generate the party code.' });
+
+  if (!gst && !aadhaar) return jsonResponse({ ok: false, error: 'Provide a GST number or an Aadhaar number.' });
+  if (aadhaar && !/^\d{12}$/.test(aadhaar)) return jsonResponse({ ok: false, error: 'Aadhaar must be exactly 12 digits.' });
+
+  // Pull existing names + codes (columns B & C) to enforce uniqueness and
+  // compute the next running number for this prefix.
+  const last = sheet.getLastRow();
+  const existing = last > 1 ? sheet.getRange(2, 2, last - 1, 2).getValues() : [];
+  const existingCodes = [];
+  const nameU = name.toUpperCase();
+  for (var i = 0; i < existing.length; i++) {
+    if (String(existing[i][0] || '').trim().toUpperCase() === nameU) {
+      return jsonResponse({ ok: false, error: 'A party named "' + name + '" already exists.' });
+    }
+    if (existing[i][1]) existingCodes.push(existing[i][1]);
+  }
+
+  const prefix = partyCodePrefix_(name, state, poc);
+  const code = nextPartyCode_(prefix, existingCodes);
 
   sheet.appendRow([
     new Date(),
-    p.name,
-    p.code,
-    p.poc || '',
-    p.gst || '',
-    p.state || '',
-    p.phone || '',
-    p.city || '',
+    name,
+    code,
+    poc,
+    gst,
+    aadhaar,
+    state,
+    String(p.phone || '').trim(),
+    String(p.city || '').trim(),
   ]);
 
-  return jsonResponse({ ok: true, party: p.name });
+  return jsonResponse({ ok: true, party: name, code: code });
+}
+
+// ---------- party code generation ----------
+
+// Indian state / UT → official 2-letter code (PB, HR, DL…), not the GSTIN
+// numeric prefix.
+var STATE_CODE_MAP_ = {
+  'JAMMU & KASHMIR': 'JK', 'JAMMU AND KASHMIR': 'JK',
+  'HIMACHAL PRADESH': 'HP', 'PUNJAB': 'PB', 'CHANDIGARH': 'CH',
+  'UTTARAKHAND': 'UK', 'HARYANA': 'HR', 'DELHI': 'DL', 'RAJASTHAN': 'RJ',
+  'UTTAR PRADESH': 'UP', 'BIHAR': 'BR', 'SIKKIM': 'SK',
+  'ARUNACHAL PRADESH': 'AR', 'NAGALAND': 'NL', 'MANIPUR': 'MN',
+  'MIZORAM': 'MZ', 'TRIPURA': 'TR', 'MEGHALAYA': 'ML', 'ASSAM': 'AS',
+  'WEST BENGAL': 'WB', 'JHARKHAND': 'JH', 'ODISHA': 'OD', 'CHHATTISGARH': 'CG',
+  'MADHYA PRADESH': 'MP', 'GUJARAT': 'GJ', 'DAMAN & DIU': 'DD',
+  'DAMAN AND DIU': 'DD', 'DADRA & NAGAR HAVELI': 'DN',
+  'DADRA AND NAGAR HAVELI': 'DN', 'MAHARASHTRA': 'MH',
+  'ANDHRA PRADESH': 'AP', 'ANDHRA PRADESH (OLD)': 'AP', 'KARNATAKA': 'KA',
+  'GOA': 'GA', 'LAKSHADWEEP': 'LD', 'KERALA': 'KL', 'TAMIL NADU': 'TN',
+  'PUDUCHERRY': 'PY', 'ANDAMAN & NICOBAR': 'AN', 'ANDAMAN AND NICOBAR': 'AN',
+  'TELANGANA': 'TS', 'LADAKH': 'LA',
+};
+
+function stateToCode_(state) {
+  var s = String(state || '').trim().toUpperCase();
+  if (/^[A-Z]{2}$/.test(s)) return s;
+  return STATE_CODE_MAP_[s] || '';
+}
+
+function pocInitials_(poc) {
+  var parts = String(poc || '').trim().split(/\s+/).filter(function (x) { return x; });
+  if (!parts.length) return '';
+  if (parts.length === 1) return parts[0].replace(/[^A-Za-z]/g, '').toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+function firstLetter_(name) {
+  var s = String(name || '').trim();
+  var m = s.match(/[A-Za-z]/);
+  return (m ? m[0] : s.charAt(0)).toUpperCase();
+}
+
+function partyCodePrefix_(name, state, poc) {
+  return firstLetter_(name) + '-' + stateToCode_(state) + pocInitials_(poc);
+}
+
+function nextPartyCode_(prefix, existingCodes) {
+  var re = new RegExp('^' + prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(\\d{3})$', 'i');
+  var max = 0;
+  for (var i = 0; i < existingCodes.length; i++) {
+    var m = re.exec(String(existingCodes[i] || '').trim());
+    if (m) { var n = parseInt(m[1], 10); if (n > max) max = n; }
+  }
+  return prefix + ('00' + (max + 1)).slice(-3);
 }
 
 // ---------- helpers ----------

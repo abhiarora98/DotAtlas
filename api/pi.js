@@ -30,6 +30,72 @@ const PI_HEADERS = [
   'Dispatch Status', 'Month', 'STATE', 'REFRENCE ID',
 ];
 
+// Parties tab columns. Aadhaar sits right after GSTIN (column F).
+const PARTIES_HEADERS = [
+  'CreatedAt', 'Party Name', 'Party Code', 'Sales POC',
+  'GSTIN', 'Aadhaar', 'State', 'Phone', 'City',
+];
+const PARTIES_RANGE = PARTIES_SHEET + '!A:I';
+
+// Indian state / UT → official 2-letter code, used to build the Party Code.
+// These are the standard registration codes (PB, HR, DL…), not the numeric
+// GSTIN prefixes.
+const STATE_CODE_MAP = {
+  'JAMMU & KASHMIR': 'JK', 'JAMMU AND KASHMIR': 'JK',
+  'HIMACHAL PRADESH': 'HP', 'PUNJAB': 'PB', 'CHANDIGARH': 'CH',
+  'UTTARAKHAND': 'UK', 'HARYANA': 'HR', 'DELHI': 'DL', 'RAJASTHAN': 'RJ',
+  'UTTAR PRADESH': 'UP', 'BIHAR': 'BR', 'SIKKIM': 'SK',
+  'ARUNACHAL PRADESH': 'AR', 'NAGALAND': 'NL', 'MANIPUR': 'MN',
+  'MIZORAM': 'MZ', 'TRIPURA': 'TR', 'MEGHALAYA': 'ML', 'ASSAM': 'AS',
+  'WEST BENGAL': 'WB', 'JHARKHAND': 'JH', 'ODISHA': 'OD', 'CHHATTISGARH': 'CG',
+  'MADHYA PRADESH': 'MP', 'GUJARAT': 'GJ', 'DAMAN & DIU': 'DD',
+  'DAMAN AND DIU': 'DD', 'DADRA & NAGAR HAVELI': 'DN',
+  'DADRA AND NAGAR HAVELI': 'DN', 'MAHARASHTRA': 'MH',
+  'ANDHRA PRADESH': 'AP', 'ANDHRA PRADESH (OLD)': 'AP', 'KARNATAKA': 'KA',
+  'GOA': 'GA', 'LAKSHADWEEP': 'LD', 'KERALA': 'KL', 'TAMIL NADU': 'TN',
+  'PUDUCHERRY': 'PY', 'ANDAMAN & NICOBAR': 'AN', 'ANDAMAN AND NICOBAR': 'AN',
+  'TELANGANA': 'TS', 'LADAKH': 'LA',
+};
+
+// Resolve a state name (or an already-2-letter code) to its 2-letter code.
+function stateToCode(state) {
+  const s = String(state || '').trim().toUpperCase();
+  if (/^[A-Z]{2}$/.test(s)) return s;
+  return STATE_CODE_MAP[s] || '';
+}
+
+// Sales POC initials. Full names ("Vishal Sharma") → first+last initial ("VS").
+// Values that are already initials ("VS", "SPM") pass through uppercased.
+function pocInitials(poc) {
+  const parts = String(poc || '').trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return '';
+  if (parts.length === 1) return parts[0].replace(/[^A-Za-z]/g, '').toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+// First *letter* of the party name, uppercased (skips leading digits/punctuation).
+function firstLetter(name) {
+  const s = String(name || '').trim();
+  const m = s.match(/[A-Za-z]/);
+  return (m ? m[0] : s.charAt(0)).toUpperCase();
+}
+
+// Build the prefix that all running numbers share, e.g. "S-PBVS".
+function partyCodePrefix(name, state, poc) {
+  return firstLetter(name) + '-' + stateToCode(state) + pocInitials(poc);
+}
+
+// Given the prefix and all existing codes, return the next zero-padded code.
+function nextPartyCode(prefix, existingCodes) {
+  const re = new RegExp('^' + prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(\\d{3})$', 'i');
+  let max = 0;
+  for (const c of existingCodes) {
+    const m = re.exec(String(c || '').trim());
+    if (m) { const n = parseInt(m[1], 10); if (n > max) max = n; }
+  }
+  return prefix + String(max + 1).padStart(3, '0');
+}
+
 module.exports = async (req, res) => {
   // Same-origin requests don't need CORS, but be permissive in case
   // someone runs the dashboard from a different host during testing.
@@ -283,8 +349,25 @@ async function handleUpdateStatus(sheets, spreadsheetId, payload, res) {
 
 async function handleParty(sheets, spreadsheetId, payload, res) {
   const p = payload.party || {};
-  if (!p.name) return res.status(400).json({ ok: false, error: 'Party name is required' });
-  if (!p.code) return res.status(400).json({ ok: false, error: 'Party code is required' });
+  const name  = String(p.name || '').trim();
+  const poc   = String(p.poc || '').trim();
+  const state = String(p.state || '').trim();
+  const gst   = String(p.gst || '').trim().toUpperCase();
+  const aadhaar = String(p.aadhaar || '').replace(/\D/g, '');
+
+  if (!name)  return res.status(400).json({ ok: false, error: 'Party name is required' });
+  if (!poc)   return res.status(400).json({ ok: false, error: 'Sales POC is required to generate the party code' });
+
+  const stateCode = stateToCode(state);
+  if (!stateCode) return res.status(400).json({ ok: false, error: 'A valid State is required to generate the party code' });
+
+  // GST or Aadhaar must be present; Aadhaar must be 12 numeric digits.
+  if (!gst && !aadhaar) {
+    return res.status(400).json({ ok: false, error: 'Provide a GST number or an Aadhaar number' });
+  }
+  if (aadhaar && !/^\d{12}$/.test(aadhaar)) {
+    return res.status(400).json({ ok: false, error: 'Aadhaar must be exactly 12 digits' });
+  }
 
   // Ensure the Parties tab exists; create it with a header row on first call.
   const meta = await sheets.spreadsheets.get({ spreadsheetId });
@@ -305,29 +388,48 @@ async function handleParty(sheets, spreadsheetId, payload, res) {
     });
     await sheets.spreadsheets.values.update({
       spreadsheetId,
-      range: PARTIES_SHEET + '!A1:H1',
+      range: PARTIES_SHEET + '!A1:I1',
       valueInputOption: 'USER_ENTERED',
-      requestBody: {
-        values: [['CreatedAt', 'Party Name', 'Party Code', 'Sales POC',
-                  'GSTIN', 'State', 'Phone', 'City']],
-      },
+      requestBody: { values: [PARTIES_HEADERS] },
     });
   }
 
+  // Read existing Party Codes (column C) so we can guarantee uniqueness and
+  // compute the next running number for this prefix. Also guard against an
+  // exact duplicate party name.
+  const existing = await sheets.spreadsheets.values.get({
+    spreadsheetId,
+    range: PARTIES_SHEET + '!B:C',
+  });
+  const existingRows = existing.data.values || [];
+  const existingCodes = [];
+  const nameU = name.toUpperCase();
+  for (let i = 0; i < existingRows.length; i++) {
+    const row = existingRows[i] || [];
+    if (String(row[0] || '').trim().toUpperCase() === nameU) {
+      return res.status(409).json({ ok: false, error: 'A party named "' + name + '" already exists' });
+    }
+    if (row[1]) existingCodes.push(row[1]);
+  }
+
+  // System-generated, unique party code: [First letter]-[State][POC][NNN].
+  const prefix = partyCodePrefix(name, state, poc);
+  const code = nextPartyCode(prefix, existingCodes);
+
   await sheets.spreadsheets.values.append({
     spreadsheetId,
-    range: PARTIES_SHEET + '!A:H',
+    range: PARTIES_RANGE,
     valueInputOption: 'USER_ENTERED',
     insertDataOption: 'INSERT_ROWS',
     requestBody: {
       values: [[
         new Date().toISOString(),
-        p.name, p.code, p.poc || '',
-        p.gst || '', p.state || '',
-        p.phone || '', p.city || '',
+        name, code, poc,
+        gst, aadhaar, state,
+        String(p.phone || '').trim(), String(p.city || '').trim(),
       ]],
     },
   });
 
-  return res.status(200).json({ ok: true, party: p.name });
+  return res.status(200).json({ ok: true, party: name, code });
 }
