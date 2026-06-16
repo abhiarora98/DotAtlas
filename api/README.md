@@ -108,6 +108,18 @@ in ~300ms.
   drawer's Edit action, and Archive/Restore (which just set
   `status` to `Archived` / `Active`). Parties are never hard-deleted —
   archiving hides them from active lists while preserving all history.
+- **CRM entities** (tasks, contacts, documents, interaction log / notes)
+  live in a `PartyCRM` tab — one row per entity — so they sync across
+  users and devices. Columns: `Id · PartyCode · Kind · Text · Due · Done
+  · Meta(JSON) · CreatedAt · UpdatedAt`. Endpoints (all `POST /api/pi`):
+  - `{ kind: 'crmList', partyCode }` → `{ ok, items }` for that party.
+  - `{ kind: 'crmAdd', partyCode, entity: { kind, text, due, done, meta } }`
+    → `{ ok, item }` (kind ∈ task | contact | document | log).
+  - `{ kind: 'crmUpdate', id, patch: { text?, due?, done? } }` → `{ ok }`.
+  - `{ kind: 'crmDelete', id }` → `{ ok }`.
+  The Party Profile reads these on open (with a local cache for instant
+  render + offline fallback) and merges notes/calls/WhatsApp/orders/
+  payments/follow-ups into one chronological Timeline.
 
 ## Why this is faster than Apps Script
 

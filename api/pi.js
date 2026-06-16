@@ -40,6 +40,12 @@ const PARTIES_HEADERS = [
 ];
 const PARTIES_RANGE = PARTIES_SHEET + '!A:P';
 
+// CRM entities (tasks, contacts, documents, interaction log) for each party,
+// so they sync across users/devices. One row per entity, keyed by PartyCode.
+const CRM_SHEET   = process.env.CRM_SHEET_NAME || 'PartyCRM';
+const CRM_HEADERS = ['Id', 'PartyCode', 'Kind', 'Text', 'Due', 'Done', 'Meta', 'CreatedAt', 'UpdatedAt'];
+const CRM_RANGE   = CRM_SHEET + '!A:I';
+
 function normPartyType(t) {
   const v = String(t || '').trim().toLowerCase();
   if (v === 'supplier') return 'Supplier';
@@ -171,6 +177,10 @@ module.exports = async (req, res) => {
     if (kind === 'updateParty')  return await handleUpdateParty(sheets, spreadsheetId, payload, res);
     if (kind === 'list')         return await handleList(sheets, spreadsheetId, payload, res);
     if (kind === 'listParties')  return await handleListParties(sheets, spreadsheetId, payload, res);
+    if (kind === 'crmList')      return await handleCrmList(sheets, spreadsheetId, payload, res);
+    if (kind === 'crmAdd')       return await handleCrmAdd(sheets, spreadsheetId, payload, res);
+    if (kind === 'crmUpdate')    return await handleCrmUpdate(sheets, spreadsheetId, payload, res);
+    if (kind === 'crmDelete')    return await handleCrmDelete(sheets, spreadsheetId, payload, res);
     if (kind === 'updateStatus') return await handleUpdateStatus(sheets, spreadsheetId, payload, res);
 
     return res.status(400).json({ ok: false, error: 'Unknown kind: ' + kind });
@@ -588,4 +598,107 @@ async function handleListParties(sheets, spreadsheetId, _payload, res) {
     });
   }
   return res.status(200).json({ ok: true, count: parties.length, parties });
+}
+
+// ---------- CRM entities (tasks / contacts / documents / interaction log) ----------
+
+async function ensureCrmSheet(sheets, spreadsheetId) {
+  const meta = await sheets.spreadsheets.get({ spreadsheetId });
+  const sh = (meta.data.sheets || []).find(s => s.properties && s.properties.title === CRM_SHEET);
+  if (sh) return sh.properties.sheetId;
+  const resp = await sheets.spreadsheets.batchUpdate({
+    spreadsheetId,
+    requestBody: { requests: [{ addSheet: { properties: { title: CRM_SHEET, gridProperties: { frozenRowCount: 1 } } } }] },
+  });
+  await sheets.spreadsheets.values.update({
+    spreadsheetId, range: CRM_SHEET + '!A1:I1', valueInputOption: 'USER_ENTERED',
+    requestBody: { values: [CRM_HEADERS] },
+  });
+  return resp.data.replies[0].addSheet.properties.sheetId;
+}
+
+async function handleCrmList(sheets, spreadsheetId, payload, res) {
+  const code = String(payload.partyCode || '').trim();
+  if (!code) return res.status(400).json({ ok: false, error: 'partyCode is required' });
+  const meta = await sheets.spreadsheets.get({ spreadsheetId });
+  const exists = (meta.data.sheets || []).some(s => s.properties && s.properties.title === CRM_SHEET);
+  if (!exists) return res.status(200).json({ ok: true, items: [] });
+
+  const resp = await sheets.spreadsheets.values.get({ spreadsheetId, range: CRM_RANGE });
+  const rows = resp.data.values || [];
+  const cu = code.toUpperCase();
+  const items = [];
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i] || [];
+    if (String(r[1] || '').trim().toUpperCase() !== cu) continue;
+    items.push({
+      id: r[0] || '', partyCode: r[1] || '', kind: r[2] || '', text: r[3] || '',
+      due: r[4] || '', done: String(r[5] || '').toUpperCase() === 'TRUE',
+      meta: r[6] || '{}', createdAt: r[7] || '', updatedAt: r[8] || '',
+    });
+  }
+  return res.status(200).json({ ok: true, count: items.length, items });
+}
+
+async function handleCrmAdd(sheets, spreadsheetId, payload, res) {
+  const code = String(payload.partyCode || '').trim();
+  const e = payload.entity || {};
+  if (!code) return res.status(400).json({ ok: false, error: 'partyCode is required' });
+  if (!e.kind) return res.status(400).json({ ok: false, error: 'entity kind is required' });
+  await ensureCrmSheet(sheets, spreadsheetId);
+  const now = new Date().toISOString();
+  const id = 'C' + Date.now() + Math.floor(Math.random() * 1000);
+  const meta = typeof e.meta === 'object' ? JSON.stringify(e.meta || {}) : String(e.meta || '{}');
+  await sheets.spreadsheets.values.append({
+    spreadsheetId, range: CRM_RANGE, valueInputOption: 'USER_ENTERED', insertDataOption: 'INSERT_ROWS',
+    requestBody: { values: [[id, code, e.kind, String(e.text || ''), String(e.due || ''), e.done ? 'TRUE' : 'FALSE', meta, now, now]] },
+  });
+  return res.status(200).json({
+    ok: true,
+    item: { id, partyCode: code, kind: e.kind, text: e.text || '', due: e.due || '', done: !!e.done, meta, createdAt: now, updatedAt: now },
+  });
+}
+
+async function handleCrmUpdate(sheets, spreadsheetId, payload, res) {
+  const id = String(payload.id || '').trim();
+  const patch = payload.patch || {};
+  if (!id) return res.status(400).json({ ok: false, error: 'id is required' });
+  const resp = await sheets.spreadsheets.values.get({ spreadsheetId, range: CRM_RANGE });
+  const rows = resp.data.values || [];
+  let rowNum = -1, row = null;
+  for (let i = 1; i < rows.length; i++) {
+    if (String((rows[i] || [])[0] || '').trim() === id) { rowNum = i + 1; row = rows[i]; break; }
+  }
+  if (rowNum < 0) return res.status(404).json({ ok: false, error: 'CRM item not found' });
+  const cur = { text: row[3] || '', due: row[4] || '', done: String(row[5] || '').toUpperCase() === 'TRUE', meta: row[6] || '{}' };
+  const text = patch.text != null ? String(patch.text) : cur.text;
+  const due = patch.due != null ? String(patch.due) : cur.due;
+  const done = patch.done != null ? !!patch.done : cur.done;
+  const meta = patch.meta != null ? (typeof patch.meta === 'object' ? JSON.stringify(patch.meta) : String(patch.meta)) : cur.meta;
+  await sheets.spreadsheets.values.update({
+    spreadsheetId, range: CRM_SHEET + '!D' + rowNum + ':I' + rowNum, valueInputOption: 'USER_ENTERED',
+    requestBody: { values: [[text, due, done ? 'TRUE' : 'FALSE', meta, row[7] || '', new Date().toISOString()]] },
+  });
+  return res.status(200).json({ ok: true, id });
+}
+
+async function handleCrmDelete(sheets, spreadsheetId, payload, res) {
+  const id = String(payload.id || '').trim();
+  if (!id) return res.status(400).json({ ok: false, error: 'id is required' });
+  const meta = await sheets.spreadsheets.get({ spreadsheetId });
+  const sh = (meta.data.sheets || []).find(s => s.properties && s.properties.title === CRM_SHEET);
+  if (!sh) return res.status(404).json({ ok: false, error: 'CRM sheet not found' });
+  const sheetId = sh.properties.sheetId;
+  const resp = await sheets.spreadsheets.values.get({ spreadsheetId, range: CRM_SHEET + '!A:A' });
+  const rows = resp.data.values || [];
+  let rowIdx = -1;
+  for (let i = 1; i < rows.length; i++) {
+    if (String((rows[i] || [])[0] || '').trim() === id) { rowIdx = i; break; }
+  }
+  if (rowIdx < 0) return res.status(404).json({ ok: false, error: 'CRM item not found' });
+  await sheets.spreadsheets.batchUpdate({
+    spreadsheetId,
+    requestBody: { requests: [{ deleteDimension: { range: { sheetId, dimension: 'ROWS', startIndex: rowIdx, endIndex: rowIdx + 1 } } }] },
+  });
+  return res.status(200).json({ ok: true, id });
 }

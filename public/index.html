@@ -22426,6 +22426,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   // ---------- Full-page Party Profile ----------
   let profileParty = null;
   let profileTab = 'overview';
+  let editingNote = null;
+  function currentUser(){ return (window.ATLAS_USER || localStorage.getItem('atlas-user') || 'You'); }
   const PROFILE_TABS = [['overview','Overview'],['timeline','Timeline'],['orders','Orders'],
     ['receivables','Receivables'],['tasks','Tasks'],['contacts','Contacts'],['notes','Notes'],
     ['documents','Documents'],['settings','Settings']];
@@ -22570,6 +22572,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     history.replaceState(null, '', '#party-profile');
     window.scrollTo({ top: 0, behavior: 'instant' });
     renderProfile();
+    // Pull CRM entities from the backend so they're in sync across devices.
+    crmFetch(p).then(() => { if (profileParty && normName(profileParty.name) === normName(p.name)) renderProfile(); });
   }
 
   function profileActs(p){
@@ -22627,9 +22631,26 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     if (profileTab === 'tasks'){ el.innerHTML = renderTasksTab(p); return; }
     if (profileTab === 'contacts'){ el.innerHTML = renderContactsTab(p); return; }
     if (profileTab === 'notes'){
-      el.innerHTML = '<div class="pd-section-t">Notes</div>' +
-        '<textarea id="pp-notes" class="pp-notes" placeholder="Add private notes about this party…">' + esc(loadNotes(p)) + '</textarea>' +
-        '<div class="pd-edit-acts"><button class="pi-btn prime" data-pa="savenotes">Save note</button></div>';
+      const notes = loadLog(p).filter(l => l.type === 'note').slice().reverse();
+      const composer = '<div class="pp-composer">' +
+        '<textarea id="pp-note-text" class="pp-notes" placeholder="Write a note… (e.g. discussed pricing, customer requested samples)"></textarea>' +
+        '<div class="pd-edit-acts"><button class="pi-btn prime" data-pa="savenotes">+ New Note</button></div></div>';
+      const cards = notes.length ? notes.map(n => {
+        if (n.id === editingNote){
+          return '<div class="pp-notecard editing">' +
+            '<textarea id="pp-note-edit" class="pp-notes">' + esc(n.text) + '</textarea>' +
+            '<div class="pd-edit-acts"><button class="pi-btn" data-pa="cancelnote">Cancel</button>' +
+            '<button class="pi-btn prime" data-pa="savenoteedit" data-id="' + n.id + '">Save</button></div></div>';
+        }
+        return '<div class="pp-notecard">' +
+          '<div class="pp-notehead"><span class="pp-noteauthor">' + esc(n.author || 'You') + '</span>' +
+          '<span class="pp-notetime">' + fmtDate(n.ts) + '</span></div>' +
+          '<div class="pp-notebody">' + esc(n.text) + '</div>' +
+          '<div class="pp-noteacts"><button data-pa="editnote" data-id="' + n.id + '">Edit</button>' +
+          '<button data-pa="delcrm" data-id="' + n.id + '">Delete</button></div></div>';
+      }).join('') : emptyTab('No notes yet — add the first one.');
+      el.innerHTML = '<div class="pd-section-t">New note</div>' + composer +
+        '<div class="pd-section-t" style="margin-top:20px;">History</div>' + cards;
       return;
     }
     if (profileTab === 'documents'){ el.innerHTML = renderDocsTab(p); return; }
@@ -22661,7 +22682,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     for (const r of piRowsFor(p)) if (r.date) ev.push([new Date(r.date), 'Order ' + (r.ref || '') + ' · ' + inr(r.totalIncGst || 0)]);
     const rec = receivables && receivables.parties && receivables.parties[slug(p.name)];
     if (rec) for (const t of (rec.fy25 || [])){ const d = parseRecDate(t.d); if (d) ev.push([d, (t.t === 'Receipt' ? 'Payment received' : t.t) + ' · ' + inr((t.dr || t.cr) || 0)]); }
-    for (const l of loadLog(p)){ const d = new Date(l.ts); if (!isNaN(d)) ev.push([d, l.text]); }
+    for (const l of loadLog(p)){ const d = new Date(l.ts); if (!isNaN(d)) ev.push([d, l.type === 'note' ? 'Note: ' + l.text : l.text]); }
+    for (const t of loadTasks(p)){ const d = t.ts ? new Date(t.ts) : null; if (d && !isNaN(d)) ev.push([d, (t.done ? 'Follow-up done: ' : 'Follow-up scheduled: ') + t.text]); }
     ev.sort((a, b) => b[0] - a[0]);
     if (!ev.length) return emptyTab('No activity recorded yet.');
     let html = '', cur = null;
@@ -22674,29 +22696,82 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   }
 
   function notesKey(p){ return normName(p.code || p.name); }
-  function loadNotes(p){ try { return (JSON.parse(localStorage.getItem('atlas-party-notes') || '{}'))[notesKey(p)] || ''; } catch(e){ return ''; } }
-  function saveNotes(p){
-    try {
-      const all = JSON.parse(localStorage.getItem('atlas-party-notes') || '{}');
-      all[notesKey(p)] = $('pp-notes').value;
-      localStorage.setItem('atlas-party-notes', JSON.stringify(all));
-      logInteraction(p, 'Note updated');
-      toast('Note saved.');
-    } catch(e){}
+
+  // ---------- CRM store: backend-synced (PartyCRM sheet), cached locally for
+  // instant render + offline fallback. Entities sync across users/devices. ----------
+  const crmCache = {};
+  function crmBucket(p){ const k = notesKey(p); return crmCache[k] || (crmCache[k] = { tasks: [], contacts: [], documents: [], log: [], loaded: false }); }
+  function partyCodeFor(p){ return (p.code || p.name || '').trim(); }
+  function safeJson(s){ try { return JSON.parse(s); } catch(e){ return {}; } }
+  function bucketName(kind){ return kind === 'task' ? 'tasks' : kind === 'contact' ? 'contacts' : kind === 'document' ? 'documents' : 'log'; }
+  function crmPost(body){
+    return fetch(endpoint(), { method: 'POST', mode: 'cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
+      .then(r => r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)));
+  }
+  function normalizeItem(it){
+    const meta = typeof it.meta === 'string' ? safeJson(it.meta) : (it.meta || {});
+    if (it.kind === 'task') return { id: it.id, kind: 'task', text: it.text || '', due: it.due || '', done: it.done === true || String(it.done).toUpperCase() === 'TRUE', ts: it.createdAt };
+    if (it.kind === 'contact') return { id: it.id, kind: 'contact', name: it.text || '', role: meta.role || '', phone: meta.phone || '', email: meta.email || '', ts: it.createdAt };
+    if (it.kind === 'document') return { id: it.id, kind: 'document', name: it.text || '', url: meta.url || '', ts: it.createdAt };
+    return { id: it.id, kind: 'log', text: it.text || '', type: meta.type || 'generic', author: meta.author || '', ts: it.updatedAt || it.createdAt };
+  }
+  function buildEntity(kind, f){
+    if (kind === 'task') return { kind: 'task', text: f.text || '', due: f.due || '', done: !!f.done, meta: {} };
+    if (kind === 'contact') return { kind: 'contact', text: f.name || '', meta: { role: f.role || '', phone: f.phone || '', email: f.email || '' } };
+    if (kind === 'document') return { kind: 'document', text: f.name || '', meta: { url: f.url || '' } };
+    return { kind: 'log', text: f.text || '', meta: { type: f.type || 'note', author: f.author || currentUser() } };
+  }
+  function crmPersistLocal(p){
+    try { const all = JSON.parse(localStorage.getItem('atlas-crm') || '{}'); const b = crmBucket(p);
+      all[notesKey(p)] = { tasks: b.tasks, contacts: b.contacts, documents: b.documents, log: b.log };
+      localStorage.setItem('atlas-crm', JSON.stringify(all)); } catch(e){}
+  }
+  function crmLoadLocal(p){ try { return (JSON.parse(localStorage.getItem('atlas-crm') || '{}'))[notesKey(p)] || null; } catch(e){ return null; } }
+
+  function crmFetch(p){
+    const b = crmBucket(p);
+    const local = crmLoadLocal(p);
+    if (local){ b.tasks = local.tasks || []; b.contacts = local.contacts || []; b.documents = local.documents || []; b.log = local.log || []; }
+    return crmPost({ kind: 'crmList', partyCode: partyCodeFor(p) }).then(j => {
+      if (j && j.ok){
+        b.tasks = []; b.contacts = []; b.documents = []; b.log = [];
+        (j.items || []).forEach(raw => { const it = normalizeItem(raw); (b[bucketName(it.kind)] || b.log).push(it); });
+        b.loaded = true; crmPersistLocal(p);
+      }
+    }).catch(() => { b.loaded = true; }); // offline → keep local cache
+  }
+  function crmAdd(p, kind, fields){
+    const b = crmBucket(p); const now = new Date().toISOString();
+    const entity = buildEntity(kind, fields);
+    const item = normalizeItem(Object.assign({ id: 'tmp' + Date.now() + Math.random().toString(36).slice(2, 6), createdAt: now }, entity));
+    b[bucketName(kind)].push(item);
+    crmPersistLocal(p); renderProfile();
+    crmPost({ kind: 'crmAdd', partyCode: partyCodeFor(p), entity }).then(j => {
+      if (j && j.ok && j.item){ item.id = j.item.id; crmPersistLocal(p); }
+    }).catch(() => {});
+    return item;
+  }
+  function crmUpdate(p, id, patch){
+    const b = crmBucket(p);
+    for (const bn of ['tasks', 'contacts', 'documents', 'log']){ const it = b[bn].find(x => x.id === id); if (it){ Object.assign(it, patch); break; } }
+    crmPersistLocal(p); renderProfile();
+    const bp = {}; if (patch.done != null) bp.done = patch.done; if (patch.text != null) bp.text = patch.text; if (patch.due != null) bp.due = patch.due;
+    crmPost({ kind: 'crmUpdate', id, partyCode: partyCodeFor(p), patch: bp }).catch(() => {});
+  }
+  function crmDelete(p, id){
+    const b = crmBucket(p);
+    for (const bn of ['tasks', 'contacts', 'documents', 'log']) b[bn] = b[bn].filter(x => x.id !== id);
+    crmPersistLocal(p); renderProfile();
+    crmPost({ kind: 'crmDelete', id, partyCode: partyCodeFor(p) }).catch(() => {});
   }
 
-  // ---------- CRM local stores (tasks / contacts / documents / activity log) ----------
-  function nsLoad(ns, key){ try { return (JSON.parse(localStorage.getItem(ns) || '{}'))[key] || []; } catch(e){ return []; } }
-  function nsSave(ns, key, arr){ try { const all = JSON.parse(localStorage.getItem(ns) || '{}'); all[key] = arr; localStorage.setItem(ns, JSON.stringify(all)); } catch(e){} }
-  function loadTasks(p){ return nsLoad('atlas-party-tasks', notesKey(p)); }
-  function saveTasks(p, a){ nsSave('atlas-party-tasks', notesKey(p), a); }
-  function loadContacts(p){ return nsLoad('atlas-party-contacts', notesKey(p)); }
-  function saveContacts(p, a){ nsSave('atlas-party-contacts', notesKey(p), a); }
-  function loadDocs(p){ return nsLoad('atlas-party-docs', notesKey(p)); }
-  function saveDocs(p, a){ nsSave('atlas-party-docs', notesKey(p), a); }
-  function loadLog(p){ return nsLoad('atlas-party-log', notesKey(p)); }
-  function logInteraction(p, text){ const a = loadLog(p); a.push({ ts: new Date().toISOString(), text }); nsSave('atlas-party-log', notesKey(p), a); }
-  function lastContact(p){ const a = loadLog(p); if (!a.length) return null; const d = new Date(a[a.length - 1].ts); return isNaN(d) ? null : d; }
+  // Accessors used by the tab renderers.
+  function loadTasks(p){ return crmBucket(p).tasks; }
+  function loadContacts(p){ return crmBucket(p).contacts; }
+  function loadDocs(p){ return crmBucket(p).documents; }
+  function loadLog(p){ return crmBucket(p).log; }
+  function logInteraction(p, text, type){ crmAdd(p, 'log', { text, type: type || 'generic' }); }
+  function lastContact(p){ const a = crmBucket(p).log; let mx = null; for (const l of a){ const d = new Date(l.ts); if (!isNaN(d) && (!mx || d > mx)) mx = d; } return mx; }
 
   // ---------- date helpers for the timeline ----------
   function startOfDay(d){ const x = new Date(d); x.setHours(0, 0, 0, 0); return x.getTime(); }
@@ -22781,10 +22856,10 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       kv('Sales POC', p.poc), kv('Phone', p.phone ? '+91 ' + p.phone : '', true), kv('Email', p.email),
     ]);
     const list = loadContacts(p);
-    const items = list.length ? list.map((c, i) =>
+    const items = list.length ? list.map(c =>
       '<div class="pp-contact"><div><div class="pp-cname">' + esc(c.name || '—') + (c.role ? ' · <span class="muted">' + esc(c.role) + '</span>' : '') + '</div>' +
       '<div class="pl-meta">' + [c.phone ? '📞 ' + c.phone : '', c.email || ''].filter(Boolean).map(esc).join(' · ') + '</div></div>' +
-      '<button class="pp-taskdel" data-pa="delcontact" data-id="' + i + '">×</button></div>').join('')
+      '<button class="pp-taskdel" data-pa="delcrm" data-id="' + c.id + '">×</button></div>').join('')
       : emptyTab('No additional contacts yet.');
     const form = '<div class="pp-rowform wrap">' +
       '<input id="pp-c-name" class="pi-input" placeholder="Name">' +
@@ -22798,10 +22873,10 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   // ---------- Documents ----------
   function renderDocsTab(p){
     const docs = loadDocs(p);
-    const items = docs.length ? docs.map((d, i) =>
+    const items = docs.length ? docs.map(d =>
       '<div class="pp-doc"><a href="' + esc(d.url) + '" target="_blank" rel="noopener">📄 ' + esc(d.name || d.url) + '</a>' +
       '<span class="pl-meta">' + fmtDate(d.ts) + '</span>' +
-      '<button class="pp-taskdel" data-pa="deldoc" data-id="' + i + '">×</button></div>').join('')
+      '<button class="pp-taskdel" data-pa="delcrm" data-id="' + d.id + '">×</button></div>').join('')
       : emptyTab('No documents linked yet.');
     const form = '<div class="pp-rowform">' +
       '<input id="pp-d-name" class="pi-input" placeholder="Document name">' +
@@ -22915,51 +22990,58 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const ph = (p.phone || '').replace(/\D/g, '');
     const id = ab.getAttribute('data-id');
     if (act === 'save'){ saveEdit(); }
-    else if (act === 'savenotes'){ saveNotes(p); renderProfile(); }
     else if (act === 'archive'){ archiveParty(); }
     else if (act === 'restore'){ restoreParty(); }
-    else if (act === 'wa'){ if (ph){ logInteraction(p, 'WhatsApp message sent'); window.open('https://wa.me/91' + ph, '_blank'); renderProfile(); } }
-    else if (act === 'call'){ if (ph){ logInteraction(p, 'Called customer'); window.location.href = 'tel:+91' + ph; renderProfile(); } }
-    else if (act === 'addnote'){ profileTab = 'notes'; renderProfile(); requestAnimationFrame(() => { const t = $('pp-notes'); if (t) t.focus(); }); }
+    else if (act === 'wa'){ if (ph){ logInteraction(p, 'WhatsApp message sent', 'whatsapp'); window.open('https://wa.me/91' + ph, '_blank'); } }
+    else if (act === 'call'){ if (ph){ logInteraction(p, 'Called customer', 'call'); window.location.href = 'tel:+91' + ph; } }
+    else if (act === 'addnote'){ profileTab = 'notes'; renderProfile(); requestAnimationFrame(() => { const t = $('pp-note-text'); if (t) t.focus(); }); }
     else if (act === 'followup'){ profileTab = 'tasks'; renderProfile(); requestAnimationFrame(() => { const t = $('pp-task-text'); if (t) t.focus(); }); }
     else if (act === 'createpi'){
       const nav = document.querySelector('.nav-item[data-page="create-pi"]');
       if (nav) nav.click();
-      logInteraction(p, 'New order started');
+      logInteraction(p, 'New order started', 'order');
       setTimeout(() => { if (window.atlasPickParty) window.atlasPickParty({ name: p.name, code: p.code }); }, 140);
+    }
+    // Notes (activity-log style; persisted to backend, shown in Timeline too)
+    else if (act === 'savenotes'){
+      const t = $('pp-note-text'); const text = t ? t.value.trim() : '';
+      if (!text){ if (t) t.focus(); return; }
+      crmAdd(p, 'log', { text, type: 'note', author: currentUser() });
+      toast('Note added.');
+    }
+    else if (act === 'editnote'){ editingNote = id; renderProfile(); requestAnimationFrame(() => { const t = $('pp-note-edit'); if (t){ t.focus(); t.setSelectionRange(t.value.length, t.value.length); } }); }
+    else if (act === 'cancelnote'){ editingNote = null; renderProfile(); }
+    else if (act === 'savenoteedit'){
+      const t = $('pp-note-edit'); const text = t ? t.value.trim() : '';
+      if (text){ crmUpdate(p, id, { text }); } editingNote = null; renderProfile();
     }
     // Tasks
     else if (act === 'addtask'){
       const text = ($('pp-task-text') || {}).value || ''; const due = ($('pp-task-due') || {}).value || '';
       if (!text.trim()){ const t = $('pp-task-text'); if (t) t.focus(); return; }
-      const tasks = loadTasks(p);
-      tasks.push({ id: 'T' + Date.now() + Math.floor(Math.random() * 999), text: text.trim(), due, done: false, ts: new Date().toISOString() });
-      saveTasks(p, tasks);
-      logInteraction(p, 'Follow-up scheduled: ' + text.trim());
-      toast('Follow-up added.'); renderProfile();
+      crmAdd(p, 'task', { text: text.trim(), due, done: false });
+      toast('Follow-up added.');
     }
     else if (act === 'toggletask'){
-      const tasks = loadTasks(p); const t = tasks.find(x => x.id === id);
-      if (t){ t.done = !t.done; saveTasks(p, tasks); if (t.done) logInteraction(p, 'Task completed: ' + t.text); renderProfile(); }
+      const t = loadTasks(p).find(x => x.id === id);
+      if (t) crmUpdate(p, id, { done: !t.done });
     }
-    else if (act === 'deltask'){ saveTasks(p, loadTasks(p).filter(x => x.id !== id)); renderProfile(); }
     // Contacts
     else if (act === 'addcontact'){
-      const c = { name: ($('pp-c-name') || {}).value || '', role: ($('pp-c-role') || {}).value || '',
+      const c = { name: (($('pp-c-name') || {}).value || '').trim(), role: (($('pp-c-role') || {}).value || '').trim(),
         phone: (($('pp-c-phone') || {}).value || '').trim(), email: (($('pp-c-email') || {}).value || '').trim() };
-      if (!c.name.trim() && !c.phone && !c.email){ const n = $('pp-c-name'); if (n) n.focus(); return; }
-      const list = loadContacts(p); list.push(c); saveContacts(p, list); toast('Contact added.'); renderProfile();
+      if (!c.name && !c.phone && !c.email){ const n = $('pp-c-name'); if (n) n.focus(); return; }
+      crmAdd(p, 'contact', c); toast('Contact added.');
     }
-    else if (act === 'delcontact'){ const list = loadContacts(p); list.splice(Number(id), 1); saveContacts(p, list); renderProfile(); }
     // Documents
     else if (act === 'adddoc'){
       const url = (($('pp-d-url') || {}).value || '').trim();
       if (!url){ const u = $('pp-d-url'); if (u) u.focus(); return; }
       const name = (($('pp-d-name') || {}).value || '').trim() || url;
-      const list = loadDocs(p); list.push({ name, url, ts: new Date().toISOString() }); saveDocs(p, list);
-      logInteraction(p, 'Document linked: ' + name); toast('Document linked.'); renderProfile();
+      crmAdd(p, 'document', { name, url }); toast('Document linked.');
     }
-    else if (act === 'deldoc'){ const list = loadDocs(p); list.splice(Number(id), 1); saveDocs(p, list); renderProfile(); }
+    // Unified delete for any CRM entity (note / task / contact / document)
+    else if (act === 'delcrm' || act === 'deltask'){ crmDelete(p, id); }
   }
 
   // ---------- load orchestration ----------
@@ -23325,6 +23407,19 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   .pp-doc a { color: var(--blue); text-decoration: none; }
   .pp-doc a:hover { text-decoration: underline; }
   .pp-danger { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+  /* Notes activity log */
+  .pp-composer .pp-notes { min-height: 80px; }
+  .pp-notecard { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; background: var(--surface-2); }
+  .pp-notecard.editing { background: var(--surface); }
+  .pp-notehead { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+  .pp-noteauthor { font-size: 12.5px; font-weight: 600; color: var(--text); }
+  .pp-notetime { font-family: var(--fm); font-size: 10.5px; color: var(--text-3); }
+  .pp-notebody { font-size: 13px; color: var(--text); line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+  .pp-noteacts { display: flex; gap: 12px; margin-top: 9px; }
+  .pp-noteacts button { background: transparent; border: 0; color: var(--text-3); font-family: var(--fm); font-size: 11px; cursor: pointer; padding: 0; }
+  .pp-noteacts button:hover { color: var(--text); }
+  .pp-noteacts button[data-pa="delcrm"]:hover { color: var(--rose); }
 
   @media (max-width: 640px){
     .pp-head-main h1 { font-size: 21px; white-space: normal; }

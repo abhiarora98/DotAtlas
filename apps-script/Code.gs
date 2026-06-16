@@ -16,6 +16,8 @@
 
 const PI_SHEET_NAME      = 'Comfort_atlas';   // tab name where PI line items live
 const PARTIES_SHEET_NAME = 'Parties';         // optional — created on first Add Party
+const CRM_SHEET_NAME     = 'PartyCRM';        // CRM entities (tasks/contacts/docs/log)
+const CRM_HEADERS_       = ['Id', 'PartyCode', 'Kind', 'Text', 'Due', 'Done', 'Meta', 'CreatedAt', 'UpdatedAt'];
 
 // ---------- request entry points ----------
 
@@ -30,6 +32,10 @@ function doPost(e) {
     if (kind === 'party')       return handleParty(payload);
     if (kind === 'updateParty') return handleUpdateParty(payload);
     if (kind === 'listParties') return handleListParties();
+    if (kind === 'crmList')     return handleCrmList(payload);
+    if (kind === 'crmAdd')      return handleCrmAdd(payload);
+    if (kind === 'crmUpdate')   return handleCrmUpdate(payload);
+    if (kind === 'crmDelete')   return handleCrmDelete(payload);
     return jsonResponse({ ok: false, error: 'Unknown kind: ' + kind });
   } catch (err) {
     return jsonResponse({ ok: false, error: String(err && err.message || err) });
@@ -269,6 +275,95 @@ function handleListParties() {
     });
   }
   return jsonResponse({ ok: true, count: parties.length, parties: parties });
+}
+
+// ---------- CRM entities ----------
+
+function ensureCrmSheet_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName(CRM_SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(CRM_SHEET_NAME);
+    sheet.appendRow(CRM_HEADERS_);
+    sheet.setFrozenRows(1);
+    sheet.getRange('A1:I1').setFontWeight('bold');
+  }
+  return sheet;
+}
+
+function handleCrmList(payload) {
+  const code = String(payload.partyCode || '').trim();
+  if (!code) return jsonResponse({ ok: false, error: 'partyCode is required.' });
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CRM_SHEET_NAME);
+  if (!sheet) return jsonResponse({ ok: true, items: [] });
+  const last = sheet.getLastRow();
+  if (last < 2) return jsonResponse({ ok: true, items: [] });
+  const rows = sheet.getRange(2, 1, last - 1, 9).getValues();
+  const cu = code.toUpperCase();
+  const items = [];
+  for (var i = 0; i < rows.length; i++) {
+    var r = rows[i];
+    if (String(r[1] || '').trim().toUpperCase() !== cu) continue;
+    items.push({
+      id: r[0] || '', partyCode: r[1] || '', kind: r[2] || '', text: r[3] || '',
+      due: r[4] || '', done: String(r[5] || '').toUpperCase() === 'TRUE',
+      meta: r[6] || '{}', createdAt: r[7] || '', updatedAt: r[8] || '',
+    });
+  }
+  return jsonResponse({ ok: true, count: items.length, items: items });
+}
+
+function handleCrmAdd(payload) {
+  const code = String(payload.partyCode || '').trim();
+  const e = payload.entity || {};
+  if (!code) return jsonResponse({ ok: false, error: 'partyCode is required.' });
+  if (!e.kind) return jsonResponse({ ok: false, error: 'entity kind is required.' });
+  const sheet = ensureCrmSheet_();
+  const now = new Date().toISOString();
+  const id = 'C' + Date.now() + Math.floor(Math.random() * 1000);
+  const meta = typeof e.meta === 'object' ? JSON.stringify(e.meta || {}) : String(e.meta || '{}');
+  sheet.appendRow([id, code, e.kind, String(e.text || ''), String(e.due || ''), e.done ? 'TRUE' : 'FALSE', meta, now, now]);
+  return jsonResponse({ ok: true, item: { id: id, partyCode: code, kind: e.kind, text: e.text || '', due: e.due || '', done: !!e.done, meta: meta, createdAt: now, updatedAt: now } });
+}
+
+function handleCrmUpdate(payload) {
+  const id = String(payload.id || '').trim();
+  const patch = payload.patch || {};
+  if (!id) return jsonResponse({ ok: false, error: 'id is required.' });
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CRM_SHEET_NAME);
+  if (!sheet) return jsonResponse({ ok: false, error: 'CRM sheet not found.' });
+  const last = sheet.getLastRow();
+  if (last < 2) return jsonResponse({ ok: false, error: 'CRM item not found.' });
+  const rows = sheet.getRange(2, 1, last - 1, 9).getValues();
+  for (var i = 0; i < rows.length; i++) {
+    if (String(rows[i][0] || '').trim() === id) {
+      var row = rows[i];
+      var text = patch.text != null ? String(patch.text) : (row[3] || '');
+      var due = patch.due != null ? String(patch.due) : (row[4] || '');
+      var done = patch.done != null ? !!patch.done : (String(row[5] || '').toUpperCase() === 'TRUE');
+      var meta = patch.meta != null ? (typeof patch.meta === 'object' ? JSON.stringify(patch.meta) : String(patch.meta)) : (row[6] || '{}');
+      sheet.getRange(i + 2, 4, 1, 6).setValues([[text, due, done ? 'TRUE' : 'FALSE', meta, row[7] || '', new Date().toISOString()]]);
+      return jsonResponse({ ok: true, id: id });
+    }
+  }
+  return jsonResponse({ ok: false, error: 'CRM item not found.' });
+}
+
+function handleCrmDelete(payload) {
+  const id = String(payload.id || '').trim();
+  if (!id) return jsonResponse({ ok: false, error: 'id is required.' });
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CRM_SHEET_NAME);
+  if (!sheet) return jsonResponse({ ok: false, error: 'CRM sheet not found.' });
+  const last = sheet.getLastRow();
+  if (last < 2) return jsonResponse({ ok: false, error: 'CRM item not found.' });
+  const ids = sheet.getRange(2, 1, last - 1, 1).getValues();
+  for (var i = 0; i < ids.length; i++) {
+    if (String(ids[i][0] || '').trim() === id) {
+      sheet.deleteRow(i + 2);
+      return jsonResponse({ ok: true, id: id });
+    }
+  }
+  return jsonResponse({ ok: false, error: 'CRM item not found.' });
 }
 
 function normPartyType_(t) {
