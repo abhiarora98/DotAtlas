@@ -52,8 +52,8 @@ const CRM_RANGE   = CRM_SHEET + '!A:I';
 const SALES_SHEET   = process.env.SALES_SHEET_NAME || 'SalesDocs';
 const SALES_HEADERS = ['Id', 'DocType', 'Number', 'Date', 'PartyCode', 'PartyName',
   'POC', 'SourceRef', 'Amount', 'Lines', 'Status', 'DispatchStage', 'CreatedAt', 'UpdatedAt',
-  'DispatchedAmount', 'InvoicedAmount'];
-const SALES_RANGE   = SALES_SHEET + '!A:P';
+  'DispatchedAmount', 'InvoicedAmount', 'Ops'];
+const SALES_RANGE   = SALES_SHEET + '!A:Q';
 
 function normPartyType(t) {
   const v = String(t || '').trim().toLowerCase();
@@ -191,6 +191,7 @@ module.exports = async (req, res) => {
     if (kind === 'salesDocList')   return await handleSalesDocList(sheets, spreadsheetId, payload, res);
     if (kind === 'salesDocAdd')    return await handleSalesDocAdd(sheets, spreadsheetId, payload, res);
     if (kind === 'salesDocUpdate') return await handleSalesDocUpdate(sheets, spreadsheetId, payload, res);
+    if (kind === 'salesDocFulfill') return await handleSalesDocFulfill(sheets, spreadsheetId, payload, res);
     if (kind === 'crmAdd')       return await handleCrmAdd(sheets, spreadsheetId, payload, res);
     if (kind === 'crmUpdate')    return await handleCrmUpdate(sheets, spreadsheetId, payload, res);
     if (kind === 'crmDelete')    return await handleCrmDelete(sheets, spreadsheetId, payload, res);
@@ -750,7 +751,7 @@ async function ensureSalesSheet(sheets, spreadsheetId) {
     requestBody: { requests: [{ addSheet: { properties: { title: SALES_SHEET, gridProperties: { frozenRowCount: 1 } } } }] },
   });
   await sheets.spreadsheets.values.update({
-    spreadsheetId, range: SALES_SHEET + '!A1:P1', valueInputOption: 'USER_ENTERED',
+    spreadsheetId, range: SALES_SHEET + '!A1:Q1', valueInputOption: 'USER_ENTERED',
     requestBody: { values: [SALES_HEADERS] },
   });
   return resp.data.replies[0].addSheet.properties.sheetId;
@@ -763,6 +764,7 @@ function salesRowToObj(r) {
     amount: Number(r[8]) || 0, lines: r[9] || '[]', status: r[10] || 'Draft',
     dispatchStage: r[11] || '', createdAt: r[12] || '', updatedAt: r[13] || '',
     dispatchedAmount: Number(r[14]) || 0, invoicedAmount: Number(r[15]) || 0,
+    ops: r[16] || '{}',
   };
 }
 
@@ -811,6 +813,7 @@ async function handleSalesDocAdd(sheets, spreadsheetId, payload, res) {
     Number(d.amount) || 0, lines, String(d.status || 'Confirmed'),
     String(d.dispatchStage || ''), now, now,
     Number(d.dispatchedAmount) || 0, Number(d.invoicedAmount) || 0,
+    typeof d.ops === 'object' ? JSON.stringify(d.ops || {}) : String(d.ops || '{}'),
   ];
   await sheets.spreadsheets.values.append({
     spreadsheetId, range: SALES_RANGE, valueInputOption: 'USER_ENTERED', insertDataOption: 'INSERT_ROWS',
@@ -839,4 +842,87 @@ async function handleSalesDocUpdate(sheets, spreadsheetId, payload, res) {
     requestBody: { values: [[status, stage, row[12] || '', new Date().toISOString(), dispatched, invoiced]] },
   });
   return res.status(200).json({ ok: true, id, status, dispatchStage: stage, dispatchedAmount: dispatched, invoicedAmount: invoiced });
+}
+
+// ----- line-level fulfillment -----
+function normFulfillLines(arr) {
+  return (Array.isArray(arr) ? arr : []).map((l, i) => ({
+    no: l.no != null ? l.no : (i + 1),
+    item: String(l.item || l.model || l.category || '').slice(0, 80),
+    qty: Number(l.qty) || 0,
+    total: Number(l.total != null ? l.total : l.totalIncGst) || 0,
+    disp: Number(l.disp) || 0,
+    inv: Number(l.inv) || 0,
+  }));
+}
+function aggregateFulfill(lines) {
+  let ordered = 0, dispQty = 0, invQty = 0, amount = 0, dispAmt = 0, invAmt = 0;
+  for (const l of lines) {
+    ordered += l.qty; dispQty += l.disp; invQty += l.inv; amount += l.total;
+    if (l.qty > 0) { dispAmt += l.total * (l.disp / l.qty); invAmt += l.total * (l.inv / l.qty); }
+  }
+  let dispStatus = null;
+  if (dispQty > 0) dispStatus = dispQty >= ordered - 1e-6 ? 'Completed' : 'Partially Dispatched';
+  return { ordered, dispQty, invQty, amount, dispAmt, invAmt, dispStatus };
+}
+
+// Per-line dispatch / invoice. Deltas add quantities to disp/inv per line;
+// the document aggregates and status are derived from the resulting lines.
+async function handleSalesDocFulfill(sheets, spreadsheetId, payload, res) {
+  const docType = String(payload.docType || 'PI').toUpperCase() === 'SO' ? 'SO' : 'PI';
+  const ref = String(payload.ref || '').trim();
+  if (!ref) return res.status(400).json({ ok: false, error: 'ref is required' });
+  const action = payload.action === 'invoice' ? 'invoice' : 'dispatch';
+  const deltas = Array.isArray(payload.deltas) ? payload.deltas : [];
+  await ensureSalesSheet(sheets, spreadsheetId);
+
+  const resp = await sheets.spreadsheets.values.get({ spreadsheetId, range: SALES_RANGE });
+  const rows = resp.data.values || [];
+  let rowNum = -1, row = null;
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i] || [];
+    if (String(r[1] || '').toUpperCase() === docType && String(r[2] || '') === ref) { rowNum = i + 1; row = r; break; }
+  }
+
+  let lines, createdAt, partyName, poc, partyCode, stage, baseStatus;
+  if (row) {
+    try { lines = normFulfillLines(JSON.parse(row[9] || '[]')); } catch (e) { lines = []; }
+    if (!lines.length) lines = normFulfillLines(payload.baseline);
+    createdAt = row[12] || new Date().toISOString();
+    partyName = row[5] || ''; poc = row[6] || ''; partyCode = row[4] || ''; stage = row[11] || ''; baseStatus = row[10] || 'Confirmed';
+  } else {
+    lines = normFulfillLines(payload.baseline);
+    createdAt = new Date().toISOString();
+    partyName = String(payload.partyName || ''); poc = String(payload.poc || ''); partyCode = String(payload.partyCode || ''); stage = ''; baseStatus = 'Confirmed';
+  }
+
+  const byNo = {}; lines.forEach(l => { byNo[String(l.no)] = l; });
+  for (const d of deltas) {
+    const l = byNo[String(d.no)]; if (!l) continue;
+    const q = Number(d.qty) || 0; if (q <= 0) continue;
+    if (action === 'dispatch') l.disp = Math.min(l.qty, l.disp + q);
+    else l.inv = Math.min(l.disp, l.inv + q);
+  }
+
+  const agg = aggregateFulfill(lines);
+  let status = payload.status != null ? String(payload.status) : baseStatus;
+  if (action === 'dispatch' && agg.dispStatus) status = agg.dispStatus;
+  if (payload.dispatchStage != null) stage = String(payload.dispatchStage);
+  const now = new Date().toISOString();
+  const linesJson = JSON.stringify(lines);
+
+  if (row) {
+    await sheets.spreadsheets.values.update({
+      spreadsheetId, range: SALES_SHEET + '!J' + rowNum + ':P' + rowNum, valueInputOption: 'USER_ENTERED',
+      requestBody: { values: [[linesJson, status, stage, createdAt, now, agg.dispAmt, agg.invAmt]] },
+    });
+    return res.status(200).json({ ok: true, doc: salesRowToObj([row[0], docType, ref, row[3], partyCode, partyName, poc, row[7], agg.amount, linesJson, status, stage, createdAt, now, agg.dispAmt, agg.invAmt]) });
+  }
+  const id = 'D' + Date.now() + Math.floor(Math.random() * 1000);
+  const newRow = [id, docType, ref, now.slice(0, 10), partyCode, partyName, poc, ref, agg.amount, linesJson, status, stage, now, now, agg.dispAmt, agg.invAmt];
+  await sheets.spreadsheets.values.append({
+    spreadsheetId, range: SALES_RANGE, valueInputOption: 'USER_ENTERED', insertDataOption: 'INSERT_ROWS',
+    requestBody: { values: [newRow] },
+  });
+  return res.status(200).json({ ok: true, doc: salesRowToObj(newRow) });
 }

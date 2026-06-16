@@ -21,7 +21,7 @@ const CRM_HEADERS_       = ['Id', 'PartyCode', 'Kind', 'Text', 'Due', 'Done', 'M
 const SALES_SHEET_NAME   = 'SalesDocs';       // Sales Orders + Sales Invoices
 const SALES_HEADERS_     = ['Id', 'DocType', 'Number', 'Date', 'PartyCode', 'PartyName',
   'POC', 'SourceRef', 'Amount', 'Lines', 'Status', 'DispatchStage', 'CreatedAt', 'UpdatedAt',
-  'DispatchedAmount', 'InvoicedAmount'];
+  'DispatchedAmount', 'InvoicedAmount', 'Ops'];
 
 // ---------- request entry points ----------
 
@@ -41,6 +41,7 @@ function doPost(e) {
     if (kind === 'salesDocList')   return handleSalesDocList();
     if (kind === 'salesDocAdd')    return handleSalesDocAdd(payload);
     if (kind === 'salesDocUpdate') return handleSalesDocUpdate(payload);
+    if (kind === 'salesDocFulfill') return handleSalesDocFulfill(payload);
     if (kind === 'crmAdd')      return handleCrmAdd(payload);
     if (kind === 'crmUpdate')   return handleCrmUpdate(payload);
     if (kind === 'crmDelete')   return handleCrmDelete(payload);
@@ -408,7 +409,7 @@ function ensureSalesSheet_() {
     sheet = ss.insertSheet(SALES_SHEET_NAME);
     sheet.appendRow(SALES_HEADERS_);
     sheet.setFrozenRows(1);
-    sheet.getRange('A1:P1').setFontWeight('bold');
+    sheet.getRange('A1:Q1').setFontWeight('bold');
   }
   return sheet;
 }
@@ -420,6 +421,7 @@ function salesRowToObj_(r) {
     amount: Number(r[8]) || 0, lines: r[9] || '[]', status: r[10] || 'Draft',
     dispatchStage: r[11] || '', createdAt: r[12] || '', updatedAt: r[13] || '',
     dispatchedAmount: Number(r[14]) || 0, invoicedAmount: Number(r[15]) || 0,
+    ops: r[16] || '{}',
   };
 }
 
@@ -428,7 +430,7 @@ function handleSalesDocList() {
   if (!sheet) return jsonResponse({ ok: true, docs: [] });
   const last = sheet.getLastRow();
   if (last < 2) return jsonResponse({ ok: true, docs: [] });
-  const rows = sheet.getRange(2, 1, last - 1, 16).getValues();
+  const rows = sheet.getRange(2, 1, last - 1, 17).getValues();
   const docs = [];
   for (var i = 0; i < rows.length; i++) { if (rows[i][0]) docs.push(salesRowToObj_(rows[i])); }
   return jsonResponse({ ok: true, count: docs.length, docs: docs });
@@ -465,6 +467,7 @@ function handleSalesDocAdd(payload) {
     Number(d.amount) || 0, lines, String(d.status || 'Confirmed'),
     String(d.dispatchStage || ''), now, now,
     Number(d.dispatchedAmount) || 0, Number(d.invoicedAmount) || 0,
+    typeof d.ops === 'object' ? JSON.stringify(d.ops || {}) : String(d.ops || '{}'),
   ];
   sheet.appendRow(row);
   return jsonResponse({ ok: true, doc: salesRowToObj_(row) });
@@ -490,6 +493,85 @@ function handleSalesDocUpdate(payload) {
     }
   }
   return jsonResponse({ ok: false, error: 'Sales doc not found.' });
+}
+
+function normFulfillLines_(arr) {
+  arr = (arr && arr.length) ? arr : [];
+  var out = [];
+  for (var i = 0; i < arr.length; i++) {
+    var l = arr[i] || {};
+    out.push({
+      no: l.no != null ? l.no : (i + 1),
+      item: String(l.item || l.model || l.category || '').slice(0, 80),
+      qty: Number(l.qty) || 0,
+      total: Number(l.total != null ? l.total : l.totalIncGst) || 0,
+      disp: Number(l.disp) || 0,
+      inv: Number(l.inv) || 0,
+    });
+  }
+  return out;
+}
+function aggregateFulfill_(lines) {
+  var ordered = 0, dispQty = 0, invQty = 0, amount = 0, dispAmt = 0, invAmt = 0;
+  for (var i = 0; i < lines.length; i++) {
+    var l = lines[i];
+    ordered += l.qty; dispQty += l.disp; invQty += l.inv; amount += l.total;
+    if (l.qty > 0) { dispAmt += l.total * (l.disp / l.qty); invAmt += l.total * (l.inv / l.qty); }
+  }
+  var dispStatus = null;
+  if (dispQty > 0) dispStatus = dispQty >= ordered - 1e-6 ? 'Completed' : 'Partially Dispatched';
+  return { ordered: ordered, dispQty: dispQty, invQty: invQty, amount: amount, dispAmt: dispAmt, invAmt: invAmt, dispStatus: dispStatus };
+}
+
+function handleSalesDocFulfill(payload) {
+  const docType = String(payload.docType || 'PI').toUpperCase() === 'SO' ? 'SO' : 'PI';
+  const ref = String(payload.ref || '').trim();
+  if (!ref) return jsonResponse({ ok: false, error: 'ref is required.' });
+  const action = payload.action === 'invoice' ? 'invoice' : 'dispatch';
+  const deltas = payload.deltas && payload.deltas.length ? payload.deltas : [];
+  const sheet = ensureSalesSheet_();
+  const last = sheet.getLastRow();
+  var rowIdx = -1, row = null;
+  if (last > 1) {
+    var data = sheet.getRange(2, 1, last - 1, 16).getValues();
+    for (var i = 0; i < data.length; i++) {
+      if (String(data[i][1] || '').toUpperCase() === docType && String(data[i][2] || '') === ref) { rowIdx = i + 2; row = data[i]; break; }
+    }
+  }
+  var lines, createdAt, partyName, poc, partyCode, stage, baseStatus, sourceRef, datev;
+  if (row) {
+    try { lines = normFulfillLines_(JSON.parse(row[9] || '[]')); } catch (e) { lines = []; }
+    if (!lines.length) lines = normFulfillLines_(payload.baseline);
+    createdAt = row[12] || new Date().toISOString();
+    partyName = row[5] || ''; poc = row[6] || ''; partyCode = row[4] || ''; stage = row[11] || '';
+    baseStatus = row[10] || 'Confirmed'; sourceRef = row[7] || ref; datev = row[3] || '';
+  } else {
+    lines = normFulfillLines_(payload.baseline);
+    createdAt = new Date().toISOString();
+    partyName = String(payload.partyName || ''); poc = String(payload.poc || ''); partyCode = String(payload.partyCode || '');
+    stage = ''; baseStatus = 'Confirmed'; sourceRef = ref; datev = createdAt.slice(0, 10);
+  }
+  var byNo = {}; for (var j = 0; j < lines.length; j++) byNo[String(lines[j].no)] = lines[j];
+  for (var k = 0; k < deltas.length; k++) {
+    var l = byNo[String(deltas[k].no)]; if (!l) continue;
+    var q = Number(deltas[k].qty) || 0; if (q <= 0) continue;
+    if (action === 'dispatch') l.disp = Math.min(l.qty, l.disp + q);
+    else l.inv = Math.min(l.disp, l.inv + q);
+  }
+  var agg = aggregateFulfill_(lines);
+  var status = payload.status != null ? String(payload.status) : baseStatus;
+  if (action === 'dispatch' && agg.dispStatus) status = agg.dispStatus;
+  if (payload.dispatchStage != null) stage = String(payload.dispatchStage);
+  var now = new Date().toISOString();
+  var linesJson = JSON.stringify(lines);
+  if (row) {
+    sheet.getRange(rowIdx, 10, 1, 7).setValues([[linesJson, status, stage, createdAt, now, agg.dispAmt, agg.invAmt]]);
+    return jsonResponse({ ok: true, doc: salesRowToObj_([row[0], docType, ref, datev, partyCode, partyName, poc, sourceRef, agg.amount, linesJson, status, stage, createdAt, now, agg.dispAmt, agg.invAmt]) });
+  }
+  var id = 'D' + Date.now() + Math.floor(Math.random() * 1000);
+  var newRow = [id, docType, ref, now.slice(0, 10), partyCode, partyName, poc, ref, agg.amount, linesJson, status, stage, now, now, agg.dispAmt, agg.invAmt];
+  sheet.appendRow(newRow);
+  return jsonResponse({ ok: true, doc: salesRowToObj_(newRow) });
 }
 
 function normPartyType_(t) {

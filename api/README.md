@@ -122,28 +122,31 @@ in ~300ms.
   The Party Profile reads these on open (with a local cache for instant
   render + offline fallback) and merges notes/calls/WhatsApp/orders/
   payments/follow-ups into one chronological Timeline.
-- **Sales documents** (Sales Orders + Sales Invoices) live in a
+- **Sales documents** (Sales Orders + Tax Invoices) live in a
   `SalesDocs` tab — one row per document. Columns: `Id · DocType
   (SO/INV) · Number · Date · PartyCode · PartyName · POC · SourceRef ·
   Amount · Lines(JSON) · Status · DispatchStage · CreatedAt · UpdatedAt ·
-  DispatchedAmount · InvoicedAmount`. The Sales Order is the operational
-  source of truth: partial dispatch and partial invoicing are tracked by
-  value (DispatchedAmount / InvoicedAmount), and invoices are generated
-  from dispatched-but-not-yet-invoiced value. Order statuses: Draft,
-  Awaiting Approval, Confirmed, Ready for Dispatch, Partially Dispatched,
-  Completed, Cancelled.
+  DispatchedAmount · InvoicedAmount · Ops(JSON)`.
+  **Default workflow: PI → confirm → Sales Order → Dispatch → Tax Invoice
+  → Payment.** The PI is the commercial document; once Confirmed it shows
+  *Create Sales Order*, which copies the customer + line items and adds
+  operational fields (`Ops`: transporter, packing instructions, sample
+  required + remarks, notes) — the Sales→Operations handoff. **The Sales
+  Order is the fulfilment source of truth.** Fulfilment is tracked at the
+  **line-item level**: the `Lines` JSON stores per-line
+  `{no,item,qty,total,disp,inv}` (ordered / dispatched / invoiced), and
+  document aggregates + status are derived from the lines. Dispatch
+  happens against the SO (line-level, partial supported); Tax Invoices are
+  generated from dispatched-but-not-yet-invoiced quantities (partial
+  invoicing). Order statuses: Draft, Awaiting Approval, Confirmed, Ready
+  for Dispatch, Partially Dispatched, Completed, Cancelled.
   Endpoints (all `POST /api/pi`): `{ kind: 'salesDocList' }`,
   `{ kind: 'salesDocAdd', doc }` (auto-numbers SO-####/INV-####),
-  `{ kind: 'salesDocUpdate', id, patch: { status?, dispatchStage? } }`.
-  Powers the Orders workspace and the Dispatch pipeline (Ready to Pick →
-  … → Delivered/Returned). The core flow is **PI → Dispatch → Invoice**:
-  a Proforma Invoice (in the PI sheet) is dispatched directly via a
-  lightweight `DocType:'PI'` fulfilment-tracking row in `SalesDocs`
-  (number = the PI ref), and the Sales Invoice is generated from
-  dispatched value. **Sales Orders are an optional advanced stage**
-  (off by default, toggle in the Orders header) for businesses needing a
-  separate order-confirmation step. PIs are never duplicated; SO/INV
-  reference their source via `SourceRef`.
+  `{ kind: 'salesDocUpdate', id, patch: { status?, dispatchStage? } }`,
+  `{ kind: 'salesDocFulfill', docType, ref, action:'dispatch'|'invoice',
+  deltas:[{no,qty}], baseline?, dispatchStage? }` (applies per-line
+  quantities and re-derives aggregates/status). PIs are never duplicated;
+  SO/INV reference their source via `SourceRef`.
 
 ## Why this is faster than Apps Script
 

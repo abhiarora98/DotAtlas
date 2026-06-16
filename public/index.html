@@ -2723,20 +2723,19 @@
         <div class="kpi ord-kpi" data-okpi="proforma"><div class="lbl"><span>Proforma Invoices</span><span class="ind b"></span></div><div class="v" id="okpi-pi">0</div><div class="d"><span class="arr">→</span>customer-approved docs</div></div>
         <div class="kpi ord-kpi" data-okpi="ready"><div class="lbl"><span>Ready to Dispatch</span><span class="ind a"></span></div><div class="v" id="okpi-so">0</div><div class="d"><span class="arr">→</span>approved, not yet shipped</div></div>
         <div class="kpi ord-kpi" data-okpi="indispatch"><div class="lbl"><span>In Dispatch</span><span class="ind"></span></div><div class="v" id="okpi-disp">0</div><div class="d"><span class="arr">→</span>in the pipeline</div></div>
-        <div class="kpi ord-kpi" data-okpi="invoice"><div class="lbl"><span>Sales Invoices</span><span class="ind"></span></div><div class="v" id="okpi-inv">0</div><div class="d"><span class="arr">→</span>billed</div></div>
+        <div class="kpi ord-kpi" data-okpi="invoice"><div class="lbl"><span>Tax Invoices</span><span class="ind"></span></div><div class="v" id="okpi-inv">0</div><div class="d"><span class="arr">→</span>billed</div></div>
       </div>
       <div class="card" style="margin-top:14px;">
         <div class="card-h">
           <div class="t"><span class="ic">◇</span><h3>Documents</h3><span class="sub"><span id="ord-count">0</span> shown</span></div>
           <div style="display:flex; gap:10px; align-items:center;">
-            <label class="pl-archtoggle" title="Add an order-confirmation stage between PI and Dispatch"><input type="checkbox" id="ord-so-toggle"> Sales Orders</label>
-            <input type="text" id="ord-search" class="pl-search" style="width:200px;" placeholder="Search party, number…" autocomplete="off">
+            <input type="text" id="ord-search" class="pl-search" style="width:220px;" placeholder="Search party, number…" autocomplete="off">
             <div class="ord-newwrap">
               <button class="pi-btn prime" id="ord-new" style="padding:7px 14px; font-size:10.5px;">+ New ▾</button>
               <div class="ord-newmenu" id="ord-newmenu" hidden>
                 <button data-newdoc="pi">📄 Proforma Invoice</button>
                 <button data-newdoc="so">🧾 Sales Order</button>
-                <button data-newdoc="invoice">💳 Sales Invoice</button>
+                <button data-newdoc="invoice">💳 Tax Invoice</button>
               </div>
             </div>
           </div>
@@ -2746,7 +2745,7 @@
             <button class="ord-tab on" data-tab="all">All</button>
             <button class="ord-tab" data-tab="proforma">Proforma</button>
             <button class="ord-tab" data-tab="so">Sales Orders</button>
-            <button class="ord-tab" data-tab="invoice">Sales Invoices</button>
+            <button class="ord-tab" data-tab="invoice">Tax Invoices</button>
             <button class="ord-tab" data-tab="drafts">Drafts</button>
           </div>
           <div id="ord-list" class="ord-list"></div>
@@ -20675,7 +20674,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   const DOC_META = {
     pi:      { label: 'Proforma Invoice', title: 'One <span class="em">proforma invoice</span>, <span class="accent">many lines</span>.', btn: 'Create PI →' },
     so:      { label: 'Sales Order',      title: 'New <span class="em">sales order</span>, <span class="accent">ready to fulfil</span>.', btn: 'Create Sales Order →' },
-    invoice: { label: 'Sales Invoice',    title: 'New <span class="em">sales invoice</span>, <span class="accent">ready to bill</span>.', btn: 'Create Invoice →' },
+    invoice: { label: 'Tax Invoice',    title: 'New <span class="em">tax invoice</span>, <span class="accent">ready to bill</span>.', btn: 'Create Invoice →' },
   };
   function applyDocType(){
     const m = DOC_META[state.docType] || DOC_META.pi;
@@ -21393,7 +21392,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       date: state.date, amount, lines: payload.rows, status: 'Confirmed',
     };
     const url = getEndpointUrl();
-    const label = docType === 'INV' ? 'Sales Invoice' : 'Sales Order';
+    const label = docType === 'INV' ? 'Tax Invoice' : 'Sales Order';
     if (!url){ setStatus('ok', label + ' ready (' + inr(amount) + '). Backend not wired — not saved.'); return; }
     setStatus('warn', 'Creating ' + label + '…');
     $('pi-submit').disabled = true;
@@ -22909,7 +22908,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const b = [];
     if (!arch){
       b.push('<button class="pi-btn prime" data-pa="createpi">+ Create PI</button>');
-      if (localStorage.getItem('atlas-enable-so') === '1') b.push('<button class="pi-btn" data-pa="createso">+ Sales Order</button>');
+      b.push('<button class="pi-btn" data-pa="createso">+ Sales Order</button>');
       b.push('<button class="pi-btn" data-pa="createinv">+ Invoice</button>');
     }
     b.push('<button class="pi-btn" data-pa="call"' + (ph ? '' : ' disabled') + '>📞 Call</button>');
@@ -24457,7 +24456,61 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   /* Inline create-party link in the PI typeahead */
   .ta-newparty { padding: 10px 12px; color: var(--emerald); font-size: 12.5px; cursor: pointer; border-top: 1px solid var(--line); }
   .ta-newparty:hover { background: var(--emerald-soft); }
+
+  /* ===== Orders/Dispatch modals ===== */
+  .lf-overlay { position: fixed; inset: 0; z-index: 1200; background: rgba(5,9,18,0.72);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; padding: 28px; }
+  .lf-overlay[hidden] { display: none; }
+  .lf-modal { width: 100%; max-width: 620px; max-height: 86vh; display: flex; flex-direction: column;
+    background: var(--surface); border: 1px solid var(--line-2); border-radius: 12px; overflow: hidden;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.45); }
+  .lf-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid var(--line); }
+  .lf-head h3 { margin: 0; font-family: var(--fd); font-size: 18px; font-weight: 600; color: var(--text); }
+  .lf-body { padding: 18px 22px; overflow-y: auto; display: flex; flex-direction: column; gap: 13px; }
+  .lf-foot { display: flex; gap: 10px; justify-content: flex-end; padding: 14px 22px; border-top: 1px solid var(--line); }
+  .lf-foot .pi-btn { flex: none; }
+  .lf-table { width: 100%; border-collapse: collapse; }
+  .lf-table th { text-align: left; font-family: var(--fm); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--text-3); padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  .lf-table th.r, .lf-table td.r { text-align: right; }
+  .lf-table td { padding: 9px 10px; border-bottom: 1px solid var(--line); font-size: 13px; color: var(--text); }
+  .lf-in { width: 78px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; color: var(--text);
+    padding: 5px 8px; font-size: 13px; text-align: right; }
+  .lf-in:focus { outline: none; border-color: var(--emerald); }
+  .so-summary { background: var(--surface-2); border: 1px solid var(--line); border-radius: 9px; padding: 11px 13px; }
+  .so-sum-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; color: var(--text); }
+  .so-sum-row span { font-family: var(--fm); font-size: 11px; color: var(--text-3); }
+  .so-sum-meta { font-family: var(--fm); font-size: 11px; color: var(--text-3); margin-top: 5px; }
+  .ord-cta { background: var(--emerald-soft) !important; color: var(--emerald) !important; border-color: rgba(78,222,163,0.4) !important; font-weight: 600; }
+  .ord-ops { font-family: var(--fm); font-size: 10.5px; color: var(--text-3); margin-top: 4px; }
 </style>
+
+<!-- Dispatch line-fulfillment modal -->
+<div class="lf-overlay" id="lf-overlay" hidden>
+  <div class="lf-modal">
+    <div class="lf-head"><h3 id="lf-title">Dispatch</h3><button class="ap-close" id="lf-close" aria-label="Close">×</button></div>
+    <div class="lf-body"><table class="lf-table"><thead><tr><th>Item</th><th class="r">Ordered</th><th class="r">Dispatched</th><th class="r">Remaining</th><th class="r">Dispatch now</th></tr></thead><tbody id="lf-rows"></tbody></table></div>
+    <div class="lf-foot"><button class="pi-btn" id="lf-fill">Fill remaining</button><button class="pi-btn" id="lf-cancel">Cancel</button><button class="pi-btn prime" id="lf-submit">Dispatch →</button></div>
+  </div>
+</div>
+
+<!-- Create Sales Order modal -->
+<div class="lf-overlay" id="so-overlay" hidden>
+  <div class="lf-modal">
+    <div class="lf-head"><h3>Create Sales Order <span style="font-weight:400;color:var(--text-3);font-size:12px;">· operations handoff</span></h3><button class="ap-close" id="so-close" aria-label="Close">×</button></div>
+    <div class="lf-body">
+      <div class="so-summary" id="so-summary"></div>
+      <div class="pi-field"><label for="so-transporter">Transporter details</label><input class="pi-input" id="so-transporter" placeholder="e.g. VRL Logistics · vehicle HR-55-AB-1234"></div>
+      <div class="pi-field"><label for="so-packing">Packing instructions</label><textarea class="pp-notes" id="so-packing" style="min-height:60px;" placeholder="e.g. double-wrap rolls, palletise, fragile"></textarea></div>
+      <div class="ap-row-2">
+        <div class="pi-field"><label for="so-sample">Sample required</label><select class="pi-select" id="so-sample"><option>No</option><option>Yes</option></select></div>
+        <div class="pi-field"><label for="so-sample-remarks">Sample remarks</label><input class="pi-input" id="so-sample-remarks" placeholder="optional"></div>
+      </div>
+      <div class="pi-field"><label for="so-notes">Additional notes</label><textarea class="pp-notes" id="so-notes" style="min-height:60px;" placeholder="optional"></textarea></div>
+    </div>
+    <div class="lf-foot"><button class="pi-btn" id="so-cancel">Cancel</button><button class="pi-btn prime" id="so-submit">Create Sales Order →</button></div>
+  </div>
+</div>
 
 <script>
 /* ===== Orders workspace + Dispatch pipeline ===== */
@@ -24481,10 +24534,6 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   let salesDocs = [];  // SalesDocs rows: PI-tracking shadows + SO + INV
   let ordTab = 'all';
   let loaded = false;
-  // Sales Orders are an optional advanced stage; off by default. When off,
-  // the core flow is PI → Dispatch → Invoice with no SO step.
-  let SO_ENABLED = localStorage.getItem('atlas-enable-so') === '1';
-
   function fetchPis(){
     return post({ kind: 'list' }).then(j => { pis = (j && j.ok && j.pis) ? j.pis : []; }).catch(() => { pis = []; });
   }
@@ -24543,40 +24592,50 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     return '<span class="ord-statwrap"><button class="ord-statbtn" data-od="statusmenu" data-id="' + esc(d.id) + '">' + statusPill(d.status) + ' ▾</button>' +
       '<span class="ord-statmenu" hidden>' + ORDER_STATUSES.map(s => '<button data-od="setstatus" data-id="' + esc(d.id) + '" data-val="' + esc(s) + '">' + esc(s) + '</button>').join('') + '</span></span>';
   }
-  function kindBadge(k){ const m = { PI: ['b', 'Proforma'], SO: ['a', 'Sales Order'], INV: ['e', 'Invoice'] }[k] || ['', k]; return '<span class="ord-kind k-' + m[0] + '">' + m[1] + '</span>'; }
+  function kindBadge(k){ const m = { PI: ['b', 'Proforma'], SO: ['a', 'Sales Order'], INV: ['e', 'Tax Invoice'] }[k] || ['', k]; return '<span class="ord-kind k-' + m[0] + '">' + m[1] + '</span>'; }
 
   function docRow(d){
     const acts = [];
     let progress = '';
-    // PIs and SOs are both fulfillable (PI directly, SO when enabled).
-    const fulfillable = (d.kind === 'PI' || d.kind === 'SO');
-    if (fulfillable){
-      const disp = d.dispatchedAmount || 0, inv = d.invoicedAmount || 0;
-      if (disp > 0 || inv > 0) progress = '<div class="ord-prog">📦 ' + inr(disp) + ' / ' + inr(d.amount) + ' dispatched · 💳 ' + inr(inv) + ' invoiced</div>';
-      if (d.kind === 'PI' && SO_ENABLED && !d.dispatchStage) acts.push('<button data-od="pi2so" data-id="' + esc(d.id) + '">→ Sales Order</button>');
-      if (!d.dispatchStage) acts.push('<button data-od="todisp" data-id="' + esc(d.id) + '">→ Dispatch</button>');
-      else acts.push('<span class="ord-stage">📦 ' + esc(d.dispatchStage) + '</span>');
-      if (disp - inv > 0.5) acts.push('<button data-od="toinv" data-id="' + esc(d.id) + '">Invoice ' + inr(disp - inv) + '</button>');
+    if (d.kind === 'PI'){
+      // Commercial doc: confirm, then hand off to Operations as a Sales Order.
+      if (String(d.status) === 'Confirmed') acts.push('<button class="ord-cta" data-od="createso" data-id="' + esc(d.id) + '">+ Create Sales Order</button>');
+      else if (String(d.status) !== 'Cancelled') acts.push('<button data-od="confirmpi" data-id="' + esc(d.id) + '">Mark Confirmed</button>');
     }
-    const statusEl = fulfillable ? statusMenu(d) : statusPill(d.status);
+    if (d.kind === 'SO'){
+      const t = lineTotals(docLines(d));
+      if (t.dsp > 0 || t.inv > 0) progress = '<div class="ord-prog">📦 ' + t.dsp + '/' + t.ord + ' qty dispatched · 💳 ' + t.inv + '/' + t.ord + ' invoiced</div>';
+      if (t.dsp < t.ord) acts.push('<button data-od="todisp" data-id="' + esc(d.id) + '">' + (d.dispatchStage ? 'Dispatch more' : '→ Dispatch') + '</button>');
+      else if (d.dispatchStage) acts.push('<span class="ord-stage">📦 ' + esc(d.dispatchStage) + '</span>');
+      if (t.dsp - t.inv > 1e-4) acts.push('<button data-od="toinv" data-id="' + esc(d.id) + '">Tax Invoice ' + (t.dsp - t.inv) + ' qty</button>');
+    }
+    const statusEl = (d.kind === 'PI' || d.kind === 'SO') ? statusMenu(d) : statusPill(d.status);
+    const ops = d.kind === 'SO' ? opsSummary(d) : '';
     return '<div class="ord-row" data-id="' + esc(d.id) + '">' +
       '<span class="pl-av av-blue">' + initials(d.party) + '</span>' +
       '<div class="ord-main"><div class="ord-top">' + kindBadge(d.kind) + '<span class="ord-num">' + esc(d.number) + '</span>' +
       '<span class="ord-party" data-od="open" data-id="' + esc(d.id) + '">' + esc(d.party) + '</span>' + statusEl + '</div>' +
-      '<div class="ord-meta">' + esc(d.poc || '') + (d.date ? ' · ' + esc(d.date) : '') + (d.sourceRef ? ' · ← ' + esc(d.sourceRef) : '') + '</div>' + progress + '</div>' +
+      '<div class="ord-meta">' + esc(d.poc || '') + (d.date ? ' · ' + esc(d.date) : '') + (d.sourceRef ? ' · ← PI ' + esc(d.sourceRef) : '') + '</div>' + ops + progress + '</div>' +
       '<div class="ord-amt">' + inr(d.amount) + '</div>' +
       '<div class="ord-acts">' + acts.join('') + '</div></div>';
+  }
+  function opsSummary(d){
+    let o = {}; try { o = JSON.parse((d.raw && d.raw.ops) || '{}'); } catch(e){}
+    const bits = [];
+    if (o.transporter) bits.push('🚚 ' + esc(o.transporter));
+    if (o.sample === 'Yes') bits.push('🧪 Sample' + (o.sampleRemarks ? ' (' + esc(o.sampleRemarks) + ')' : ''));
+    if (o.packing) bits.push('📦 ' + esc(o.packing));
+    return bits.length ? '<div class="ord-ops">' + bits.join(' · ') + '</div>' : '';
   }
 
   function renderKpis(){
     const set = (id, v) => { const e = $(id); if (e) e.textContent = v; };
-    const docs = allDocs();
-    const fulfillable = docs.filter(d => d.kind === 'PI' || d.kind === 'SO');
+    const sos = salesDocs.filter(d => d.docType === 'SO');
     set('okpi-pi', pis.length);
-    // Ready to dispatch: confirmed/approved docs not yet in the pipeline.
-    set('okpi-so', fulfillable.filter(d => !d.dispatchStage && String(d.status).toLowerCase() !== 'cancelled').length);
-    // In dispatch: in the pipeline but not delivered.
-    set('okpi-disp', fulfillable.filter(d => d.dispatchStage && d.dispatchStage !== 'Delivered' && d.dispatchStage !== 'Returned').length);
+    // Ready to dispatch: Sales Orders not yet in the pipeline.
+    set('okpi-so', sos.filter(d => !d.dispatchStage && String(d.status).toLowerCase() !== 'cancelled').length);
+    // In dispatch: SOs in the pipeline but not delivered/returned.
+    set('okpi-disp', sos.filter(d => d.dispatchStage && d.dispatchStage !== 'Delivered' && d.dispatchStage !== 'Returned').length);
     set('okpi-inv', salesDocs.filter(d => d.docType === 'INV').length);
     document.querySelectorAll('.ord-kpi').forEach(k => k.classList.toggle('active', false));
   }
@@ -24594,61 +24653,130 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 
   function findDoc(id){ return allDocs().find(d => d.id === id); }
 
-  // The SalesDocs row that fulfilment state is written to: the doc itself for
-  // SO/INV, or the PI's tracking shadow (created on demand) for a PI.
-  function trackRowFor(d){
-    if (d.kind === 'SO' || d.kind === 'INV') return Promise.resolve(d.raw);
-    const t = piTrack(d.ref);
-    if (t) return Promise.resolve(t);
-    return post({ kind: 'salesDocAdd', doc: { docType: 'PI', number: d.ref, sourceRef: d.ref,
-      partyName: d.party, poc: d.poc, amount: d.amount, status: 'Confirmed', dispatchStage: '' } })
-      .then(j => { if (j && j.ok){ salesDocs.push(j.doc); return j.doc; } throw 0; });
+  // ----- line-level fulfillment helpers -----
+  function parseLines(s){ try { return Array.isArray(s) ? s : JSON.parse(s || '[]'); } catch(e){ return []; } }
+  function nLine(l, i){ return { no: l.no != null ? l.no : (i + 1),
+    item: String(l.item || l.model || l.category || ('Line ' + (i + 1))),
+    qty: Number(l.qty) || 0, total: Number(l.total != null ? l.total : l.totalIncGst) || 0,
+    disp: Number(l.disp) || 0, inv: Number(l.inv) || 0 }; }
+  function orderedLinesForPi(ref){
+    const pi = pis.find(p => String(p.ref) === String(ref));
+    return pi ? (pi.items || []).map((it, i) => nLine({ no: it.no != null ? it.no : (i + 1),
+      item: it.model || it.category || ('Line ' + (i + 1)), qty: it.qty, total: it.total }, i)) : [];
   }
+  function docLines(d){
+    if (d.kind === 'PI'){ const t = piTrack(d.ref); const ls = t ? parseLines(t.lines).map(nLine) : []; return ls.length ? ls : orderedLinesForPi(d.ref); }
+    return parseLines(d.raw && d.raw.lines).map(nLine);
+  }
+  function lineTotals(lines){ let ord = 0, dsp = 0, inv = 0; for (const l of lines){ ord += l.qty; dsp += l.disp; inv += l.inv; } return { ord, dsp, inv }; }
+  function upsertSalesDoc(doc){
+    const i = salesDocs.findIndex(x => x.id === doc.id || (x.docType === doc.docType && String(x.number) === String(doc.number)));
+    if (i >= 0) salesDocs[i] = doc; else salesDocs.push(doc);
+  }
+  function tgtFromDoc(d){ return { docType: d.kind === 'SO' ? 'SO' : 'PI', ref: d.kind === 'SO' ? d.number : d.ref,
+    number: d.number, party: d.party, partyCode: d.partyCode, poc: d.poc, lines: docLines(d), stage: d.dispatchStage }; }
+  function tgtFromRow(sd){ return { docType: sd.docType, ref: sd.number, number: sd.number, party: sd.partyName,
+    partyCode: sd.partyCode, poc: sd.poc, lines: parseLines(sd.lines).map(nLine), stage: sd.dispatchStage }; }
+  function callFulfill(tgt, action, deltas, extra){
+    const body = { kind: 'salesDocFulfill', docType: tgt.docType, ref: tgt.ref, action, deltas,
+      partyName: tgt.party, partyCode: tgt.partyCode, poc: tgt.poc, baseline: tgt.lines };
+    if (extra) Object.assign(body, extra);
+    return post(body);
+  }
+
   // Optional: PI → Sales Order (only when the advanced SO stage is enabled).
   function convertPiToSo(d){
     if (!d) return;
     post({ kind: 'salesDocAdd', doc: { docType: 'SO', partyName: d.party, poc: d.poc,
-      date: new Date().toISOString().slice(0, 10), amount: d.amount, sourceRef: d.ref, status: 'Confirmed' } })
+      date: new Date().toISOString().slice(0, 10), amount: d.amount, sourceRef: d.ref, status: 'Confirmed',
+      lines: docLines(d) } })
       .then(j => { if (j && j.ok){ salesDocs.push(j.doc); toastO('Sales Order ' + j.doc.number + ' created from PI ' + d.number + '.'); renderOrders(); } })
       .catch(() => toastO('Could not create Sales Order (backend offline).'));
   }
-  // Invoice generated from dispatched-but-not-yet-invoiced value (partial).
-  function invoiceFromDispatched(d){
-    if (!d) return;
-    trackRowFor(d).then(t => {
-      const toInvoice = (t.dispatchedAmount || 0) - (t.invoicedAmount || 0);
-      if (toInvoice <= 0.5){ toastO('Nothing newly dispatched to invoice yet.'); return; }
-      return post({ kind: 'salesDocAdd', doc: { docType: 'INV', partyName: d.party, partyCode: d.partyCode, poc: d.poc,
-        date: new Date().toISOString().slice(0, 10), amount: toInvoice, sourceRef: d.number, status: 'Confirmed' } })
-        .then(j => { if (!j || !j.ok) throw 0; salesDocs.push(j.doc);
-          const inv = (t.invoicedAmount || 0) + toInvoice;
-          return post({ kind: 'salesDocUpdate', id: t.id, patch: { invoicedAmount: inv } }).then(() => { t.invoicedAmount = inv;
-            toastO('Invoice ' + j.doc.number + ' raised for ' + inr(toInvoice) + '.'); renderOrders(); }); });
-    }).catch(() => toastO('Could not raise invoice (backend offline).'));
-  }
-  function sendToDispatch(d){
-    if (!d) return;
-    trackRowFor(d).then(t => post({ kind: 'salesDocUpdate', id: t.id, patch: { dispatchStage: 'Ready to Pick', status: 'Ready for Dispatch' } })
-      .then(() => { t.dispatchStage = 'Ready to Pick'; t.status = 'Ready for Dispatch';
-        toastO(d.number + ' sent to dispatch.'); renderOrders(); renderDispatch(); }))
-      .catch(() => toastO('Could not update dispatch (backend offline).'));
-  }
   function setDocStatus(d, val){
-    if (!d) return;
-    trackRowFor(d).then(t => post({ kind: 'salesDocUpdate', id: t.id, patch: { status: val } })
-      .then(() => { t.status = val; renderOrders(); }))
+    const tgt = tgtFromDoc(d);
+    callFulfill(tgt, 'dispatch', [], { status: val })
+      .then(j => { if (j && j.ok){ upsertSalesDoc(j.doc); renderOrders(); } })
       .catch(() => toastO('Could not update status (backend offline).'));
   }
-  // Record a (partial) dispatch by value against a SalesDocs row (PI shadow / SO).
-  function recordDispatch(sd, amt){
-    if (!sd) return;
-    const total = sd.amount || 0;
-    const newDisp = Math.min(total, (sd.dispatchedAmount || 0) + amt);
-    const status = newDisp >= total - 0.5 ? 'Completed' : 'Partially Dispatched';
-    post({ kind: 'salesDocUpdate', id: sd.id, patch: { dispatchedAmount: newDisp, status } })
-      .then(j => { if (j && j.ok){ sd.dispatchedAmount = newDisp; sd.status = status;
-        toastO('Dispatched ' + inr(amt) + ' of ' + sd.number + '.'); renderOrders(); renderDispatch(); } })
-      .catch(() => toastO('Could not record dispatch (backend offline).'));
+  // Invoice = invoice every dispatched-but-not-yet-invoiced quantity, per line.
+  function invoiceFromDispatched(d){
+    const lines = docLines(d);
+    const deltas = lines.map(l => ({ no: l.no, qty: +(l.disp - l.inv).toFixed(4) })).filter(x => x.qty > 1e-4);
+    if (!deltas.length){ toastO('Nothing newly dispatched to invoice yet.'); return; }
+    const invAmt = deltas.reduce((a, x) => { const l = lines.find(L => String(L.no) === String(x.no)); return a + (l && l.qty > 0 ? l.total * (x.qty / l.qty) : 0); }, 0);
+    const tgt = tgtFromDoc(d);
+    callFulfill(tgt, 'invoice', deltas).then(j => { if (!j || !j.ok) throw 0; upsertSalesDoc(j.doc);
+      const invLines = deltas.map(x => { const l = lines.find(L => String(L.no) === String(x.no)); return { no: x.no, item: l ? l.item : '', qty: x.qty, total: l && l.qty > 0 ? l.total * (x.qty / l.qty) : 0 }; });
+      return post({ kind: 'salesDocAdd', doc: { docType: 'INV', partyName: d.party, partyCode: d.partyCode, poc: d.poc,
+        amount: invAmt, sourceRef: d.number, status: 'Confirmed', lines: invLines } }); })
+      .then(j2 => { if (j2 && j2.ok) salesDocs.push(j2.doc); toastO('Invoice raised for ' + inr(invAmt) + '.'); renderOrders(); })
+      .catch(() => toastO('Could not raise invoice (backend offline).'));
+  }
+
+  // ----- per-line dispatch modal -----
+  let _lfTgt = null;
+  function openFulfillModal(tgt){
+    if (!tgt || !tgt.lines.length){ toastO('No line items to dispatch.'); return; }
+    _lfTgt = tgt;
+    $('lf-title').textContent = 'Dispatch ' + (tgt.number || '');
+    $('lf-rows').innerHTML = tgt.lines.map(l => {
+      const rem = Math.max(0, l.qty - l.disp);
+      return '<tr><td>' + esc(l.item) + '</td><td class="r">' + l.qty + '</td><td class="r">' + l.disp + '</td>' +
+        '<td class="r">' + rem + '</td><td class="r"><input class="lf-in" type="number" min="0" max="' + rem + '" value="0" data-no="' + esc(String(l.no)) + '" ' + (rem <= 0 ? 'disabled' : '') + '></td></tr>';
+    }).join('');
+    $('lf-overlay').hidden = false;
+    document.body.style.overflow = 'hidden';
+  }
+  function closeFulfill(){ $('lf-overlay').hidden = true; document.body.style.overflow = ''; _lfTgt = null; }
+  function lfFillRemaining(){
+    if (!_lfTgt) return;
+    $('lf-rows').querySelectorAll('.lf-in').forEach(inp => { const max = Number(inp.getAttribute('max')) || 0; inp.value = String(max); });
+  }
+  function submitFulfill(){
+    if (!_lfTgt) return;
+    const deltas = [];
+    $('lf-rows').querySelectorAll('.lf-in').forEach(inp => {
+      const q = Number(inp.value) || 0; if (q > 0) deltas.push({ no: inp.getAttribute('data-no'), qty: q });
+    });
+    if (!deltas.length){ toastO('Enter a quantity to dispatch.'); return; }
+    const extra = _lfTgt.stage ? null : { dispatchStage: 'Ready to Pick' };
+    callFulfill(_lfTgt, 'dispatch', deltas, extra)
+      .then(j => { if (!j || !j.ok) throw 0; upsertSalesDoc(j.doc); toastO('Dispatched.'); closeFulfill(); renderOrders(); renderDispatch(); })
+      .catch(() => { toastO('Could not dispatch (backend offline).'); closeFulfill(); });
+  }
+
+  // ----- Create Sales Order from a confirmed PI (operations handoff) -----
+  let _soPi = null;
+  function openSoModal(d){
+    if (!d || d.kind !== 'PI') return;
+    _soPi = d;
+    const lines = docLines(d);
+    $('so-summary').innerHTML = '<div class="so-sum-row"><b>' + esc(d.party) + '</b><span>PI ' + esc(d.number) + '</span></div>' +
+      '<div class="so-sum-meta">' + lines.length + ' line item' + (lines.length === 1 ? '' : 's') + ' · ' + inr(d.amount) + ' · copied from PI</div>';
+    ['so-transporter', 'so-packing', 'so-sample-remarks', 'so-notes'].forEach(id => { const e = $(id); if (e) e.value = ''; });
+    $('so-sample').value = 'No';
+    $('so-overlay').hidden = false; document.body.style.overflow = 'hidden';
+    setTimeout(() => $('so-transporter').focus(), 30);
+  }
+  function closeSo(){ $('so-overlay').hidden = true; document.body.style.overflow = ''; _soPi = null; }
+  function submitSo(){
+    if (!_soPi) return;
+    const d = _soPi;
+    const ops = {
+      transporter: $('so-transporter').value.trim(),
+      packing: $('so-packing').value.trim(),
+      sample: $('so-sample').value,
+      sampleRemarks: $('so-sample-remarks').value.trim(),
+      notes: $('so-notes').value.trim(),
+    };
+    post({ kind: 'salesDocAdd', doc: { docType: 'SO', partyName: d.party, partyCode: d.partyCode, poc: d.poc,
+      date: new Date().toISOString().slice(0, 10), amount: d.amount, sourceRef: d.ref, status: 'Confirmed',
+      lines: docLines(d), ops } })
+      .then(j => { if (!j || !j.ok) throw 0; salesDocs.push(j.doc);
+        toastO('Sales Order ' + j.doc.number + ' created from PI ' + d.number + '.');
+        closeSo(); ordTab = 'so'; renderOrders(); })
+      .catch(() => toastO('Could not create Sales Order (backend offline).'));
   }
 
   function toastO(msg){
@@ -24724,15 +24852,6 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   window.atlasLoadDispatch = function(){ load(false); };
   window.atlasOrdersChanged = function(){ load(true); };
 
-  // Show/hide the optional Sales Order surfaces based on the advanced toggle.
-  function applySoVisibility(){
-    const soTab = document.querySelector('.ord-tab[data-tab="so"]');
-    if (soTab) soTab.hidden = !SO_ENABLED;
-    const soNew = document.querySelector('#ord-newmenu button[data-newdoc="so"]');
-    if (soNew) soNew.hidden = !SO_ENABLED;
-    const chk = $('ord-so-toggle'); if (chk) chk.checked = SO_ENABLED;
-    if (!SO_ENABLED && ordTab === 'so') ordTab = 'all';
-  }
 
   function init(){
     const ordTabs = $('ord-tabs');
@@ -24749,14 +24868,6 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       menu.hidden = true; if (window.atlasNewDoc) window.atlasNewDoc(b.getAttribute('data-newdoc'));
     });
 
-    // Advanced: enable the optional Sales Order stage.
-    const soToggle = $('ord-so-toggle');
-    if (soToggle) soToggle.addEventListener('change', () => {
-      SO_ENABLED = soToggle.checked;
-      localStorage.setItem('atlas-enable-so', SO_ENABLED ? '1' : '0');
-      applySoVisibility(); renderOrders();
-    });
-
     // KPI cards → jump to the matching tab.
     const kpis = $('ord-kpis');
     if (kpis) kpis.addEventListener('click', (e) => {
@@ -24770,9 +24881,10 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     if (list) list.addEventListener('click', (e) => {
       const a = e.target.closest('[data-od]'); if (!a) return;
       const act = a.getAttribute('data-od'); const d = findDoc(a.getAttribute('data-id'));
-      if (act === 'pi2so'){ e.stopPropagation(); convertPiToSo(d); }
+      if (act === 'createso'){ e.stopPropagation(); openSoModal(d); }
+      else if (act === 'confirmpi'){ e.stopPropagation(); setDocStatus(d, 'Confirmed'); }
       else if (act === 'toinv'){ e.stopPropagation(); invoiceFromDispatched(d); }
-      else if (act === 'todisp'){ e.stopPropagation(); sendToDispatch(d); }
+      else if (act === 'todisp'){ e.stopPropagation(); openFulfillModal(tgtFromDoc(d)); }
       else if (act === 'statusmenu'){ e.stopPropagation(); const m = a.parentNode.querySelector('.ord-statmenu'); if (m) m.hidden = !m.hidden; }
       else if (act === 'setstatus'){ e.stopPropagation(); setDocStatus(d, a.getAttribute('data-val')); }
       else if (act === 'open'){ if (window.atlasOpenPartyByName && d) window.atlasOpenPartyByName(d.party); }
@@ -24790,14 +24902,28 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       else if (act === 'return') advanceDispatch(id, 'Returned');
       else if (act === 'dispatchpart'){
         const sd = salesDocs.find(x => x.id === id); if (!sd) return;
-        const remaining = (sd.amount || 0) - (sd.dispatchedAmount || 0);
-        const ans = prompt('Dispatch how much of ' + sd.number + '? Remaining ' + inr(remaining), String(Math.round(remaining)));
-        if (ans == null) return; const amt = Number(String(ans).replace(/[^0-9.]/g, '')) || 0;
-        if (amt > 0) recordDispatch(sd, amt);
+        openFulfillModal(tgtFromRow(sd));
       }
     });
 
-    applySoVisibility();
+    // Dispatch line modal.
+    const lfo = $('lf-overlay');
+    if (lfo){
+      $('lf-close').addEventListener('click', closeFulfill);
+      $('lf-cancel').addEventListener('click', closeFulfill);
+      $('lf-fill').addEventListener('click', lfFillRemaining);
+      $('lf-submit').addEventListener('click', submitFulfill);
+      lfo.addEventListener('click', (e) => { if (e.target === lfo) closeFulfill(); });
+    }
+    // Create Sales Order modal.
+    const soo = $('so-overlay');
+    if (soo){
+      $('so-close').addEventListener('click', closeSo);
+      $('so-cancel').addEventListener('click', closeSo);
+      $('so-submit').addEventListener('click', submitSo);
+      soo.addEventListener('click', (e) => { if (e.target === soo) closeSo(); });
+    }
+
     if (location.hash.slice(1) === 'orders' || location.hash.slice(1) === 'dispatch') load(false);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
