@@ -2720,18 +2720,19 @@
         <div class="when">PROFORMA → SO → INVOICE<br/>then DISPATCH → PAYMENT</div>
       </div>
       <div class="kpis" id="ord-kpis">
-        <div class="kpi ord-kpi" data-okpi="proforma"><div class="lbl"><span>Proforma Invoices</span><span class="ind b"></span></div><div class="v" id="okpi-pi">0</div><div class="d"><span class="arr">→</span>customer-approved docs</div></div>
-        <div class="kpi ord-kpi" data-okpi="ready"><div class="lbl"><span>Ready to Dispatch</span><span class="ind a"></span></div><div class="v" id="okpi-so">0</div><div class="d"><span class="arr">→</span>approved, not yet shipped</div></div>
-        <div class="kpi ord-kpi" data-okpi="indispatch"><div class="lbl"><span>In Dispatch</span><span class="ind"></span></div><div class="v" id="okpi-disp">0</div><div class="d"><span class="arr">→</span>in the pipeline</div></div>
-        <div class="kpi ord-kpi" data-okpi="invoice"><div class="lbl"><span>Tax Invoices</span><span class="ind"></span></div><div class="v" id="okpi-inv">0</div><div class="d"><span class="arr">→</span>billed</div></div>
+        <div class="kpi ord-kpi" data-okpi="pending"><div class="lbl"><span>PI Pending Approval</span><span class="ind a"></span></div><div class="v" id="okpi-pi">0</div><div class="d"><span class="arr">→</span>awaiting customer OK</div></div>
+        <div class="kpi ord-kpi" data-okpi="ready"><div class="lbl"><span>Ready to Dispatch</span><span class="ind b"></span></div><div class="v" id="okpi-so">0</div><div class="d"><span class="arr">→</span>SOs to fulfil</div></div>
+        <div class="kpi ord-kpi" data-okpi="delayed"><div class="lbl"><span>Dispatch Delayed</span><span class="ind r"></span></div><div class="v" id="okpi-disp">0</div><div class="d dn"><span class="arr">→</span>stuck &gt;3 days</div></div>
+        <div class="kpi ord-kpi" data-okpi="invpending"><div class="lbl"><span>Invoices Pending</span><span class="ind"></span></div><div class="v" id="okpi-inv">0</div><div class="d"><span class="arr">→</span>dispatched, not billed</div></div>
       </div>
       <div class="card" style="margin-top:14px;">
         <div class="card-h">
           <div class="t"><span class="ic">◇</span><h3>Documents</h3><span class="sub"><span id="ord-count">0</span> shown</span></div>
           <div style="display:flex; gap:10px; align-items:center;">
-            <input type="text" id="ord-search" class="pl-search" style="width:220px;" placeholder="Search party, number…" autocomplete="off">
+            <input type="text" id="ord-search" class="pl-search" style="width:200px;" placeholder="Search party, number…" autocomplete="off">
+            <button class="pi-btn prime" id="ord-createpi" style="padding:7px 14px; font-size:10.5px;">+ Create PI</button>
             <div class="ord-newwrap">
-              <button class="pi-btn prime" id="ord-new" style="padding:7px 14px; font-size:10.5px;">+ New ▾</button>
+              <button class="pi-btn" id="ord-new" style="padding:7px 11px; font-size:10.5px;" title="Other documents">▾</button>
               <div class="ord-newmenu" id="ord-newmenu" hidden>
                 <button data-newdoc="pi">📄 Proforma Invoice</button>
                 <button data-newdoc="so">🧾 Sales Order</button>
@@ -22952,7 +22953,21 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       return;
     }
     if (profileTab === 'timeline'){ el.innerHTML = renderTimeline(p); return; }
-    if (profileTab === 'orders'){ el.innerHTML = ordersTable(orderRows(p)); return; }
+    if (profileTab === 'orders'){
+      const docs = (window.atlasDocsForParty ? window.atlasDocsForParty(p.name) : []);
+      if (docs.length){
+        const badge = { PI: 'Proforma', SO: 'Sales Order', INV: 'Tax Invoice' };
+        el.innerHTML = '<div class="pd-section-t">Documents</div>' +
+          table(['Type', 'Number', 'Date', 'Amount', 'Status'], docs.map(o => [
+            esc(badge[o.kind] || o.kind), '<span class="mono">' + esc(o.number) + '</span>', esc(o.date || ''),
+            'r:' + inr(o.amount), statusPill(o.status)]));
+      } else {
+        // Fall back to the PI list, and pull full docs in the background.
+        el.innerHTML = ordersTable(orderRows(p));
+        if (window.atlasEnsureOrders) window.atlasEnsureOrders().then(() => { if (profileParty === p && profileTab === 'orders') renderTabBody(); });
+      }
+      return;
+    }
     if (profileTab === 'receivables'){
       const rec = receivables && receivables.parties && receivables.parties[slug(p.name)];
       el.innerHTML = renderFinancials(p) +
@@ -23443,6 +23458,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 
   window.atlasLoadParties = function(){ loadParties(false); };
   window.atlasOpenPartyByName = function(name){ const p = findParty(normName(name)); if (p) openPartyPage(p); };
+  window.atlasPartyRecord = function(name){ return findParty(normName(name)) || null; };
 
   function init(){
     const search = $('pl-search'); if (!search) return; // parties page not present
@@ -24552,7 +24568,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       const t = piTrack(pi.ref);
       out.push({ kind: 'PI', id: 'pi:' + pi.ref, number: pi.ref, party: pi.party, poc: pi.poc,
         date: pi.date, amount: pi.totalIncGst, ref: pi.ref,
-        status: t ? t.status : 'Confirmed', dispatchStage: t ? t.dispatchStage : '',
+        status: t ? t.status : 'Awaiting Approval', dispatchStage: t ? t.dispatchStage : '',
         dispatchedAmount: t ? t.dispatchedAmount : 0, invoicedAmount: t ? t.invoicedAmount : 0,
         trackId: t ? t.id : null, raw: t || null });
     }
@@ -24598,9 +24614,10 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const acts = [];
     let progress = '';
     if (d.kind === 'PI'){
-      // Commercial doc: confirm, then hand off to Operations as a Sales Order.
+      // Commercial doc: approve (customer OK), then hand off to Operations as an SO.
       if (String(d.status) === 'Confirmed') acts.push('<button class="ord-cta" data-od="createso" data-id="' + esc(d.id) + '">+ Create Sales Order</button>');
-      else if (String(d.status) !== 'Cancelled') acts.push('<button data-od="confirmpi" data-id="' + esc(d.id) + '">Mark Confirmed</button>');
+      else if (String(d.status) !== 'Cancelled') acts.push('<button class="ord-cta" data-od="approveso" data-id="' + esc(d.id) + '">Approve &amp; Create SO</button>');
+      acts.push('<button data-od="download" data-id="' + esc(d.id) + '">⤓ PDF</button>');
     }
     if (d.kind === 'SO'){
       const t = lineTotals(docLines(d));
@@ -24608,7 +24625,9 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       if (t.dsp < t.ord) acts.push('<button data-od="todisp" data-id="' + esc(d.id) + '">' + (d.dispatchStage ? 'Dispatch more' : '→ Dispatch') + '</button>');
       else if (d.dispatchStage) acts.push('<span class="ord-stage">📦 ' + esc(d.dispatchStage) + '</span>');
       if (t.dsp - t.inv > 1e-4) acts.push('<button data-od="toinv" data-id="' + esc(d.id) + '">Tax Invoice ' + (t.dsp - t.inv) + ' qty</button>');
+      acts.push('<button data-od="download" data-id="' + esc(d.id) + '">⤓ PDF</button>');
     }
+    if (d.kind === 'INV') acts.push('<button data-od="download" data-id="' + esc(d.id) + '">⤓ PDF</button>');
     const statusEl = (d.kind === 'PI' || d.kind === 'SO') ? statusMenu(d) : statusPill(d.status);
     const ops = d.kind === 'SO' ? opsSummary(d) : '';
     return '<div class="ord-row" data-id="' + esc(d.id) + '">' +
@@ -24631,12 +24650,15 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   function renderKpis(){
     const set = (id, v) => { const e = $(id); if (e) e.textContent = v; };
     const sos = salesDocs.filter(d => d.docType === 'SO');
-    set('okpi-pi', pis.length);
-    // Ready to dispatch: Sales Orders not yet in the pipeline.
+    const now = Date.now();
+    // PI pending approval: PIs not yet Confirmed (and not Cancelled).
+    set('okpi-pi', allDocs().filter(d => d.kind === 'PI' && String(d.status) !== 'Confirmed' && String(d.status) !== 'Cancelled').length);
+    // Ready to dispatch: SOs not yet in the pipeline.
     set('okpi-so', sos.filter(d => !d.dispatchStage && String(d.status).toLowerCase() !== 'cancelled').length);
-    // In dispatch: SOs in the pipeline but not delivered/returned.
-    set('okpi-disp', sos.filter(d => d.dispatchStage && d.dispatchStage !== 'Delivered' && d.dispatchStage !== 'Returned').length);
-    set('okpi-inv', salesDocs.filter(d => d.docType === 'INV').length);
+    // Dispatch delayed: in the pipeline (not delivered/returned) and idle > 3 days.
+    set('okpi-disp', sos.filter(d => d.dispatchStage && d.dispatchStage !== 'Delivered' && d.dispatchStage !== 'Returned' && (now - (Date.parse(d.updatedAt) || now)) > 3 * 864e5).length);
+    // Invoices pending: SOs with dispatched-but-not-yet-invoiced quantity.
+    set('okpi-inv', sos.filter(d => { const t = lineTotals(parseLines(d.lines).map(nLine)); return t.dsp - t.inv > 1e-4; }).length);
     document.querySelectorAll('.ord-kpi').forEach(k => k.classList.toggle('active', false));
   }
   function renderOrders(){
@@ -24779,6 +24801,84 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       .catch(() => toastO('Could not create Sales Order (backend offline).'));
   }
 
+  // ----- Document download (print-ready invoice template) -----
+  function numToWords(n){
+    n = Math.round(Number(n) || 0);
+    if (n === 0) return 'Zero Rupees Only';
+    const a = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+    const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+    function two(x){ return x < 20 ? a[x] : b[Math.floor(x / 10)] + (x % 10 ? ' ' + a[x % 10] : ''); }
+    function three(x){ return (x >= 100 ? a[Math.floor(x / 100)] + ' Hundred' + (x % 100 ? ' ' : '') : '') + (x % 100 ? two(x % 100) : ''); }
+    let out = '', crore = Math.floor(n / 1e7); n %= 1e7;
+    let lakh = Math.floor(n / 1e5); n %= 1e5;
+    let thou = Math.floor(n / 1e3); n %= 1e3;
+    if (crore) out += three(crore) + ' Crore ';
+    if (lakh) out += three(lakh) + ' Lakh ';
+    if (thou) out += three(thou) + ' Thousand ';
+    if (n) out += three(n);
+    return out.trim() + ' Rupees Only';
+  }
+  function downloadDoc(d){
+    if (!d) return;
+    const title = d.kind === 'INV' ? 'Tax Invoice' : d.kind === 'SO' ? 'Sales Order' : 'Proforma Invoice';
+    const party = (window.atlasPartyRecord && window.atlasPartyRecord(d.party)) || {};
+    const lines = docLines(d);
+    const intra = String(party.state || '').toUpperCase().indexOf('HARYANA') !== -1; // issuer state = Haryana
+    let sub = 0;
+    const rowsHtml = lines.map((l, i) => {
+      const taxable = l.qty > 0 ? (l.total / 1.18) : (l.total || 0);
+      sub += taxable;
+      const cg = intra ? taxable * 0.09 : 0, sg = intra ? taxable * 0.09 : 0, ig = intra ? 0 : taxable * 0.18;
+      return '<tr><td>' + (i + 1) + '. ' + esc(l.item) + '</td><td class="c">—</td><td class="c">' + l.qty + '</td><td class="c">18%</td>' +
+        '<td class="r">' + money(taxable) + '</td>' + (intra ? '<td class="r">' + money(sg) + '</td><td class="r">' + money(cg) + '</td>' : '<td class="r">' + money(ig) + '</td>') +
+        '<td class="r">' + money(taxable * 1.18) + '</td></tr>';
+    }).join('');
+    const cgst = intra ? sub * 0.09 : 0, sgst = intra ? sub * 0.09 : 0, igst = intra ? 0 : sub * 0.18;
+    const total = sub + cgst + sgst + igst;
+    const taxCols = intra ? '<th class="r">SGST</th><th class="r">CGST</th>' : '<th class="r">IGST</th>';
+    const today = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    const html =
+      '<!doctype html><html><head><meta charset="utf-8"><title>' + title + ' ' + esc(d.number) + '</title><style>' +
+      '*{box-sizing:border-box;font-family:Arial,Helvetica,sans-serif;} body{margin:0;padding:34px;color:#111;font-size:12px;}' +
+      'h1{font-size:30px;margin:0 0 18px;} .top{display:flex;justify-content:space-between;align-items:flex-start;}' +
+      '.meta div{margin:2px 0;} .meta b{display:inline-block;width:90px;color:#444;}' +
+      '.brand{font-size:20px;font-weight:800;text-align:right;}' +
+      '.boxes{display:flex;gap:16px;margin:22px 0;} .box{flex:1;background:#f4f4f5;border-radius:8px;padding:14px;}' +
+      '.box h4{margin:0 0 6px;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:.04em;} .box .nm{font-weight:700;font-size:13px;}' +
+      '.box small{color:#555;} .box .gst{margin-top:6px;} .box .gst b{display:inline-block;width:42px;color:#444;}' +
+      '.supply{display:flex;justify-content:space-between;color:#555;margin:8px 2px 14px;}' +
+      'table{width:100%;border-collapse:collapse;} thead th{background:#2f3033;color:#fff;padding:9px 8px;text-align:left;font-size:11px;}' +
+      'th.r,td.r{text-align:right;} th.c,td.c{text-align:center;} tbody td{padding:10px 8px;border-bottom:1px solid #eee;}' +
+      '.totals{display:flex;justify-content:flex-end;margin-top:16px;} .totals table{width:300px;}' +
+      '.totals td{padding:6px 4px;} .totals .grand td{border-top:2px solid #111;font-size:16px;font-weight:800;padding-top:10px;}' +
+      '.words{margin-top:6px;color:#444;font-style:italic;} .foot{margin-top:26px;color:#666;font-size:11px;border-top:1px solid #eee;padding-top:12px;}' +
+      '@media print{body{padding:0;}}</style></head><body>' +
+      '<div class="top"><div><h1>' + title + '</h1><div class="meta">' +
+        '<div><b>' + (d.kind === 'INV' ? 'Invoice#' : d.kind === 'SO' ? 'SO #' : 'PI #') + '</b>' + esc(d.number) + '</div>' +
+        '<div><b>Date</b>' + esc(d.date || today) + '</div></div></div>' +
+        '<div class="brand">COMFORT<br>INDUSTRIES</div></div>' +
+      '<div class="boxes">' +
+        '<div class="box"><h4>Billed by</h4><div class="nm">Comfort Industries</div>' +
+        '<small>Panipat, Haryana, India</small><div class="gst"><b>GSTIN</b> 06ABCDE1234F1Z5</div></div>' +
+        '<div class="box"><h4>Billed to</h4><div class="nm">' + esc(d.party) + '</div>' +
+        '<small>' + esc([party.billingAddress, party.city, party.state].filter(Boolean).join(', ') || '—') + '</small>' +
+        '<div class="gst"><b>GSTIN</b> ' + esc(party.gst || '—') + '</div></div></div>' +
+      '<div class="supply"><span>Place of Supply: <b>' + esc(party.state || '—') + '</b></span><span>Country of Supply: <b>India</b></span></div>' +
+      '<table><thead><tr><th>Item / description</th><th class="c">HSN</th><th class="c">Qty</th><th class="c">GST</th><th class="r">Taxable</th>' + taxCols + '<th class="r">Amount</th></tr></thead><tbody>' + rowsHtml + '</tbody></table>' +
+      '<div class="totals"><table>' +
+        '<tr><td>Sub Total</td><td class="r">' + money(sub) + '</td></tr>' +
+        (intra ? '<tr><td>CGST</td><td class="r">' + money(cgst) + '</td></tr><tr><td>SGST</td><td class="r">' + money(sgst) + '</td></tr>' : '<tr><td>IGST</td><td class="r">' + money(igst) + '</td></tr>') +
+        '<tr class="grand"><td>Total</td><td class="r">₹' + money(total) + '</td></tr>' +
+      '</table></div>' +
+      '<div class="words">' + esc(title) + ' total (in words): ' + numToWords(total) + '</div>' +
+      '<div class="foot">This is a computer-generated ' + esc(title.toLowerCase()) + '. For enquiries, contact Comfort Industries, Panipat.</div>' +
+      '<script>window.onload=function(){setTimeout(function(){window.print();},250);}<\/script></body></html>';
+    const w = window.open('', '_blank');
+    if (!w){ toastO('Allow pop-ups to download the document.'); return; }
+    w.document.open(); w.document.write(html); w.document.close();
+  }
+  function money(n){ return Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
   function toastO(msg){
     let t = document.querySelector('.atlas-toast');
     if (!t){ t = document.createElement('div'); t.className = 'atlas-toast'; document.body.appendChild(t); }
@@ -24851,6 +24951,13 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   window.atlasLoadOrders = function(){ load(false); };
   window.atlasLoadDispatch = function(){ load(false); };
   window.atlasOrdersChanged = function(){ load(true); };
+  window.atlasEnsureOrders = function(){ return load(false); };
+  // All documents (PI / SO / INV) for a party — powers the party-centric view.
+  window.atlasDocsForParty = function(name){
+    const nn = String(name || '').trim().toLowerCase();
+    return allDocs().filter(d => String(d.party || '').trim().toLowerCase() === nn)
+      .sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  };
 
 
   function init(){
@@ -24859,7 +24966,9 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     ordTabs.addEventListener('click', (e) => { const b = e.target.closest('.ord-tab[data-tab]'); if (!b) return; ordTab = b.getAttribute('data-tab'); renderOrders(); });
     const search = $('ord-search'); if (search) search.addEventListener('input', renderOrders);
 
-    // + New menu
+    // Primary Create PI + secondary menu (SO / Tax Invoice / detailed PI).
+    const createPi = $('ord-createpi');
+    if (createPi) createPi.addEventListener('click', () => { if (window.atlasNewDoc) window.atlasNewDoc('pi'); });
     const newBtn = $('ord-new'), menu = $('ord-newmenu');
     if (newBtn) newBtn.addEventListener('click', (e) => { e.stopPropagation(); menu.hidden = !menu.hidden; });
     document.addEventListener('click', () => { if (menu && !menu.hidden) menu.hidden = true; });
@@ -24872,7 +24981,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const kpis = $('ord-kpis');
     if (kpis) kpis.addEventListener('click', (e) => {
       const k = e.target.closest('.ord-kpi[data-okpi]'); if (!k) return;
-      const map = { proforma: 'proforma', ready: 'all', indispatch: 'all', invoice: 'invoice' };
+      const map = { pending: 'proforma', ready: 'so', delayed: 'so', invpending: 'so' };
       ordTab = map[k.getAttribute('data-okpi')] || 'all'; renderOrders();
     });
 
@@ -24882,7 +24991,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       const a = e.target.closest('[data-od]'); if (!a) return;
       const act = a.getAttribute('data-od'); const d = findDoc(a.getAttribute('data-id'));
       if (act === 'createso'){ e.stopPropagation(); openSoModal(d); }
-      else if (act === 'confirmpi'){ e.stopPropagation(); setDocStatus(d, 'Confirmed'); }
+      else if (act === 'approveso'){ e.stopPropagation(); setDocStatus(d, 'Confirmed'); openSoModal(d); }
+      else if (act === 'download'){ e.stopPropagation(); downloadDoc(d); }
       else if (act === 'toinv'){ e.stopPropagation(); invoiceFromDispatched(d); }
       else if (act === 'todisp'){ e.stopPropagation(); openFulfillModal(tgtFromDoc(d)); }
       else if (act === 'statusmenu'){ e.stopPropagation(); const m = a.parentNode.querySelector('.ord-statmenu'); if (m) m.hidden = !m.hidden; }
