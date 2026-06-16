@@ -2264,20 +2264,16 @@
     <div class="nav-item" data-page="dispatch">
       <span class="glyph">→</span><span>Dispatch</span>
     </div>
-    <div class="nav-item" data-page="create-pi">
-      <span class="glyph">+</span><span>Create PI</span><span class="badge live">NEW</span>
-    </div>
-    <div class="nav-item" data-page="pi-history">
-      <span class="glyph">≡</span><span>PI History</span>
-    </div>
 
-    <div class="rail-section">Sense</div>
+    <div class="rail-section">Finance</div>
     <div class="nav-item" data-page="cash">
       <span class="glyph">◔</span><span>Cash &amp; finance</span>
     </div>
     <div class="nav-item" data-page="receivables">
       <span class="glyph">⋮</span><span>Receivables</span><span class="badge warn">3</span>
     </div>
+
+    <div class="rail-section">Insights</div>
     <div class="nav-item" data-page="intel">
       <span class="glyph">◈</span><span>Intelligence</span>
     </div>
@@ -2714,37 +2710,46 @@
 
     </section>
 
-    <!-- ORDERS PAGE -->
+    <!-- ORDERS PAGE — central sales workspace -->
     <section class="page" data-page="orders" hidden>
       <div class="hero-h">
         <div>
-          <div class="eb"><span class="live-dot"></span>Order book · 312 in motion</div>
-          <h1>Everything <span class="em">moving</span>, every <span class="accent">stage</span>.</h1>
+          <div class="eb"><span class="live-dot"></span>Orders · sales documents</div>
+          <h1>Every <span class="em">sales document</span>, one <span class="accent">workspace</span>.</h1>
         </div>
-        <div class="when">OPEN · <b>74</b><br/>PICKING · <b>38</b><br/>DISPATCHED · <b>200</b></div>
+        <div class="when">PROFORMA → SO → INVOICE<br/>then DISPATCH → PAYMENT</div>
       </div>
-      <div class="range-bar">
-        <div class="range"><button>ALL</button><button class="on">OPEN</button><button>PICKING</button><button>DISPATCHED</button><button>HOLD</button></div>
-        <div class="actions"><button class="chip">+ NEW ORDER</button><button class="chip">⤓ EXPORT</button><button class="chip emerald">◆ ASK NATIVE</button></div>
-      </div>
-      <div class="kpis">
-        <div class="kpi"><div class="lbl"><span>Open value</span><span class="ind"></span></div><div class="v"><span class="cur">₹</span>1.84<span class="un">Cr</span></div><div class="d"><span class="arr">↑</span>+8.2% week-on-week</div></div>
-        <div class="kpi"><div class="lbl"><span>Avg lead time</span><span class="ind b"></span></div><div class="v">4.2<span class="un">d</span></div><div class="d"><span class="arr">↓</span>−0.6d this month</div></div>
-        <div class="kpi"><div class="lbl"><span>On-time rate</span><span class="ind"></span></div><div class="v">91.4<span class="un">%</span></div><div class="d"><span class="arr">↑</span>+2.1 pts</div></div>
-        <div class="kpi"><div class="lbl"><span>On hold</span><span class="ind r"></span></div><div class="v">6</div><div class="d rr"><span class="arr">↑</span>3 awaiting credit</div></div>
+      <div class="kpis" id="ord-kpis">
+        <div class="kpi ord-kpi" data-okpi="proforma"><div class="lbl"><span>Proforma Invoices</span><span class="ind b"></span></div><div class="v" id="okpi-pi">0</div><div class="d"><span class="arr">→</span>quotes issued</div></div>
+        <div class="kpi ord-kpi" data-okpi="so"><div class="lbl"><span>Open Sales Orders</span><span class="ind a"></span></div><div class="v" id="okpi-so">0</div><div class="d"><span class="arr">→</span>to fulfil</div></div>
+        <div class="kpi ord-kpi" data-okpi="todispatch"><div class="lbl"><span>Ready to Dispatch</span><span class="ind"></span></div><div class="v" id="okpi-disp">0</div><div class="d"><span class="arr">→</span>hand to warehouse</div></div>
+        <div class="kpi ord-kpi" data-okpi="invoice"><div class="lbl"><span>Sales Invoices</span><span class="ind"></span></div><div class="v" id="okpi-inv">0</div><div class="d"><span class="arr">→</span>billed</div></div>
       </div>
       <div class="card" style="margin-top:14px;">
-        <div class="card-h"><div class="t"><span class="ic">◇</span><h3>Order book</h3><span class="sub">SORTED · LATEST</span></div><div class="seg"><button class="on">CARDS</button><button>TABLE</button></div></div>
-        <div class="card-b" style="padding-top:6px;">
-          <table class="table"><thead><tr><th>Order</th><th>Party</th><th>Stage</th><th class="r">Value</th><th class="r">ETA</th></tr></thead><tbody>
-            <tr><td class="mute" style="font-family:var(--fm);">#ORD-2118</td><td><div class="name"><div class="av-sq e">GC</div><div class="nm-c"><div class="pri">Goyal Carpets</div><div class="sec">PANIPAT · 6 SKU</div></div></div></td><td><span class="pill-s ok">DISPATCHED</span></td><td class="num r"><span class="cur">₹</span>9.42 L</td><td class="mute r">today</td></tr>
-            <tr><td class="mute" style="font-family:var(--fm);">#ORD-2117</td><td><div class="name"><div class="av-sq b">VT</div><div class="nm-c"><div class="pri">Vinod Trading</div><div class="sec">DELHI · 4 SKU</div></div></div></td><td><span class="pill-s warn">PICKING</span></td><td class="num r"><span class="cur">₹</span>11.20 L</td><td class="mute r">tomorrow</td></tr>
-            <tr><td class="mute" style="font-family:var(--fm);">#ORD-2116</td><td><div class="name"><div class="av-sq a">SI</div><div class="nm-c"><div class="pri">Sai Industries</div><div class="sec">PUNE · 8 SKU</div></div></div></td><td><span class="pill-s bad">ON HOLD</span></td><td class="num r"><span class="cur">₹</span>7.18 L</td><td class="mute r">credit review</td></tr>
-            <tr><td class="mute" style="font-family:var(--fm);">#ORD-2115</td><td><div class="name"><div class="av-sq e">RM</div><div class="nm-c"><div class="pri">Rajesh Mats</div><div class="sec">JAIPUR · 3 SKU</div></div></div></td><td><span class="pill-s info">CONFIRMED</span></td><td class="num r"><span class="cur">₹</span>4.86 L</td><td class="mute r">14 May</td></tr>
-            <tr><td class="mute" style="font-family:var(--fm);">#ORD-2114</td><td><div class="name"><div class="av-sq b">KB</div><div class="nm-c"><div class="pri">Khanna Bros.</div><div class="sec">LUDHIANA · 12 SKU</div></div></div></td><td><span class="pill-s warn">PICKING</span></td><td class="num r"><span class="cur">₹</span>14.20 L</td><td class="mute r">12 May</td></tr>
-            <tr><td class="mute" style="font-family:var(--fm);">#ORD-2113</td><td><div class="name"><div class="av-sq e">PA</div><div class="nm-c"><div class="pri">Pune Auto Mats</div><div class="sec">PUNE · 2 SKU</div></div></div></td><td><span class="pill-s ok">DISPATCHED</span></td><td class="num r"><span class="cur">₹</span>3.40 L</td><td class="mute r">delivered</td></tr>
-            <tr><td class="mute" style="font-family:var(--fm);">#ORD-2112</td><td><div class="name"><div class="av-sq a">TN</div><div class="nm-c"><div class="pri">TEFNO Foam</div><div class="sec">SUPPLIER · #PO-0814</div></div></div></td><td><span class="pill-s muted">DRAFT</span></td><td class="num r"><span class="cur">₹</span>2.95 L</td><td class="mute r">await sign-off</td></tr>
-          </tbody></table>
+        <div class="card-h">
+          <div class="t"><span class="ic">◇</span><h3>Documents</h3><span class="sub"><span id="ord-count">0</span> shown</span></div>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <input type="text" id="ord-search" class="pl-search" style="width:220px;" placeholder="Search party, number…" autocomplete="off">
+            <div class="ord-newwrap">
+              <button class="pi-btn prime" id="ord-new" style="padding:7px 14px; font-size:10.5px;">+ New ▾</button>
+              <div class="ord-newmenu" id="ord-newmenu" hidden>
+                <button data-newdoc="pi">📄 Proforma Invoice</button>
+                <button data-newdoc="so">🧾 Sales Order</button>
+                <button data-newdoc="invoice">💳 Sales Invoice</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-b">
+          <div class="ord-tabs" id="ord-tabs">
+            <button class="ord-tab on" data-tab="all">All</button>
+            <button class="ord-tab" data-tab="proforma">Proforma</button>
+            <button class="ord-tab" data-tab="so">Sales Orders</button>
+            <button class="ord-tab" data-tab="invoice">Sales Invoices</button>
+            <button class="ord-tab" data-tab="drafts">Drafts</button>
+          </div>
+          <div id="ord-list" class="ord-list"></div>
+          <div id="ord-empty" class="pl-empty" hidden>No documents here yet.</div>
         </div>
       </div>
     </section>
@@ -2854,45 +2859,22 @@
       </div>
     </section>
 
-    <!-- DISPATCH PAGE -->
+    <!-- DISPATCH PAGE — logistics pipeline -->
     <section class="page" data-page="dispatch" hidden>
       <div class="hero-h">
-        <div><div class="eb"><span class="live-dot"></span>Dispatch · 6 vehicles · 14 routes today</div><h1>Wheels <span class="em">turning</span>, e-way bills <span class="accent">clean</span>.</h1></div>
-        <div class="when">LOADING · <b>3</b><br/>EN ROUTE · <b>8</b><br/>DELIVERED · <b>11</b></div>
+        <div><div class="eb"><span class="live-dot"></span>Dispatch · warehouse &amp; shipping</div><h1>From <span class="em">pick</span> to <span class="accent">delivered</span>.</h1></div>
+        <div class="when">ORDERS FLOW IN<br/>FROM SALES ORDERS</div>
       </div>
-      <div class="kpis">
-        <div class="kpi"><div class="lbl"><span>Vehicles active</span><span class="ind"></span></div><div class="v">6<span class="un"> / 8</span></div><div class="d"><span class="arr">→</span>2 in service</div></div>
-        <div class="kpi"><div class="lbl"><span>Capacity used</span><span class="ind b"></span></div><div class="v">81<span class="un">%</span></div><div class="d"><span class="arr">↑</span>+6 pts</div></div>
-        <div class="kpi"><div class="lbl"><span>Avg drop time</span><span class="ind"></span></div><div class="v">38<span class="un">min</span></div><div class="d"><span class="arr">↓</span>−4 min</div></div>
-        <div class="kpi"><div class="lbl"><span>E-way bills</span><span class="ind a"></span></div><div class="v">14</div><div class="d"><span class="arr">→</span>1 expiring · 2h</div></div>
-      </div>
-      <div class="row-2" style="grid-template-columns:repeat(3,1fr);">
-        <div class="card"><div class="card-h"><div class="t"><span class="ic">◇</span><h3>Loading</h3><span class="sub">3 LIVE</span></div></div><div class="card-b">
-          <div class="party-row"><div class="nm">DL-1C-AT-4421<small>DRIVER · RAM SINGH · WH-A</small></div><span class="pill-s warn">73% LOAD</span><div class="num">9 stops<small>panipat → delhi</small></div></div>
-          <div class="party-row"><div class="nm">HR-26-BG-2810<small>DRIVER · SURESH · WH-B</small></div><span class="pill-s warn">58% LOAD</span><div class="num">6 stops<small>delhi → ncr</small></div></div>
-          <div class="party-row"><div class="nm">MH-12-CK-9914<small>DRIVER · DESHMUKH · WH-C</small></div><span class="pill-s muted">12% LOAD</span><div class="num">4 stops<small>pune → mumbai</small></div></div>
-        </div></div>
-        <div class="card"><div class="card-h"><div class="t"><span class="ic">→</span><h3>En route</h3><span class="sub">8 LIVE</span></div></div><div class="card-b">
-          <div class="party-row"><div class="nm">PB-08-AT-1102<small>JALANDHAR · ETA 2.4h</small></div><span class="pill-s ok">ON TIME</span><div class="num">4 / 7<small>stops done</small></div></div>
-          <div class="party-row"><div class="nm">UP-14-DL-0844<small>NOIDA · ETA 48m</small></div><span class="pill-s ok">ON TIME</span><div class="num">2 / 3<small>stops done</small></div></div>
-          <div class="party-row"><div class="nm">RJ-19-PA-3211<small>JAIPUR · ETA 5.8h</small></div><span class="pill-s warn">42m LATE</span><div class="num">1 / 5<small>stops done</small></div></div>
-          <div class="party-row"><div class="nm">DL-9C-CV-7780<small>GHAZIABAD · ETA 32m</small></div><span class="pill-s ok">ON TIME</span><div class="num">3 / 4<small>stops done</small></div></div>
-        </div></div>
-        <div class="card"><div class="card-h"><div class="t"><span class="ic">○</span><h3>Delivered today</h3><span class="sub">11 DROPS</span></div></div><div class="card-b">
-          <div class="party-row"><div class="nm">Goyal Carpets<small>PANIPAT · POD signed</small></div><span class="pill-s ok">CLEAN</span><div class="num">8:42a<small>9.42L</small></div></div>
-          <div class="party-row"><div class="nm">Pune Auto Mats<small>PUNE · POD signed</small></div><span class="pill-s ok">CLEAN</span><div class="num">10:18a<small>3.40L</small></div></div>
-          <div class="party-row"><div class="nm">Khanna Bros.<small>LUDHIANA · partial</small></div><span class="pill-s warn">SHORT 2</span><div class="num">11:04a<small>12.10L</small></div></div>
-          <div class="party-row"><div class="nm">Bombay Hospitality<small>MUMBAI · POD signed</small></div><span class="pill-s ok">CLEAN</span><div class="num">11:38a<small>5.20L</small></div></div>
-        </div></div>
-      </div>
+      <div class="dz-board" id="dz-board"></div>
+      <div id="dz-empty" class="pl-empty" hidden>Nothing in the dispatch pipeline yet. Send a Sales Order to dispatch from the Orders page.</div>
     </section>
 
     <!-- CREATE PI PAGE -->
     <section class="page" data-page="create-pi" hidden>
       <div class="hero-h">
         <div>
-          <div class="eb"><span class="live-dot"></span>Operate · create PI · <span id="pi-eb-status">draft</span></div>
-          <h1>One <span class="em">proforma invoice</span>, <span class="accent">many lines</span>.</h1>
+          <div class="eb"><span class="live-dot"></span>Orders · <span id="pi-eb-doc">new document</span> · <span id="pi-eb-status">draft</span></div>
+          <h1 id="pi-eb-title">One <span class="em">proforma invoice</span>, <span class="accent">many lines</span>.</h1>
         </div>
         <div class="when">WORKSPACE · <b>COMFORT INDUSTRIES</b><br/>SHEET · <b>MASTERS</b><br/>REF# · <b id="pi-eb-ref">—</b></div>
       </div>
@@ -18761,14 +18743,14 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   // ── Routing ──────────────────────────────────────────────
   const pageTitleMap = {
     today:'Today', orders:'Orders', parties:'Parties', inventory:'Inventory',
-    dispatch:'Dispatch', 'create-pi':'Create PI', 'pi-history':'PI History',
+    dispatch:'Dispatch', 'create-pi':'New document', 'pi-history':'Orders',
     cash:'Cash & finance', receivables:'Receivables',
     intel:'Intelligence', reports:'Reports', workflows:'Workflows', settings:'Settings'
   };
   const sectionMap = {
     today:'Operate', orders:'Operate', parties:'Operate', inventory:'Operate', dispatch:'Operate',
     'create-pi':'Operate', 'pi-history':'Operate',
-    cash:'Sense', receivables:'Sense', intel:'Sense', reports:'Sense',
+    cash:'Finance', receivables:'Finance', intel:'Insights', reports:'Insights',
     workflows:'Studio', settings:'Studio'
   };
   function setPage(p) {
@@ -18788,6 +18770,15 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     }
     if (p === 'parties' && typeof window.atlasLoadParties === 'function') {
       window.atlasLoadParties();
+    }
+    if (p === 'orders' && typeof window.atlasLoadOrders === 'function') {
+      window.atlasLoadOrders();
+    }
+    if (p === 'dispatch' && typeof window.atlasLoadDispatch === 'function') {
+      window.atlasLoadDispatch();
+    }
+    if (p === 'create-pi' && typeof window.atlasApplyDocType === 'function') {
+      window.atlasApplyDocType();
     }
   }
   document.querySelectorAll('.nav-item[data-page]').forEach(n => {
@@ -20675,6 +20666,29 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     poc: V.pocs[0] || '',
     ref: V.nextRefNumber,
     lines: [],
+    docType: 'pi',  // 'pi' | 'so' | 'invoice'
+  };
+  const DOC_META = {
+    pi:      { label: 'Proforma Invoice', title: 'One <span class="em">proforma invoice</span>, <span class="accent">many lines</span>.', btn: 'Create PI →' },
+    so:      { label: 'Sales Order',      title: 'New <span class="em">sales order</span>, <span class="accent">ready to fulfil</span>.', btn: 'Create Sales Order →' },
+    invoice: { label: 'Sales Invoice',    title: 'New <span class="em">sales invoice</span>, <span class="accent">ready to bill</span>.', btn: 'Create Invoice →' },
+  };
+  function applyDocType(){
+    const m = DOC_META[state.docType] || DOC_META.pi;
+    const d = document.getElementById('pi-eb-doc'); if (d) d.textContent = m.label.toLowerCase();
+    const t = document.getElementById('pi-eb-title'); if (t) t.innerHTML = m.title;
+    const b = document.getElementById('pi-submit'); if (b) b.textContent = m.btn;
+  }
+  window.atlasApplyDocType = applyDocType;
+  // Open the create flow for a given document type, optionally with a party.
+  window.atlasNewDoc = function(type, party){
+    state.docType = (type === 'so' || type === 'invoice') ? type : 'pi';
+    // create-pi has no sidebar item anymore; switch pages via the hash router.
+    location.hash = '#create-pi';
+    setTimeout(() => {
+      applyDocType();
+      if (party && window.atlasPickParty) window.atlasPickParty(party);
+    }, 40);
   };
 
   // ---------- category specs (from Updated_Product_Specs.pdf) ----------
@@ -21138,7 +21152,17 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     partyTypeahead.open = true;
 
     if (!ordered.length){
-      box.innerHTML = '<div class="empty">No party matches <b>' + escapeHtml(q) + '</b></div>';
+      box.innerHTML = '<div class="empty">No party matches <b>' + escapeHtml(q) + '</b></div>' +
+        '<div class="ta-newparty" id="ta-newparty">＋ Create new party “' + escapeHtml(q) + '”</div>';
+      const np = box.querySelector('#ta-newparty');
+      if (np) np.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        box.hidden = true; partyTypeahead.open = false;
+        // Remember the in-progress query so we can auto-select after creation.
+        window.ATLAS_PENDING_PARTY_QUERY = q;
+        const addBtn = document.getElementById('parties-add-btn');
+        if (addBtn) addBtn.click();
+      });
     } else {
       const rows = ordered.map((p, i) =>
         '<div class="row' + (i === 0 ? ' active' : '') + '" data-i="' + i + '">' +
@@ -21315,6 +21339,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   }
 
   async function onSubmit(){
+    if (state.docType === 'so' || state.docType === 'invoice') return onSubmitSalesDoc();
     if (!canSubmit()){ setStatus('warn', 'Add a party, REF#, and at least one line with quantity and rate.'); return; }
     const payload = buildPayload();
     payload.kind = 'pi';
@@ -21339,6 +21364,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       });
       if (!res.ok) throw new Error('HTTP ' + res.status);
       setStatus('ok', 'PI ' + payload.header.ref + ' created — ' + payload.rows.length + ' line(s) written to Masters.');
+      if (window.atlasOrdersChanged) window.atlasOrdersChanged();
       // bump ref for next PI
       state.ref = Number(state.ref) + 1;
       state.lines = [];
@@ -21349,6 +21375,38 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       setStatus('err', 'Submit failed: ' + err.message + '. Payload preserved in form.');
     } finally {
       renderTotals();
+    }
+  }
+
+  async function onSubmitSalesDoc(){
+    if (!state.party){ setStatus('warn', 'Pick a party first.'); return; }
+    if (!state.lines.length){ setStatus('warn', 'Add at least one line.'); return; }
+    const docType = state.docType === 'invoice' ? 'INV' : 'SO';
+    const payload = buildPayload();
+    const amount = payload.rows.reduce((a, r) => a + (Number(r.totalIncGst) || 0), 0);
+    const doc = {
+      docType, partyName: state.party, partyCode: state.partyCode, poc: state.poc,
+      date: state.date, amount, lines: payload.rows, status: 'Confirmed',
+    };
+    const url = getEndpointUrl();
+    const label = docType === 'INV' ? 'Sales Invoice' : 'Sales Order';
+    if (!url){ setStatus('ok', label + ' ready (' + inr(amount) + '). Backend not wired — not saved.'); return; }
+    setStatus('warn', 'Creating ' + label + '…');
+    $('pi-submit').disabled = true;
+    try {
+      const res = await fetch(url, { method: 'POST', mode: 'cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ kind: 'salesDocAdd', doc }) });
+      const j = await res.json();
+      if (!j.ok) throw new Error(j.error || 'Failed');
+      setStatus('ok', label + ' ' + (j.doc && j.doc.number || '') + ' created — ' + inr(amount) + '.');
+      state.lines = []; renderLines(); renderTotals();
+      localStorage.removeItem('atlas-pi-draft');
+      if (window.atlasOrdersChanged) window.atlasOrdersChanged();
+    } catch (err){
+      setStatus('err', 'Create failed: ' + err.message);
+    } finally {
+      $('pi-submit').disabled = false;
     }
   }
 
@@ -22276,9 +22334,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     else if (act === 'note'){ openPartyPage(p); profileTab = 'notes'; renderProfile(); requestAnimationFrame(() => { const t = $('pp-note-text'); if (t) t.focus(); }); }
     else if (act === 'followup'){ openPartyPage(p); profileTab = 'tasks'; renderProfile(); requestAnimationFrame(() => { const t = $('pp-task-text'); if (t) t.focus(); }); }
     else if (act === 'createpi'){
-      const nav = document.querySelector('.nav-item[data-page="create-pi"]'); if (nav) nav.click();
-      logInteraction(p, 'New order started', 'order');
-      setTimeout(() => { if (window.atlasPickParty) window.atlasPickParty({ name: p.name, code: p.code }); }, 140);
+      logInteraction(p, 'Proforma started', 'order');
+      if (window.atlasNewDoc) window.atlasNewDoc('pi', { name: p.name, code: p.code });
     }
     else if (act === 'wa'){ if (ph){ logInteraction(p, 'WhatsApp message sent', 'whatsapp'); window.open('https://wa.me/91' + ph, '_blank'); } }
     else if (act === 'call'){ if (ph){ logInteraction(p, 'Called customer', 'call'); window.location.href = 'tel:+91' + ph; } }
@@ -22671,9 +22728,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       const p = findParty(normName(it.name)) || it.party;
       if (p && p.name) openPartyPage(p);
     } else if (act === 'pi'){
-      const nav = document.querySelector('.nav-item[data-page="pi-history"]');
-      if (nav) nav.click();
-      setTimeout(() => { const s = document.getElementById('ph-search'); if (s){ s.value = it.name; s.dispatchEvent(new Event('input', { bubbles: true })); } }, 120);
+      location.hash = '#orders';
+      setTimeout(() => { const s = document.getElementById('ord-search'); if (s){ s.value = it.name; s.dispatchEvent(new Event('input', { bubbles: true })); } }, 160);
     } else if (act === 'wa'){
       if (ph) window.open('https://wa.me/91' + ph, '_blank');
     } else if (act === 'call'){
@@ -22847,11 +22903,15 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   function profileActs(p){
     const ph = (p.phone || '').replace(/\D/g, ''); const arch = isArchived(p);
     const b = [];
-    if (!arch) b.push('<button class="pi-btn prime" data-pa="createpi">+ New Order</button>');
+    if (!arch){
+      b.push('<button class="pi-btn prime" data-pa="createpi">+ Create PI</button>');
+      b.push('<button class="pi-btn" data-pa="createso">+ Sales Order</button>');
+      b.push('<button class="pi-btn" data-pa="createinv">+ Invoice</button>');
+    }
     b.push('<button class="pi-btn" data-pa="call"' + (ph ? '' : ' disabled') + '>📞 Call</button>');
     b.push('<button class="pi-btn" data-pa="wa"' + (ph ? '' : ' disabled') + '>💬 WhatsApp</button>');
     b.push('<button class="pi-btn" data-pa="addnote">📝 Add Note</button>');
-    b.push('<button class="pi-btn" data-pa="followup">⏰ Schedule Follow-up</button>');
+    b.push('<button class="pi-btn" data-pa="followup">⏰ Follow-up</button>');
     if (arch) b.push('<button class="pi-btn prime" data-pa="restore">Restore</button>');
     return b.join('');
   }
@@ -23287,11 +23347,10 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     else if (act === 'call'){ if (ph){ logInteraction(p, 'Called customer', 'call'); window.location.href = 'tel:+91' + ph; } }
     else if (act === 'addnote'){ profileTab = 'notes'; renderProfile(); requestAnimationFrame(() => { const t = $('pp-note-text'); if (t) t.focus(); }); }
     else if (act === 'followup'){ profileTab = 'tasks'; renderProfile(); requestAnimationFrame(() => { const t = $('pp-task-text'); if (t) t.focus(); }); }
-    else if (act === 'createpi'){
-      const nav = document.querySelector('.nav-item[data-page="create-pi"]');
-      if (nav) nav.click();
-      logInteraction(p, 'New order started', 'order');
-      setTimeout(() => { if (window.atlasPickParty) window.atlasPickParty({ name: p.name, code: p.code }); }, 140);
+    else if (act === 'createpi' || act === 'createso' || act === 'createinv'){
+      const type = act === 'createso' ? 'so' : act === 'createinv' ? 'invoice' : 'pi';
+      logInteraction(p, (type === 'so' ? 'Sales order' : type === 'invoice' ? 'Invoice' : 'Proforma') + ' started', 'order');
+      if (window.atlasNewDoc) window.atlasNewDoc(type, { name: p.name, code: p.code });
     }
     // Notes (activity-log style; persisted to backend, shown in Timeline too)
     else if (act === 'savenotes'){
@@ -23370,9 +23429,17 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     sortStore();                 // newest-created first → new party leads
     renderFilters(); renderList();
     toast('Party created successfully.');
+    // If this creation began from the "Create new party" link inside a
+    // document flow, auto-select it and return to the create screen.
+    if (window.ATLAS_PENDING_PARTY_QUERY != null){
+      window.ATLAS_PENDING_PARTY_QUERY = null;
+      if (window.atlasPickParty) window.atlasPickParty({ name: entry.name, code: entry.code });
+      location.hash = '#create-pi';
+    }
   };
 
   window.atlasLoadParties = function(){ loadParties(false); };
+  window.atlasOpenPartyByName = function(name){ const p = findParty(normName(name)); if (p) openPartyPage(p); };
 
   function init(){
     const search = $('pl-search'); if (!search) return; // parties page not present
@@ -24297,6 +24364,283 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     // If user lands directly on #pi-history, fetch immediately.
     if (location.hash === '#pi-history') window.atlasLoadHistory();
   });
+})();
+</script>
+
+<style>
+  /* ===== Orders workspace ===== */
+  .ord-kpi { cursor: pointer; transition: border-color 160ms var(--ease), transform 160ms var(--ease); }
+  .ord-kpi:hover { border-color: var(--text-3); transform: translateY(-1px); }
+  .ord-tabs { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 1px solid var(--line); margin: 4px 0 14px; }
+  .ord-tab { background: transparent; border: 0; border-bottom: 2px solid transparent; color: var(--text-3);
+    padding: 9px 14px; font-size: 12.5px; cursor: pointer; margin-bottom: -1px; transition: all 150ms var(--ease); }
+  .ord-tab:hover { color: var(--text-2); }
+  .ord-tab.on { color: var(--text); border-bottom-color: var(--emerald); }
+  .ord-newwrap { position: relative; }
+  .ord-newmenu { position: absolute; right: 0; top: calc(100% + 6px); z-index: 40; min-width: 190px;
+    background: var(--surface); border: 1px solid var(--line-2); border-radius: 9px; padding: 5px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35); display: flex; flex-direction: column; gap: 2px; }
+  .ord-newmenu[hidden] { display: none; }
+  .ord-newmenu button { background: transparent; border: 0; color: var(--text); text-align: left;
+    padding: 9px 11px; border-radius: 6px; font-size: 13px; cursor: pointer; }
+  .ord-newmenu button:hover { background: var(--surface-2); }
+  .ord-list { display: flex; flex-direction: column; gap: 8px; max-height: 600px; overflow-y: auto; }
+  .ord-row { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border: 1px solid var(--line);
+    border-radius: 10px; background: var(--surface); cursor: pointer; transition: border-color 150ms var(--ease); }
+  .ord-row:hover { border-color: var(--text-3); }
+  .ord-main { flex: 1; min-width: 0; }
+  .ord-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .ord-kind { font-family: var(--fm); font-size: 9.5px; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 999px; }
+  .ord-kind.k-b { background: rgba(124,168,255,0.16); color: var(--blue); }
+  .ord-kind.k-a { background: rgba(255,176,121,0.16); color: var(--amber); }
+  .ord-kind.k-e { background: var(--emerald-soft); color: var(--emerald); }
+  .ord-num { font-family: var(--fm); font-size: 11px; color: var(--text-2); letter-spacing: 0.04em; }
+  .ord-party { font-size: 13.5px; font-weight: 600; color: var(--text); }
+  .ord-meta { font-family: var(--fm); font-size: 10.5px; color: var(--text-3); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.03em; }
+  .ord-amt { font-family: var(--fd); font-variant-numeric: tabular-nums; font-weight: 500; color: var(--text); flex: none; }
+  .ord-acts { display: flex; gap: 6px; flex: none; flex-wrap: wrap; justify-content: flex-end; }
+  .ord-acts button { background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; color: var(--text-2);
+    padding: 5px 9px; font-size: 10.5px; font-family: var(--fm); cursor: pointer; white-space: nowrap; transition: border-color 150ms var(--ease); }
+  .ord-acts button:hover { color: var(--text); border-color: var(--text-3); }
+  .ord-stage { font-family: var(--fm); font-size: 10.5px; color: var(--emerald); padding: 4px 0; }
+
+  /* ===== Dispatch pipeline ===== */
+  .dz-board { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+  .dz-col { background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .dz-head { display: flex; align-items: center; justify-content: space-between; padding: 9px 11px;
+    font-family: var(--fm); font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-2);
+    border-bottom: 1px solid var(--line); }
+  .dz-head span { background: var(--surface-3); border-radius: 999px; padding: 1px 7px; }
+  .dz-body { padding: 8px; display: flex; flex-direction: column; gap: 8px; min-height: 60px; max-height: 560px; overflow-y: auto; }
+  .dz-card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; }
+  .dz-cnum { font-family: var(--fm); font-size: 11px; color: var(--text-2); display: flex; justify-content: space-between; }
+  .dz-cnum span { color: var(--text-3); }
+  .dz-cparty { font-size: 12.5px; font-weight: 600; color: var(--text); margin: 4px 0 8px; }
+  .dz-cacts { display: flex; flex-direction: column; gap: 5px; }
+  .dz-cacts button { background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; color: var(--text-2);
+    padding: 5px 8px; font-size: 10.5px; font-family: var(--fm); cursor: pointer; }
+  .dz-cacts button:hover { color: var(--text); border-color: var(--text-3); }
+  .dz-done { color: var(--emerald); font-size: 11px; font-family: var(--fm); }
+  .dz-empty2 { color: var(--text-3); font-size: 11px; text-align: center; padding: 10px 0; }
+  @media (max-width: 1100px){ .dz-board { grid-template-columns: repeat(3, 1fr); } }
+
+  /* Inline create-party link in the PI typeahead */
+  .ta-newparty { padding: 10px 12px; color: var(--emerald); font-size: 12.5px; cursor: pointer; border-top: 1px solid var(--line); }
+  .ta-newparty:hover { background: var(--emerald-soft); }
+</style>
+
+<script>
+/* ===== Orders workspace + Dispatch pipeline ===== */
+(function(){
+  const $ = (id) => document.getElementById(id);
+  function endpoint(){ return (window.ATLAS_APPS_SCRIPT_URL || localStorage.getItem('atlas-apps-script-url') || '/api/pi').trim(); }
+  function post(body){
+    return fetch(endpoint(), { method: 'POST', mode: 'cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
+      .then(r => r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)));
+  }
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function inr(n){ n = Number(n) || 0; const neg = n < 0; n = Math.abs(n); let s;
+    if (n >= 1e7) s = '₹' + (n / 1e7).toFixed(2).replace(/\.00$/, '') + 'Cr';
+    else if (n >= 1e5) s = '₹' + (n / 1e5).toFixed(2).replace(/\.00$/, '') + 'L';
+    else s = '₹' + Math.round(n).toLocaleString('en-IN'); return (neg ? '-' : '') + s; }
+  function initials(name){ const w = String(name || '').trim().split(/\s+/).filter(Boolean); return ((w[0] && w[0][0] || '—') + (w[1] ? w[1][0] : '')).toUpperCase(); }
+
+  const DISPATCH_STAGES = ['Ready to Pick', 'Packing', 'Ready to Ship', 'Out for Delivery', 'Delivered', 'Returned'];
+
+  let pis = [];        // proforma invoices from the PI sheet (grouped)
+  let salesDocs = [];  // SO + INV from SalesDocs
+  let ordTab = 'all';
+  let loaded = false;
+
+  function fetchPis(){
+    return post({ kind: 'list' }).then(j => { pis = (j && j.ok && j.pis) ? j.pis : []; }).catch(() => { pis = []; });
+  }
+  function fetchSalesDocs(){
+    return post({ kind: 'salesDocList' }).then(j => { salesDocs = (j && j.ok && j.docs) ? j.docs : []; }).catch(() => { salesDocs = []; });
+  }
+
+  // Unified document list across PIs and sales docs.
+  function allDocs(){
+    const out = [];
+    for (const pi of pis){
+      out.push({ kind: 'PI', id: 'pi:' + pi.ref, number: pi.ref, party: pi.party, poc: pi.poc,
+        date: pi.date, amount: pi.totalIncGst, status: pi.status || 'Confirmed', ref: pi.ref });
+    }
+    for (const d of salesDocs){
+      out.push({ kind: d.docType, id: d.id, number: d.number, party: d.partyName, poc: d.poc,
+        date: d.date, amount: d.amount, status: d.status, dispatchStage: d.dispatchStage,
+        partyCode: d.partyCode, sourceRef: d.sourceRef, raw: d });
+    }
+    return out;
+  }
+  function tabDocs(){
+    const docs = allDocs();
+    const q = ($('ord-search') ? $('ord-search').value : '').trim().toLowerCase();
+    return docs.filter(d => {
+      if (ordTab === 'proforma' && d.kind !== 'PI') return false;
+      if (ordTab === 'so' && d.kind !== 'SO') return false;
+      if (ordTab === 'invoice' && d.kind !== 'INV') return false;
+      if (ordTab === 'drafts' && String(d.status).toLowerCase() !== 'draft') return false;
+      if (q){ return (d.party + ' ' + d.number).toLowerCase().indexOf(q) !== -1; }
+      return true;
+    }).sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  }
+
+  function kindBadge(k){ const m = { PI: ['b', 'Proforma'], SO: ['a', 'Sales Order'], INV: ['e', 'Invoice'] }[k] || ['', k]; return '<span class="ord-kind k-' + m[0] + '">' + m[1] + '</span>'; }
+  function docRow(d){
+    const acts = [];
+    if (d.kind === 'PI') acts.push('<button data-od="pi2so" data-id="' + esc(d.id) + '">→ Sales Order</button>');
+    if (d.kind === 'SO'){
+      if (!d.dispatchStage) acts.push('<button data-od="so2disp" data-id="' + esc(d.id) + '">→ Dispatch</button>');
+      else acts.push('<span class="ord-stage">📦 ' + esc(d.dispatchStage) + '</span>');
+      acts.push('<button data-od="so2inv" data-id="' + esc(d.id) + '">→ Invoice</button>');
+    }
+    const ph = '';
+    return '<div class="ord-row" data-od="open" data-id="' + esc(d.id) + '">' +
+      '<span class="pl-av av-blue">' + initials(d.party) + '</span>' +
+      '<div class="ord-main"><div class="ord-top">' + kindBadge(d.kind) + '<span class="ord-num">' + esc(d.number) + '</span>' +
+      '<span class="ord-party">' + esc(d.party) + '</span></div>' +
+      '<div class="ord-meta">' + esc(d.poc || '') + (d.date ? ' · ' + esc(d.date) : '') + ' · ' + esc(d.status) + '</div></div>' +
+      '<div class="ord-amt">' + inr(d.amount) + '</div>' +
+      '<div class="ord-acts">' + acts.join('') + '</div></div>';
+  }
+
+  function renderKpis(){
+    const set = (id, v) => { const e = $(id); if (e) e.textContent = v; };
+    set('okpi-pi', pis.length);
+    const sos = salesDocs.filter(d => d.docType === 'SO');
+    set('okpi-so', sos.filter(d => String(d.status).toLowerCase() !== 'cancelled').length);
+    set('okpi-disp', sos.filter(d => !d.dispatchStage).length);
+    set('okpi-inv', salesDocs.filter(d => d.docType === 'INV').length);
+    document.querySelectorAll('.ord-kpi').forEach(k => k.classList.toggle('active', false));
+  }
+  function renderOrders(){
+    const list = $('ord-list'), empty = $('ord-empty'), count = $('ord-count');
+    if (!list) return;
+    document.querySelectorAll('.ord-tab').forEach(t => t.classList.toggle('on', t.getAttribute('data-tab') === ordTab));
+    const rows = tabDocs();
+    if (count) count.textContent = rows.length;
+    if (!rows.length){ list.innerHTML = ''; if (empty) empty.hidden = false; return; }
+    if (empty) empty.hidden = true;
+    list.innerHTML = rows.slice(0, 300).map(docRow).join('');
+    renderKpis();
+  }
+
+  function findDoc(id){ return allDocs().find(d => d.id === id); }
+
+  function convertPiToSo(d){
+    if (!d) return;
+    post({ kind: 'salesDocAdd', doc: { docType: 'SO', partyName: d.party, poc: d.poc,
+      date: new Date().toISOString().slice(0, 10), amount: d.amount, sourceRef: d.ref, status: 'Confirmed' } })
+      .then(j => { if (j && j.ok){ salesDocs.push(j.doc); toastO('Sales Order ' + j.doc.number + ' created from PI ' + d.number + '.'); renderOrders(); } })
+      .catch(() => toastO('Could not create Sales Order (backend offline).'));
+  }
+  function convertSoToInv(d){
+    if (!d) return;
+    post({ kind: 'salesDocAdd', doc: { docType: 'INV', partyName: d.party, partyCode: d.partyCode, poc: d.poc,
+      date: new Date().toISOString().slice(0, 10), amount: d.amount, sourceRef: d.number, status: 'Confirmed' } })
+      .then(j => { if (j && j.ok){ salesDocs.push(j.doc); toastO('Invoice ' + j.doc.number + ' raised for ' + d.party + '.'); renderOrders(); } })
+      .catch(() => toastO('Could not raise invoice (backend offline).'));
+  }
+  function sendToDispatch(d){
+    if (!d || !d.raw) return;
+    post({ kind: 'salesDocUpdate', id: d.id, patch: { dispatchStage: 'Ready to Pick' } })
+      .then(j => { if (j && j.ok){ d.raw.dispatchStage = 'Ready to Pick'; toastO(d.number + ' sent to dispatch.'); renderOrders(); renderDispatch(); } })
+      .catch(() => toastO('Could not update dispatch (backend offline).'));
+  }
+
+  function toastO(msg){
+    let t = document.querySelector('.atlas-toast');
+    if (!t){ t = document.createElement('div'); t.className = 'atlas-toast'; document.body.appendChild(t); }
+    t.textContent = msg; requestAnimationFrame(() => t.classList.add('show'));
+    clearTimeout(window._otoast); window._otoast = setTimeout(() => t.classList.remove('show'), 2400);
+  }
+
+  // ---------- Dispatch pipeline ----------
+  function renderDispatch(){
+    const board = $('dz-board'), empty = $('dz-empty'); if (!board) return;
+    const items = salesDocs.filter(d => d.dispatchStage);
+    if (!items.length){ board.innerHTML = ''; if (empty) empty.hidden = false; return; }
+    if (empty) empty.hidden = true;
+    board.innerHTML = DISPATCH_STAGES.map(stage => {
+      const inStage = items.filter(d => d.dispatchStage === stage);
+      const cards = inStage.map(d => {
+        const idx = DISPATCH_STAGES.indexOf(stage);
+        const next = idx < DISPATCH_STAGES.indexOf('Delivered') ? DISPATCH_STAGES[idx + 1] : null;
+        return '<div class="dz-card"><div class="dz-cnum">' + esc(d.number) + ' <span>' + inr(d.amount) + '</span></div>' +
+          '<div class="dz-cparty">' + esc(d.partyName) + '</div>' +
+          '<div class="dz-cacts">' +
+          (next ? '<button data-dz="advance" data-id="' + esc(d.id) + '" data-next="' + esc(next) + '">→ ' + esc(next) + '</button>' : '<span class="dz-done">✓ Delivered</span>') +
+          (stage !== 'Returned' && stage !== 'Delivered' ? '<button data-dz="return" data-id="' + esc(d.id) + '">Return</button>' : '') +
+          '</div></div>';
+      }).join('') || '<div class="dz-empty2">—</div>';
+      return '<div class="dz-col"><div class="dz-head">' + esc(stage) + ' <span>' + inStage.length + '</span></div><div class="dz-body">' + cards + '</div></div>';
+    }).join('');
+  }
+  function advanceDispatch(id, stage){
+    const d = salesDocs.find(x => x.id === id); if (!d) return;
+    post({ kind: 'salesDocUpdate', id, patch: { dispatchStage: stage, status: stage === 'Delivered' ? 'Delivered' : d.status } })
+      .then(j => { if (j && j.ok){ d.dispatchStage = stage; if (stage === 'Delivered') d.status = 'Delivered'; renderDispatch(); renderOrders(); } })
+      .catch(() => toastO('Could not update (backend offline).'));
+  }
+
+  function load(force){
+    if (loaded && !force){ renderOrders(); renderDispatch(); return Promise.resolve(); }
+    return Promise.all([fetchPis(), fetchSalesDocs()]).then(() => { loaded = true; renderOrders(); renderDispatch(); });
+  }
+
+  window.atlasLoadOrders = function(){ load(false); };
+  window.atlasLoadDispatch = function(){ load(false); };
+  window.atlasOrdersChanged = function(){ load(true); };
+
+  function init(){
+    const ordTabs = $('ord-tabs');
+    if (!ordTabs) return; // orders page not present
+    ordTabs.addEventListener('click', (e) => { const b = e.target.closest('.ord-tab[data-tab]'); if (!b) return; ordTab = b.getAttribute('data-tab'); renderOrders(); });
+    const search = $('ord-search'); if (search) search.addEventListener('input', renderOrders);
+
+    // + New menu
+    const newBtn = $('ord-new'), menu = $('ord-newmenu');
+    if (newBtn) newBtn.addEventListener('click', (e) => { e.stopPropagation(); menu.hidden = !menu.hidden; });
+    document.addEventListener('click', () => { if (menu && !menu.hidden) menu.hidden = true; });
+    if (menu) menu.addEventListener('click', (e) => {
+      const b = e.target.closest('button[data-newdoc]'); if (!b) return;
+      menu.hidden = true; if (window.atlasNewDoc) window.atlasNewDoc(b.getAttribute('data-newdoc'));
+    });
+
+    // KPI cards → jump to the matching tab.
+    const kpis = $('ord-kpis');
+    if (kpis) kpis.addEventListener('click', (e) => {
+      const k = e.target.closest('.ord-kpi[data-okpi]'); if (!k) return;
+      const map = { proforma: 'proforma', so: 'so', todispatch: 'so', invoice: 'invoice' };
+      ordTab = map[k.getAttribute('data-okpi')] || 'all'; renderOrders();
+    });
+
+    // Document row actions / conversions.
+    const list = $('ord-list');
+    if (list) list.addEventListener('click', (e) => {
+      const a = e.target.closest('[data-od]'); if (!a) return;
+      const act = a.getAttribute('data-od'); const d = findDoc(a.getAttribute('data-id'));
+      if (act === 'pi2so'){ e.stopPropagation(); convertPiToSo(d); }
+      else if (act === 'so2inv'){ e.stopPropagation(); convertSoToInv(d); }
+      else if (act === 'so2disp'){ e.stopPropagation(); sendToDispatch(d); }
+      else if (act === 'open'){ if (window.atlasOpenPartyByName && d) window.atlasOpenPartyByName(d.party); }
+    });
+
+    // Dispatch board actions.
+    const board = $('dz-board');
+    if (board) board.addEventListener('click', (e) => {
+      const b = e.target.closest('button[data-dz]'); if (!b) return;
+      const act = b.getAttribute('data-dz'), id = b.getAttribute('data-id');
+      if (act === 'advance') advanceDispatch(id, b.getAttribute('data-next'));
+      else if (act === 'return') advanceDispatch(id, 'Returned');
+    });
+
+    if (location.hash.slice(1) === 'orders' || location.hash.slice(1) === 'dispatch') load(false);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
 })();
 </script>
 

@@ -18,6 +18,9 @@ const PI_SHEET_NAME      = 'Comfort_atlas';   // tab name where PI line items li
 const PARTIES_SHEET_NAME = 'Parties';         // optional — created on first Add Party
 const CRM_SHEET_NAME     = 'PartyCRM';        // CRM entities (tasks/contacts/docs/log)
 const CRM_HEADERS_       = ['Id', 'PartyCode', 'Kind', 'Text', 'Due', 'Done', 'Meta', 'CreatedAt', 'UpdatedAt'];
+const SALES_SHEET_NAME   = 'SalesDocs';       // Sales Orders + Sales Invoices
+const SALES_HEADERS_     = ['Id', 'DocType', 'Number', 'Date', 'PartyCode', 'PartyName',
+  'POC', 'SourceRef', 'Amount', 'Lines', 'Status', 'DispatchStage', 'CreatedAt', 'UpdatedAt'];
 
 // ---------- request entry points ----------
 
@@ -34,6 +37,9 @@ function doPost(e) {
     if (kind === 'listParties') return handleListParties();
     if (kind === 'crmList')     return handleCrmList(payload);
     if (kind === 'crmListAll')  return handleCrmListAll();
+    if (kind === 'salesDocList')   return handleSalesDocList();
+    if (kind === 'salesDocAdd')    return handleSalesDocAdd(payload);
+    if (kind === 'salesDocUpdate') return handleSalesDocUpdate(payload);
     if (kind === 'crmAdd')      return handleCrmAdd(payload);
     if (kind === 'crmUpdate')   return handleCrmUpdate(payload);
     if (kind === 'crmDelete')   return handleCrmDelete(payload);
@@ -390,6 +396,89 @@ function handleCrmDelete(payload) {
     }
   }
   return jsonResponse({ ok: false, error: 'CRM item not found.' });
+}
+
+// ---------- Sales documents ----------
+
+function ensureSalesSheet_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName(SALES_SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(SALES_SHEET_NAME);
+    sheet.appendRow(SALES_HEADERS_);
+    sheet.setFrozenRows(1);
+    sheet.getRange('A1:N1').setFontWeight('bold');
+  }
+  return sheet;
+}
+
+function salesRowToObj_(r) {
+  return {
+    id: r[0] || '', docType: r[1] || '', number: r[2] || '', date: r[3] || '',
+    partyCode: r[4] || '', partyName: r[5] || '', poc: r[6] || '', sourceRef: r[7] || '',
+    amount: Number(r[8]) || 0, lines: r[9] || '[]', status: r[10] || 'Draft',
+    dispatchStage: r[11] || '', createdAt: r[12] || '', updatedAt: r[13] || '',
+  };
+}
+
+function handleSalesDocList() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SALES_SHEET_NAME);
+  if (!sheet) return jsonResponse({ ok: true, docs: [] });
+  const last = sheet.getLastRow();
+  if (last < 2) return jsonResponse({ ok: true, docs: [] });
+  const rows = sheet.getRange(2, 1, last - 1, 14).getValues();
+  const docs = [];
+  for (var i = 0; i < rows.length; i++) { if (rows[i][0]) docs.push(salesRowToObj_(rows[i])); }
+  return jsonResponse({ ok: true, count: docs.length, docs: docs });
+}
+
+function handleSalesDocAdd(payload) {
+  const d = payload.doc || {};
+  const docType = String(d.docType || '').toUpperCase() === 'INV' ? 'INV' : 'SO';
+  if (!d.partyName) return jsonResponse({ ok: false, error: 'Party is required.' });
+  const sheet = ensureSalesSheet_();
+  const last = sheet.getLastRow();
+  var max = 0;
+  if (last > 1) {
+    const ex = sheet.getRange(2, 2, last - 1, 2).getValues();
+    for (var i = 0; i < ex.length; i++) {
+      if (String(ex[i][0] || '').toUpperCase() !== docType) continue;
+      var m = String(ex[i][1] || '').match(/(\d+)\s*$/);
+      if (m) { var n = parseInt(m[1], 10); if (n > max) max = n; }
+    }
+  }
+  const number = (docType === 'INV' ? 'INV-' : 'SO-') + ('000' + (max + 1)).slice(-4);
+  const now = new Date().toISOString();
+  const id = 'D' + Date.now() + Math.floor(Math.random() * 1000);
+  const lines = typeof d.lines === 'string' ? d.lines : JSON.stringify(d.lines || []);
+  const row = [
+    id, docType, number, String(d.date || now.slice(0, 10)), String(d.partyCode || ''),
+    String(d.partyName || ''), String(d.poc || ''), String(d.sourceRef || ''),
+    Number(d.amount) || 0, lines, String(d.status || 'Confirmed'),
+    String(d.dispatchStage || ''), now, now,
+  ];
+  sheet.appendRow(row);
+  return jsonResponse({ ok: true, doc: salesRowToObj_(row) });
+}
+
+function handleSalesDocUpdate(payload) {
+  const id = String(payload.id || '').trim();
+  const patch = payload.patch || {};
+  if (!id) return jsonResponse({ ok: false, error: 'id is required.' });
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SALES_SHEET_NAME);
+  if (!sheet) return jsonResponse({ ok: false, error: 'Sales doc not found.' });
+  const last = sheet.getLastRow();
+  if (last < 2) return jsonResponse({ ok: false, error: 'Sales doc not found.' });
+  const rows = sheet.getRange(2, 1, last - 1, 14).getValues();
+  for (var i = 0; i < rows.length; i++) {
+    if (String(rows[i][0] || '').trim() === id) {
+      var status = patch.status != null ? String(patch.status) : (rows[i][10] || 'Draft');
+      var stage = patch.dispatchStage != null ? String(patch.dispatchStage) : (rows[i][11] || '');
+      sheet.getRange(i + 2, 11, 1, 4).setValues([[status, stage, rows[i][12] || '', new Date().toISOString()]]);
+      return jsonResponse({ ok: true, id: id, status: status, dispatchStage: stage });
+    }
+  }
+  return jsonResponse({ ok: false, error: 'Sales doc not found.' });
 }
 
 function normPartyType_(t) {

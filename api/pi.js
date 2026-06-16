@@ -47,6 +47,13 @@ const CRM_SHEET   = process.env.CRM_SHEET_NAME || 'PartyCRM';
 const CRM_HEADERS = ['Id', 'PartyCode', 'Kind', 'Text', 'Due', 'Done', 'Meta', 'CreatedAt', 'UpdatedAt'];
 const CRM_RANGE   = CRM_SHEET + '!A:I';
 
+// Sales documents (Sales Orders + Sales Invoices). PIs stay in the PI sheet;
+// these are the SO/INV layer plus the dispatch pipeline stage.
+const SALES_SHEET   = process.env.SALES_SHEET_NAME || 'SalesDocs';
+const SALES_HEADERS = ['Id', 'DocType', 'Number', 'Date', 'PartyCode', 'PartyName',
+  'POC', 'SourceRef', 'Amount', 'Lines', 'Status', 'DispatchStage', 'CreatedAt', 'UpdatedAt'];
+const SALES_RANGE   = SALES_SHEET + '!A:N';
+
 function normPartyType(t) {
   const v = String(t || '').trim().toLowerCase();
   if (v === 'supplier') return 'Supplier';
@@ -180,6 +187,9 @@ module.exports = async (req, res) => {
     if (kind === 'listParties')  return await handleListParties(sheets, spreadsheetId, payload, res);
     if (kind === 'crmList')      return await handleCrmList(sheets, spreadsheetId, payload, res);
     if (kind === 'crmListAll')   return await handleCrmListAll(sheets, spreadsheetId, payload, res);
+    if (kind === 'salesDocList')   return await handleSalesDocList(sheets, spreadsheetId, payload, res);
+    if (kind === 'salesDocAdd')    return await handleSalesDocAdd(sheets, spreadsheetId, payload, res);
+    if (kind === 'salesDocUpdate') return await handleSalesDocUpdate(sheets, spreadsheetId, payload, res);
     if (kind === 'crmAdd')       return await handleCrmAdd(sheets, spreadsheetId, payload, res);
     if (kind === 'crmUpdate')    return await handleCrmUpdate(sheets, spreadsheetId, payload, res);
     if (kind === 'crmDelete')    return await handleCrmDelete(sheets, spreadsheetId, payload, res);
@@ -726,4 +736,94 @@ async function handleCrmDelete(sheets, spreadsheetId, payload, res) {
     requestBody: { requests: [{ deleteDimension: { range: { sheetId, dimension: 'ROWS', startIndex: rowIdx, endIndex: rowIdx + 1 } } }] },
   });
   return res.status(200).json({ ok: true, id });
+}
+
+// ---------- Sales documents (Sales Orders + Sales Invoices) ----------
+
+async function ensureSalesSheet(sheets, spreadsheetId) {
+  const meta = await sheets.spreadsheets.get({ spreadsheetId });
+  const sh = (meta.data.sheets || []).find(s => s.properties && s.properties.title === SALES_SHEET);
+  if (sh) return sh.properties.sheetId;
+  const resp = await sheets.spreadsheets.batchUpdate({
+    spreadsheetId,
+    requestBody: { requests: [{ addSheet: { properties: { title: SALES_SHEET, gridProperties: { frozenRowCount: 1 } } } }] },
+  });
+  await sheets.spreadsheets.values.update({
+    spreadsheetId, range: SALES_SHEET + '!A1:N1', valueInputOption: 'USER_ENTERED',
+    requestBody: { values: [SALES_HEADERS] },
+  });
+  return resp.data.replies[0].addSheet.properties.sheetId;
+}
+
+function salesRowToObj(r) {
+  return {
+    id: r[0] || '', docType: r[1] || '', number: r[2] || '', date: r[3] || '',
+    partyCode: r[4] || '', partyName: r[5] || '', poc: r[6] || '', sourceRef: r[7] || '',
+    amount: Number(r[8]) || 0, lines: r[9] || '[]', status: r[10] || 'Draft',
+    dispatchStage: r[11] || '', createdAt: r[12] || '', updatedAt: r[13] || '',
+  };
+}
+
+async function handleSalesDocList(sheets, spreadsheetId, _payload, res) {
+  const meta = await sheets.spreadsheets.get({ spreadsheetId });
+  const exists = (meta.data.sheets || []).some(s => s.properties && s.properties.title === SALES_SHEET);
+  if (!exists) return res.status(200).json({ ok: true, docs: [] });
+  const resp = await sheets.spreadsheets.values.get({ spreadsheetId, range: SALES_RANGE });
+  const rows = resp.data.values || [];
+  const docs = [];
+  for (let i = 1; i < rows.length; i++) { if ((rows[i] || [])[0]) docs.push(salesRowToObj(rows[i])); }
+  return res.status(200).json({ ok: true, count: docs.length, docs });
+}
+
+async function handleSalesDocAdd(sheets, spreadsheetId, payload, res) {
+  const d = payload.doc || {};
+  const docType = String(d.docType || '').toUpperCase() === 'INV' ? 'INV' : 'SO';
+  if (!d.partyName) return res.status(400).json({ ok: false, error: 'Party is required' });
+  await ensureSalesSheet(sheets, spreadsheetId);
+
+  // Auto number: SO-#### / INV-####, max existing + 1 for that type.
+  const cur = await sheets.spreadsheets.values.get({ spreadsheetId, range: SALES_SHEET + '!B:C' });
+  const rows = cur.data.values || [];
+  let max = 0;
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i] || [];
+    if (String(r[0] || '').toUpperCase() !== docType) continue;
+    const m = String(r[1] || '').match(/(\d+)\s*$/);
+    if (m) { const n = parseInt(m[1], 10); if (n > max) max = n; }
+  }
+  const number = (docType === 'INV' ? 'INV-' : 'SO-') + String(max + 1).padStart(4, '0');
+  const now = new Date().toISOString();
+  const id = 'D' + Date.now() + Math.floor(Math.random() * 1000);
+  const lines = typeof d.lines === 'string' ? d.lines : JSON.stringify(d.lines || []);
+  const row = [
+    id, docType, number, String(d.date || now.slice(0, 10)), String(d.partyCode || ''),
+    String(d.partyName || ''), String(d.poc || ''), String(d.sourceRef || ''),
+    Number(d.amount) || 0, lines, String(d.status || 'Confirmed'),
+    String(d.dispatchStage || ''), now, now,
+  ];
+  await sheets.spreadsheets.values.append({
+    spreadsheetId, range: SALES_RANGE, valueInputOption: 'USER_ENTERED', insertDataOption: 'INSERT_ROWS',
+    requestBody: { values: [row] },
+  });
+  return res.status(200).json({ ok: true, doc: salesRowToObj(row) });
+}
+
+async function handleSalesDocUpdate(sheets, spreadsheetId, payload, res) {
+  const id = String(payload.id || '').trim();
+  const patch = payload.patch || {};
+  if (!id) return res.status(400).json({ ok: false, error: 'id is required' });
+  const resp = await sheets.spreadsheets.values.get({ spreadsheetId, range: SALES_RANGE });
+  const rows = resp.data.values || [];
+  let rowNum = -1, row = null;
+  for (let i = 1; i < rows.length; i++) {
+    if (String((rows[i] || [])[0] || '').trim() === id) { rowNum = i + 1; row = rows[i]; break; }
+  }
+  if (rowNum < 0) return res.status(404).json({ ok: false, error: 'Sales doc not found' });
+  const status = patch.status != null ? String(patch.status) : (row[10] || 'Draft');
+  const stage = patch.dispatchStage != null ? String(patch.dispatchStage) : (row[11] || '');
+  await sheets.spreadsheets.values.update({
+    spreadsheetId, range: SALES_SHEET + '!K' + rowNum + ':N' + rowNum, valueInputOption: 'USER_ENTERED',
+    requestBody: { values: [[status, stage, row[12] || '', new Date().toISOString()]] },
+  });
+  return res.status(200).json({ ok: true, id, status, dispatchStage: stage });
 }

@@ -122,6 +122,17 @@ in ~300ms.
   The Party Profile reads these on open (with a local cache for instant
   render + offline fallback) and merges notes/calls/WhatsApp/orders/
   payments/follow-ups into one chronological Timeline.
+- **Sales documents** (Sales Orders + Sales Invoices) live in a
+  `SalesDocs` tab — one row per document. Columns: `Id · DocType
+  (SO/INV) · Number · Date · PartyCode · PartyName · POC · SourceRef ·
+  Amount · Lines(JSON) · Status · DispatchStage · CreatedAt · UpdatedAt`.
+  Endpoints (all `POST /api/pi`): `{ kind: 'salesDocList' }`,
+  `{ kind: 'salesDocAdd', doc }` (auto-numbers SO-####/INV-####),
+  `{ kind: 'salesDocUpdate', id, patch: { status?, dispatchStage? } }`.
+  Powers the Orders workspace (Proforma=PI sheet, SO/INV here) and the
+  Dispatch pipeline (Ready to Pick → … → Delivered/Returned). PIs are
+  never duplicated — Proforma stays in the PI sheet; SO/INV reference
+  their source via `SourceRef`.
 
 ## Why this is faster than Apps Script
 
