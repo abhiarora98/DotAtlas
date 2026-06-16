@@ -178,6 +178,7 @@ module.exports = async (req, res) => {
     if (kind === 'list')         return await handleList(sheets, spreadsheetId, payload, res);
     if (kind === 'listParties')  return await handleListParties(sheets, spreadsheetId, payload, res);
     if (kind === 'crmList')      return await handleCrmList(sheets, spreadsheetId, payload, res);
+    if (kind === 'crmListAll')   return await handleCrmListAll(sheets, spreadsheetId, payload, res);
     if (kind === 'crmAdd')       return await handleCrmAdd(sheets, spreadsheetId, payload, res);
     if (kind === 'crmUpdate')    return await handleCrmUpdate(sheets, spreadsheetId, payload, res);
     if (kind === 'crmDelete')    return await handleCrmDelete(sheets, spreadsheetId, payload, res);
@@ -631,6 +632,25 @@ async function handleCrmList(sheets, spreadsheetId, payload, res) {
   for (let i = 1; i < rows.length; i++) {
     const r = rows[i] || [];
     if (String(r[1] || '').trim().toUpperCase() !== cu) continue;
+    items.push({
+      id: r[0] || '', partyCode: r[1] || '', kind: r[2] || '', text: r[3] || '',
+      due: r[4] || '', done: String(r[5] || '').toUpperCase() === 'TRUE',
+      meta: r[6] || '{}', createdAt: r[7] || '', updatedAt: r[8] || '',
+    });
+  }
+  return res.status(200).json({ ok: true, count: items.length, items });
+}
+
+async function handleCrmListAll(sheets, spreadsheetId, _payload, res) {
+  const meta = await sheets.spreadsheets.get({ spreadsheetId });
+  const exists = (meta.data.sheets || []).some(s => s.properties && s.properties.title === CRM_SHEET);
+  if (!exists) return res.status(200).json({ ok: true, items: [] });
+  const resp = await sheets.spreadsheets.values.get({ spreadsheetId, range: CRM_RANGE });
+  const rows = resp.data.values || [];
+  const items = [];
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i] || [];
+    if (!r[0]) continue;
     items.push({
       id: r[0] || '', partyCode: r[1] || '', kind: r[2] || '', text: r[3] || '',
       due: r[4] || '', done: String(r[5] || '').toUpperCase() === 'TRUE',

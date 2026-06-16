@@ -33,6 +33,7 @@ function doPost(e) {
     if (kind === 'updateParty') return handleUpdateParty(payload);
     if (kind === 'listParties') return handleListParties();
     if (kind === 'crmList')     return handleCrmList(payload);
+    if (kind === 'crmListAll')  return handleCrmListAll();
     if (kind === 'crmAdd')      return handleCrmAdd(payload);
     if (kind === 'crmUpdate')   return handleCrmUpdate(payload);
     if (kind === 'crmDelete')   return handleCrmDelete(payload);
@@ -304,6 +305,25 @@ function handleCrmList(payload) {
   for (var i = 0; i < rows.length; i++) {
     var r = rows[i];
     if (String(r[1] || '').trim().toUpperCase() !== cu) continue;
+    items.push({
+      id: r[0] || '', partyCode: r[1] || '', kind: r[2] || '', text: r[3] || '',
+      due: r[4] || '', done: String(r[5] || '').toUpperCase() === 'TRUE',
+      meta: r[6] || '{}', createdAt: r[7] || '', updatedAt: r[8] || '',
+    });
+  }
+  return jsonResponse({ ok: true, count: items.length, items: items });
+}
+
+function handleCrmListAll() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CRM_SHEET_NAME);
+  if (!sheet) return jsonResponse({ ok: true, items: [] });
+  const last = sheet.getLastRow();
+  if (last < 2) return jsonResponse({ ok: true, items: [] });
+  const rows = sheet.getRange(2, 1, last - 1, 9).getValues();
+  const items = [];
+  for (var i = 0; i < rows.length; i++) {
+    var r = rows[i];
+    if (!r[0]) continue;
     items.push({
       id: r[0] || '', partyCode: r[1] || '', kind: r[2] || '', text: r[3] || '',
       due: r[4] || '', done: String(r[5] || '').toUpperCase() === 'TRUE',
