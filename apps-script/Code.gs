@@ -20,7 +20,8 @@ const CRM_SHEET_NAME     = 'PartyCRM';        // CRM entities (tasks/contacts/do
 const CRM_HEADERS_       = ['Id', 'PartyCode', 'Kind', 'Text', 'Due', 'Done', 'Meta', 'CreatedAt', 'UpdatedAt'];
 const SALES_SHEET_NAME   = 'SalesDocs';       // Sales Orders + Sales Invoices
 const SALES_HEADERS_     = ['Id', 'DocType', 'Number', 'Date', 'PartyCode', 'PartyName',
-  'POC', 'SourceRef', 'Amount', 'Lines', 'Status', 'DispatchStage', 'CreatedAt', 'UpdatedAt'];
+  'POC', 'SourceRef', 'Amount', 'Lines', 'Status', 'DispatchStage', 'CreatedAt', 'UpdatedAt',
+  'DispatchedAmount', 'InvoicedAmount'];
 
 // ---------- request entry points ----------
 
@@ -407,7 +408,7 @@ function ensureSalesSheet_() {
     sheet = ss.insertSheet(SALES_SHEET_NAME);
     sheet.appendRow(SALES_HEADERS_);
     sheet.setFrozenRows(1);
-    sheet.getRange('A1:N1').setFontWeight('bold');
+    sheet.getRange('A1:P1').setFontWeight('bold');
   }
   return sheet;
 }
@@ -418,6 +419,7 @@ function salesRowToObj_(r) {
     partyCode: r[4] || '', partyName: r[5] || '', poc: r[6] || '', sourceRef: r[7] || '',
     amount: Number(r[8]) || 0, lines: r[9] || '[]', status: r[10] || 'Draft',
     dispatchStage: r[11] || '', createdAt: r[12] || '', updatedAt: r[13] || '',
+    dispatchedAmount: Number(r[14]) || 0, invoicedAmount: Number(r[15]) || 0,
   };
 }
 
@@ -426,7 +428,7 @@ function handleSalesDocList() {
   if (!sheet) return jsonResponse({ ok: true, docs: [] });
   const last = sheet.getLastRow();
   if (last < 2) return jsonResponse({ ok: true, docs: [] });
-  const rows = sheet.getRange(2, 1, last - 1, 14).getValues();
+  const rows = sheet.getRange(2, 1, last - 1, 16).getValues();
   const docs = [];
   for (var i = 0; i < rows.length; i++) { if (rows[i][0]) docs.push(salesRowToObj_(rows[i])); }
   return jsonResponse({ ok: true, count: docs.length, docs: docs });
@@ -456,6 +458,7 @@ function handleSalesDocAdd(payload) {
     String(d.partyName || ''), String(d.poc || ''), String(d.sourceRef || ''),
     Number(d.amount) || 0, lines, String(d.status || 'Confirmed'),
     String(d.dispatchStage || ''), now, now,
+    Number(d.dispatchedAmount) || 0, Number(d.invoicedAmount) || 0,
   ];
   sheet.appendRow(row);
   return jsonResponse({ ok: true, doc: salesRowToObj_(row) });
@@ -469,13 +472,15 @@ function handleSalesDocUpdate(payload) {
   if (!sheet) return jsonResponse({ ok: false, error: 'Sales doc not found.' });
   const last = sheet.getLastRow();
   if (last < 2) return jsonResponse({ ok: false, error: 'Sales doc not found.' });
-  const rows = sheet.getRange(2, 1, last - 1, 14).getValues();
+  const rows = sheet.getRange(2, 1, last - 1, 16).getValues();
   for (var i = 0; i < rows.length; i++) {
     if (String(rows[i][0] || '').trim() === id) {
       var status = patch.status != null ? String(patch.status) : (rows[i][10] || 'Draft');
       var stage = patch.dispatchStage != null ? String(patch.dispatchStage) : (rows[i][11] || '');
-      sheet.getRange(i + 2, 11, 1, 4).setValues([[status, stage, rows[i][12] || '', new Date().toISOString()]]);
-      return jsonResponse({ ok: true, id: id, status: status, dispatchStage: stage });
+      var dispatched = patch.dispatchedAmount != null ? (Number(patch.dispatchedAmount) || 0) : (Number(rows[i][14]) || 0);
+      var invoiced = patch.invoicedAmount != null ? (Number(patch.invoicedAmount) || 0) : (Number(rows[i][15]) || 0);
+      sheet.getRange(i + 2, 11, 1, 6).setValues([[status, stage, rows[i][12] || '', new Date().toISOString(), dispatched, invoiced]]);
+      return jsonResponse({ ok: true, id: id, status: status, dispatchStage: stage, dispatchedAmount: dispatched, invoicedAmount: invoiced });
     }
   }
   return jsonResponse({ ok: false, error: 'Sales doc not found.' });

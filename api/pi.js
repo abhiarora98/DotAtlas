@@ -51,8 +51,9 @@ const CRM_RANGE   = CRM_SHEET + '!A:I';
 // these are the SO/INV layer plus the dispatch pipeline stage.
 const SALES_SHEET   = process.env.SALES_SHEET_NAME || 'SalesDocs';
 const SALES_HEADERS = ['Id', 'DocType', 'Number', 'Date', 'PartyCode', 'PartyName',
-  'POC', 'SourceRef', 'Amount', 'Lines', 'Status', 'DispatchStage', 'CreatedAt', 'UpdatedAt'];
-const SALES_RANGE   = SALES_SHEET + '!A:N';
+  'POC', 'SourceRef', 'Amount', 'Lines', 'Status', 'DispatchStage', 'CreatedAt', 'UpdatedAt',
+  'DispatchedAmount', 'InvoicedAmount'];
+const SALES_RANGE   = SALES_SHEET + '!A:P';
 
 function normPartyType(t) {
   const v = String(t || '').trim().toLowerCase();
@@ -749,7 +750,7 @@ async function ensureSalesSheet(sheets, spreadsheetId) {
     requestBody: { requests: [{ addSheet: { properties: { title: SALES_SHEET, gridProperties: { frozenRowCount: 1 } } } }] },
   });
   await sheets.spreadsheets.values.update({
-    spreadsheetId, range: SALES_SHEET + '!A1:N1', valueInputOption: 'USER_ENTERED',
+    spreadsheetId, range: SALES_SHEET + '!A1:P1', valueInputOption: 'USER_ENTERED',
     requestBody: { values: [SALES_HEADERS] },
   });
   return resp.data.replies[0].addSheet.properties.sheetId;
@@ -761,6 +762,7 @@ function salesRowToObj(r) {
     partyCode: r[4] || '', partyName: r[5] || '', poc: r[6] || '', sourceRef: r[7] || '',
     amount: Number(r[8]) || 0, lines: r[9] || '[]', status: r[10] || 'Draft',
     dispatchStage: r[11] || '', createdAt: r[12] || '', updatedAt: r[13] || '',
+    dispatchedAmount: Number(r[14]) || 0, invoicedAmount: Number(r[15]) || 0,
   };
 }
 
@@ -800,6 +802,7 @@ async function handleSalesDocAdd(sheets, spreadsheetId, payload, res) {
     String(d.partyName || ''), String(d.poc || ''), String(d.sourceRef || ''),
     Number(d.amount) || 0, lines, String(d.status || 'Confirmed'),
     String(d.dispatchStage || ''), now, now,
+    Number(d.dispatchedAmount) || 0, Number(d.invoicedAmount) || 0,
   ];
   await sheets.spreadsheets.values.append({
     spreadsheetId, range: SALES_RANGE, valueInputOption: 'USER_ENTERED', insertDataOption: 'INSERT_ROWS',
@@ -821,9 +824,11 @@ async function handleSalesDocUpdate(sheets, spreadsheetId, payload, res) {
   if (rowNum < 0) return res.status(404).json({ ok: false, error: 'Sales doc not found' });
   const status = patch.status != null ? String(patch.status) : (row[10] || 'Draft');
   const stage = patch.dispatchStage != null ? String(patch.dispatchStage) : (row[11] || '');
+  const dispatched = patch.dispatchedAmount != null ? Number(patch.dispatchedAmount) || 0 : (Number(row[14]) || 0);
+  const invoiced = patch.invoicedAmount != null ? Number(patch.invoicedAmount) || 0 : (Number(row[15]) || 0);
   await sheets.spreadsheets.values.update({
-    spreadsheetId, range: SALES_SHEET + '!K' + rowNum + ':N' + rowNum, valueInputOption: 'USER_ENTERED',
-    requestBody: { values: [[status, stage, row[12] || '', new Date().toISOString()]] },
+    spreadsheetId, range: SALES_SHEET + '!K' + rowNum + ':P' + rowNum, valueInputOption: 'USER_ENTERED',
+    requestBody: { values: [[status, stage, row[12] || '', new Date().toISOString(), dispatched, invoiced]] },
   });
-  return res.status(200).json({ ok: true, id, status, dispatchStage: stage });
+  return res.status(200).json({ ok: true, id, status, dispatchStage: stage, dispatchedAmount: dispatched, invoicedAmount: invoiced });
 }

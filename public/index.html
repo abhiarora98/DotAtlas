@@ -2865,6 +2865,9 @@
         <div><div class="eb"><span class="live-dot"></span>Dispatch · warehouse &amp; shipping</div><h1>From <span class="em">pick</span> to <span class="accent">delivered</span>.</h1></div>
         <div class="when">ORDERS FLOW IN<br/>FROM SALES ORDERS</div>
       </div>
+      <div class="dz-toolbar">
+        <div class="seg dz-vtoggle"><button class="dz-vbtn on" data-view="kanban">Kanban</button><button class="dz-vbtn" data-view="queue">Queue</button></div>
+      </div>
       <div class="dz-board" id="dz-board"></div>
       <div id="dz-empty" class="pl-empty" hidden>Nothing in the dispatch pipeline yet. Send a Sales Order to dispatch from the Orders page.</div>
     </section>
@@ -24404,6 +24407,31 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     padding: 5px 9px; font-size: 10.5px; font-family: var(--fm); cursor: pointer; white-space: nowrap; transition: border-color 150ms var(--ease); }
   .ord-acts button:hover { color: var(--text); border-color: var(--text-3); }
   .ord-stage { font-family: var(--fm); font-size: 10.5px; color: var(--emerald); padding: 4px 0; }
+  .ord-prog { font-family: var(--fm); font-size: 10.5px; color: var(--text-3); margin-top: 4px; }
+  .ord-statwrap { position: relative; }
+  .ord-statbtn { background: transparent; border: 0; cursor: pointer; padding: 0; font: inherit; }
+  .ord-statmenu { position: absolute; left: 0; top: calc(100% + 5px); z-index: 30; min-width: 175px;
+    background: var(--surface); border: 1px solid var(--line-2); border-radius: 8px; padding: 4px;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.35); display: flex; flex-direction: column; gap: 1px; }
+  .ord-statmenu[hidden] { display: none; }
+  .ord-statmenu button { background: transparent; border: 0; color: var(--text); text-align: left;
+    padding: 7px 10px; border-radius: 5px; font-size: 12px; cursor: pointer; }
+  .ord-statmenu button:hover { background: var(--surface-2); }
+
+  /* Dispatch toolbar + queue + progress */
+  .dz-toolbar { display: flex; justify-content: flex-end; margin-top: 12px; }
+  .dz-queue { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+  .dz-qrow { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+  .dz-qmain { flex: 1; min-width: 0; }
+  .dz-qtop { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .dz-qacts { display: flex; gap: 6px; flex: none; flex-wrap: wrap; justify-content: flex-end; }
+  .dz-qacts button { background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; color: var(--text-2);
+    padding: 5px 9px; font-size: 10.5px; font-family: var(--fm); cursor: pointer; white-space: nowrap; }
+  .dz-qacts button:hover { color: var(--text); border-color: var(--text-3); }
+  .dz-prog { margin: 7px 0 2px; }
+  .dz-progbar { height: 4px; border-radius: 2px; background: var(--surface-3); overflow: hidden; }
+  .dz-progbar > div { height: 100%; background: var(--emerald); }
+  .dz-progt { font-family: var(--fm); font-size: 9.5px; color: var(--text-3); margin-top: 3px; }
 
   /* ===== Dispatch pipeline ===== */
   .dz-board { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
@@ -24487,21 +24515,42 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     }).sort((a, b) => String(b.date).localeCompare(String(a.date)));
   }
 
+  const ORDER_STATUSES = ['Draft', 'Awaiting Approval', 'Confirmed', 'Ready for Dispatch', 'Partially Dispatched', 'Completed', 'Cancelled'];
+  function statusCls(s){
+    s = String(s || '').toLowerCase();
+    if (s === 'cancelled') return 'muted';
+    if (s === 'completed') return 'ok';
+    if (s === 'partially dispatched' || s === 'ready for dispatch') return 'warn';
+    if (s === 'awaiting approval' || s === 'draft') return 'info';
+    return 'info';
+  }
+  function statusPill(s){ return '<span class="pill-s ' + statusCls(s) + '">' + esc(String(s || 'Confirmed').toUpperCase()) + '</span>'; }
+  function statusMenu(d){
+    return '<span class="ord-statwrap"><button class="ord-statbtn" data-od="statusmenu" data-id="' + esc(d.id) + '">' + statusPill(d.status) + ' ▾</button>' +
+      '<span class="ord-statmenu" hidden>' + ORDER_STATUSES.map(s => '<button data-od="setstatus" data-id="' + esc(d.id) + '" data-val="' + esc(s) + '">' + esc(s) + '</button>').join('') + '</span></span>';
+  }
   function kindBadge(k){ const m = { PI: ['b', 'Proforma'], SO: ['a', 'Sales Order'], INV: ['e', 'Invoice'] }[k] || ['', k]; return '<span class="ord-kind k-' + m[0] + '">' + m[1] + '</span>'; }
+
   function docRow(d){
     const acts = [];
-    if (d.kind === 'PI') acts.push('<button data-od="pi2so" data-id="' + esc(d.id) + '">→ Sales Order</button>');
+    let progress = '';
+    if (d.kind === 'PI'){
+      acts.push('<button data-od="pi2so" data-id="' + esc(d.id) + '">→ Sales Order</button>');
+    }
     if (d.kind === 'SO'){
+      const disp = d.raw ? d.raw.dispatchedAmount || 0 : 0;
+      const inv = d.raw ? d.raw.invoicedAmount || 0 : 0;
+      if (disp > 0 || inv > 0) progress = '<div class="ord-prog">📦 ' + inr(disp) + ' / ' + inr(d.amount) + ' dispatched · 💳 ' + inr(inv) + ' invoiced</div>';
       if (!d.dispatchStage) acts.push('<button data-od="so2disp" data-id="' + esc(d.id) + '">→ Dispatch</button>');
       else acts.push('<span class="ord-stage">📦 ' + esc(d.dispatchStage) + '</span>');
-      acts.push('<button data-od="so2inv" data-id="' + esc(d.id) + '">→ Invoice</button>');
+      if (disp - inv > 0.5) acts.push('<button data-od="so2inv" data-id="' + esc(d.id) + '">Invoice ' + inr(disp - inv) + '</button>');
     }
-    const ph = '';
-    return '<div class="ord-row" data-od="open" data-id="' + esc(d.id) + '">' +
+    const statusEl = d.kind === 'SO' ? statusMenu(d) : statusPill(d.status);
+    return '<div class="ord-row" data-id="' + esc(d.id) + '">' +
       '<span class="pl-av av-blue">' + initials(d.party) + '</span>' +
       '<div class="ord-main"><div class="ord-top">' + kindBadge(d.kind) + '<span class="ord-num">' + esc(d.number) + '</span>' +
-      '<span class="ord-party">' + esc(d.party) + '</span></div>' +
-      '<div class="ord-meta">' + esc(d.poc || '') + (d.date ? ' · ' + esc(d.date) : '') + ' · ' + esc(d.status) + '</div></div>' +
+      '<span class="ord-party" data-od="open" data-id="' + esc(d.id) + '">' + esc(d.party) + '</span>' + statusEl + '</div>' +
+      '<div class="ord-meta">' + esc(d.poc || '') + (d.date ? ' · ' + esc(d.date) : '') + (d.sourceRef ? ' · ← ' + esc(d.sourceRef) : '') + '</div>' + progress + '</div>' +
       '<div class="ord-amt">' + inr(d.amount) + '</div>' +
       '<div class="ord-acts">' + acts.join('') + '</div></div>';
   }
@@ -24536,18 +24585,43 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       .then(j => { if (j && j.ok){ salesDocs.push(j.doc); toastO('Sales Order ' + j.doc.number + ' created from PI ' + d.number + '.'); renderOrders(); } })
       .catch(() => toastO('Could not create Sales Order (backend offline).'));
   }
-  function convertSoToInv(d){
-    if (!d) return;
+  // Invoice is generated from dispatched-but-not-yet-invoiced value (partial
+  // invoicing). The SO stays the source of truth and tracks invoicedAmount.
+  function invoiceFromDispatched(d){
+    if (!d || !d.raw) return;
+    const toInvoice = (d.raw.dispatchedAmount || 0) - (d.raw.invoicedAmount || 0);
+    if (toInvoice <= 0.5){ toastO('Nothing newly dispatched to invoice yet.'); return; }
     post({ kind: 'salesDocAdd', doc: { docType: 'INV', partyName: d.party, partyCode: d.partyCode, poc: d.poc,
-      date: new Date().toISOString().slice(0, 10), amount: d.amount, sourceRef: d.number, status: 'Confirmed' } })
-      .then(j => { if (j && j.ok){ salesDocs.push(j.doc); toastO('Invoice ' + j.doc.number + ' raised for ' + d.party + '.'); renderOrders(); } })
+      date: new Date().toISOString().slice(0, 10), amount: toInvoice, sourceRef: d.number, status: 'Confirmed' } })
+      .then(j => { if (!j || !j.ok) throw 0; salesDocs.push(j.doc);
+        const inv = (d.raw.invoicedAmount || 0) + toInvoice;
+        return post({ kind: 'salesDocUpdate', id: d.id, patch: { invoicedAmount: inv } }).then(() => { d.raw.invoicedAmount = inv;
+          toastO('Invoice ' + j.doc.number + ' raised for ' + inr(toInvoice) + '.'); renderOrders(); }); })
       .catch(() => toastO('Could not raise invoice (backend offline).'));
   }
   function sendToDispatch(d){
     if (!d || !d.raw) return;
-    post({ kind: 'salesDocUpdate', id: d.id, patch: { dispatchStage: 'Ready to Pick' } })
-      .then(j => { if (j && j.ok){ d.raw.dispatchStage = 'Ready to Pick'; toastO(d.number + ' sent to dispatch.'); renderOrders(); renderDispatch(); } })
+    post({ kind: 'salesDocUpdate', id: d.id, patch: { dispatchStage: 'Ready to Pick', status: 'Ready for Dispatch' } })
+      .then(j => { if (j && j.ok){ d.raw.dispatchStage = 'Ready to Pick'; d.raw.status = 'Ready for Dispatch';
+        toastO(d.number + ' sent to dispatch.'); renderOrders(); renderDispatch(); } })
       .catch(() => toastO('Could not update dispatch (backend offline).'));
+  }
+  function setDocStatus(d, val){
+    if (!d || !d.raw) return;
+    post({ kind: 'salesDocUpdate', id: d.id, patch: { status: val } })
+      .then(j => { if (j && j.ok){ d.raw.status = val; renderOrders(); } })
+      .catch(() => toastO('Could not update status (backend offline).'));
+  }
+  // Record a (partial) dispatch by value against an SO.
+  function recordDispatch(d, amt){
+    if (!d || !d.raw) return;
+    const total = d.raw.amount || 0;
+    const newDisp = Math.min(total, (d.raw.dispatchedAmount || 0) + amt);
+    const status = newDisp >= total - 0.5 ? 'Completed' : 'Partially Dispatched';
+    post({ kind: 'salesDocUpdate', id: d.id, patch: { dispatchedAmount: newDisp, status } })
+      .then(j => { if (j && j.ok){ d.raw.dispatchedAmount = newDisp; d.raw.status = status;
+        toastO('Dispatched ' + inr(amt) + ' of ' + d.number + '.'); renderOrders(); renderDispatch(); } })
+      .catch(() => toastO('Could not record dispatch (backend offline).'));
   }
 
   function toastO(msg){
@@ -24557,24 +24631,52 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     clearTimeout(window._otoast); window._otoast = setTimeout(() => t.classList.remove('show'), 2400);
   }
 
-  // ---------- Dispatch pipeline ----------
+  // ---------- Dispatch pipeline (Kanban + Queue views) ----------
+  let dzView = 'kanban';
+  function dzCardActs(d, stage){
+    const idx = DISPATCH_STAGES.indexOf(stage);
+    const next = idx < DISPATCH_STAGES.indexOf('Delivered') ? DISPATCH_STAGES[idx + 1] : null;
+    const remaining = (d.amount || 0) - (d.dispatchedAmount || 0);
+    let a = '';
+    if (remaining > 0.5) a += '<button data-dz="dispatchpart" data-id="' + esc(d.id) + '">📦 Dispatch ' + inr(remaining) + '</button>';
+    a += next ? '<button data-dz="advance" data-id="' + esc(d.id) + '" data-next="' + esc(next) + '">→ ' + esc(next) + '</button>' : '<span class="dz-done">✓ Delivered</span>';
+    if (stage !== 'Returned' && stage !== 'Delivered') a += '<button data-dz="return" data-id="' + esc(d.id) + '">Return</button>';
+    return a;
+  }
+  function dzProgress(d){
+    const disp = d.dispatchedAmount || 0, total = d.amount || 1;
+    return '<div class="dz-prog"><div class="dz-progbar"><div style="width:' + Math.min(100, Math.round(disp / total * 100)) + '%"></div></div>' +
+      '<div class="dz-progt">' + inr(disp) + ' / ' + inr(d.amount) + '</div></div>';
+  }
+  function vtoggle(){
+    return '<div class="dz-toolbar2"><div class="seg dz-vtoggle">' +
+      '<button class="dz-vbtn' + (dzView === 'kanban' ? ' on' : '') + '" data-view="kanban">Kanban</button>' +
+      '<button class="dz-vbtn' + (dzView === 'queue' ? ' on' : '') + '" data-view="queue">Queue</button></div></div>';
+  }
   function renderDispatch(){
     const board = $('dz-board'), empty = $('dz-empty'); if (!board) return;
+    // sync the static toolbar toggle
+    document.querySelectorAll('.dz-vtoggle .dz-vbtn').forEach(b => b.classList.toggle('on', b.getAttribute('data-view') === dzView));
     const items = salesDocs.filter(d => d.dispatchStage);
-    if (!items.length){ board.innerHTML = ''; if (empty) empty.hidden = false; return; }
+    if (!items.length){ board.innerHTML = ''; board.className = 'dz-board'; if (empty) empty.hidden = false; return; }
     if (empty) empty.hidden = true;
+    if (dzView === 'queue'){
+      board.className = 'dz-queue';
+      const ordered = items.slice().sort((a, b) => DISPATCH_STAGES.indexOf(a.dispatchStage) - DISPATCH_STAGES.indexOf(b.dispatchStage));
+      board.innerHTML = ordered.map(d =>
+        '<div class="dz-qrow"><span class="pl-av av-amber">' + initials(d.partyName) + '</span>' +
+        '<div class="dz-qmain"><div class="dz-qtop"><span class="ord-num">' + esc(d.number) + '</span><span class="ord-party">' + esc(d.partyName) + '</span>' +
+        '<span class="pill-s ' + statusCls(d.status) + '">' + esc(String(d.dispatchStage).toUpperCase()) + '</span></div>' + dzProgress(d) + '</div>' +
+        '<div class="dz-qacts">' + dzCardActs(d, d.dispatchStage) + '</div></div>').join('');
+      return;
+    }
+    board.className = 'dz-board';
     board.innerHTML = DISPATCH_STAGES.map(stage => {
       const inStage = items.filter(d => d.dispatchStage === stage);
-      const cards = inStage.map(d => {
-        const idx = DISPATCH_STAGES.indexOf(stage);
-        const next = idx < DISPATCH_STAGES.indexOf('Delivered') ? DISPATCH_STAGES[idx + 1] : null;
-        return '<div class="dz-card"><div class="dz-cnum">' + esc(d.number) + ' <span>' + inr(d.amount) + '</span></div>' +
-          '<div class="dz-cparty">' + esc(d.partyName) + '</div>' +
-          '<div class="dz-cacts">' +
-          (next ? '<button data-dz="advance" data-id="' + esc(d.id) + '" data-next="' + esc(next) + '">→ ' + esc(next) + '</button>' : '<span class="dz-done">✓ Delivered</span>') +
-          (stage !== 'Returned' && stage !== 'Delivered' ? '<button data-dz="return" data-id="' + esc(d.id) + '">Return</button>' : '') +
-          '</div></div>';
-      }).join('') || '<div class="dz-empty2">—</div>';
+      const cards = inStage.map(d =>
+        '<div class="dz-card"><div class="dz-cnum">' + esc(d.number) + ' <span>' + inr(d.amount) + '</span></div>' +
+        '<div class="dz-cparty">' + esc(d.partyName) + '</div>' + dzProgress(d) +
+        '<div class="dz-cacts">' + dzCardActs(d, stage) + '</div></div>').join('') || '<div class="dz-empty2">—</div>';
       return '<div class="dz-col"><div class="dz-head">' + esc(stage) + ' <span>' + inStage.length + '</span></div><div class="dz-body">' + cards + '</div></div>';
     }).join('');
   }
@@ -24623,18 +24725,30 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       const a = e.target.closest('[data-od]'); if (!a) return;
       const act = a.getAttribute('data-od'); const d = findDoc(a.getAttribute('data-id'));
       if (act === 'pi2so'){ e.stopPropagation(); convertPiToSo(d); }
-      else if (act === 'so2inv'){ e.stopPropagation(); convertSoToInv(d); }
+      else if (act === 'so2inv'){ e.stopPropagation(); invoiceFromDispatched(d); }
       else if (act === 'so2disp'){ e.stopPropagation(); sendToDispatch(d); }
+      else if (act === 'statusmenu'){ e.stopPropagation(); const m = a.parentNode.querySelector('.ord-statmenu'); if (m) m.hidden = !m.hidden; }
+      else if (act === 'setstatus'){ e.stopPropagation(); setDocStatus(d, a.getAttribute('data-val')); }
       else if (act === 'open'){ if (window.atlasOpenPartyByName && d) window.atlasOpenPartyByName(d.party); }
     });
 
-    // Dispatch board actions.
-    const board = $('dz-board');
-    if (board) board.addEventListener('click', (e) => {
+    // Dispatch board / queue actions.
+    const dz = document.querySelector('[data-page="dispatch"]');
+    if (dz) dz.addEventListener('click', (e) => {
+      const vb = e.target.closest('.dz-vbtn[data-view]');
+      if (vb){ dzView = vb.getAttribute('data-view'); renderDispatch(); return; }
       const b = e.target.closest('button[data-dz]'); if (!b) return;
       const act = b.getAttribute('data-dz'), id = b.getAttribute('data-id');
+      const d = findDoc(id);
       if (act === 'advance') advanceDispatch(id, b.getAttribute('data-next'));
       else if (act === 'return') advanceDispatch(id, 'Returned');
+      else if (act === 'dispatchpart'){
+        if (!d || !d.raw) return;
+        const remaining = (d.raw.amount || 0) - (d.raw.dispatchedAmount || 0);
+        const ans = prompt('Dispatch how much of ' + d.number + '? Remaining ' + inr(remaining), String(Math.round(remaining)));
+        if (ans == null) return; const amt = Number(String(ans).replace(/[^0-9.]/g, '')) || 0;
+        if (amt > 0) recordDispatch(d, amt);
+      }
     });
 
     if (location.hash.slice(1) === 'orders' || location.hash.slice(1) === 'dispatch') load(false);

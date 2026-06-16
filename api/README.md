@@ -125,7 +125,13 @@ in ~300ms.
 - **Sales documents** (Sales Orders + Sales Invoices) live in a
   `SalesDocs` tab — one row per document. Columns: `Id · DocType
   (SO/INV) · Number · Date · PartyCode · PartyName · POC · SourceRef ·
-  Amount · Lines(JSON) · Status · DispatchStage · CreatedAt · UpdatedAt`.
+  Amount · Lines(JSON) · Status · DispatchStage · CreatedAt · UpdatedAt ·
+  DispatchedAmount · InvoicedAmount`. The Sales Order is the operational
+  source of truth: partial dispatch and partial invoicing are tracked by
+  value (DispatchedAmount / InvoicedAmount), and invoices are generated
+  from dispatched-but-not-yet-invoiced value. Order statuses: Draft,
+  Awaiting Approval, Confirmed, Ready for Dispatch, Partially Dispatched,
+  Completed, Cancelled.
   Endpoints (all `POST /api/pi`): `{ kind: 'salesDocList' }`,
   `{ kind: 'salesDocAdd', doc }` (auto-numbers SO-####/INV-####),
   `{ kind: 'salesDocUpdate', id, patch: { status?, dispatchStage? } }`.
