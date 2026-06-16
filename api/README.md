@@ -135,10 +135,15 @@ in ~300ms.
   Endpoints (all `POST /api/pi`): `{ kind: 'salesDocList' }`,
   `{ kind: 'salesDocAdd', doc }` (auto-numbers SO-####/INV-####),
   `{ kind: 'salesDocUpdate', id, patch: { status?, dispatchStage? } }`.
-  Powers the Orders workspace (Proforma=PI sheet, SO/INV here) and the
-  Dispatch pipeline (Ready to Pick → … → Delivered/Returned). PIs are
-  never duplicated — Proforma stays in the PI sheet; SO/INV reference
-  their source via `SourceRef`.
+  Powers the Orders workspace and the Dispatch pipeline (Ready to Pick →
+  … → Delivered/Returned). The core flow is **PI → Dispatch → Invoice**:
+  a Proforma Invoice (in the PI sheet) is dispatched directly via a
+  lightweight `DocType:'PI'` fulfilment-tracking row in `SalesDocs`
+  (number = the PI ref), and the Sales Invoice is generated from
+  dispatched value. **Sales Orders are an optional advanced stage**
+  (off by default, toggle in the Orders header) for businesses needing a
+  separate order-confirmation step. PIs are never duplicated; SO/INV
+  reference their source via `SourceRef`.
 
 ## Why this is faster than Apps Script
 

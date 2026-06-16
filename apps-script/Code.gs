@@ -436,20 +436,26 @@ function handleSalesDocList() {
 
 function handleSalesDocAdd(payload) {
   const d = payload.doc || {};
-  const docType = String(d.docType || '').toUpperCase() === 'INV' ? 'INV' : 'SO';
+  const dt = String(d.docType || '').toUpperCase();
+  const docType = dt === 'INV' ? 'INV' : dt === 'PI' ? 'PI' : 'SO';
   if (!d.partyName) return jsonResponse({ ok: false, error: 'Party is required.' });
   const sheet = ensureSalesSheet_();
   const last = sheet.getLastRow();
-  var max = 0;
-  if (last > 1) {
-    const ex = sheet.getRange(2, 2, last - 1, 2).getValues();
-    for (var i = 0; i < ex.length; i++) {
-      if (String(ex[i][0] || '').toUpperCase() !== docType) continue;
-      var m = String(ex[i][1] || '').match(/(\d+)\s*$/);
-      if (m) { var n = parseInt(m[1], 10); if (n > max) max = n; }
+  var number;
+  if (docType === 'PI') {
+    number = String(d.number || d.sourceRef || '');
+  } else {
+    var max = 0;
+    if (last > 1) {
+      const ex = sheet.getRange(2, 2, last - 1, 2).getValues();
+      for (var i = 0; i < ex.length; i++) {
+        if (String(ex[i][0] || '').toUpperCase() !== docType) continue;
+        var m = String(ex[i][1] || '').match(/(\d+)\s*$/);
+        if (m) { var n = parseInt(m[1], 10); if (n > max) max = n; }
+      }
     }
+    number = (docType === 'INV' ? 'INV-' : 'SO-') + ('000' + (max + 1)).slice(-4);
   }
-  const number = (docType === 'INV' ? 'INV-' : 'SO-') + ('000' + (max + 1)).slice(-4);
   const now = new Date().toISOString();
   const id = 'D' + Date.now() + Math.floor(Math.random() * 1000);
   const lines = typeof d.lines === 'string' ? d.lines : JSON.stringify(d.lines || []);

@@ -779,21 +779,29 @@ async function handleSalesDocList(sheets, spreadsheetId, _payload, res) {
 
 async function handleSalesDocAdd(sheets, spreadsheetId, payload, res) {
   const d = payload.doc || {};
-  const docType = String(d.docType || '').toUpperCase() === 'INV' ? 'INV' : 'SO';
+  const dt = String(d.docType || '').toUpperCase();
+  // 'PI' rows are fulfillment-tracking shadows for a Proforma Invoice (the PI
+  // itself lives in the PI sheet); SO/INV are real sales documents.
+  const docType = dt === 'INV' ? 'INV' : dt === 'PI' ? 'PI' : 'SO';
   if (!d.partyName) return res.status(400).json({ ok: false, error: 'Party is required' });
   await ensureSalesSheet(sheets, spreadsheetId);
 
-  // Auto number: SO-#### / INV-####, max existing + 1 for that type.
-  const cur = await sheets.spreadsheets.values.get({ spreadsheetId, range: SALES_SHEET + '!B:C' });
-  const rows = cur.data.values || [];
-  let max = 0;
-  for (let i = 1; i < rows.length; i++) {
-    const r = rows[i] || [];
-    if (String(r[0] || '').toUpperCase() !== docType) continue;
-    const m = String(r[1] || '').match(/(\d+)\s*$/);
-    if (m) { const n = parseInt(m[1], 10); if (n > max) max = n; }
+  let number;
+  if (docType === 'PI') {
+    number = String(d.number || d.sourceRef || '');
+  } else {
+    // Auto number: SO-#### / INV-####, max existing + 1 for that type.
+    const cur = await sheets.spreadsheets.values.get({ spreadsheetId, range: SALES_SHEET + '!B:C' });
+    const rows = cur.data.values || [];
+    let max = 0;
+    for (let i = 1; i < rows.length; i++) {
+      const r = rows[i] || [];
+      if (String(r[0] || '').toUpperCase() !== docType) continue;
+      const m = String(r[1] || '').match(/(\d+)\s*$/);
+      if (m) { const n = parseInt(m[1], 10); if (n > max) max = n; }
+    }
+    number = (docType === 'INV' ? 'INV-' : 'SO-') + String(max + 1).padStart(4, '0');
   }
-  const number = (docType === 'INV' ? 'INV-' : 'SO-') + String(max + 1).padStart(4, '0');
   const now = new Date().toISOString();
   const id = 'D' + Date.now() + Math.floor(Math.random() * 1000);
   const lines = typeof d.lines === 'string' ? d.lines : JSON.stringify(d.lines || []);

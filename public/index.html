@@ -2720,16 +2720,17 @@
         <div class="when">PROFORMA → SO → INVOICE<br/>then DISPATCH → PAYMENT</div>
       </div>
       <div class="kpis" id="ord-kpis">
-        <div class="kpi ord-kpi" data-okpi="proforma"><div class="lbl"><span>Proforma Invoices</span><span class="ind b"></span></div><div class="v" id="okpi-pi">0</div><div class="d"><span class="arr">→</span>quotes issued</div></div>
-        <div class="kpi ord-kpi" data-okpi="so"><div class="lbl"><span>Open Sales Orders</span><span class="ind a"></span></div><div class="v" id="okpi-so">0</div><div class="d"><span class="arr">→</span>to fulfil</div></div>
-        <div class="kpi ord-kpi" data-okpi="todispatch"><div class="lbl"><span>Ready to Dispatch</span><span class="ind"></span></div><div class="v" id="okpi-disp">0</div><div class="d"><span class="arr">→</span>hand to warehouse</div></div>
+        <div class="kpi ord-kpi" data-okpi="proforma"><div class="lbl"><span>Proforma Invoices</span><span class="ind b"></span></div><div class="v" id="okpi-pi">0</div><div class="d"><span class="arr">→</span>customer-approved docs</div></div>
+        <div class="kpi ord-kpi" data-okpi="ready"><div class="lbl"><span>Ready to Dispatch</span><span class="ind a"></span></div><div class="v" id="okpi-so">0</div><div class="d"><span class="arr">→</span>approved, not yet shipped</div></div>
+        <div class="kpi ord-kpi" data-okpi="indispatch"><div class="lbl"><span>In Dispatch</span><span class="ind"></span></div><div class="v" id="okpi-disp">0</div><div class="d"><span class="arr">→</span>in the pipeline</div></div>
         <div class="kpi ord-kpi" data-okpi="invoice"><div class="lbl"><span>Sales Invoices</span><span class="ind"></span></div><div class="v" id="okpi-inv">0</div><div class="d"><span class="arr">→</span>billed</div></div>
       </div>
       <div class="card" style="margin-top:14px;">
         <div class="card-h">
           <div class="t"><span class="ic">◇</span><h3>Documents</h3><span class="sub"><span id="ord-count">0</span> shown</span></div>
           <div style="display:flex; gap:10px; align-items:center;">
-            <input type="text" id="ord-search" class="pl-search" style="width:220px;" placeholder="Search party, number…" autocomplete="off">
+            <label class="pl-archtoggle" title="Add an order-confirmation stage between PI and Dispatch"><input type="checkbox" id="ord-so-toggle"> Sales Orders</label>
+            <input type="text" id="ord-search" class="pl-search" style="width:200px;" placeholder="Search party, number…" autocomplete="off">
             <div class="ord-newwrap">
               <button class="pi-btn prime" id="ord-new" style="padding:7px 14px; font-size:10.5px;">+ New ▾</button>
               <div class="ord-newmenu" id="ord-newmenu" hidden>
@@ -22908,7 +22909,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const b = [];
     if (!arch){
       b.push('<button class="pi-btn prime" data-pa="createpi">+ Create PI</button>');
-      b.push('<button class="pi-btn" data-pa="createso">+ Sales Order</button>');
+      if (localStorage.getItem('atlas-enable-so') === '1') b.push('<button class="pi-btn" data-pa="createso">+ Sales Order</button>');
       b.push('<button class="pi-btn" data-pa="createinv">+ Invoice</button>');
     }
     b.push('<button class="pi-btn" data-pa="call"' + (ph ? '' : ' disabled') + '>📞 Call</button>');
@@ -24477,9 +24478,12 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   const DISPATCH_STAGES = ['Ready to Pick', 'Packing', 'Ready to Ship', 'Out for Delivery', 'Delivered', 'Returned'];
 
   let pis = [];        // proforma invoices from the PI sheet (grouped)
-  let salesDocs = [];  // SO + INV from SalesDocs
+  let salesDocs = [];  // SalesDocs rows: PI-tracking shadows + SO + INV
   let ordTab = 'all';
   let loaded = false;
+  // Sales Orders are an optional advanced stage; off by default. When off,
+  // the core flow is PI → Dispatch → Invoice with no SO step.
+  let SO_ENABLED = localStorage.getItem('atlas-enable-so') === '1';
 
   function fetchPis(){
     return post({ kind: 'list' }).then(j => { pis = (j && j.ok && j.pis) ? j.pis : []; }).catch(() => { pis = []; });
@@ -24488,16 +24492,26 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     return post({ kind: 'salesDocList' }).then(j => { salesDocs = (j && j.ok && j.docs) ? j.docs : []; }).catch(() => { salesDocs = []; });
   }
 
-  // Unified document list across PIs and sales docs.
+  // The PI fulfilment-tracking shadow row (docType 'PI') for a given PI ref.
+  function piTrack(ref){ return salesDocs.find(d => d.docType === 'PI' && String(d.number) === String(ref)); }
+
+  // Unified document list. PIs carry their fulfilment state from the tracking
+  // shadow; SO/INV are standalone. PI shadows are never listed on their own.
   function allDocs(){
     const out = [];
     for (const pi of pis){
+      const t = piTrack(pi.ref);
       out.push({ kind: 'PI', id: 'pi:' + pi.ref, number: pi.ref, party: pi.party, poc: pi.poc,
-        date: pi.date, amount: pi.totalIncGst, status: pi.status || 'Confirmed', ref: pi.ref });
+        date: pi.date, amount: pi.totalIncGst, ref: pi.ref,
+        status: t ? t.status : 'Confirmed', dispatchStage: t ? t.dispatchStage : '',
+        dispatchedAmount: t ? t.dispatchedAmount : 0, invoicedAmount: t ? t.invoicedAmount : 0,
+        trackId: t ? t.id : null, raw: t || null });
     }
     for (const d of salesDocs){
+      if (d.docType === 'PI') continue; // shadow, merged above
       out.push({ kind: d.docType, id: d.id, number: d.number, party: d.partyName, poc: d.poc,
         date: d.date, amount: d.amount, status: d.status, dispatchStage: d.dispatchStage,
+        dispatchedAmount: d.dispatchedAmount, invoicedAmount: d.invoicedAmount,
         partyCode: d.partyCode, sourceRef: d.sourceRef, raw: d });
     }
     return out;
@@ -24534,18 +24548,17 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   function docRow(d){
     const acts = [];
     let progress = '';
-    if (d.kind === 'PI'){
-      acts.push('<button data-od="pi2so" data-id="' + esc(d.id) + '">→ Sales Order</button>');
-    }
-    if (d.kind === 'SO'){
-      const disp = d.raw ? d.raw.dispatchedAmount || 0 : 0;
-      const inv = d.raw ? d.raw.invoicedAmount || 0 : 0;
+    // PIs and SOs are both fulfillable (PI directly, SO when enabled).
+    const fulfillable = (d.kind === 'PI' || d.kind === 'SO');
+    if (fulfillable){
+      const disp = d.dispatchedAmount || 0, inv = d.invoicedAmount || 0;
       if (disp > 0 || inv > 0) progress = '<div class="ord-prog">📦 ' + inr(disp) + ' / ' + inr(d.amount) + ' dispatched · 💳 ' + inr(inv) + ' invoiced</div>';
-      if (!d.dispatchStage) acts.push('<button data-od="so2disp" data-id="' + esc(d.id) + '">→ Dispatch</button>');
+      if (d.kind === 'PI' && SO_ENABLED && !d.dispatchStage) acts.push('<button data-od="pi2so" data-id="' + esc(d.id) + '">→ Sales Order</button>');
+      if (!d.dispatchStage) acts.push('<button data-od="todisp" data-id="' + esc(d.id) + '">→ Dispatch</button>');
       else acts.push('<span class="ord-stage">📦 ' + esc(d.dispatchStage) + '</span>');
-      if (disp - inv > 0.5) acts.push('<button data-od="so2inv" data-id="' + esc(d.id) + '">Invoice ' + inr(disp - inv) + '</button>');
+      if (disp - inv > 0.5) acts.push('<button data-od="toinv" data-id="' + esc(d.id) + '">Invoice ' + inr(disp - inv) + '</button>');
     }
-    const statusEl = d.kind === 'SO' ? statusMenu(d) : statusPill(d.status);
+    const statusEl = fulfillable ? statusMenu(d) : statusPill(d.status);
     return '<div class="ord-row" data-id="' + esc(d.id) + '">' +
       '<span class="pl-av av-blue">' + initials(d.party) + '</span>' +
       '<div class="ord-main"><div class="ord-top">' + kindBadge(d.kind) + '<span class="ord-num">' + esc(d.number) + '</span>' +
@@ -24557,10 +24570,13 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 
   function renderKpis(){
     const set = (id, v) => { const e = $(id); if (e) e.textContent = v; };
+    const docs = allDocs();
+    const fulfillable = docs.filter(d => d.kind === 'PI' || d.kind === 'SO');
     set('okpi-pi', pis.length);
-    const sos = salesDocs.filter(d => d.docType === 'SO');
-    set('okpi-so', sos.filter(d => String(d.status).toLowerCase() !== 'cancelled').length);
-    set('okpi-disp', sos.filter(d => !d.dispatchStage).length);
+    // Ready to dispatch: confirmed/approved docs not yet in the pipeline.
+    set('okpi-so', fulfillable.filter(d => !d.dispatchStage && String(d.status).toLowerCase() !== 'cancelled').length);
+    // In dispatch: in the pipeline but not delivered.
+    set('okpi-disp', fulfillable.filter(d => d.dispatchStage && d.dispatchStage !== 'Delivered' && d.dispatchStage !== 'Returned').length);
     set('okpi-inv', salesDocs.filter(d => d.docType === 'INV').length);
     document.querySelectorAll('.ord-kpi').forEach(k => k.classList.toggle('active', false));
   }
@@ -24578,6 +24594,17 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 
   function findDoc(id){ return allDocs().find(d => d.id === id); }
 
+  // The SalesDocs row that fulfilment state is written to: the doc itself for
+  // SO/INV, or the PI's tracking shadow (created on demand) for a PI.
+  function trackRowFor(d){
+    if (d.kind === 'SO' || d.kind === 'INV') return Promise.resolve(d.raw);
+    const t = piTrack(d.ref);
+    if (t) return Promise.resolve(t);
+    return post({ kind: 'salesDocAdd', doc: { docType: 'PI', number: d.ref, sourceRef: d.ref,
+      partyName: d.party, poc: d.poc, amount: d.amount, status: 'Confirmed', dispatchStage: '' } })
+      .then(j => { if (j && j.ok){ salesDocs.push(j.doc); return j.doc; } throw 0; });
+  }
+  // Optional: PI → Sales Order (only when the advanced SO stage is enabled).
   function convertPiToSo(d){
     if (!d) return;
     post({ kind: 'salesDocAdd', doc: { docType: 'SO', partyName: d.party, poc: d.poc,
@@ -24585,42 +24612,42 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       .then(j => { if (j && j.ok){ salesDocs.push(j.doc); toastO('Sales Order ' + j.doc.number + ' created from PI ' + d.number + '.'); renderOrders(); } })
       .catch(() => toastO('Could not create Sales Order (backend offline).'));
   }
-  // Invoice is generated from dispatched-but-not-yet-invoiced value (partial
-  // invoicing). The SO stays the source of truth and tracks invoicedAmount.
+  // Invoice generated from dispatched-but-not-yet-invoiced value (partial).
   function invoiceFromDispatched(d){
-    if (!d || !d.raw) return;
-    const toInvoice = (d.raw.dispatchedAmount || 0) - (d.raw.invoicedAmount || 0);
-    if (toInvoice <= 0.5){ toastO('Nothing newly dispatched to invoice yet.'); return; }
-    post({ kind: 'salesDocAdd', doc: { docType: 'INV', partyName: d.party, partyCode: d.partyCode, poc: d.poc,
-      date: new Date().toISOString().slice(0, 10), amount: toInvoice, sourceRef: d.number, status: 'Confirmed' } })
-      .then(j => { if (!j || !j.ok) throw 0; salesDocs.push(j.doc);
-        const inv = (d.raw.invoicedAmount || 0) + toInvoice;
-        return post({ kind: 'salesDocUpdate', id: d.id, patch: { invoicedAmount: inv } }).then(() => { d.raw.invoicedAmount = inv;
-          toastO('Invoice ' + j.doc.number + ' raised for ' + inr(toInvoice) + '.'); renderOrders(); }); })
-      .catch(() => toastO('Could not raise invoice (backend offline).'));
+    if (!d) return;
+    trackRowFor(d).then(t => {
+      const toInvoice = (t.dispatchedAmount || 0) - (t.invoicedAmount || 0);
+      if (toInvoice <= 0.5){ toastO('Nothing newly dispatched to invoice yet.'); return; }
+      return post({ kind: 'salesDocAdd', doc: { docType: 'INV', partyName: d.party, partyCode: d.partyCode, poc: d.poc,
+        date: new Date().toISOString().slice(0, 10), amount: toInvoice, sourceRef: d.number, status: 'Confirmed' } })
+        .then(j => { if (!j || !j.ok) throw 0; salesDocs.push(j.doc);
+          const inv = (t.invoicedAmount || 0) + toInvoice;
+          return post({ kind: 'salesDocUpdate', id: t.id, patch: { invoicedAmount: inv } }).then(() => { t.invoicedAmount = inv;
+            toastO('Invoice ' + j.doc.number + ' raised for ' + inr(toInvoice) + '.'); renderOrders(); }); });
+    }).catch(() => toastO('Could not raise invoice (backend offline).'));
   }
   function sendToDispatch(d){
-    if (!d || !d.raw) return;
-    post({ kind: 'salesDocUpdate', id: d.id, patch: { dispatchStage: 'Ready to Pick', status: 'Ready for Dispatch' } })
-      .then(j => { if (j && j.ok){ d.raw.dispatchStage = 'Ready to Pick'; d.raw.status = 'Ready for Dispatch';
-        toastO(d.number + ' sent to dispatch.'); renderOrders(); renderDispatch(); } })
+    if (!d) return;
+    trackRowFor(d).then(t => post({ kind: 'salesDocUpdate', id: t.id, patch: { dispatchStage: 'Ready to Pick', status: 'Ready for Dispatch' } })
+      .then(() => { t.dispatchStage = 'Ready to Pick'; t.status = 'Ready for Dispatch';
+        toastO(d.number + ' sent to dispatch.'); renderOrders(); renderDispatch(); }))
       .catch(() => toastO('Could not update dispatch (backend offline).'));
   }
   function setDocStatus(d, val){
-    if (!d || !d.raw) return;
-    post({ kind: 'salesDocUpdate', id: d.id, patch: { status: val } })
-      .then(j => { if (j && j.ok){ d.raw.status = val; renderOrders(); } })
+    if (!d) return;
+    trackRowFor(d).then(t => post({ kind: 'salesDocUpdate', id: t.id, patch: { status: val } })
+      .then(() => { t.status = val; renderOrders(); }))
       .catch(() => toastO('Could not update status (backend offline).'));
   }
-  // Record a (partial) dispatch by value against an SO.
-  function recordDispatch(d, amt){
-    if (!d || !d.raw) return;
-    const total = d.raw.amount || 0;
-    const newDisp = Math.min(total, (d.raw.dispatchedAmount || 0) + amt);
+  // Record a (partial) dispatch by value against a SalesDocs row (PI shadow / SO).
+  function recordDispatch(sd, amt){
+    if (!sd) return;
+    const total = sd.amount || 0;
+    const newDisp = Math.min(total, (sd.dispatchedAmount || 0) + amt);
     const status = newDisp >= total - 0.5 ? 'Completed' : 'Partially Dispatched';
-    post({ kind: 'salesDocUpdate', id: d.id, patch: { dispatchedAmount: newDisp, status } })
-      .then(j => { if (j && j.ok){ d.raw.dispatchedAmount = newDisp; d.raw.status = status;
-        toastO('Dispatched ' + inr(amt) + ' of ' + d.number + '.'); renderOrders(); renderDispatch(); } })
+    post({ kind: 'salesDocUpdate', id: sd.id, patch: { dispatchedAmount: newDisp, status } })
+      .then(j => { if (j && j.ok){ sd.dispatchedAmount = newDisp; sd.status = status;
+        toastO('Dispatched ' + inr(amt) + ' of ' + sd.number + '.'); renderOrders(); renderDispatch(); } })
       .catch(() => toastO('Could not record dispatch (backend offline).'));
   }
 
@@ -24682,8 +24709,9 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   }
   function advanceDispatch(id, stage){
     const d = salesDocs.find(x => x.id === id); if (!d) return;
-    post({ kind: 'salesDocUpdate', id, patch: { dispatchStage: stage, status: stage === 'Delivered' ? 'Delivered' : d.status } })
-      .then(j => { if (j && j.ok){ d.dispatchStage = stage; if (stage === 'Delivered') d.status = 'Delivered'; renderDispatch(); renderOrders(); } })
+    const status = stage === 'Delivered' ? 'Completed' : d.status;
+    post({ kind: 'salesDocUpdate', id, patch: { dispatchStage: stage, status } })
+      .then(j => { if (j && j.ok){ d.dispatchStage = stage; d.status = status; renderDispatch(); renderOrders(); } })
       .catch(() => toastO('Could not update (backend offline).'));
   }
 
@@ -24695,6 +24723,16 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   window.atlasLoadOrders = function(){ load(false); };
   window.atlasLoadDispatch = function(){ load(false); };
   window.atlasOrdersChanged = function(){ load(true); };
+
+  // Show/hide the optional Sales Order surfaces based on the advanced toggle.
+  function applySoVisibility(){
+    const soTab = document.querySelector('.ord-tab[data-tab="so"]');
+    if (soTab) soTab.hidden = !SO_ENABLED;
+    const soNew = document.querySelector('#ord-newmenu button[data-newdoc="so"]');
+    if (soNew) soNew.hidden = !SO_ENABLED;
+    const chk = $('ord-so-toggle'); if (chk) chk.checked = SO_ENABLED;
+    if (!SO_ENABLED && ordTab === 'so') ordTab = 'all';
+  }
 
   function init(){
     const ordTabs = $('ord-tabs');
@@ -24711,11 +24749,19 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       menu.hidden = true; if (window.atlasNewDoc) window.atlasNewDoc(b.getAttribute('data-newdoc'));
     });
 
+    // Advanced: enable the optional Sales Order stage.
+    const soToggle = $('ord-so-toggle');
+    if (soToggle) soToggle.addEventListener('change', () => {
+      SO_ENABLED = soToggle.checked;
+      localStorage.setItem('atlas-enable-so', SO_ENABLED ? '1' : '0');
+      applySoVisibility(); renderOrders();
+    });
+
     // KPI cards → jump to the matching tab.
     const kpis = $('ord-kpis');
     if (kpis) kpis.addEventListener('click', (e) => {
       const k = e.target.closest('.ord-kpi[data-okpi]'); if (!k) return;
-      const map = { proforma: 'proforma', so: 'so', todispatch: 'so', invoice: 'invoice' };
+      const map = { proforma: 'proforma', ready: 'all', indispatch: 'all', invoice: 'invoice' };
       ordTab = map[k.getAttribute('data-okpi')] || 'all'; renderOrders();
     });
 
@@ -24725,8 +24771,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       const a = e.target.closest('[data-od]'); if (!a) return;
       const act = a.getAttribute('data-od'); const d = findDoc(a.getAttribute('data-id'));
       if (act === 'pi2so'){ e.stopPropagation(); convertPiToSo(d); }
-      else if (act === 'so2inv'){ e.stopPropagation(); invoiceFromDispatched(d); }
-      else if (act === 'so2disp'){ e.stopPropagation(); sendToDispatch(d); }
+      else if (act === 'toinv'){ e.stopPropagation(); invoiceFromDispatched(d); }
+      else if (act === 'todisp'){ e.stopPropagation(); sendToDispatch(d); }
       else if (act === 'statusmenu'){ e.stopPropagation(); const m = a.parentNode.querySelector('.ord-statmenu'); if (m) m.hidden = !m.hidden; }
       else if (act === 'setstatus'){ e.stopPropagation(); setDocStatus(d, a.getAttribute('data-val')); }
       else if (act === 'open'){ if (window.atlasOpenPartyByName && d) window.atlasOpenPartyByName(d.party); }
@@ -24743,14 +24789,15 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       if (act === 'advance') advanceDispatch(id, b.getAttribute('data-next'));
       else if (act === 'return') advanceDispatch(id, 'Returned');
       else if (act === 'dispatchpart'){
-        if (!d || !d.raw) return;
-        const remaining = (d.raw.amount || 0) - (d.raw.dispatchedAmount || 0);
-        const ans = prompt('Dispatch how much of ' + d.number + '? Remaining ' + inr(remaining), String(Math.round(remaining)));
+        const sd = salesDocs.find(x => x.id === id); if (!sd) return;
+        const remaining = (sd.amount || 0) - (sd.dispatchedAmount || 0);
+        const ans = prompt('Dispatch how much of ' + sd.number + '? Remaining ' + inr(remaining), String(Math.round(remaining)));
         if (ans == null) return; const amt = Number(String(ans).replace(/[^0-9.]/g, '')) || 0;
-        if (amt > 0) recordDispatch(d, amt);
+        if (amt > 0) recordDispatch(sd, amt);
       }
     });
 
+    applySoVisibility();
     if (location.hash.slice(1) === 'orders' || location.hash.slice(1) === 'dispatch') load(false);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
