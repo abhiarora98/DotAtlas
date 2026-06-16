@@ -22243,7 +22243,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   function quickAction(act, nm){
     const p = findParty(nm); if (!p) return;
     const ph = (p.phone || '').replace(/\D/g, '');
-    if (act === 'edit'){ openPartyPage(p); profileTab = 'edit'; renderProfile(); }
+    if (act === 'edit'){ openPartyPage(p); profileTab = 'settings'; renderProfile(); }
     else if (act === 'createpi'){
       const nav = document.querySelector('.nav-item[data-page="create-pi"]'); if (nav) nav.click();
       setTimeout(() => { if (window.atlasPickParty) window.atlasPickParty({ name: p.name, code: p.code }); }, 140);
@@ -22426,8 +22426,9 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   // ---------- Full-page Party Profile ----------
   let profileParty = null;
   let profileTab = 'overview';
-  const PROFILE_TABS = [['overview','Overview'],['pis','PIs'],['receivables','Receivables'],
-    ['dispatch','Dispatch'],['activity','Activity'],['notes','Notes'],['edit','Edit details']];
+  const PROFILE_TABS = [['overview','Overview'],['timeline','Timeline'],['orders','Orders'],
+    ['receivables','Receivables'],['tasks','Tasks'],['contacts','Contacts'],['notes','Notes'],
+    ['documents','Documents'],['settings','Settings']];
 
   function initials(name){
     const w = String(name || '').trim().split(/\s+/).filter(Boolean);
@@ -22480,18 +22481,16 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     };
   }
 
-  function renderStats(p){
+  // 360° KPI header (item: KPI header).
+  function renderKpis(p){
     const s = partyStats(p);
-    const wlTxt = s.watch ? (s.watch.sev >= 3 ? 'Critical' : s.watch.sev === 2 ? 'Watch' : 'Monitor') : 'Clear';
-    const wlCls = s.watch ? (s.watch.sev >= 3 ? 'rose' : 'amber') : 'emerald';
+    const lc = lastContact(p);
     const cells = [
-      ['Total PIs', s.totalPis || '0', ''],
-      ['Business value', inr(s.businessValue), 'sm'],
+      ['Lifetime Sales', inr(s.businessValue), 'sm'],
       ['Outstanding', inr(s.outstanding), 'sm ' + (s.outstanding > 0 ? 'amber' : 'emerald')],
-      ['Last order', fmtDate(s.lastOrder), 'sm'],
-      ['Last payment', fmtDate(s.lastPay), 'sm'],
-      ['Watchlist', wlTxt, 'sm ' + wlCls],
-      ['Sales POC', esc(p.poc) || '—', 'sm'],
+      ['Last Order', fmtDate(s.lastOrder), 'sm'],
+      ['Last Contact', lc ? fmtDate(lc) : '—', 'sm'],
+      ['Credit Limit', p.creditLimit ? inr(p.creditLimit) : '—', 'sm'],
     ];
     return cells.map(c => '<div class="pd-stat"><div class="k">' + c[0] + '</div><div class="v ' + (c[2] || '') + '">' + c[1] + '</div></div>').join('');
   }
@@ -22575,12 +22574,13 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 
   function profileActs(p){
     const ph = (p.phone || '').replace(/\D/g, ''); const arch = isArchived(p);
-    const b = ['<button class="pi-btn" data-pa="edit">✏️ Edit</button>'];
-    if (!arch) b.push('<button class="pi-btn" data-pa="createpi">📄 Create PI</button>');
-    b.push('<button class="pi-btn" data-pa="wa"' + (ph ? '' : ' disabled') + '>💬 WhatsApp</button>');
+    const b = [];
+    if (!arch) b.push('<button class="pi-btn prime" data-pa="createpi">+ New Order</button>');
     b.push('<button class="pi-btn" data-pa="call"' + (ph ? '' : ' disabled') + '>📞 Call</button>');
+    b.push('<button class="pi-btn" data-pa="wa"' + (ph ? '' : ' disabled') + '>💬 WhatsApp</button>');
+    b.push('<button class="pi-btn" data-pa="addnote">📝 Add Note</button>');
+    b.push('<button class="pi-btn" data-pa="followup">⏰ Schedule Follow-up</button>');
     if (arch) b.push('<button class="pi-btn prime" data-pa="restore">Restore</button>');
-    else b.push('<button class="pi-btn pd-arch" data-pa="archive">🗂️ Archive</button>');
     return b.join('');
   }
 
@@ -22591,8 +22591,13 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     $('pp-name').textContent = p.name;
     $('pp-code').textContent = p.code || '—';
     $('pp-chips').innerHTML = chipsFor(p);
-    $('pp-meta').innerHTML = [p.poc, p.state, p.city, p.phone ? '📞 ' + p.phone : '', p.email].filter(Boolean).map(esc).join(' &nbsp;·&nbsp; ');
-    $('pp-stats').innerHTML = renderStats(p);
+    $('pp-meta').innerHTML = [
+      p.poc ? '👤 ' + p.poc : '',
+      (p.city || p.state) ? '📍 ' + [p.city, p.state].filter(Boolean).join(', ') : '',
+      p.phone ? '📞 +91 ' + p.phone : '',
+      customerSince(p) ? '🏷️ ' + customerSince(p) : '',
+    ].filter(Boolean).map(x => '<span>' + esc(x) + '</span>').join('');
+    $('pp-stats').innerHTML = renderKpis(p);
     $('pp-acts').innerHTML = profileActs(p);
     ppStatus('', '');
     $('pp-tabs').innerHTML = PROFILE_TABS.map(t => '<button class="pp-tab' + (t[0] === profileTab ? ' on' : '') + '" data-tab="' + t[0] + '">' + t[1] + '</button>').join('');
@@ -22603,42 +22608,40 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 
   function renderTabBody(){
     const p = profileParty, el = $('pp-tabbody'); if (!el) return;
-    if (profileTab === 'overview'){ el.innerHTML = renderDetails(p); return; }
-    if (profileTab === 'pis'){
-      const rows = piRowsFor(p).sort((a, b) => (b.firstNo || 0) - (a.firstNo || 0));
-      el.innerHTML = rows.length ? table(['REF#','Date','Lines','Total','Status'],
-        rows.map(r => ['<span class="mono">' + esc(r.ref || '') + '</span>', esc(r.date || ''), 'r:' + (r.lines || 0), 'r:' + inr(r.totalIncGst || 0), statusPill(r.status)]))
-        : emptyTab('No PIs found for this party yet.');
+    if (profileTab === 'overview'){
+      const rows = orderRows(p);
+      const recent = '<div class="pd-section-t" style="margin-top:18px;">Recent orders</div>' + ordersTable(rows, 5);
+      el.innerHTML = renderDetails(p) + recent;
       return;
     }
+    if (profileTab === 'timeline'){ el.innerHTML = renderTimeline(p); return; }
+    if (profileTab === 'orders'){ el.innerHTML = ordersTable(orderRows(p)); return; }
     if (profileTab === 'receivables'){
       const rec = receivables && receivables.parties && receivables.parties[slug(p.name)];
-      if (!rec){ el.innerHTML = emptyTab('No receivables data for this party.'); return; }
-      const sum = '<div class="pp-stats">' + [['Opening', rec.opening],['Billed', rec.billed],['Received', rec.received],['Outstanding', rec.outstanding]]
-        .map(c => '<div class="pd-stat"><div class="k">' + c[0] + '</div><div class="v sm">' + inr(c[1] || 0) + '</div></div>').join('') + '</div>';
-      const tx = (rec.fy25 || []).slice().reverse();
-      el.innerHTML = sum + '<div class="pd-section-t" style="margin-top:18px;">Ledger</div>' +
-        table(['Date','Type','Debit','Credit'], tx.map(t => [esc(t.d), esc(t.t), 'r:' + (t.dr ? inr(t.dr) : '—'), 'r:' + (t.cr ? inr(t.cr) : '—')]));
+      el.innerHTML = renderFinancials(p) +
+        (rec ? '<div class="pd-section-t" style="margin-top:18px;">Payment history</div>' +
+          table(['Date','Type','Debit','Credit'], (rec.fy25 || []).slice().reverse().map(t => [esc(t.d), esc(t.t), 'r:' + (t.dr ? inr(t.dr) : '—'), 'r:' + (t.cr ? inr(t.cr) : '—')]))
+          : emptyTab('No receivables ledger for this party.'));
       return;
     }
-    if (profileTab === 'dispatch'){
-      const rows = piRowsFor(p);
-      el.innerHTML = rows.length ? table(['REF#','Date','Dispatch status'],
-        rows.map(r => ['<span class="mono">' + esc(r.ref || '') + '</span>', esc(r.date || ''), statusPill(r.status)]))
-        : emptyTab('No dispatch records for this party.');
-      return;
-    }
-    if (profileTab === 'activity'){ el.innerHTML = renderActivity(p); return; }
+    if (profileTab === 'tasks'){ el.innerHTML = renderTasksTab(p); return; }
+    if (profileTab === 'contacts'){ el.innerHTML = renderContactsTab(p); return; }
     if (profileTab === 'notes'){
       el.innerHTML = '<div class="pd-section-t">Notes</div>' +
         '<textarea id="pp-notes" class="pp-notes" placeholder="Add private notes about this party…">' + esc(loadNotes(p)) + '</textarea>' +
         '<div class="pd-edit-acts"><button class="pi-btn prime" data-pa="savenotes">Save note</button></div>';
       return;
     }
-    if (profileTab === 'edit'){
+    if (profileTab === 'documents'){ el.innerHTML = renderDocsTab(p); return; }
+    if (profileTab === 'settings'){
       el.innerHTML = renderEditForm(p) +
-        '<div class="pd-edit-acts"><button class="pi-btn" data-pa="canceledit">Cancel</button><button class="pi-btn prime" id="pp-save" data-pa="save">Save changes</button></div>';
-      requestAnimationFrame(() => { const f = $('pde-name'); if (f) f.focus({ preventScroll: true }); });
+        '<div class="pd-edit-acts"><button class="pi-btn prime" id="pp-save" data-pa="save">Save changes</button></div>' +
+        '<div class="pd-section-t" style="margin-top:22px;">Account</div>' +
+        '<div class="pp-danger">' +
+          (isArchived(p) ? '<button class="pi-btn prime" data-pa="restore">Restore party</button>'
+                         : '<button class="pi-btn pd-arch" data-pa="archive">🗂️ Archive party</button>') +
+          '<span class="pl-meta">Archiving hides the party from active lists but preserves all history.</span>' +
+        '</div>';
     }
   }
 
@@ -22651,17 +22654,23 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     return '<table class="pp-table"><thead><tr>' + th + '</tr></thead><tbody>' + body + '</tbody></table>';
   }
 
-  function renderActivity(p){
+  function renderTimeline(p){
     const ev = [];
     if (p.createdAt) ev.push([new Date(p.createdAt), 'Party created']);
     if (p.updatedAt && p.updatedAt !== p.createdAt) ev.push([new Date(p.updatedAt), 'Details updated']);
-    for (const r of piRowsFor(p)) if (r.date) ev.push([new Date(r.date), 'PI ' + (r.ref || '') + ' · ' + inr(r.totalIncGst || 0)]);
+    for (const r of piRowsFor(p)) if (r.date) ev.push([new Date(r.date), 'Order ' + (r.ref || '') + ' · ' + inr(r.totalIncGst || 0)]);
     const rec = receivables && receivables.parties && receivables.parties[slug(p.name)];
-    if (rec) for (const t of (rec.fy25 || [])){ const d = parseRecDate(t.d); if (d) ev.push([d, t.t + ' · ' + inr((t.dr || t.cr) || 0)]); }
+    if (rec) for (const t of (rec.fy25 || [])){ const d = parseRecDate(t.d); if (d) ev.push([d, (t.t === 'Receipt' ? 'Payment received' : t.t) + ' · ' + inr((t.dr || t.cr) || 0)]); }
+    for (const l of loadLog(p)){ const d = new Date(l.ts); if (!isNaN(d)) ev.push([d, l.text]); }
     ev.sort((a, b) => b[0] - a[0]);
     if (!ev.length) return emptyTab('No activity recorded yet.');
-    return '<div class="pp-timeline">' + ev.slice(0, 80).map(e =>
-      '<div class="pp-tl"><span class="pp-tl-d">' + fmtDate(e[0]) + '</span><span class="pp-tl-t">' + esc(e[1]) + '</span></div>').join('') + '</div>';
+    let html = '', cur = null;
+    for (const e of ev.slice(0, 120)){
+      const bk = timelineBucket(e[0]);
+      if (bk !== cur){ cur = bk; html += '<div class="pp-tlgroup"><span class="pp-tldot"></span>' + esc(bk) + '</div>'; }
+      html += '<div class="pp-tlrow"><span class="pp-tlchk">✓</span><span class="pp-tltext">' + esc(e[1]) + '</span><span class="pp-tldate">' + fmtDate(e[0]) + '</span></div>';
+    }
+    return '<div class="pp-timeline">' + html + '</div>';
   }
 
   function notesKey(p){ return normName(p.code || p.name); }
@@ -22671,8 +22680,134 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       const all = JSON.parse(localStorage.getItem('atlas-party-notes') || '{}');
       all[notesKey(p)] = $('pp-notes').value;
       localStorage.setItem('atlas-party-notes', JSON.stringify(all));
+      logInteraction(p, 'Note updated');
       toast('Note saved.');
     } catch(e){}
+  }
+
+  // ---------- CRM local stores (tasks / contacts / documents / activity log) ----------
+  function nsLoad(ns, key){ try { return (JSON.parse(localStorage.getItem(ns) || '{}'))[key] || []; } catch(e){ return []; } }
+  function nsSave(ns, key, arr){ try { const all = JSON.parse(localStorage.getItem(ns) || '{}'); all[key] = arr; localStorage.setItem(ns, JSON.stringify(all)); } catch(e){} }
+  function loadTasks(p){ return nsLoad('atlas-party-tasks', notesKey(p)); }
+  function saveTasks(p, a){ nsSave('atlas-party-tasks', notesKey(p), a); }
+  function loadContacts(p){ return nsLoad('atlas-party-contacts', notesKey(p)); }
+  function saveContacts(p, a){ nsSave('atlas-party-contacts', notesKey(p), a); }
+  function loadDocs(p){ return nsLoad('atlas-party-docs', notesKey(p)); }
+  function saveDocs(p, a){ nsSave('atlas-party-docs', notesKey(p), a); }
+  function loadLog(p){ return nsLoad('atlas-party-log', notesKey(p)); }
+  function logInteraction(p, text){ const a = loadLog(p); a.push({ ts: new Date().toISOString(), text }); nsSave('atlas-party-log', notesKey(p), a); }
+  function lastContact(p){ const a = loadLog(p); if (!a.length) return null; const d = new Date(a[a.length - 1].ts); return isNaN(d) ? null : d; }
+
+  // ---------- date helpers for the timeline ----------
+  function startOfDay(d){ const x = new Date(d); x.setHours(0, 0, 0, 0); return x.getTime(); }
+  function startOfToday(){ return startOfDay(new Date()); }
+  function timelineBucket(d){
+    const days = Math.round((startOfToday() - startOfDay(d)) / 864e5);
+    if (days <= 0) return 'Today';
+    if (days === 1) return 'Yesterday';
+    if (days < 7) return days + ' days ago';
+    if (days < 14) return 'Last week';
+    if (days < 30) return Math.floor(days / 7) + ' weeks ago';
+    return MONTHS[new Date(d).getMonth()] + ' ' + new Date(d).getFullYear();
+  }
+  function customerSince(p){
+    if (!p.createdAt) return '';
+    const d = new Date(p.createdAt); if (isNaN(d)) return '';
+    return 'Customer since ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear();
+  }
+
+  // ---------- orders + financials ----------
+  function orderRows(p){ return piRowsFor(p).slice().sort((a, b) => (b.firstNo || 0) - (a.firstNo || 0)); }
+  function ordersTable(rows, limit){
+    const r = limit ? rows.slice(0, limit) : rows;
+    if (!r.length) return emptyTab('No orders yet.');
+    return table(['REF#','Date','Total','Status'],
+      r.map(o => ['<span class="mono">' + esc(o.ref || '') + '</span>', esc(o.date || ''), 'r:' + inr(o.totalIncGst || 0), statusPill(o.status)]));
+  }
+  function renderFinancials(p){
+    const s = partyStats(p);
+    const pi = piByParty.get(normName(p.name));
+    const orders = pi ? pi.count : 0;
+    const aov = orders ? s.businessValue / orders : 0;
+    const dsl = s.lastOrder ? Math.max(0, Math.round((Date.now() - s.lastOrder.getTime()) / 864e5)) : null;
+    const openInv = pi ? pi.pending : 0;
+    const ratio = s.businessValue ? s.outstanding / s.businessValue : 0;
+    const behavior = s.outstanding <= 0 ? 'Excellent' : ratio < 0.15 ? 'Good' : ratio < 0.4 ? 'Fair' : 'Slow';
+    const cells = [
+      ['Lifetime Sales', inr(s.businessValue)],
+      ['Outstanding', inr(s.outstanding)],
+      ['Credit Limit', p.creditLimit ? inr(p.creditLimit) : '—'],
+      ['Average Order Value', inr(aov)],
+      ['Days Since Last Order', dsl != null ? dsl + 'd' : '—'],
+      ['Payment Behavior', behavior],
+      ['Open Invoices', String(openInv)],
+    ];
+    return '<div class="pp-stats">' + cells.map(c => '<div class="pd-stat"><div class="k">' + c[0] + '</div><div class="v sm">' + c[1] + '</div></div>').join('') + '</div>';
+  }
+
+  // ---------- Tasks & follow-ups ----------
+  function taskRow(t, cls){
+    const due = t.due ? fmtDate(new Date(t.due + 'T00:00:00')) : '';
+    return '<div class="pp-task ' + cls + '">' +
+      '<button class="pp-taskchk" data-pa="toggletask" data-id="' + t.id + '" title="Toggle done">' + (t.done ? '✓' : '') + '</button>' +
+      '<span class="pp-tasktext">' + esc(t.text) + '</span>' +
+      (due ? '<span class="pp-taskdue ' + (cls === 'over' ? 'over' : '') + '">' + due + '</span>' : '') +
+      '<button class="pp-taskdel" data-pa="deltask" data-id="' + t.id + '" title="Delete">×</button>' +
+    '</div>';
+  }
+  function renderTasksTab(p){
+    const tasks = loadTasks(p); const today = startOfToday();
+    const up = [], over = [], done = [];
+    for (const t of tasks){
+      if (t.done){ done.push(t); continue; }
+      const due = t.due ? startOfDay(new Date(t.due + 'T00:00:00')) : null;
+      if (due != null && due < today) over.push(t); else up.push(t);
+    }
+    const byDue = (a, b) => (a.due || '9999').localeCompare(b.due || '9999');
+    up.sort(byDue); over.sort(byDue);
+    const form = '<div class="pp-rowform">' +
+      '<input id="pp-task-text" class="pi-input" placeholder="Add a task or follow-up…">' +
+      '<input id="pp-task-due" class="pi-input no-upper" type="date" style="max-width:160px;">' +
+      '<button class="pi-btn prime" data-pa="addtask">Add</button></div>';
+    const sec = (title, arr, cls) => arr.length ? '<div class="pd-section-t">' + title + (cls === 'over' ? ' <span class="pp-overbadge">' + arr.length + '</span>' : '') + '</div>' + arr.map(t => taskRow(t, cls)).join('') : '';
+    let body = sec('Overdue', over, 'over') + sec('Upcoming', up, '') + sec('Completed', done.slice(-10).reverse(), 'done');
+    if (!tasks.length) body = emptyTab('No tasks yet — schedule a follow-up to stay on top of this account.');
+    return form + body;
+  }
+
+  // ---------- Contacts ----------
+  function renderContactsTab(p){
+    const primary = group('Primary contact', [
+      kv('Sales POC', p.poc), kv('Phone', p.phone ? '+91 ' + p.phone : '', true), kv('Email', p.email),
+    ]);
+    const list = loadContacts(p);
+    const items = list.length ? list.map((c, i) =>
+      '<div class="pp-contact"><div><div class="pp-cname">' + esc(c.name || '—') + (c.role ? ' · <span class="muted">' + esc(c.role) + '</span>' : '') + '</div>' +
+      '<div class="pl-meta">' + [c.phone ? '📞 ' + c.phone : '', c.email || ''].filter(Boolean).map(esc).join(' · ') + '</div></div>' +
+      '<button class="pp-taskdel" data-pa="delcontact" data-id="' + i + '">×</button></div>').join('')
+      : emptyTab('No additional contacts yet.');
+    const form = '<div class="pp-rowform wrap">' +
+      '<input id="pp-c-name" class="pi-input" placeholder="Name">' +
+      '<input id="pp-c-role" class="pi-input" placeholder="Role (e.g. Accounts)">' +
+      '<input id="pp-c-phone" class="pi-input no-upper" placeholder="Phone" inputmode="tel">' +
+      '<input id="pp-c-email" class="pi-input no-upper" placeholder="Email" type="email">' +
+      '<button class="pi-btn prime" data-pa="addcontact">Add contact</button></div>';
+    return primary + '<div class="pd-section-t" style="margin-top:18px;">Additional contacts</div>' + items + form;
+  }
+
+  // ---------- Documents ----------
+  function renderDocsTab(p){
+    const docs = loadDocs(p);
+    const items = docs.length ? docs.map((d, i) =>
+      '<div class="pp-doc"><a href="' + esc(d.url) + '" target="_blank" rel="noopener">📄 ' + esc(d.name || d.url) + '</a>' +
+      '<span class="pl-meta">' + fmtDate(d.ts) + '</span>' +
+      '<button class="pp-taskdel" data-pa="deldoc" data-id="' + i + '">×</button></div>').join('')
+      : emptyTab('No documents linked yet.');
+    const form = '<div class="pp-rowform">' +
+      '<input id="pp-d-name" class="pi-input" placeholder="Document name">' +
+      '<input id="pp-d-url" class="pi-input no-upper" placeholder="https://link-to-file">' +
+      '<button class="pi-btn prime" data-pa="adddoc">Add link</button></div>';
+    return '<div class="pd-section-t">Documents</div>' + items + form;
   }
 
   function archiveParty(){
@@ -22778,19 +22913,53 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const ab = e.target.closest('[data-pa]'); if (!ab) return;
     const act = ab.getAttribute('data-pa'); const p = profileParty; if (!p) return;
     const ph = (p.phone || '').replace(/\D/g, '');
-    if (act === 'edit'){ profileTab = 'edit'; renderProfile(); }
-    else if (act === 'canceledit'){ profileTab = 'overview'; renderProfile(); }
-    else if (act === 'save'){ saveEdit(); }
-    else if (act === 'savenotes'){ saveNotes(p); }
+    const id = ab.getAttribute('data-id');
+    if (act === 'save'){ saveEdit(); }
+    else if (act === 'savenotes'){ saveNotes(p); renderProfile(); }
     else if (act === 'archive'){ archiveParty(); }
     else if (act === 'restore'){ restoreParty(); }
-    else if (act === 'wa'){ if (ph) window.open('https://wa.me/91' + ph, '_blank'); }
-    else if (act === 'call'){ if (ph) window.location.href = 'tel:+91' + ph; }
+    else if (act === 'wa'){ if (ph){ logInteraction(p, 'WhatsApp message sent'); window.open('https://wa.me/91' + ph, '_blank'); renderProfile(); } }
+    else if (act === 'call'){ if (ph){ logInteraction(p, 'Called customer'); window.location.href = 'tel:+91' + ph; renderProfile(); } }
+    else if (act === 'addnote'){ profileTab = 'notes'; renderProfile(); requestAnimationFrame(() => { const t = $('pp-notes'); if (t) t.focus(); }); }
+    else if (act === 'followup'){ profileTab = 'tasks'; renderProfile(); requestAnimationFrame(() => { const t = $('pp-task-text'); if (t) t.focus(); }); }
     else if (act === 'createpi'){
       const nav = document.querySelector('.nav-item[data-page="create-pi"]');
       if (nav) nav.click();
+      logInteraction(p, 'New order started');
       setTimeout(() => { if (window.atlasPickParty) window.atlasPickParty({ name: p.name, code: p.code }); }, 140);
     }
+    // Tasks
+    else if (act === 'addtask'){
+      const text = ($('pp-task-text') || {}).value || ''; const due = ($('pp-task-due') || {}).value || '';
+      if (!text.trim()){ const t = $('pp-task-text'); if (t) t.focus(); return; }
+      const tasks = loadTasks(p);
+      tasks.push({ id: 'T' + Date.now() + Math.floor(Math.random() * 999), text: text.trim(), due, done: false, ts: new Date().toISOString() });
+      saveTasks(p, tasks);
+      logInteraction(p, 'Follow-up scheduled: ' + text.trim());
+      toast('Follow-up added.'); renderProfile();
+    }
+    else if (act === 'toggletask'){
+      const tasks = loadTasks(p); const t = tasks.find(x => x.id === id);
+      if (t){ t.done = !t.done; saveTasks(p, tasks); if (t.done) logInteraction(p, 'Task completed: ' + t.text); renderProfile(); }
+    }
+    else if (act === 'deltask'){ saveTasks(p, loadTasks(p).filter(x => x.id !== id)); renderProfile(); }
+    // Contacts
+    else if (act === 'addcontact'){
+      const c = { name: ($('pp-c-name') || {}).value || '', role: ($('pp-c-role') || {}).value || '',
+        phone: (($('pp-c-phone') || {}).value || '').trim(), email: (($('pp-c-email') || {}).value || '').trim() };
+      if (!c.name.trim() && !c.phone && !c.email){ const n = $('pp-c-name'); if (n) n.focus(); return; }
+      const list = loadContacts(p); list.push(c); saveContacts(p, list); toast('Contact added.'); renderProfile();
+    }
+    else if (act === 'delcontact'){ const list = loadContacts(p); list.splice(Number(id), 1); saveContacts(p, list); renderProfile(); }
+    // Documents
+    else if (act === 'adddoc'){
+      const url = (($('pp-d-url') || {}).value || '').trim();
+      if (!url){ const u = $('pp-d-url'); if (u) u.focus(); return; }
+      const name = (($('pp-d-name') || {}).value || '').trim() || url;
+      const list = loadDocs(p); list.push({ name, url, ts: new Date().toISOString() }); saveDocs(p, list);
+      logInteraction(p, 'Document linked: ' + name); toast('Document linked.'); renderProfile();
+    }
+    else if (act === 'deldoc'){ const list = loadDocs(p); list.splice(Number(id), 1); saveDocs(p, list); renderProfile(); }
   }
 
   // ---------- load orchestration ----------
@@ -23116,9 +23285,51 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     border-radius: 9px; color: var(--text); padding: 12px; font-size: 13px; font-family: inherit; line-height: 1.5; }
   .pp-notes:focus { outline: none; border-color: var(--emerald); }
   .pp-tabbody .pd-edit-acts { margin-top: 16px; }
+  .pp-meta span:not(:last-child)::after { content: '·'; margin: 0 8px; color: var(--text-3); }
+
+  /* Grouped activity timeline */
+  .pp-tlgroup { display: flex; align-items: center; gap: 8px; font-family: var(--fm); font-size: 11px;
+    letter-spacing: 0.04em; color: var(--text-2); text-transform: uppercase; margin: 16px 0 8px; }
+  .pp-tldot { width: 8px; height: 8px; border-radius: 50%; background: var(--emerald); flex: none; }
+  .pp-tlrow { display: flex; align-items: center; gap: 10px; padding: 8px 0 8px 16px; border-left: 1px solid var(--line);
+    margin-left: 3px; font-size: 13px; }
+  .pp-tlchk { color: var(--emerald); flex: none; }
+  .pp-tltext { color: var(--text); flex: 1; }
+  .pp-tldate { font-family: var(--fm); font-size: 11px; color: var(--text-3); flex: none; }
+
+  /* Inline add forms (tasks / contacts / documents) */
+  .pp-rowform { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; }
+  .pp-rowform.wrap { flex-wrap: wrap; }
+  .pp-rowform .pi-input { flex: 1; min-width: 120px; }
+  .pp-rowform .pi-btn { flex: none; }
+
+  /* Tasks */
+  .pp-task { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .pp-task.done .pp-tasktext { color: var(--text-3); text-decoration: line-through; }
+  .pp-taskchk { flex: none; width: 20px; height: 20px; border-radius: 5px; border: 1px solid var(--line-2);
+    background: var(--surface-2); color: var(--emerald); cursor: pointer; font-size: 12px; line-height: 1; }
+  .pp-task.over .pp-taskchk { border-color: var(--rose); }
+  .pp-tasktext { flex: 1; color: var(--text); }
+  .pp-taskdue { font-family: var(--fm); font-size: 11px; color: var(--text-3); flex: none; }
+  .pp-taskdue.over { color: var(--rose); }
+  .pp-taskdel { flex: none; background: transparent; border: 0; color: var(--text-3); cursor: pointer; font-size: 16px; line-height: 1; }
+  .pp-taskdel:hover { color: var(--rose); }
+  .pp-overbadge { background: rgba(255,138,168,0.16); color: var(--rose); border-radius: 999px;
+    padding: 1px 7px; font-size: 10px; margin-left: 6px; }
+
+  /* Contacts + documents */
+  .pp-contact, .pp-doc { display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .pp-cname { font-weight: 500; color: var(--text); }
+  .pp-cname .muted { color: var(--text-3); font-weight: 400; }
+  .pp-doc a { color: var(--blue); text-decoration: none; }
+  .pp-doc a:hover { text-decoration: underline; }
+  .pp-danger { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
   @media (max-width: 640px){
     .pp-head-main h1 { font-size: 21px; white-space: normal; }
     .pp-head-acts { width: 100%; }
+    .pp-rowform { flex-wrap: wrap; }
   }
 
   /* PI History */
