@@ -2764,10 +2764,14 @@
       <div class="pl-views" id="pl-views">
         <button class="pl-view on" data-sv="all">All parties</button>
         <button class="pl-view" data-sv="followup">My Follow-ups</button>
+        <button class="pl-view" data-sv="dueToday">Due Today</button>
+        <button class="pl-view" data-sv="overduefollow">Overdue</button>
         <button class="pl-view" data-sv="attention">Needs Attention</button>
-        <button class="pl-view" data-sv="overdue">Payment Overdue</button>
         <button class="pl-view" data-sv="dormant">Dormant</button>
+        <button class="pl-view" data-sv="overdue">Payment Overdue</button>
+        <button class="pl-view" data-sv="vip">VIP Accounts</button>
         <button class="pl-view" data-sv="leads">New Leads</button>
+        <button class="pl-view" data-sv="nevercontacted">Never Contacted</button>
       </div>
       <div class="row-2" style="grid-template-columns:1.5fr 1fr; align-items:start;">
         <div class="card">
@@ -22239,18 +22243,17 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const sig = partySignals(p);
     const meta = [p.state, p.city].filter(Boolean).join(' · ');
     const lc = sig.lastContact ? 'Last contact: ' + relativeFrom(sig.lastContact) : 'No contact logged';
-    const next = sig.nextFollowup ? ' &nbsp;·&nbsp; ⏰ Next: ' + esc(fmtDate(sig.nextFollowup)) : '';
     const owner = ownerOf(p);
-    return '<div class="pl-row h-' + h.level + (archived ? ' archived' : '') + '" role="listitem" data-name="' + esc(normName(p.name)) + '">' +
+    return '<div class="pl-row h-' + healthBorder(p) + (archived ? ' archived' : '') + '" role="listitem" data-name="' + esc(normName(p.name)) + '">' +
       '<span class="pl-av ' + avatarColor(p.name) + '">' + initials(p.name) + '</span>' +
       '<div class="pl-main">' +
         '<div class="pl-name-row">' +
           '<span class="pl-name">' + esc(p.name) + '</span>' +
           (p.code ? '<span class="pl-codebadge">' + esc(p.code) + '</span>' : '') +
-          stageChip(p) + chipsFor(p) + crmBadges(sig) +
+          stageChip(p) + healthChip(p) + chipsFor(p) + crmBadges(sig) +
         '</div>' +
-        '<div class="pl-meta">' + (owner ? '👤 ' + esc(owner) + ' &nbsp;·&nbsp; ' : '') + (esc(meta) || '—') + (ph ? ' &nbsp;·&nbsp; 📞 ' + esc(p.phone) : '') + '</div>' +
-        '<div class="pl-meta pl-crmline">🕑 ' + esc(lc) + next + '</div>' +
+        '<div class="pl-meta">' + (owner ? '👤 ' + esc(owner) + ' &nbsp;·&nbsp; ' : '') + (esc(meta) || '—') + (ph ? ' &nbsp;·&nbsp; 📞 ' + esc(p.phone) : '') + ' &nbsp;·&nbsp; 🕑 ' + esc(lc) + '</div>' +
+        '<div class="pl-meta pl-crmline">⏭️ Next: ' + esc(nextActionText(p)) + '</div>' +
       '</div>' +
       '<div class="pl-side">' +
         (h.out ? '<div class="pl-out">' + inr(h.out) + '<small>outstanding</small></div>'
@@ -22260,8 +22263,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         '<button data-qa="call" title="Call"' + (ph ? '' : ' disabled') + '>📞</button>' +
         '<button data-qa="wa" title="WhatsApp"' + (ph ? '' : ' disabled') + '>💬</button>' +
         '<button data-qa="note" title="Add Note">📝</button>' +
+        '<button data-qa="followup" title="Schedule Follow-up">⏰</button>' +
         '<button data-qa="createpi" title="New Order">📄</button>' +
-        '<button data-qa="edit" title="Edit">✏️</button>' +
       '</div>' +
     '</div>';
   }
@@ -22271,6 +22274,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const ph = (p.phone || '').replace(/\D/g, '');
     if (act === 'edit'){ openPartyPage(p); profileTab = 'settings'; renderProfile(); }
     else if (act === 'note'){ openPartyPage(p); profileTab = 'notes'; renderProfile(); requestAnimationFrame(() => { const t = $('pp-note-text'); if (t) t.focus(); }); }
+    else if (act === 'followup'){ openPartyPage(p); profileTab = 'tasks'; renderProfile(); requestAnimationFrame(() => { const t = $('pp-task-text'); if (t) t.focus(); }); }
     else if (act === 'createpi'){
       const nav = document.querySelector('.nav-item[data-page="create-pi"]'); if (nav) nav.click();
       logInteraction(p, 'New order started', 'order');
@@ -22486,14 +22490,67 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const paymentOverdue = s.outstanding > 50000;
     const dormant = stage === 'Dormant' || (idle != null && idle > 90 && hadOrders);
     const needsContact = h.isHighValue && (!info.lastContact || (Date.now() - info.lastContact.getTime()) > 30 * 864e5);
+    const lcDays = info.lastContact ? Math.round((Date.now() - info.lastContact.getTime()) / 864e5) : null;
     return {
-      outstanding: s.outstanding, isVip: h.isHighValue, stage, owner: ownerOf(p),
-      paymentOverdue, dormant,
-      followupDue: info.hasFollowupDue, overdue: info.overdue, needsContact,
-      isLead: stage === 'Lead',
+      outstanding: s.outstanding, isVip: h.isHighValue || stage === 'VIP', stage, owner: ownerOf(p),
+      paymentOverdue, dormant, hadOrders,
+      followupDue: info.hasFollowupDue, overdue: info.overdue, dueToday: info.dueToday, needsContact,
+      isLead: stage === 'Lead', neverContacted: !info.lastContact,
       needsAttention: paymentOverdue || info.hasFollowupDue || dormant || needsContact,
-      lastContact: info.lastContact, nextFollowup: info.nextFollowup, idle,
+      lastContact: info.lastContact, lcDays, nextFollowup: info.nextFollowup, idle,
     };
+  }
+
+  // Relationship health: 🟢 Healthy / 🟡 Needs Attention / 🔴 At Risk, from
+  // contact recency, missed follow-ups, receivables, recency and stage.
+  function relHealth(p){
+    const sig = partySignals(p); let score = 0;
+    if (sig.paymentOverdue) score += 2;
+    if (sig.overdue > 0) score += 2;                 // missed follow-ups
+    if (sig.dormant) score += 2;
+    if (sig.stage === 'Lost') score += 3;
+    if (sig.lcDays == null) score += (sig.hadOrders ? 2 : 1);
+    else if (sig.lcDays > 45) score += 2; else if (sig.lcDays > 21) score += 1;
+    const level = score >= 3 ? 'risk' : score >= 1 ? 'attention' : 'healthy';
+    return { level, score };
+  }
+  function healthChip(p){
+    const lvl = relHealth(p).level;
+    const map = { healthy: ['green', '🟢 Healthy'], attention: ['yellow', '🟡 Needs attention'], risk: ['red', '🔴 At risk'] };
+    return '<span class="chip ' + map[lvl][0] + '">' + map[lvl][1] + '</span>';
+  }
+  function healthBorder(p){ return { healthy: 'green', attention: 'yellow', risk: 'red' }[relHealth(p).level]; }
+
+  // Humanised "next action" so no party ever lacks a visible next step.
+  function nextActionText(p){
+    const sig = partySignals(p);
+    if (sig.nextFollowup){
+      const dd = startOfDay(sig.nextFollowup), t = startOfToday();
+      if (dd < t) return 'Overdue follow-up · ' + fmtDate(sig.nextFollowup);
+      if (dd === t) return 'Follow-up due today';
+      return 'Follow-up on ' + fmtDate(sig.nextFollowup);
+    }
+    if (sig.paymentOverdue) return 'Chase ' + inr(sig.outstanding) + ' payment';
+    if (sig.dormant) return 'Re-engage · dormant ' + (sig.idle != null ? sig.idle + 'd' : '');
+    if (sig.stage === 'Lead') return 'Qualify this lead';
+    if (sig.neverContacted) return 'Make first contact';
+    if (sig.needsContact) return 'Check in — VIP gone quiet';
+    return 'Schedule next follow-up';
+  }
+
+  // Rule-based "AI" customer brief, generated from activity + financials.
+  function aiBrief(p){
+    const s = partyStats(p), sig = partySignals(p), pi = piByParty.get(normName(p.name));
+    const parts = [];
+    parts.push(sig.lastContact ? 'Last contacted ' + relativeFrom(sig.lastContact) + '.' : 'No contact logged yet.');
+    if (pi && pi.count) parts.push(pi.count + ' order' + (pi.count > 1 ? 's' : '') + ' worth ' + inr(s.businessValue) + ' to date' + (sig.idle != null ? ' (last ' + sig.idle + 'd ago)' : '') + '.');
+    else parts.push('No orders yet.');
+    parts.push(s.outstanding > 0 ? inr(s.outstanding) + ' outstanding.' : 'No outstanding payment.');
+    if (sig.nextFollowup){ const dd = startOfDay(sig.nextFollowup), t = startOfToday();
+      parts.push('Follow-up ' + (dd < t ? 'overdue (' + fmtDate(sig.nextFollowup) + ')' : dd === t ? 'due today' : 'due ' + fmtDate(sig.nextFollowup)) + '.'); }
+    const lvl = relHealth(p).level;
+    parts.push('Relationship ' + (lvl === 'healthy' ? 'healthy' : lvl === 'attention' ? 'needs attention' : 'at risk') + '.');
+    return parts.join(' ');
   }
   let crmFilter = null;
   function computeKpis(){
@@ -22506,17 +22563,22 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     document.querySelectorAll('.pl-view').forEach(v => v.classList.toggle('on', v.getAttribute('data-sv') === (crmFilter || 'all')));
   }
   function crmFilterLabel(){
-    return { followup: 'Follow-ups due', attention: 'Needs attention', overdue: 'Payment overdue',
-      dormant: 'Dormant', leads: 'New leads' }[crmFilter] || '';
+    return { followup: 'Follow-ups due', dueToday: 'Due today', overduefollow: 'Overdue follow-ups',
+      attention: 'Needs attention', overdue: 'Payment overdue', dormant: 'Dormant',
+      vip: 'VIP accounts', leads: 'New leads', nevercontacted: 'Never contacted' }[crmFilter] || '';
   }
   function matchesCrmFilter(p){
     if (!crmFilter) return true;
     const sig = partySignals(p);
     if (crmFilter === 'followup') return sig.followupDue;
+    if (crmFilter === 'dueToday') return sig.dueToday > 0;
+    if (crmFilter === 'overduefollow') return sig.overdue > 0;
     if (crmFilter === 'attention') return sig.needsAttention;
     if (crmFilter === 'overdue') return sig.paymentOverdue;
     if (crmFilter === 'dormant') return sig.dormant;
+    if (crmFilter === 'vip') return sig.isVip;
     if (crmFilter === 'leads') return sig.isLead;
+    if (crmFilter === 'nevercontacted') return sig.neverContacted;
     return true;
   }
 
@@ -22528,7 +22590,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const list = $('wl-list'), empty = $('wl-empty'), count = $('wl-count');
     if (!list) return;
     const today = startOfToday(), horizon = today + 7 * 864e5;
-    const overdueTasks = [], todayTasks = [], upcoming = [], pays = [], events = [];
+    const overdueTasks = [], todayTasks = [], upcoming = [], pays = [], events = [], leads = [];
     for (const p of store){
       if (isArchived(p)) continue;
       const b = crmCache[notesKey(p)];
@@ -22536,53 +22598,69 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         for (const t of (b.tasks || [])){
           if (t.done || !t.due) continue;
           const d = startOfDay(new Date(t.due + 'T00:00:00'));
-          const it = { type: 'task', p, t, d };
+          const it = { type: 'task', p, t, d, call: /\bcall\b|☎|phone/i.test(t.text) };
           if (d < today) overdueTasks.push(it); else if (d === today) todayTasks.push(it); else if (d <= horizon) upcoming.push(it);
         }
         for (const l of (b.log || [])){ const d = new Date(l.ts); if (!isNaN(d) && (Date.now() - d.getTime()) < 14 * 864e5) events.push({ type: 'event', p, text: (l.type === 'note' ? 'Note: ' : '') + l.text, d }); }
       }
       const sig = partySignals(p);
       if (sig.paymentOverdue) pays.push({ type: 'pay', p, amount: sig.outstanding });
+      if (sig.isLead && p.createdAt && (Date.now() - (Date.parse(p.createdAt) || 0)) < 21 * 864e5) leads.push({ type: 'lead', p, d: new Date(p.createdAt) });
     }
     overdueTasks.sort((a, b) => a.d - b.d); upcoming.sort((a, b) => a.d - b.d);
-    pays.sort((a, b) => b.amount - a.amount); events.sort((a, b) => b.d - a.d);
+    pays.sort((a, b) => b.amount - a.amount); events.sort((a, b) => b.d - a.d); leads.sort((a, b) => b.d - a.d);
 
     _panelItems = [];
     const push = (it) => { _panelItems.push(it); return _panelItems.length - 1; };
     const taskCard = (it) => { const i = push(it);
+      const ph = (it.p.phone || '');
       const rel = it.d < today ? 'Overdue · ' + fmtDate(it.d) : (it.d === today ? 'Due today' : 'Due ' + fmtDate(it.d));
       return '<div class="wl-card"><span class="wl-pip ' + (it.d < today ? 'r' : 'a') + '"></span><div class="wl-body">' +
-        '<div class="wl-name">' + esc(it.p.name) + '</div><div class="wl-why">' + esc(it.t.text) + '</div>' +
+        '<div class="wl-name">' + (it.call ? '📞 ' : '') + esc(it.p.name) + '</div><div class="wl-why">' + esc(it.t.text) + '</div>' +
         '<div class="wl-sub2">' + rel + '</div><div class="wl-acts">' +
-        '<button data-tp="open" data-i="' + i + '">Open</button><button class="prime" data-tp="done" data-i="' + i + '">Done</button></div></div></div>'; };
+        '<button data-tp="open" data-i="' + i + '">Open</button>' +
+        '<button class="prime" data-tp="done" data-i="' + i + '">Done</button>' +
+        '<button data-tp="snooze" data-i="' + i + '">Snooze</button>' +
+        '<button data-tp="call" data-i="' + i + '"' + (ph ? '' : ' disabled') + '>Call</button>' +
+        '<button data-tp="wa" data-i="' + i + '"' + (ph ? '' : ' disabled') + '>WA</button></div></div></div>'; };
     const payCard = (it) => { const i = push(it);
       return '<div class="wl-card"><span class="wl-pip r"></span><div class="wl-body">' +
         '<div class="wl-name">' + esc(it.p.name) + '</div><div class="wl-why">' + inr(it.amount) + ' outstanding</div>' +
         '<div class="wl-sub2">Chase payment</div><div class="wl-acts">' +
         '<button data-tp="open" data-i="' + i + '">Open</button>' +
+        '<button data-tp="call" data-i="' + i + '"' + ((it.p.phone || '') ? '' : ' disabled') + '>Call</button>' +
         '<button data-tp="wa" data-i="' + i + '"' + ((it.p.phone || '') ? '' : ' disabled') + '>WhatsApp</button></div></div></div>'; };
+    const leadCard = (it) => { const i = push(it);
+      return '<div class="wl-card"><span class="wl-pip b"></span><div class="wl-body">' +
+        '<div class="wl-name">' + esc(it.p.name) + '</div><div class="wl-why">New lead · added ' + relativeFrom(it.d) + '</div>' +
+        '<div class="wl-acts"><button data-tp="open" data-i="' + i + '">Open</button>' +
+        '<button data-tp="call" data-i="' + i + '"' + ((it.p.phone || '') ? '' : ' disabled') + '>Call</button></div></div></div>'; };
     const eventRow = (it) => { const i = push(it);
       return '<div class="wl-event" data-tp="open" data-i="' + i + '"><span class="wl-edot"></span><div>' +
         '<div class="wl-etext">' + esc(it.text) + '</div><div class="wl-emeta">' + esc(it.p.name) + ' · ' + relativeFrom(it.d) + '</div></div></div>'; };
 
     const sec = (title, html, n) => html ? '<div class="wl-sech">' + title + (n != null ? ' <span class="wl-secn">' + n + '</span>' : '') + '</div>' + html : '';
     let body =
-      sec('Overdue', overdueTasks.map(taskCard).join(''), overdueTasks.length) +
-      sec('Payments to chase', pays.slice(0, 8).map(payCard).join(''), pays.length) +
-      sec('Due today', todayTasks.map(taskCard).join(''), todayTasks.length) +
-      sec('This week', upcoming.slice(0, 8).map(taskCard).join(''), upcoming.length) +
-      sec('Recent activity', events.slice(0, 8).map(eventRow).join(''), null);
+      sec('🔴 Overdue', overdueTasks.map(taskCard).join(''), overdueTasks.length) +
+      sec('🟡 Due today', todayTasks.map(taskCard).join(''), todayTasks.length) +
+      sec('💰 Payments to chase', pays.slice(0, 8).map(payCard).join(''), pays.length) +
+      sec('📅 This week', upcoming.slice(0, 8).map(taskCard).join(''), upcoming.length) +
+      sec('🆕 New leads', leads.slice(0, 6).map(leadCard).join(''), leads.length) +
+      sec('📝 Recent activity', events.slice(0, 8).map(eventRow).join(''), null);
 
     if (count) count.textContent = overdueTasks.length + todayTasks.length + pays.length;
     if (!body){ list.innerHTML = ''; if (empty) empty.hidden = false; return; }
     if (empty) empty.hidden = true;
     list.innerHTML = body;
   }
+  function isoDay(ms){ const d = new Date(ms); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
   function panelAction(act, i){
     const it = _panelItems[i]; if (!it) return;
     const ph = (it.p.phone || '').replace(/\D/g, '');
     if (act === 'open'){ openPartyPage(it.p); profileTab = (it.type === 'task') ? 'tasks' : 'overview'; renderProfile(); }
     else if (act === 'done'){ crmUpdate(it.p, it.t.id, { done: true }); renderTasksPanel(); computeKpis(); }
+    else if (act === 'snooze'){ crmUpdate(it.p, it.t.id, { due: isoDay(startOfToday() + 864e5) }); renderTasksPanel(); }
+    else if (act === 'call'){ if (ph){ logInteraction(it.p, 'Called customer', 'call'); window.location.href = 'tel:+91' + ph; } }
     else if (act === 'wa'){ if (ph){ logInteraction(it.p, 'WhatsApp message sent', 'whatsapp'); window.open('https://wa.me/91' + ph, '_blank'); } }
   }
 
@@ -22784,7 +22862,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     $('pp-avatar').className = 'pp-avatar ' + avatarColor(p.name);
     $('pp-name').textContent = p.name;
     $('pp-code').textContent = p.code || '—';
-    $('pp-chips').innerHTML = stageChip(p) + chipsFor(p) + crmBadges(partySignals(p));
+    $('pp-chips').innerHTML = stageChip(p) + healthChip(p) + chipsFor(p) + crmBadges(partySignals(p));
     $('pp-meta').innerHTML = [
       p.poc ? '👤 ' + p.poc : '',
       (p.city || p.state) ? '📍 ' + [p.city, p.state].filter(Boolean).join(', ') : '',
@@ -22804,8 +22882,10 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const p = profileParty, el = $('pp-tabbody'); if (!el) return;
     if (profileTab === 'overview'){
       const rows = orderRows(p);
+      const brief = '<div class="pp-brief"><div class="pp-brief-h">✨ AI summary <span>Next: ' + esc(nextActionText(p)) + '</span></div>' +
+        '<div class="pp-brief-b">' + esc(aiBrief(p)) + '</div></div>';
       const recent = '<div class="pd-section-t" style="margin-top:18px;">Recent orders</div>' + ordersTable(rows, 5);
-      el.innerHTML = renderDetails(p) + recent;
+      el.innerHTML = brief + renderDetails(p) + recent;
       return;
     }
     if (profileTab === 'timeline'){ el.innerHTML = renderTimeline(p); return; }
@@ -23171,6 +23251,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       profileTab = 'overview'; renderProfile();
     }
 
+    logInteraction(profileParty, 'Profile updated', 'edit');
     const local = Object.assign({}, profileParty, upd, { phone: phoneRaw ? phone : profileParty.phone, updatedAt: new Date().toISOString() });
     const url = (window.ATLAS_APPS_SCRIPT_URL || localStorage.getItem('atlas-apps-script-url') || '').trim();
     if (!url){ applyRecord(local); toast('Party updated (saved locally — backend not wired).'); return; }
@@ -23621,6 +23702,12 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     border-radius: 9px; color: var(--text); padding: 12px; font-size: 13px; font-family: inherit; line-height: 1.5; }
   .pp-notes:focus { outline: none; border-color: var(--emerald); }
   .pp-tabbody .pd-edit-acts { margin-top: 16px; }
+  .pp-brief { border: 1px solid rgba(78,222,163,0.28); background: linear-gradient(180deg, rgba(78,222,163,0.06), transparent);
+    border-radius: 11px; padding: 13px 15px; margin-bottom: 18px; }
+  .pp-brief-h { display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+    font-family: var(--fm); font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--emerald); margin-bottom: 7px; }
+  .pp-brief-h span { color: var(--text-2); text-transform: none; letter-spacing: 0; font-size: 11.5px; }
+  .pp-brief-b { font-size: 13.5px; color: var(--text); line-height: 1.55; }
   .pp-meta span:not(:last-child)::after { content: '·'; margin: 0 8px; color: var(--text-3); }
 
   /* Grouped activity timeline */
