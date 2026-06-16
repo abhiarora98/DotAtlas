@@ -2757,9 +2757,17 @@
       </div>
       <div class="kpis" id="pl-kpis">
         <div class="kpi pl-kpi" data-kpi="followup"><div class="lbl"><span>Follow-ups Due</span><span class="ind a"></span></div><div class="v" id="kpi-followup">0</div><div class="d"><span class="arr">→</span>due today &amp; overdue</div></div>
+        <div class="kpi pl-kpi" data-kpi="attention"><div class="lbl"><span>Needing Attention</span><span class="ind b"></span></div><div class="v" id="kpi-attention">0</div><div class="d"><span class="arr">→</span>act before they slip</div></div>
         <div class="kpi pl-kpi" data-kpi="overdue"><div class="lbl"><span>Overdue Payments</span><span class="ind r"></span></div><div class="v" id="kpi-overdue">0</div><div class="d dn"><span class="arr">→</span>outstanding to chase</div></div>
-        <div class="kpi pl-kpi" data-kpi="dormant"><div class="lbl"><span>Dormant Customers</span><span class="ind"></span></div><div class="v" id="kpi-dormant">0</div><div class="d"><span class="arr">→</span>no order in 90d+</div></div>
-        <div class="kpi pl-kpi" data-kpi="highvalue"><div class="lbl"><span>High-Value · Need Contact</span><span class="ind b"></span></div><div class="v" id="kpi-highvalue">0</div><div class="d"><span class="arr">→</span>VIPs gone quiet</div></div>
+        <div class="kpi pl-kpi" data-kpi="leads"><div class="lbl"><span>New Leads</span><span class="ind"></span></div><div class="v" id="kpi-leads">0</div><div class="d"><span class="arr">→</span>qualify &amp; convert</div></div>
+      </div>
+      <div class="pl-views" id="pl-views">
+        <button class="pl-view on" data-sv="all">All parties</button>
+        <button class="pl-view" data-sv="followup">My Follow-ups</button>
+        <button class="pl-view" data-sv="attention">Needs Attention</button>
+        <button class="pl-view" data-sv="overdue">Payment Overdue</button>
+        <button class="pl-view" data-sv="dormant">Dormant</button>
+        <button class="pl-view" data-sv="leads">New Leads</button>
       </div>
       <div class="row-2" style="grid-template-columns:1.5fr 1fr; align-items:start;">
         <div class="card">
@@ -22064,6 +22072,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         email: r.email || '', billingAddress: r.billingAddress || '',
         shippingAddress: r.shippingAddress || '', creditLimit: r.creditLimit || '',
         createdAt: r.createdAt || '', updatedAt: r.updatedAt || '',
+        stage: r.stage || '', owner: r.owner || '',
       };
     });
     sortStore();
@@ -22182,13 +22191,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       if (fState && p.state !== fState) return false;
       if (fPoc && p.poc !== fPoc) return false;
       if (fStatus && fStatus !== 'Archived' && (p.status || 'Active') !== fStatus) return false;
-      if (crmFilter){
-        const sig = partySignals(p);
-        if (crmFilter === 'followup' && !sig.followupDue) return false;
-        if (crmFilter === 'overdue' && !sig.paymentOverdue) return false;
-        if (crmFilter === 'dormant' && !sig.dormant) return false;
-        if (crmFilter === 'highvalue' && !sig.needsContact) return false;
-      }
+      if (crmFilter && !matchesCrmFilter(p)) return false;
       if (!q) return true;
       const hay = [p.name, p.code, p.gst, p.aadhaar, p.phone, p.city, p.state, p.poc, p.type, p.status].join(' ').toLowerCase();
       return hay.indexOf(q) !== -1;
@@ -22234,19 +22237,19 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const archived = isArchived(p);
     const ph = (p.phone || '').replace(/\D/g, '');
     const sig = partySignals(p);
-    const meta = [p.poc, p.state, p.city].filter(Boolean).join(' · ');
+    const meta = [p.state, p.city].filter(Boolean).join(' · ');
     const lc = sig.lastContact ? 'Last contact: ' + relativeFrom(sig.lastContact) : 'No contact logged';
     const next = sig.nextFollowup ? ' &nbsp;·&nbsp; ⏰ Next: ' + esc(fmtDate(sig.nextFollowup)) : '';
-    // VIP chip comes from chipsFor; add the CRM relationship badges.
+    const owner = ownerOf(p);
     return '<div class="pl-row h-' + h.level + (archived ? ' archived' : '') + '" role="listitem" data-name="' + esc(normName(p.name)) + '">' +
       '<span class="pl-av ' + avatarColor(p.name) + '">' + initials(p.name) + '</span>' +
       '<div class="pl-main">' +
         '<div class="pl-name-row">' +
           '<span class="pl-name">' + esc(p.name) + '</span>' +
           (p.code ? '<span class="pl-codebadge">' + esc(p.code) + '</span>' : '') +
-          chipsFor(p) + crmBadges(sig) +
+          stageChip(p) + chipsFor(p) + crmBadges(sig) +
         '</div>' +
-        '<div class="pl-meta">' + (esc(meta) || '—') + (ph ? ' &nbsp;·&nbsp; 📞 ' + esc(p.phone) : '') + '</div>' +
+        '<div class="pl-meta">' + (owner ? '👤 ' + esc(owner) + ' &nbsp;·&nbsp; ' : '') + (esc(meta) || '—') + (ph ? ' &nbsp;·&nbsp; 📞 ' + esc(p.phone) : '') + '</div>' +
         '<div class="pl-meta pl-crmline">🕑 ' + esc(lc) + next + '</div>' +
       '</div>' +
       '<div class="pl-side">' +
@@ -22462,67 +22465,125 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     return { overdue, dueToday, hasFollowupDue: (overdue + dueToday) > 0,
       nextFollowup: earliest != null ? new Date(earliest) : null, lastContact: lc };
   }
+  const STAGES = ['Lead', 'Qualified', 'Active', 'VIP', 'Dormant', 'Lost'];
+  function stageOf(p){
+    if (p.stage && STAGES.indexOf(p.stage) >= 0) return p.stage;
+    const h = partyHealth(p); const s = partyStats(p);
+    const idle = s.lastOrder ? Math.round((Date.now() - s.lastOrder.getTime()) / 864e5) : null;
+    const hadOrders = ((piByParty.get(normName(p.name)) || {}).count > 0) || s.businessValue > 0;
+    if (idle != null && idle > 180 && hadOrders) return 'Dormant';
+    if (h.isHighValue) return 'VIP';
+    if (hadOrders) return 'Active';
+    return 'Lead';
+  }
+  function ownerOf(p){ return p.owner || p.poc || ''; }
+
   function partySignals(p){
     const info = crmInfo(p); const s = partyStats(p); const h = partyHealth(p);
     const idle = s.lastOrder ? Math.round((Date.now() - s.lastOrder.getTime()) / 864e5) : null;
     const hadOrders = ((piByParty.get(normName(p.name)) || {}).count > 0) || s.businessValue > 0;
+    const stage = stageOf(p);
+    const paymentOverdue = s.outstanding > 50000;
+    const dormant = stage === 'Dormant' || (idle != null && idle > 90 && hadOrders);
+    const needsContact = h.isHighValue && (!info.lastContact || (Date.now() - info.lastContact.getTime()) > 30 * 864e5);
     return {
-      outstanding: s.outstanding, isVip: h.isHighValue,
-      paymentOverdue: s.outstanding > 50000,
-      dormant: idle != null && idle > 90 && hadOrders,
-      followupDue: info.hasFollowupDue, overdue: info.overdue,
-      needsContact: h.isHighValue && (!info.lastContact || (Date.now() - info.lastContact.getTime()) > 30 * 864e5),
+      outstanding: s.outstanding, isVip: h.isHighValue, stage, owner: ownerOf(p),
+      paymentOverdue, dormant,
+      followupDue: info.hasFollowupDue, overdue: info.overdue, needsContact,
+      isLead: stage === 'Lead',
+      needsAttention: paymentOverdue || info.hasFollowupDue || dormant || needsContact,
       lastContact: info.lastContact, nextFollowup: info.nextFollowup, idle,
     };
   }
   let crmFilter = null;
   function computeKpis(){
-    let f = 0, o = 0, d = 0, hv = 0;
+    let f = 0, a = 0, o = 0, l = 0;
     for (const p of store){ if (isArchived(p)) continue; const sig = partySignals(p);
-      if (sig.followupDue) f++; if (sig.paymentOverdue) o++; if (sig.dormant) d++; if (sig.needsContact) hv++; }
+      if (sig.followupDue) f++; if (sig.needsAttention) a++; if (sig.paymentOverdue) o++; if (sig.isLead) l++; }
     const set = (id, v) => { const e = $(id); if (e) e.textContent = v; };
-    set('kpi-followup', f); set('kpi-overdue', o); set('kpi-dormant', d); set('kpi-highvalue', hv);
+    set('kpi-followup', f); set('kpi-attention', a); set('kpi-overdue', o); set('kpi-leads', l);
     document.querySelectorAll('.pl-kpi').forEach(k => k.classList.toggle('active', k.getAttribute('data-kpi') === crmFilter));
+    document.querySelectorAll('.pl-view').forEach(v => v.classList.toggle('on', v.getAttribute('data-sv') === (crmFilter || 'all')));
   }
   function crmFilterLabel(){
-    return { followup: 'Follow-ups due', overdue: 'Overdue payments', dormant: 'Dormant customers', highvalue: 'High-value · need contact' }[crmFilter] || '';
+    return { followup: 'Follow-ups due', attention: 'Needs attention', overdue: 'Payment overdue',
+      dormant: 'Dormant', leads: 'New leads' }[crmFilter] || '';
+  }
+  function matchesCrmFilter(p){
+    if (!crmFilter) return true;
+    const sig = partySignals(p);
+    if (crmFilter === 'followup') return sig.followupDue;
+    if (crmFilter === 'attention') return sig.needsAttention;
+    if (crmFilter === 'overdue') return sig.paymentOverdue;
+    if (crmFilter === 'dormant') return sig.dormant;
+    if (crmFilter === 'leads') return sig.isLead;
+    return true;
   }
 
   // ---------- My Tasks & Follow-ups panel ----------
+  // Unified "Today" inbox: tasks (due/overdue), payment chases, and recent
+  // activity across all parties — what a salesperson should action now.
   let _panelItems = [];
   function renderTasksPanel(){
     const list = $('wl-list'), empty = $('wl-empty'), count = $('wl-count');
     if (!list) return;
     const today = startOfToday(), horizon = today + 7 * 864e5;
-    const items = [];
+    const overdueTasks = [], todayTasks = [], upcoming = [], pays = [], events = [];
     for (const p of store){
       if (isArchived(p)) continue;
-      const b = crmCache[notesKey(p)]; if (!b) continue;
-      for (const t of (b.tasks || [])){
-        if (t.done || !t.due) continue;
-        const d = startOfDay(new Date(t.due + 'T00:00:00'));
-        if (d <= horizon) items.push({ p, t, d, overdue: d < today });
+      const b = crmCache[notesKey(p)];
+      if (b){
+        for (const t of (b.tasks || [])){
+          if (t.done || !t.due) continue;
+          const d = startOfDay(new Date(t.due + 'T00:00:00'));
+          const it = { type: 'task', p, t, d };
+          if (d < today) overdueTasks.push(it); else if (d === today) todayTasks.push(it); else if (d <= horizon) upcoming.push(it);
+        }
+        for (const l of (b.log || [])){ const d = new Date(l.ts); if (!isNaN(d) && (Date.now() - d.getTime()) < 14 * 864e5) events.push({ type: 'event', p, text: (l.type === 'note' ? 'Note: ' : '') + l.text, d }); }
       }
+      const sig = partySignals(p);
+      if (sig.paymentOverdue) pays.push({ type: 'pay', p, amount: sig.outstanding });
     }
-    items.sort((a, b) => a.d - b.d);
-    _panelItems = items;
-    if (count) count.textContent = items.filter(i => i.d <= today).length;
-    if (!items.length){ list.innerHTML = ''; if (empty) empty.hidden = false; return; }
+    overdueTasks.sort((a, b) => a.d - b.d); upcoming.sort((a, b) => a.d - b.d);
+    pays.sort((a, b) => b.amount - a.amount); events.sort((a, b) => b.d - a.d);
+
+    _panelItems = [];
+    const push = (it) => { _panelItems.push(it); return _panelItems.length - 1; };
+    const taskCard = (it) => { const i = push(it);
+      const rel = it.d < today ? 'Overdue · ' + fmtDate(it.d) : (it.d === today ? 'Due today' : 'Due ' + fmtDate(it.d));
+      return '<div class="wl-card"><span class="wl-pip ' + (it.d < today ? 'r' : 'a') + '"></span><div class="wl-body">' +
+        '<div class="wl-name">' + esc(it.p.name) + '</div><div class="wl-why">' + esc(it.t.text) + '</div>' +
+        '<div class="wl-sub2">' + rel + '</div><div class="wl-acts">' +
+        '<button data-tp="open" data-i="' + i + '">Open</button><button class="prime" data-tp="done" data-i="' + i + '">Done</button></div></div></div>'; };
+    const payCard = (it) => { const i = push(it);
+      return '<div class="wl-card"><span class="wl-pip r"></span><div class="wl-body">' +
+        '<div class="wl-name">' + esc(it.p.name) + '</div><div class="wl-why">' + inr(it.amount) + ' outstanding</div>' +
+        '<div class="wl-sub2">Chase payment</div><div class="wl-acts">' +
+        '<button data-tp="open" data-i="' + i + '">Open</button>' +
+        '<button data-tp="wa" data-i="' + i + '"' + ((it.p.phone || '') ? '' : ' disabled') + '>WhatsApp</button></div></div></div>'; };
+    const eventRow = (it) => { const i = push(it);
+      return '<div class="wl-event" data-tp="open" data-i="' + i + '"><span class="wl-edot"></span><div>' +
+        '<div class="wl-etext">' + esc(it.text) + '</div><div class="wl-emeta">' + esc(it.p.name) + ' · ' + relativeFrom(it.d) + '</div></div></div>'; };
+
+    const sec = (title, html, n) => html ? '<div class="wl-sech">' + title + (n != null ? ' <span class="wl-secn">' + n + '</span>' : '') + '</div>' + html : '';
+    let body =
+      sec('Overdue', overdueTasks.map(taskCard).join(''), overdueTasks.length) +
+      sec('Payments to chase', pays.slice(0, 8).map(payCard).join(''), pays.length) +
+      sec('Due today', todayTasks.map(taskCard).join(''), todayTasks.length) +
+      sec('This week', upcoming.slice(0, 8).map(taskCard).join(''), upcoming.length) +
+      sec('Recent activity', events.slice(0, 8).map(eventRow).join(''), null);
+
+    if (count) count.textContent = overdueTasks.length + todayTasks.length + pays.length;
+    if (!body){ list.innerHTML = ''; if (empty) empty.hidden = false; return; }
     if (empty) empty.hidden = true;
-    list.innerHTML = items.slice(0, 40).map((it, i) => {
-      const rel = it.overdue ? 'Overdue · ' + fmtDate(it.d) : (it.d === today ? 'Due today' : 'Due ' + fmtDate(it.d));
-      return '<div class="wl-card"><span class="wl-pip ' + (it.overdue ? 'r' : 'a') + '"></span><div class="wl-body">' +
-        '<div class="wl-name">' + esc(it.p.name) + '</div>' +
-        '<div class="wl-why">' + esc(it.t.text) + '</div>' +
-        '<div class="wl-sub2">' + rel + '</div>' +
-        '<div class="wl-acts"><button data-tp="open" data-i="' + i + '">Open</button>' +
-        '<button class="prime" data-tp="done" data-i="' + i + '">Mark done</button></div></div>';
-    }).join('');
+    list.innerHTML = body;
   }
   function panelAction(act, i){
     const it = _panelItems[i]; if (!it) return;
-    if (act === 'open'){ openPartyPage(it.p); profileTab = 'tasks'; renderProfile(); }
+    const ph = (it.p.phone || '').replace(/\D/g, '');
+    if (act === 'open'){ openPartyPage(it.p); profileTab = (it.type === 'task') ? 'tasks' : 'overview'; renderProfile(); }
     else if (act === 'done'){ crmUpdate(it.p, it.t.id, { done: true }); renderTasksPanel(); computeKpis(); }
+    else if (act === 'wa'){ if (ph){ logInteraction(it.p, 'WhatsApp message sent', 'whatsapp'); window.open('https://wa.me/91' + ph, '_blank'); } }
   }
 
   function wlAction(act, i){
@@ -22568,12 +22629,17 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
     return colors[h % colors.length];
   }
-  // Base identity chips (the urgency badges come from crmBadges()).
+  // Relationship-stage chip (Lead / Qualified / Active / VIP / Dormant / Lost).
+  function stageChip(p){
+    const st = stageOf(p);
+    const cls = { Lead: 'blue', Qualified: 'blue', Active: 'green', VIP: 'purple', Dormant: 'neutral', Lost: 'neutral' }[st] || 'neutral';
+    return '<span class="chip ' + cls + '">' + st + '</span>';
+  }
+  // Base identity chips (stage + urgency badges are added separately).
   function chipsFor(p){
     const h = partyHealth(p); const out = [];
     if (isArchived(p)) out.push('<span class="chip arch">Archived</span>');
     if (h.isNew && !isArchived(p)) out.push('<span class="chip blue">New</span>');
-    if (h.isHighValue) out.push('<span class="chip purple">VIP</span>');
     if ((p.type || 'Customer') === 'Supplier') out.push('<span class="chip neutral">Supplier</span>');
     else if (p.type === 'Both') out.push('<span class="chip neutral">Both</span>');
     return out.join('');
@@ -22666,6 +22732,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     return '' +
       '<div class="pd-section-t">Overview</div>' +
       fld('Party Name', inp('pde-name', p.name)) +
+      '<div class="ap-row-2">' + fld('Stage', sel('pde-stage', stageOf(p), STAGES)) +
+        fld('Owner', sel('pde-owner', ownerOf(p), ['—', ...(V.pocs || [])])) + '</div>' +
       '<div class="ap-row-2">' + fld('Type', sel('pde-type', p.type || 'Customer', ['Customer', 'Supplier', 'Both'])) +
         fld('Status', sel('pde-status', p.status || 'Active', statusOpts)) + '</div>' +
       '<div class="pd-section-t">Contact details</div>' +
@@ -22716,7 +22784,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     $('pp-avatar').className = 'pp-avatar ' + avatarColor(p.name);
     $('pp-name').textContent = p.name;
     $('pp-code').textContent = p.code || '—';
-    $('pp-chips').innerHTML = chipsFor(p) + crmBadges(partySignals(p));
+    $('pp-chips').innerHTML = stageChip(p) + chipsFor(p) + crmBadges(partySignals(p));
     $('pp-meta').innerHTML = [
       p.poc ? '👤 ' + p.poc : '',
       (p.city || p.state) ? '📍 ' + [p.city, p.state].filter(Boolean).join(', ') : '',
@@ -23082,6 +23150,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       state: g('pde-state') === '—' ? '' : g('pde-state'), city: g('pde-city').toUpperCase(),
       email: g('pde-email'), creditLimit: g('pde-credit').replace(/[^0-9.]/g, ''),
       billingAddress: g('pde-billing').toUpperCase(), shippingAddress: g('pde-shipping').toUpperCase(),
+      stage: g('pde-stage'), owner: g('pde-owner') === '—' ? '' : g('pde-owner'),
     };
 
     function applyRecord(rec){
@@ -23214,7 +23283,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       status: entry.status || 'Active', email: entry.email || '',
       billingAddress: entry.billingAddress || '', shippingAddress: entry.shippingAddress || '',
       creditLimit: entry.creditLimit || '', createdAt: entry.createdAt || now,
-      updatedAt: entry.updatedAt || now };
+      updatedAt: entry.updatedAt || now, stage: entry.stage || '', owner: entry.owner || entry.poc || '' };
     const idx = store.findIndex(p => normName(p.name) === key);
     if (idx >= 0) store[idx] = Object.assign(store[idx], rec); else store.unshift(rec);
     sortStore();                 // newest-created first → new party leads
@@ -23231,10 +23300,10 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       const el = $(id); if (el) el.addEventListener('change', renderList);
     });
     const wl = $('wl-refresh'); if (wl) wl.addEventListener('click', () => loadParties(true));
-    // "My Tasks & Follow-ups" panel actions.
+    // "Today" inbox actions (cards have buttons; event rows are clickable).
     const wlList = $('wl-list');
     if (wlList) wlList.addEventListener('click', (e) => {
-      const b = e.target.closest('button[data-tp]'); if (!b) return;
+      const b = e.target.closest('[data-tp]'); if (!b) return;
       panelAction(b.getAttribute('data-tp'), parseInt(b.getAttribute('data-i'), 10));
     });
 
@@ -23244,6 +23313,15 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       const k = e.target.closest('.pl-kpi[data-kpi]'); if (!k) return;
       const f = k.getAttribute('data-kpi');
       crmFilter = (crmFilter === f) ? null : f;
+      computeKpis(); renderList();
+    });
+
+    // Saved views (HubSpot/Pipedrive-style quick filters).
+    const views = $('pl-views');
+    if (views) views.addEventListener('click', (e) => {
+      const v = e.target.closest('.pl-view[data-sv]'); if (!v) return;
+      const sv = v.getAttribute('data-sv');
+      crmFilter = (sv === 'all') ? null : sv;
       computeKpis(); renderList();
     });
 
@@ -23598,6 +23676,20 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   .pp-noteacts button[data-pa="delcrm"]:hover { color: var(--rose); }
 
   /* ===== CRM workspace ===== */
+  .pl-views { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 2px; }
+  .pl-view { background: transparent; border: 1px solid var(--line); color: var(--text-2);
+    padding: 6px 13px; border-radius: 999px; font-size: 12px; cursor: pointer; transition: all 150ms var(--ease); }
+  .pl-view:hover { color: var(--text); border-color: var(--text-3); }
+  .pl-view.on { background: var(--emerald-soft); color: var(--emerald); border-color: rgba(78,222,163,0.4); }
+  .wl-sech { font-family: var(--fm); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-3); margin: 14px 0 8px; display: flex; align-items: center; gap: 7px; }
+  .wl-sech:first-child { margin-top: 0; }
+  .wl-secn { background: var(--surface-3); border-radius: 999px; padding: 1px 7px; color: var(--text-2); }
+  .wl-event { display: flex; gap: 9px; padding: 7px 2px; cursor: pointer; align-items: flex-start; }
+  .wl-event:hover .wl-etext { color: var(--emerald); }
+  .wl-edot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-3); margin-top: 5px; flex: none; }
+  .wl-etext { font-size: 12.5px; color: var(--text); }
+  .wl-emeta { font-family: var(--fm); font-size: 10px; color: var(--text-3); margin-top: 2px; }
   .pl-kpi { cursor: pointer; transition: border-color 160ms var(--ease), transform 160ms var(--ease); }
   .pl-kpi:hover { border-color: var(--text-3); transform: translateY(-1px); }
   .pl-kpi.active { border-color: var(--emerald); box-shadow: 0 0 0 1px var(--emerald) inset; }

@@ -134,9 +134,10 @@ function handleParty(payload) {
       'CreatedAt', 'Party Name', 'Party Code', 'Sales POC',
       'GSTIN', 'Aadhaar', 'State', 'Phone', 'City', 'Type', 'Status',
       'Email', 'Billing Address', 'Shipping Address', 'Credit Limit', 'UpdatedAt',
+      'Stage', 'Owner',
     ]);
     sheet.setFrozenRows(1);
-    sheet.getRange('A1:P1').setFontWeight('bold');
+    sheet.getRange('A1:R1').setFontWeight('bold');
   }
 
   const p = payload.party || {};
@@ -183,9 +184,10 @@ function handleParty(payload) {
   const code = nextPartyCode_(prefix, existingCodes);
 
   var now = new Date();
+  var stage = String(p.stage || ''); var owner = String(p.owner || poc);
   sheet.appendRow([
     now, name, code, poc, gst, aadhaar, state, phone, city, type, status,
-    email, billing, shipping, creditLimit, now,
+    email, billing, shipping, creditLimit, now, stage, owner,
   ]);
 
   return jsonResponse({
@@ -193,7 +195,8 @@ function handleParty(payload) {
     record: { createdAt: now, name: name, code: code, poc: poc, gst: gst,
               aadhaar: aadhaar, state: state, phone: phone, city: city,
               type: type, status: status, email: email, billingAddress: billing,
-              shippingAddress: shipping, creditLimit: creditLimit, updatedAt: now },
+              shippingAddress: shipping, creditLimit: creditLimit, updatedAt: now,
+              stage: stage, owner: owner },
   });
 }
 
@@ -220,7 +223,7 @@ function handleUpdateParty(payload) {
   }
   if (rowNum < 2) return jsonResponse({ ok: false, error: 'No party found with code ' + code });
 
-  const r = sheet.getRange(rowNum, 1, 1, 16).getValues()[0];
+  const r = sheet.getRange(rowNum, 1, 1, 18).getValues()[0];
   function keep(v, old) { return v != null ? v : (old || ''); }
   const createdAt = r[0] || '';
   const rec = {
@@ -239,12 +242,14 @@ function handleUpdateParty(payload) {
     creditLimit: p.creditLimit != null
       ? (String(p.creditLimit).trim() === '' ? '' : String(Number(String(p.creditLimit).replace(/[^0-9.]/g, '')) || 0))
       : (r[14] || ''),
+    stage: keep(p.stage, r[16]),
+    owner: keep(p.owner, r[17]),
   };
   const updatedAt = new Date();
-  sheet.getRange(rowNum, 1, 1, 16).setValues([[
+  sheet.getRange(rowNum, 1, 1, 18).setValues([[
     createdAt, rec.name, code, rec.poc, rec.gst, rec.aadhaar, rec.state,
     rec.phone, rec.city, rec.type, rec.status, rec.email, rec.billing,
-    rec.shipping, rec.creditLimit, updatedAt,
+    rec.shipping, rec.creditLimit, updatedAt, rec.stage, rec.owner,
   ]]);
 
   return jsonResponse({
@@ -253,7 +258,8 @@ function handleUpdateParty(payload) {
               gst: rec.gst, aadhaar: rec.aadhaar, state: rec.state, phone: rec.phone,
               city: rec.city, type: rec.type, status: rec.status, email: rec.email,
               billingAddress: rec.billing, shippingAddress: rec.shipping,
-              creditLimit: rec.creditLimit, updatedAt: updatedAt },
+              creditLimit: rec.creditLimit, updatedAt: updatedAt,
+              stage: rec.stage, owner: rec.owner },
   });
 }
 
@@ -262,7 +268,7 @@ function handleListParties() {
   if (!sheet) return jsonResponse({ ok: true, count: 0, parties: [] });
   const last = sheet.getLastRow();
   if (last < 2) return jsonResponse({ ok: true, count: 0, parties: [] });
-  const rows = sheet.getRange(2, 1, last - 1, 16).getValues();
+  const rows = sheet.getRange(2, 1, last - 1, 18).getValues();
   const parties = [];
   for (var i = 0; i < rows.length; i++) {
     var r = rows[i];
@@ -272,7 +278,7 @@ function handleListParties() {
       gst: r[4] || '', aadhaar: r[5] || '', state: r[6] || '', phone: r[7] || '',
       city: r[8] || '', type: r[9] || 'Customer', status: r[10] || 'Active',
       email: r[11] || '', billingAddress: r[12] || '', shippingAddress: r[13] || '',
-      creditLimit: r[14] || '', updatedAt: r[15] || '',
+      creditLimit: r[14] || '', updatedAt: r[15] || '', stage: r[16] || '', owner: r[17] || '',
     });
   }
   return jsonResponse({ ok: true, count: parties.length, parties: parties });

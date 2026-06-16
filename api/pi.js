@@ -37,8 +37,9 @@ const PARTIES_HEADERS = [
   'CreatedAt', 'Party Name', 'Party Code', 'Sales POC',
   'GSTIN', 'Aadhaar', 'State', 'Phone', 'City', 'Type', 'Status',
   'Email', 'Billing Address', 'Shipping Address', 'Credit Limit', 'UpdatedAt',
+  'Stage', 'Owner',
 ];
-const PARTIES_RANGE = PARTIES_SHEET + '!A:P';
+const PARTIES_RANGE = PARTIES_SHEET + '!A:R';
 
 // CRM entities (tasks, contacts, documents, interaction log) for each party,
 // so they sync across users/devices. One row per entity, keyed by PartyCode.
@@ -449,7 +450,7 @@ async function handleParty(sheets, spreadsheetId, payload, res) {
     });
     await sheets.spreadsheets.values.update({
       spreadsheetId,
-      range: PARTIES_SHEET + '!A1:P1',
+      range: PARTIES_SHEET + '!A1:R1',
       valueInputOption: 'USER_ENTERED',
       requestBody: { values: [PARTIES_HEADERS] },
     });
@@ -490,6 +491,7 @@ async function handleParty(sheets, spreadsheetId, payload, res) {
         gst, aadhaar, state,
         phone, city, type, status,
         email, billing, shipping, creditLimit, now,
+        String(p.stage || ''), String(p.owner || poc),
       ]],
     },
   });
@@ -498,7 +500,8 @@ async function handleParty(sheets, spreadsheetId, payload, res) {
     ok: true, party: name, code,
     record: { createdAt: now, name, code, poc, gst, aadhaar, state, phone,
               city, type, status, email, billingAddress: billing,
-              shippingAddress: shipping, creditLimit, updatedAt: now },
+              shippingAddress: shipping, creditLimit, updatedAt: now,
+              stage: String(p.stage || ''), owner: String(p.owner || poc) },
   });
 }
 
@@ -525,7 +528,7 @@ async function handleUpdateParty(sheets, spreadsheetId, payload, res) {
 
   // Read the current row so unspecified fields (and CreatedAt) are preserved.
   const cur = await sheets.spreadsheets.values.get({
-    spreadsheetId, range: PARTIES_SHEET + '!A' + rowNum + ':P' + rowNum });
+    spreadsheetId, range: PARTIES_SHEET + '!A' + rowNum + ':R' + rowNum });
   const r = (cur.data.values && cur.data.values[0]) || [];
   const keep = (v, old) => (v != null ? v : (old || ''));
 
@@ -546,18 +549,20 @@ async function handleUpdateParty(sheets, spreadsheetId, payload, res) {
     creditLimit: p.creditLimit != null
       ? (String(p.creditLimit).trim() === '' ? '' : String(Number(String(p.creditLimit).replace(/[^0-9.]/g, '')) || 0))
       : (r[14] || ''),
+    stage: keep(p.stage, r[16]),
+    owner: keep(p.owner, r[17]),
   };
   const updatedAt = new Date().toISOString();
 
   await sheets.spreadsheets.values.update({
     spreadsheetId,
-    range: PARTIES_SHEET + '!A' + rowNum + ':P' + rowNum,
+    range: PARTIES_SHEET + '!A' + rowNum + ':R' + rowNum,
     valueInputOption: 'USER_ENTERED',
     requestBody: {
       values: [[
         createdAt, rec.name, code, rec.poc, rec.gst, rec.aadhaar, rec.state,
         rec.phone, rec.city, rec.type, rec.status, rec.email, rec.billing,
-        rec.shipping, rec.creditLimit, updatedAt,
+        rec.shipping, rec.creditLimit, updatedAt, rec.stage, rec.owner,
       ]],
     },
   });
@@ -569,7 +574,7 @@ async function handleUpdateParty(sheets, spreadsheetId, payload, res) {
               city: rec.city, type: rec.type, status: rec.status,
               email: rec.email, billingAddress: rec.billing,
               shippingAddress: rec.shipping, creditLimit: rec.creditLimit,
-              updatedAt },
+              updatedAt, stage: rec.stage, owner: rec.owner },
   });
 }
 
@@ -595,7 +600,7 @@ async function handleListParties(sheets, spreadsheetId, _payload, res) {
       gst: r[4] || '', aadhaar: r[5] || '', state: r[6] || '', phone: r[7] || '',
       city: r[8] || '', type: r[9] || 'Customer', status: r[10] || 'Active',
       email: r[11] || '', billingAddress: r[12] || '', shippingAddress: r[13] || '',
-      creditLimit: r[14] || '', updatedAt: r[15] || '',
+      creditLimit: r[14] || '', updatedAt: r[15] || '', stage: r[16] || '', owner: r[17] || '',
     });
   }
   return res.status(200).json({ ok: true, count: parties.length, parties });

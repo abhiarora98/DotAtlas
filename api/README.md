@@ -97,7 +97,9 @@ in ~300ms.
   Also accepts `email`, `billingAddress`, `shippingAddress`,
   `creditLimit`. Parties columns: `CreatedAt · Party Name · Party Code ·
   Sales POC · GSTIN · Aadhaar · State · Phone · City · Type · Status ·
-  Email · Billing Address · Shipping Address · Credit Limit · UpdatedAt`.
+  Email · Billing Address · Shipping Address · Credit Limit · UpdatedAt ·
+  Stage · Owner` (Stage ∈ Lead/Qualified/Active/VIP/Dormant/Lost; Owner =
+  assigned salesperson — both editable from the profile Settings tab).
 - **`POST /api/pi`** with body `{ kind: 'listParties' }` → returns
   `{ ok, count, parties: [...] }`, every row of the `Parties` tab as
   objects. Powers the live All Parties list + search/filters in the UI.
