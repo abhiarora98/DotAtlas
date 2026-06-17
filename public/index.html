@@ -1880,6 +1880,41 @@
   .pi-sticky-total[hidden] { display: none; }
   .pi-sticky-total span { font-family: var(--fm); font-size: 10px; letter-spacing: 0.1em; color: var(--text-3); }
   .pi-sticky-total b { font-family: var(--fd); font-size: 18px; color: var(--text); font-variant-numeric: tabular-nums; }
+
+  /* Split-screen: form left, live PDF preview right */
+  .cp-split { display: grid; grid-template-columns: 1fr 0.82fr; gap: 16px; align-items: start; }
+  .cp-left { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+  .cp-right { position: sticky; top: 14px; }
+  .cp-preview-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+  .cp-preview-head span:first-child { font-family: var(--fm); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-2); }
+  .cp-preview-hint { font-family: var(--fm); font-size: 10px; color: var(--text-3); }
+  .cp-preview { background: #fff; border: 1px solid var(--line-2); border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+    max-height: calc(100vh - 110px); overflow-y: auto; }
+  @media (max-width: 1080px){ .cp-split { grid-template-columns: 1fr; } .cp-right { position: static; } .cp-preview { max-height: none; } }
+
+  /* Invoice preview document (always light) */
+  .inv { color: #111; padding: 22px; font-family: Arial, Helvetica, sans-serif; font-size: 11.5px; }
+  .inv-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .inv-h { font-size: 22px; font-weight: 800; }
+  .inv-meta { color: #555; margin-top: 3px; } .inv-meta span { color: #999; }
+  .inv-brand { font-weight: 800; text-align: right; color: #111; line-height: 1.1; }
+  .inv-boxes { display: flex; gap: 12px; margin: 16px 0; }
+  .inv-box { flex: 1; background: #f4f4f5; border-radius: 7px; padding: 10px 12px; }
+  .inv-box h5 { margin: 0 0 4px; font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.05em; color: #888; }
+  .inv-box b { font-size: 12.5px; } .inv-box small { display: block; color: #666; margin-top: 2px; }
+  .inv-box .g { margin-top: 5px; font-size: 10.5px; color: #444; }
+  .inv-t { width: 100%; border-collapse: collapse; margin-top: 6px; }
+  .inv-t thead th { background: #2f3033; color: #fff; padding: 7px 8px; text-align: left; font-size: 10px; }
+  .inv-t th.r, .inv-t td.r { text-align: right; } .inv-t th.c, .inv-t td.c { text-align: center; }
+  .inv-t td { padding: 8px; border-bottom: 1px solid #eee; }
+  .inv-t td .d { color: #999; font-size: 10px; margin-top: 2px; }
+  .inv-t td.empty { text-align: center; color: #aaa; padding: 20px; }
+  .inv-tot { display: flex; justify-content: flex-end; margin-top: 12px; }
+  .inv-tot table { width: 240px; } .inv-tot td { padding: 4px 2px; }
+  .inv-tot .g td { border-top: 2px solid #111; font-size: 15px; font-weight: 800; padding-top: 8px; }
+  .inv-words { margin-top: 6px; color: #555; font-style: italic; font-size: 11px; }
+  .inv-comm { margin-top: 14px; border-top: 1px solid #eee; padding-top: 10px; color: #444; font-size: 11px; }
+  .inv-comm b { display: block; margin-bottom: 4px; color: #222; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
   .pi-empty-lines {
     padding: 28px 12px; text-align: center;
     color: var(--text-3); font-size: 13px;
@@ -2919,6 +2954,8 @@
         <span><kbd>⌘</kbd>+<kbd>Enter</kbd> create PI</span>
       </div>
 
+      <div class="cp-split">
+       <div class="cp-left">
       <!-- HEADER CARD -->
       <div class="card pi-header-card">
         <div class="card-h">
@@ -3046,6 +3083,12 @@
           </div>
         </div>
       </div>
+       </div><!-- /cp-left -->
+       <div class="cp-right">
+         <div class="cp-preview-head"><span>Live preview</span><span class="cp-preview-hint">updates as you type</span></div>
+         <div class="cp-preview" id="cp-preview"></div>
+       </div>
+      </div><!-- /cp-split -->
       <div class="pi-sticky-total" id="pi-sticky-total" hidden><span>TOTAL</span><b id="pi-sticky-total-v">₹0</b></div>
     </section>
 
@@ -21173,6 +21216,55 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     if (stick && stickV){ stickV.textContent = inr(total); stick.hidden = !(state.lines.length && total > 0); }
 
     $('pi-submit').disabled = !canSubmit();
+    renderPreview();
+  }
+
+  // ---------- live PDF preview ----------
+  function esc2(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function money2(n){ return Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function renderPreview(){
+    const box = $('cp-preview'); if (!box) return;
+    const docLabel = state.docType === 'so' ? 'Sales Order' : state.docType === 'invoice' ? 'Tax Invoice' : 'Proforma Invoice';
+    const numPrefix = state.docType === 'so' ? 'SO' : state.docType === 'invoice' ? 'INV' : 'PI';
+    const party = state.party || '—';
+    const rec = (window.atlasPartyRecord && window.atlasPartyRecord(state.party)) || {};
+    const intra = String(rec.state || '').toUpperCase().indexOf('HARYANA') !== -1;
+    let sub = 0, gstT = 0;
+    const rows = state.lines.map((ln, i) => {
+      const d = derived(ln);
+      const taxable = d.taxable || 0; sub += taxable; gstT += (d.gst || 0);
+      const item = [ln.model, ln.category].filter(Boolean).join(' · ') || ('Line ' + (i + 1));
+      const dims = [ln.width, ln.length].filter(Boolean).join(' × ');
+      return '<tr><td>' + (i + 1) + '. ' + esc2(item) + (dims ? '<div class="d">' + esc2(dims) + '</div>' : '') + '</td>' +
+        '<td class="c">' + esc2(ln.qty || 0) + '</td><td class="r">' + money2(ln.billRate || ln.actualRate || 0) + '</td>' +
+        '<td class="r">' + money2(taxable) + '</td><td class="r">' + money2(d.total || 0) + '</td></tr>';
+    }).join('') || '<tr><td colspan="5" class="empty">Add line items to see them here…</td></tr>';
+    const cgst = intra ? gstT / 2 : 0, sgst = intra ? gstT / 2 : 0, igst = intra ? 0 : gstT;
+    const total = sub + gstT;
+    const words = window.atlasNumToWords ? window.atlasNumToWords(total) : '';
+    const c = state.commercial || {};
+    const commercial = (c.transporter || c.packing || c.sample === 'Yes' || c.notes) ?
+      '<div class="inv-comm"><b>Commercial</b>' +
+      (c.transporter ? '<div>🚚 ' + esc2(c.transporter) + '</div>' : '') +
+      (c.packing ? '<div>📦 ' + esc2(c.packing) + '</div>' : '') +
+      (c.sample === 'Yes' ? '<div>🧪 Sample required' + (c.sampleRemarks ? ' — ' + esc2(c.sampleRemarks) : '') + '</div>' : '') +
+      (c.notes ? '<div>📝 ' + esc2(c.notes) + '</div>' : '') + '</div>' : '';
+    box.innerHTML =
+      '<div class="inv">' +
+      '<div class="inv-top"><div><div class="inv-h">' + docLabel + '</div>' +
+        '<div class="inv-meta"><span>' + numPrefix + ' #</span> ' + esc2(state.ref || '—') + '</div>' +
+        '<div class="inv-meta"><span>Date</span> ' + esc2(state.date || '') + '</div></div>' +
+        '<div class="inv-brand">COMFORT<br>INDUSTRIES</div></div>' +
+      '<div class="inv-boxes"><div class="inv-box"><h5>Billed by</h5><b>Comfort Industries</b><small>Panipat, Haryana</small><div class="g">GSTIN 06ABCDE1234F1Z5</div></div>' +
+        '<div class="inv-box"><h5>Billed to</h5><b>' + esc2(party) + '</b><small>' + esc2([rec.city, rec.state].filter(Boolean).join(', ') || '—') + '</small><div class="g">GSTIN ' + esc2(rec.gst || '—') + '</div></div></div>' +
+      '<table class="inv-t"><thead><tr><th>Item</th><th class="c">Qty</th><th class="r">Rate</th><th class="r">Taxable</th><th class="r">Amount</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+      '<div class="inv-tot"><table>' +
+        '<tr><td>Sub Total</td><td class="r">₹' + money2(sub) + '</td></tr>' +
+        (intra ? '<tr><td>CGST</td><td class="r">₹' + money2(cgst) + '</td></tr><tr><td>SGST</td><td class="r">₹' + money2(sgst) + '</td></tr>' : '<tr><td>IGST</td><td class="r">₹' + money2(igst) + '</td></tr>') +
+        '<tr class="g"><td>Total</td><td class="r">₹' + money2(total) + '</td></tr></table></div>' +
+      (total > 0 ? '<div class="inv-words">' + esc2(words) + '</div>' : '') +
+      commercial +
+      '</div>';
   }
 
   function canSubmit(){
@@ -21348,7 +21440,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       }
     });
     $('pi-party-code').addEventListener('input', e => { state.partyCode = e.target.value; });
-    $('pi-date').addEventListener('input', e => { state.date = e.target.value; });
+    $('pi-date').addEventListener('input', e => { state.date = e.target.value; renderPreview(); });
     $('pi-poc').addEventListener('change', e => { state.poc = e.target.value; });
     $('pi-ref').addEventListener('input', e => {
       state.ref = e.target.value;
@@ -21380,8 +21472,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       const e = $(id); if (!e) return;
       const k = cMap[id];
       if (state.commercial && state.commercial[k] != null) e.value = state.commercial[k];
-      e.addEventListener('input', () => { state.commercial = state.commercial || {}; state.commercial[k] = e.value; saveDraft(); });
-      e.addEventListener('change', () => { state.commercial = state.commercial || {}; state.commercial[k] = e.value; saveDraft(); });
+      e.addEventListener('input', () => { state.commercial = state.commercial || {}; state.commercial[k] = e.value; saveDraft(); renderPreview(); });
+      e.addEventListener('change', () => { state.commercial = state.commercial || {}; state.commercial[k] = e.value; saveDraft(); renderPreview(); });
     });
 
     $('pi-clear').addEventListener('click', () => {
@@ -25016,6 +25108,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     w.document.open(); w.document.write(html); w.document.close();
   }
   function money(n){ return Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  window.atlasNumToWords = numToWords;
 
   function toastO(msg){
     let t = document.querySelector('.atlas-toast');
