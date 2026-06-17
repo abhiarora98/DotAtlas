@@ -1858,6 +1858,28 @@
     margin-top: 12px;
   }
   .pi-add-line:hover { background: var(--emerald-soft); border-color: var(--emerald); }
+
+  /* Create-PI: header meta, party hero, quick chips, sticky total */
+  .pi-eb-meta { font-family: var(--fm); font-size: 11.5px; color: var(--text-3); margin-top: 6px; letter-spacing: 0.02em; }
+  .pi-eb-meta b { color: var(--text-2); }
+  .pi-eb-slogan { color: var(--text-3); opacity: 0.7; }
+  .pi-party-hero { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-top: 8px;
+    background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; }
+  .pi-party-hero[hidden] { display: none; }
+  .pi-party-hero .ph-name { font-weight: 600; font-size: 13px; color: var(--text); }
+  .pi-party-hero .ph-stat { font-family: var(--fm); font-size: 11px; color: var(--text-2); }
+  .pi-party-hero .ph-stat.amber { color: var(--amber); }
+  .pi-chips { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; margin-bottom: 14px; }
+  .pi-chips-lbl { font-family: var(--fm); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); margin-right: 4px; }
+  .pi-chip { background: var(--surface-2); border: 1px solid var(--line); color: var(--text-2);
+    padding: 5px 11px; border-radius: 999px; font-size: 12px; cursor: pointer; transition: all 150ms var(--ease); }
+  .pi-chip:hover { color: var(--emerald); border-color: rgba(78,222,163,0.4); background: var(--emerald-soft); }
+  .pi-sticky-total { position: fixed; right: 22px; bottom: 22px; z-index: 60;
+    background: var(--surface); border: 1px solid var(--emerald); border-radius: 10px; padding: 10px 16px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.4); display: flex; align-items: center; gap: 12px; }
+  .pi-sticky-total[hidden] { display: none; }
+  .pi-sticky-total span { font-family: var(--fm); font-size: 10px; letter-spacing: 0.1em; color: var(--text-3); }
+  .pi-sticky-total b { font-family: var(--fd); font-size: 18px; color: var(--text); font-variant-numeric: tabular-nums; }
   .pi-empty-lines {
     padding: 28px 12px; text-align: center;
     color: var(--text-3); font-size: 13px;
@@ -2878,7 +2900,8 @@
       <div class="hero-h">
         <div>
           <div class="eb"><span class="live-dot"></span>Orders · <span id="pi-eb-doc">new document</span> · <span id="pi-eb-status">draft</span></div>
-          <h1 id="pi-eb-title">One <span class="em">proforma invoice</span>, <span class="accent">many lines</span>.</h1>
+          <h1 id="pi-eb-title">Create Proforma Invoice</h1>
+          <div class="pi-eb-meta"><b id="pi-eb-num">PI #—</b> · <span id="pi-eb-saved">new draft</span> <span class="pi-eb-slogan">· one document, many lines</span></div>
         </div>
         <div class="when">WORKSPACE · <b>COMFORT INDUSTRIES</b><br/>SHEET · <b>MASTERS</b><br/>REF# · <b id="pi-eb-ref">—</b></div>
       </div>
@@ -2912,6 +2935,7 @@
               <label for="pi-party">Party</label>
               <input class="pi-input" id="pi-party" placeholder="Start typing party name or code…" autocomplete="off" spellcheck="false">
               <div class="pi-typeahead" id="pi-party-results" role="listbox" aria-label="Party suggestions" hidden></div>
+              <div class="pi-party-hero" id="pi-party-hero" hidden></div>
             </div>
             <div class="pi-field">
               <label for="pi-party-code">Party Code</label>
@@ -2943,11 +2967,41 @@
           </div>
         </div>
         <div class="card-b">
+          <div class="pi-chips" id="pi-chips">
+            <span class="pi-chips-lbl">Quick add</span>
+            <button class="pi-chip" data-cat="Cushion">+ Cushion</button>
+            <button class="pi-chip" data-cat="S-Mat">+ S-Mat</button>
+            <button class="pi-chip" data-cat="Foot Mat">+ Foot Mat</button>
+            <button class="pi-chip" data-cat="Turf">+ Turf</button>
+            <button class="pi-chip" data-cat="Grass">+ Grass</button>
+            <button class="pi-chip" data-cat="Car Set">+ Car Set</button>
+          </div>
           <div class="pi-lines-wrap">
             <div id="pi-lines" class="pi-lines"></div>
             <div id="pi-empty-lines" class="pi-empty-lines">No lines yet. Add the first one →</div>
           </div>
           <button class="pi-add-line" id="pi-add-line">+ add line</button>
+        </div>
+      </div>
+
+      <!-- COMMERCIAL DETAILS (collapsible; flows into the Sales Order) -->
+      <div class="card">
+        <div class="card-h pi-commercial-h" id="pi-commercial-toggle" style="cursor:pointer;">
+          <div class="t"><span class="ic">▦</span><h3>Commercial details</h3><span class="sub">OPTIONAL · FLOWS TO SALES ORDER</span></div>
+          <span class="more" id="pi-commercial-caret">▾</span>
+        </div>
+        <div class="card-b" id="pi-commercial-body" hidden>
+          <div class="pi-grid">
+            <div class="pi-field"><label for="pi-c-transporter">Transporter details</label><input class="pi-input" id="pi-c-transporter" placeholder="e.g. VRL Logistics · HR-55-AB-1234" autocomplete="off"></div>
+            <div class="pi-field"><label for="pi-c-sample">Sample required</label><select class="pi-select" id="pi-c-sample"><option>No</option><option>Yes</option></select></div>
+            <div class="pi-field"><label for="pi-c-sample-remarks">Sample remarks</label><input class="pi-input" id="pi-c-sample-remarks" placeholder="optional" autocomplete="off"></div>
+          </div>
+          <div class="pi-grid" style="margin-top:12px;">
+            <div class="pi-field" style="grid-column:1 / -1;"><label for="pi-c-packing">Packing instructions</label><input class="pi-input" id="pi-c-packing" placeholder="e.g. double-wrap rolls, palletise" autocomplete="off"></div>
+          </div>
+          <div class="pi-grid" style="margin-top:12px;">
+            <div class="pi-field" style="grid-column:1 / -1;"><label for="pi-c-notes">Additional notes</label><input class="pi-input" id="pi-c-notes" placeholder="optional" autocomplete="off"></div>
+          </div>
         </div>
       </div>
 
@@ -2992,9 +3046,10 @@
           </div>
         </div>
       </div>
+      <div class="pi-sticky-total" id="pi-sticky-total" hidden><span>TOTAL</span><b id="pi-sticky-total-v">₹0</b></div>
     </section>
 
-    <!-- PI HISTORY PAGE -->
+    <!-- PI HISTORY PAGE (legacy; reachable from Orders) -->
     <section class="page" data-page="pi-history" hidden>
       <div class="hero-h">
         <div>
@@ -20671,6 +20726,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     ref: V.nextRefNumber,
     lines: [],
     docType: 'pi',  // 'pi' | 'so' | 'invoice'
+    commercial: { transporter: '', packing: '', sample: 'No', sampleRemarks: '', notes: '' },
   };
   const DOC_META = {
     pi:      { label: 'Proforma Invoice', title: 'One <span class="em">proforma invoice</span>, <span class="accent">many lines</span>.', btn: 'Create PI →' },
@@ -20680,9 +20736,21 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   function applyDocType(){
     const m = DOC_META[state.docType] || DOC_META.pi;
     const d = document.getElementById('pi-eb-doc'); if (d) d.textContent = m.label.toLowerCase();
-    const t = document.getElementById('pi-eb-title'); if (t) t.innerHTML = m.title;
+    const t = document.getElementById('pi-eb-title'); if (t) t.textContent = 'Create ' + m.label;
     const b = document.getElementById('pi-submit'); if (b) b.textContent = m.btn;
+    const numPrefix = state.docType === 'so' ? 'SO' : state.docType === 'invoice' ? 'INV' : 'PI';
+    const n = document.getElementById('pi-eb-num'); if (n) n.textContent = numPrefix + ' #' + (state.ref || '—');
   }
+  // "Draft saved Nm ago" stamp.
+  let _lastSaved = 0;
+  function markSaved(){ _lastSaved = Date.now(); paintSaved(); }
+  function paintSaved(){
+    const e = document.getElementById('pi-eb-saved'); if (!e) return;
+    if (!_lastSaved){ e.textContent = 'new draft'; return; }
+    const s = Math.round((Date.now() - _lastSaved) / 1000);
+    e.textContent = 'draft saved ' + (s < 5 ? 'just now' : s < 60 ? s + 's ago' : Math.round(s / 60) + 'm ago');
+  }
+  setInterval(paintSaved, 20000);
   window.atlasApplyDocType = applyDocType;
   // Open the create flow for a given document type, optionally with a party.
   window.atlasNewDoc = function(type, party){
@@ -20920,6 +20988,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     $('pi-ref').value = state.ref;
 
     $('pi-eb-ref').textContent = state.ref || '—';
+    const numPrefix = state.docType === 'so' ? 'SO' : state.docType === 'invoice' ? 'INV' : 'PI';
+    const n = document.getElementById('pi-eb-num'); if (n) n.textContent = numPrefix + ' #' + (state.ref || '—');
   }
 
   function field(labelText, control){
@@ -21034,12 +21104,12 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
           renderTotals(); refreshDerivedCard(card, line);
           if (!line.billRate) renderLines();
         }});
-      botGrid.appendChild(field('Actual ₹', arInp));
+      botGrid.appendChild(field('Cost ₹', arInp));
 
       // BILL RATE
       const brInp = el('input', { class: 'pi-input num', type: 'number', min: '0', step: '0.01', value: line.billRate, placeholder: line.actualRate || '0',
         oninput: e => { line.billRate = e.target.value; renderTotals(); refreshDerivedCard(card, line); }});
-      botGrid.appendChild(field('Bill ₹', brInp));
+      botGrid.appendChild(field('Selling ₹', brInp));
 
       // FREIGHT
       const frInp = el('input', { class: 'pi-input num', type: 'number', min: '0', step: '1', value: line.freight, placeholder: '0',
@@ -21097,6 +21167,10 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     $('pi-tot-taxable').textContent = inr(taxable);
     $('pi-tot-gst').textContent = inr(gst);
     $('pi-tot-total').textContent = inr(total);
+
+    // Sticky live total (always visible while entering lines).
+    const stick = $('pi-sticky-total'), stickV = $('pi-sticky-total-v');
+    if (stick && stickV){ stickV.textContent = inr(total); stick.hidden = !(state.lines.length && total > 0); }
 
     $('pi-submit').disabled = !canSubmit();
   }
@@ -21209,11 +21283,27 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     $('pi-party-results').hidden = true;
     partyTypeahead.open = false;
     renderTotals();
+    renderPartyHero();
     saveDraft();
     // advance focus naturally (next input is the Party Code field)
     $('pi-party-code').focus();
     try { $('pi-party-code').select(); } catch(e){}
   }
+  // Party hero: outstanding + last order, shown once a party is selected.
+  function renderPartyHero(){
+    const box = $('pi-party-hero'); if (!box) return;
+    const name = state.party;
+    if (!name || !window.atlasPartyQuickStats){ box.hidden = true; box.innerHTML = ''; return; }
+    const s = window.atlasPartyQuickStats(name);
+    const rel = s.lastOrder ? relDays(s.lastOrder) : 'no orders yet';
+    box.hidden = false;
+    box.innerHTML = '<span class="ph-name">' + escapeHtml(name) + '</span>' +
+      '<span class="ph-stat ' + (s.outstanding > 0 ? 'amber' : '') + '">Outstanding: ' + inr(s.outstanding) + '</span>' +
+      '<span class="ph-stat">Last order: ' + rel + '</span>' +
+      (s.orders ? '<span class="ph-stat">' + s.orders + ' PIs</span>' : '');
+    if (!s.loaded) setTimeout(() => { if (state.party === name) renderPartyHero(); }, 700);
+  }
+  function relDays(d){ const n = Math.round((Date.now() - d.getTime()) / 864e5); return n <= 0 ? 'today' : n === 1 ? 'yesterday' : n + ' days ago'; }
 
   // ---------- header wiring ----------
   function wireHeader(){
@@ -21222,6 +21312,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       state.party = e.target.value;
       const exact = V.parties.find(p => p.name === state.party);
       if (exact) { state.partyCode = exact.code || ''; $('pi-party-code').value = state.partyCode; }
+      const hero = $('pi-party-hero'); if (hero) hero.hidden = true;
       renderPartyResults(state.party);
       renderTotals();
     });
@@ -21269,6 +21360,28 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       state.lines.push(newLine());
       renderLines(); renderTotals();
       saveDraft();
+    });
+    // Quick product chips → add a pre-categorised line.
+    const chips = $('pi-chips');
+    if (chips) chips.addEventListener('click', (e) => {
+      const b = e.target.closest('.pi-chip[data-cat]'); if (!b) return;
+      const ln = newLine(); ln.category = b.getAttribute('data-cat');
+      state.lines.push(ln); renderLines(); renderTotals(); saveDraft();
+    });
+
+    // Commercial details: collapse toggle + field binding.
+    const cToggle = $('pi-commercial-toggle');
+    if (cToggle) cToggle.addEventListener('click', () => {
+      const body = $('pi-commercial-body'), caret = $('pi-commercial-caret');
+      const open = body.hidden; body.hidden = !open; if (caret) caret.textContent = open ? '▴' : '▾';
+    });
+    const cMap = { 'pi-c-transporter': 'transporter', 'pi-c-packing': 'packing', 'pi-c-sample': 'sample', 'pi-c-sample-remarks': 'sampleRemarks', 'pi-c-notes': 'notes' };
+    Object.keys(cMap).forEach(id => {
+      const e = $(id); if (!e) return;
+      const k = cMap[id];
+      if (state.commercial && state.commercial[k] != null) e.value = state.commercial[k];
+      e.addEventListener('input', () => { state.commercial = state.commercial || {}; state.commercial[k] = e.value; saveDraft(); });
+      e.addEventListener('change', () => { state.commercial = state.commercial || {}; state.commercial[k] = e.value; saveDraft(); });
     });
 
     $('pi-clear').addEventListener('click', () => {
@@ -21368,6 +21481,15 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       });
       if (!res.ok) throw new Error('HTTP ' + res.status);
       setStatus('ok', 'PI ' + payload.header.ref + ' created — ' + payload.rows.length + ' line(s) written to Masters.');
+      // Stash commercial details so the eventual Sales Order can prefill them.
+      try {
+        const c = state.commercial || {};
+        if (c.transporter || c.packing || c.sample === 'Yes' || c.notes){
+          const all = JSON.parse(localStorage.getItem('atlas-pi-ops') || '{}');
+          all[String(payload.header.ref)] = c;
+          localStorage.setItem('atlas-pi-ops', JSON.stringify(all));
+        }
+      } catch(e){}
       if (window.atlasOrdersChanged) window.atlasOrdersChanged();
       // bump ref for next PI
       state.ref = Number(state.ref) + 1;
@@ -21416,7 +21538,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 
   // ---------- draft persistence ----------
   function saveDraft(){
-    try { localStorage.setItem('atlas-pi-draft', JSON.stringify(state)); } catch(e){}
+    try { localStorage.setItem('atlas-pi-draft', JSON.stringify(state)); markSaved(); } catch(e){}
   }
   function restoreDraft(){
     try {
@@ -21524,6 +21646,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     renderHeader();
     renderLines();
     renderTotals();
+    if (state.party) renderPartyHero();
     wireHeader();
     wireKeyboard();
     attachUppercase(document.querySelector('[data-page="create-pi"]'));
@@ -23459,6 +23582,15 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   window.atlasLoadParties = function(){ loadParties(false); };
   window.atlasOpenPartyByName = function(name){ const p = findParty(normName(name)); if (p) openPartyPage(p); };
   window.atlasPartyRecord = function(name){ return findParty(normName(name)) || null; };
+  // Quick stats for the Create-PI party hero. Triggers a load if cold.
+  window.atlasPartyQuickStats = function(name){
+    if (!enriched) loadParties(false);
+    const rec = receivables && receivables.parties && receivables.parties[slug(name)];
+    const pi = piByParty.get(normName(name));
+    let lastOrder = pi && pi.lastDate ? pi.lastDate : null;
+    if (rec) for (const t of (rec.fy25 || [])){ if (t.t === 'Sales'){ const d = parseRecDate(t.d); if (d && (!lastOrder || d > lastOrder)) lastOrder = d; } }
+    return { loaded: enriched, outstanding: rec ? Number(rec.outstanding) || 0 : 0, lastOrder, orders: pi ? pi.count : 0 };
+  };
 
   function init(){
     const search = $('pl-search'); if (!search) return; // parties page not present
@@ -24778,6 +24910,12 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       '<div class="so-sum-meta">' + lines.length + ' line item' + (lines.length === 1 ? '' : 's') + ' · ' + inr(d.amount) + ' · copied from PI</div>';
     ['so-transporter', 'so-packing', 'so-sample-remarks', 'so-notes'].forEach(id => { const e = $(id); if (e) e.value = ''; });
     $('so-sample').value = 'No';
+    // Prefill operational fields captured on the source PI, if any.
+    try {
+      const ops = (JSON.parse(localStorage.getItem('atlas-pi-ops') || '{}'))[String(d.ref)];
+      if (ops){ $('so-transporter').value = ops.transporter || ''; $('so-packing').value = ops.packing || '';
+        $('so-sample').value = ops.sample || 'No'; $('so-sample-remarks').value = ops.sampleRemarks || ''; $('so-notes').value = ops.notes || ''; }
+    } catch(e){}
     $('so-overlay').hidden = false; document.body.style.overflow = 'hidden';
     setTimeout(() => $('so-transporter').focus(), 30);
   }
