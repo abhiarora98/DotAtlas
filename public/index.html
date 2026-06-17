@@ -3058,7 +3058,7 @@
             <div class="kr"><span>Trade discount tracked</span><b id="pi-tot-td">₹0</b></div>
             <div class="kr"><span>Freight</span><b id="pi-tot-freight">₹0</b></div>
             <div class="kr"><span>Taxable value</span><b id="pi-tot-taxable">₹0</b></div>
-            <div class="kr"><span>GST 18%</span><b id="pi-tot-gst">₹0</b></div>
+            <div class="kr"><span>GST</span><b id="pi-tot-gst">₹0</b></div>
             <div class="kr big"><span>Total (inc GST)</span><b id="pi-tot-total">₹0</b></div>
           </div>
         </div>
@@ -20885,6 +20885,29 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   function widthsFor(cat){   const s = specOf(cat); return s && s.widths   ? s.widths   : V.widths; }
   function lengthsFor(cat){  const s = specOf(cat); return s && s.lengths  ? s.lengths  : V.lengths; }
 
+  // ---------- HSN / GST per category (from the product mapping) ----------
+  // Artificial Grass & Mono Grass are 5% (HSN 57033100); everything else 18%
+  // (HSN 39189090). Matched case/space/“Foot Mat” spelling-insensitively.
+  const TAX_MAP = {
+    'cushion': { hsn: '39189090', gst: 18 },
+    'tefno': { hsn: '39189090', gst: 18 },
+    'turf': { hsn: '39189090', gst: 18 },
+    'artificial grass': { hsn: '57033100', gst: 5 },
+    'mono grass': { hsn: '57033100', gst: 5 },
+    'monograss': { hsn: '57033100', gst: 5 },
+    'grass': { hsn: '57033100', gst: 5 },
+    'footmat': { hsn: '39189090', gst: 18 },
+    'foot mat': { hsn: '39189090', gst: 18 },
+    'footmat (welcome)': { hsn: '39189090', gst: 18 },
+    's-mat': { hsn: '39189090', gst: 18 },
+    'car set': { hsn: '39189090', gst: 18 },
+  };
+  function taxFor(cat){
+    return TAX_MAP[String(cat || '').trim().toLowerCase()] || { hsn: '39189090', gst: 18 };
+  }
+  // Shared with the Orders/Dispatch module for the downloadable PDF.
+  window.ATLAS_TAX = { rate: function(c){ return taxFor(c).gst; }, hsn: function(c){ return taxFor(c).hsn; } };
+
   function newLine(){
     return {
       category: 'Cushion',
@@ -20932,9 +20955,10 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const freight = Number(line.freight) || 0;
     const td = Math.max(0, (ar - br)) * units * qty;
     const taxable = br * units * qty + freight;
-    const gst = taxable * 0.18;
+    const rate = taxFor(line.category).gst / 100;
+    const gst = taxable * rate;
     const total = taxable + gst;
-    return { units, td, taxable, gst, total };
+    return { units, td, taxable, gst, total, gstRate: taxFor(line.category).gst, hsn: taxFor(line.category).hsn };
   }
 
   // ---------- formatters ----------
@@ -21235,7 +21259,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       const taxable = d.taxable || 0; sub += taxable; gstT += (d.gst || 0);
       const item = [ln.model, ln.category].filter(Boolean).join(' · ') || ('Line ' + (i + 1));
       const dims = [ln.width, ln.length].filter(Boolean).join(' × ');
-      return '<tr><td>' + (i + 1) + '. ' + esc2(item) + (dims ? '<div class="d">' + esc2(dims) + '</div>' : '') + '</td>' +
+      const sub = [dims, 'HSN ' + d.hsn, 'GST ' + d.gstRate + '%'].filter(Boolean).join(' · ');
+      return '<tr><td>' + (i + 1) + '. ' + esc2(item) + '<div class="d">' + esc2(sub) + '</div></td>' +
         '<td class="c">' + esc2(ln.qty || 0) + '</td><td class="r">' + money2(ln.billRate || ln.actualRate || 0) + '</td>' +
         '<td class="r">' + money2(taxable) + '</td><td class="r">' + money2(d.total || 0) + '</td></tr>';
     }).join('') || '<tr><td colspan="5" class="empty">Add line items to see them here…</td></tr>';
@@ -24903,12 +24928,13 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   function parseLines(s){ try { return Array.isArray(s) ? s : JSON.parse(s || '[]'); } catch(e){ return []; } }
   function nLine(l, i){ return { no: l.no != null ? l.no : (i + 1),
     item: String(l.item || l.model || l.category || ('Line ' + (i + 1))),
+    cat: l.cat || l.category || '',
     qty: Number(l.qty) || 0, total: Number(l.total != null ? l.total : l.totalIncGst) || 0,
     disp: Number(l.disp) || 0, inv: Number(l.inv) || 0 }; }
   function orderedLinesForPi(ref){
     const pi = pis.find(p => String(p.ref) === String(ref));
     return pi ? (pi.items || []).map((it, i) => nLine({ no: it.no != null ? it.no : (i + 1),
-      item: it.model || it.category || ('Line ' + (i + 1)), qty: it.qty, total: it.total }, i)) : [];
+      item: it.model || it.category || ('Line ' + (i + 1)), cat: it.category, qty: it.qty, total: it.total }, i)) : [];
   }
   function docLines(d){
     if (d.kind === 'PI'){ const t = piTrack(d.ref); const ls = t ? parseLines(t.lines).map(nLine) : []; return ls.length ? ls : orderedLinesForPi(d.ref); }
@@ -25054,16 +25080,18 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const party = (window.atlasPartyRecord && window.atlasPartyRecord(d.party)) || {};
     const lines = docLines(d);
     const intra = String(party.state || '').toUpperCase().indexOf('HARYANA') !== -1; // issuer state = Haryana
-    let sub = 0;
+    const TAX = window.ATLAS_TAX || { rate: function(){ return 18; }, hsn: function(){ return '39189090'; } };
+    let sub = 0, cgst = 0, sgst = 0, igst = 0;
     const rowsHtml = lines.map((l, i) => {
-      const taxable = l.qty > 0 ? (l.total / 1.18) : (l.total || 0);
+      const rate = TAX.rate(l.cat) / 100;
+      const taxable = l.qty > 0 ? (l.total / (1 + rate)) : (l.total || 0);
       sub += taxable;
-      const cg = intra ? taxable * 0.09 : 0, sg = intra ? taxable * 0.09 : 0, ig = intra ? 0 : taxable * 0.18;
-      return '<tr><td>' + (i + 1) + '. ' + esc(l.item) + '</td><td class="c">—</td><td class="c">' + l.qty + '</td><td class="c">18%</td>' +
+      const cg = intra ? taxable * rate / 2 : 0, sg = cg, ig = intra ? 0 : taxable * rate;
+      cgst += cg; sgst += sg; igst += ig;
+      return '<tr><td>' + (i + 1) + '. ' + esc(l.item) + '</td><td class="c">' + esc(TAX.hsn(l.cat)) + '</td><td class="c">' + l.qty + '</td><td class="c">' + Math.round(rate * 100) + '%</td>' +
         '<td class="r">' + money(taxable) + '</td>' + (intra ? '<td class="r">' + money(sg) + '</td><td class="r">' + money(cg) + '</td>' : '<td class="r">' + money(ig) + '</td>') +
-        '<td class="r">' + money(taxable * 1.18) + '</td></tr>';
+        '<td class="r">' + money(taxable * (1 + rate)) + '</td></tr>';
     }).join('');
-    const cgst = intra ? sub * 0.09 : 0, sgst = intra ? sub * 0.09 : 0, igst = intra ? 0 : sub * 0.18;
     const total = sub + cgst + sgst + igst;
     const taxCols = intra ? '<th class="r">SGST</th><th class="r">CGST</th>' : '<th class="r">IGST</th>';
     const today = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
