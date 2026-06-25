@@ -1347,18 +1347,29 @@
   .risk { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; font-family: var(--fm); font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em; }
   .risk::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
 
-  /* Labeled product attributes (Model / Backing / Colour) */
-  .ob-items td.it-prod .ip-attrs { display: block; margin-top: 4px; }
-  .ob-items td.it-prod .ip-seg { display: inline-block; margin-right: 12px; font-family: var(--fm); font-size: 10.5px; color: var(--text-2); white-space: nowrap; }
-  .ob-items td.it-prod .ip-seg .ip-l { color: var(--text-4); text-transform: uppercase; font-size: 8px; letter-spacing: 0.08em; margin-right: 4px; }
+  /* Compact product attributes (Model • Backing • Colour) */
+  .ob-items td.it-prod .ip-cat { display: block; font-weight: 600; color: var(--text); }
+  .ob-items td.it-prod .ip-attrs { display: block; margin-top: 3px; font-family: var(--fm); font-size: 10.5px; color: var(--text-3); letter-spacing: 0.01em; }
 
-  /* Current order summary */
+  /* Current order summary — value-led hierarchy */
   .ob-os { margin-bottom: 4px; }
   .ob-os-head { font-family: var(--fd); font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 14px; letter-spacing: -0.01em; }
   .ob-os-head span#ob-dr-ref { font-family: var(--fm); }
-  .ob-os-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line-2); border-radius: 14px; overflow: hidden; }
-  @media (max-width: 820px) { .ob-os-grid { grid-template-columns: repeat(2, 1fr); } }
-  .ob-os-grid .ob-stat { background: var(--surface-2); }
+  .ob-os-hero { display: flex; align-items: stretch; gap: 18px; background: var(--surface-2); border: 1px solid var(--line-2); border-radius: 14px; padding: 18px 22px; }
+  .ob-os-val { flex: 0 0 auto; padding-right: 20px; border-right: 1px solid var(--line); }
+  .ob-os-val .lbl { font-family: var(--fm); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-3); }
+  .ob-os-val .val { font-family: var(--fd); font-size: 30px; font-weight: 700; color: var(--emerald); letter-spacing: -0.02em; margin-top: 8px; font-variant-numeric: tabular-nums; }
+  .ob-os-med { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: center; min-width: 0; }
+  .ob-os-med .m { min-width: 0; }
+  .ob-os-med .m .ml { font-family: var(--fm); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3); }
+  .ob-os-med .m .mv { font-size: 15px; font-weight: 600; color: var(--text); margin-top: 7px; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; }
+  .ob-os-med .m .mv.amber { color: var(--amber); }
+  .ob-os-small { display: flex; flex-wrap: wrap; gap: 7px 24px; margin-top: 13px; padding: 0 4px; font-family: var(--fm); font-size: 11px; color: var(--text-3); }
+  .ob-os-small b { color: var(--text-2); font-weight: 600; margin-left: 5px; }
+  @media (max-width: 760px) { .ob-os-hero { flex-direction: column; } .ob-os-val { border-right: 0; border-bottom: 1px solid var(--line); padding-right: 0; padding-bottom: 14px; } }
+
+  /* Workflow elapsed-time markers */
+  .ob-wf-gap { margin: -10px 0 8px 42px; font-family: var(--fm); font-size: 10px; color: var(--text-3); letter-spacing: 0.04em; }
 
   /* Collapsible sections */
   .ob-coll { border-top: 1px solid var(--line); }
@@ -3444,8 +3455,7 @@
               <div class="ob-dr-items-wrap">
                 <table class="ob-items">
                   <thead><tr>
-                    <th>#</th><th>Product</th><th>Size</th><th class="r">Qty</th><th class="r">Unit</th>
-                    <th class="r">Rate</th><th class="r">Freight</th><th class="r">Tax</th><th class="r">Total</th>
+                    <th>#</th><th>Product</th><th>Size</th><th class="r">Qty</th><th class="r">Rate</th><th class="r">Total</th>
                   </tr></thead>
                   <tbody id="ob-dr-items"></tbody>
                   <tfoot id="ob-dr-items-foot"></tfoot>
@@ -3460,9 +3470,9 @@
             <div class="ob-coll-b"><div class="ob-workflow" id="ob-dr-history"></div></div>
           </div>
 
-          <!-- 4 · customer intelligence (concise summary) -->
-          <div class="ob-coll" data-open="1">
-            <div class="ob-coll-h"><span class="ob-coll-t">Customer intelligence</span><span class="ob-coll-meta">summary</span><span class="ob-chev">▾</span></div>
+          <!-- 4 · customer intelligence (concise summary, collapsed) -->
+          <div class="ob-coll" data-open="0">
+            <div class="ob-coll-h"><span class="ob-coll-t">Customer intelligence</span><span class="ob-coll-meta" id="ob-dr-ci-meta"></span><span class="ob-chev">▾</span></div>
             <div class="ob-coll-b">
               <div class="ob-stat-grid concise" id="ob-dr-stats"></div>
               <button class="ob-profile-btn" id="ob-dr-profile">View full customer profile →</button>
@@ -23587,6 +23597,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const top = greater / n;
     return { top, label: top<=0.10?'Top 10%' : top<=0.25?'Top 25%' : top<=0.50?'Top 50%' : 'Bottom 50%' };
   }
+  function fmtElapsed(ms){ const min=Math.round(ms/60000); if(min<1) return 'moments'; if(min<60) return min+' min'+(min!==1?'s':''); const hr=Math.round(min/60); if(hr<24) return hr+' hr'+(hr!==1?'s':''); const d=Math.round(hr/24); return d+' day'+(d!==1?'s':''); }
   function fmtDateLong(iso){ const m=String(iso||'').match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? (String(+m[3])+' '+MON[+m[2]-1]+' '+m[1]) : '—'; }
   function fmtTsLong(ms){ if (ms==null) return '—'; const d=new Date(ms); return d.getDate()+' '+MON[d.getMonth()]+' '+d.getFullYear(); }
 
@@ -23725,16 +23736,18 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       + '<button class="ob-qi-btn" data-qa="pdf" title="Download PDF">⤓</button>'
       + '<button class="ob-qi-btn" data-qa="copy" title="Copy link">🔗</button>';
 
-    // 1 · current order summary
-    const sum = [
-      { l:'Order Value', v:inr(o.totalValue), big:true, tone:'good' },
-      { l:'Line items', v:String(o.lineCount) },
-      { l:'Total qty', v:String(o.totalQty) },
-      { l:'Invoice #', v:o.invoiceNo||'—' },
-      { l:'Est. dispatch', v:o.estDispatch||'—' },
-      { l:'Salesperson', v:o.poc||'—' },
-    ];
-    $('ob-dr-ordersum').innerHTML = sum.map(statCell).join('');
+    // 1 · current order summary — commercial value leads the hierarchy
+    const orderOut = o.status === 'Dispatched' ? o.totalValue : 0;
+    $('ob-dr-ordersum').innerHTML =
+      '<div class="ob-os-hero">'
+      + '<div class="ob-os-val"><div class="lbl">Order value</div><div class="val">'+inr(o.totalValue)+'</div></div>'
+      + '<div class="ob-os-med">'
+      +   '<div class="m"><div class="ml">Outstanding</div><div class="mv'+(orderOut>0?' amber':'')+'">'+(orderOut>0?inr(orderOut):'—')+'</div></div>'
+      +   '<div class="m"><div class="ml">Invoice</div><div class="mv">'+esc(o.invoiceNo||'—')+'</div></div>'
+      +   '<div class="m"><div class="ml">Status</div><div class="mv">'+pill(o.status)+'</div></div>'
+      + '</div></div>'
+      + '<div class="ob-os-small"><span>Items<b>'+o.lineCount+'</b></span><span>Qty<b>'+o.totalQty+'</b></span>'
+      +   '<span>Salesperson<b>'+esc(o.poc||'—')+'</b></span><span>Est. dispatch<b>'+esc(o.estDispatch||'—')+'</b></span></div>';
 
     // 4 · concise customer intelligence (8 most actionable metrics)
     const concise = [
@@ -23748,35 +23761,41 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       { l:'Risk of churn', v: ci.churn||'—', risk: ci.churn },
     ];
     $('ob-dr-stats').innerHTML = concise.map(statCell).join('');
+    const nextTxt = ci.nextExpectedT!=null ? (ci.overdueDays>0?('overdue '+ci.overdueDays+'d'):('next in '+(-ci.overdueDays)+'d')) : '';
+    $('ob-dr-ci-meta').textContent = ps.count+' orders · ₹'+compact(ps.lifetime)+' lifetime'+(nextTxt?' · '+nextTxt:'');
 
-    // 5 · recent orders (last 6)
-    $('ob-dr-prev-count').textContent = '· '+ps.list.length+' total';
+    // 5 · recent orders (last 6) with preview meta
+    $('ob-dr-prev-count').textContent = ps.count+' order'+(ps.count!==1?'s':'')+(ps.list[0]?' · last '+inr(ps.list[0].totalValue):'');
     $('ob-dr-prev').innerHTML = ps.list.slice(0,6).map(p => prevRow(p, ref)).join('');
 
-    // 2 · line items
+    // 2 · line items — compact: # · Product · Size · Qty · Rate · Total (units/freight/tax in tooltip)
     $('ob-dr-itemcount').textContent = o.lineCount+' item'+(o.lineCount!==1?'s':'');
     $('ob-dr-items').innerHTML = o.lines.map(li => {
       const d = prodDesc(li);
       const rate = li.billRate || li.actualRate || 0;
-      return '<tr><td>'+li.ono+'</td>'
-        + '<td class="it-prod"><span class="ip-cat">'+esc(d.product)+'</span>'+(d.segs?'<span class="ip-attrs">'+d.segs+'</span>':'')+'</td>'
+      const tip = 'Units '+(li.units?li.units.toLocaleString('en-IN',{maximumFractionDigits:2}):'—')+'  ·  Freight '+inr(li.freight||0)+'  ·  Taxable '+inr(li.taxable);
+      return '<tr title="'+esc(tip)+'"><td>'+li.ono+'</td>'
+        + '<td class="it-prod"><span class="ip-cat">'+esc(d.product)+'</span>'+(d.attrs?'<span class="ip-attrs">'+esc(d.attrs)+'</span>':'')+'</td>'
         + '<td class="it-size">'+(esc(d.dim)||'—')+'</td>'
-        + '<td class="it-num">'+li.qty+'</td><td>'+(li.units?li.units.toLocaleString('en-IN',{maximumFractionDigits:2}):'—')+'</td>'
-        + '<td class="it-num">'+(rate?inr(rate):'—')+'</td><td>'+(li.freight?inr(li.freight):'—')+'</td>'
-        + '<td class="it-num">'+inr(li.taxable)+'</td><td class="it-total">'+inr(li.total)+'</td></tr>';
+        + '<td class="it-num">'+li.qty+'</td>'
+        + '<td class="it-num">'+(rate?inr(rate):'—')+'</td>'
+        + '<td class="it-total">'+inr(li.total)+'</td></tr>';
     }).join('');
     $('ob-dr-items-foot').innerHTML = '<tr><td class="it-lbl" colspan="3">Total · '+o.lineCount+' items</td>'
-      + '<td>'+o.totalQty+'</td><td></td><td></td><td></td><td></td><td class="it-grand">'+inr(o.totalValue)+'</td></tr>';
+      + '<td class="it-num">'+o.totalQty+'</td><td></td><td class="it-grand">'+inr(o.totalValue)+'</td></tr>';
 
-    // 3 · workflow stepper
+    // 3 · workflow stepper with elapsed time between stages
     const stages = buildWorkflow(o);
-    const curStage = stages.find(s=>s.state==='current') || stages.filter(s=>s.state==='done').pop();
-    $('ob-dr-wf-meta').textContent = curStage ? curStage.label : '';
+    $('ob-dr-wf-meta').textContent = o.status + (o.estDispatch ? ' • '+o.estDispatch : '');
+    let prevMs = null;
     $('ob-dr-history').innerHTML = stages.map(s => {
       const mark = s.state==='done' ? '✓' : s.state==='cancelled' ? '×' : s.state==='current' ? '●' : '';
       const ts = wfTs(s.tsISO);
-      return '<div class="ob-wf-step '+s.state+'">'
-        + '<div class="ob-wf-marker">'+mark+'</div>'
+      const curMs = (s.tsISO && /^\d{4}-\d{2}-\d{2}T/.test(s.tsISO)) ? Date.parse(s.tsISO) : null;
+      let gap = '';
+      if (prevMs!=null && curMs!=null && curMs-prevMs >= 60000) gap = '<div class="ob-wf-gap">↓ '+fmtElapsed(curMs-prevMs)+'</div>';
+      if (curMs!=null) prevMs = curMs;
+      return gap + '<div class="ob-wf-step '+s.state+'"><div class="ob-wf-marker">'+mark+'</div>'
         + '<div class="ob-wf-body"><div class="ob-wf-label">'+esc(s.label)+'</div>'
         + (s.sub?'<div class="ob-wf-sub">'+esc(s.sub)+'</div>':'')
         + (ts?'<div class="ob-wf-ts">'+ts+'</div>':'')
