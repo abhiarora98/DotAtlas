@@ -1338,15 +1338,23 @@
   .ob-stat.amber .ss { color: var(--amber); }
   .ob-stat.good .ss { color: var(--emerald); }
 
-  /* Customer intelligence */
-  .ob-intel { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
-  @media (max-width: 820px) { .ob-intel { grid-template-columns: 1fr; } }
-  .ob-intel .ir { background: var(--void-2); padding: 13px 15px; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
-  .ob-intel .ir .il { font-family: var(--fm); font-size: 9.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); }
-  .ob-intel .ir .iv { font-size: 13px; color: var(--text); font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
-  .ob-intel .ir .iv.up { color: var(--emerald); }
-  .ob-intel .ir .iv.down { color: var(--rose); }
-  .ob-intel .ir .iv.amber { color: var(--amber); }
+  /* Customer intelligence — predictive insight cells */
+  .ob-intel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  @media (max-width: 820px) { .ob-intel { grid-template-columns: repeat(2, 1fr); } }
+  .ob-intel .ic { background: var(--void-2); padding: 14px 15px; min-height: 74px; display: flex; flex-direction: column; }
+  .ob-intel .ic .icl { font-family: var(--fm); font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3); }
+  .ob-intel .ic .icv { font-size: 14.5px; color: var(--text); font-weight: 600; margin-top: 7px; font-variant-numeric: tabular-nums; line-height: 1.15; }
+  .ob-intel .ic .icv.small { font-size: 11.5px; font-weight: 500; line-height: 1.3; }
+  .ob-intel .ic .icv.up { color: var(--emerald); }
+  .ob-intel .ic .icv.down { color: var(--rose); }
+  .ob-intel .ic .icv.amber { color: var(--amber); }
+  .ob-intel .ic .icv.muted { color: var(--text-2); }
+  .ob-intel .ic .ics { font-family: var(--fm); font-size: 9.5px; color: var(--text-3); margin-top: 5px; letter-spacing: 0.02em; }
+  .ob-intel .ic .risk { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; font-family: var(--fm); font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em; }
+  .ob-intel .ic .risk::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+  .risk.risk-low { background: var(--emerald-soft); color: var(--emerald); }
+  .risk.risk-medium { background: var(--amber-soft); color: var(--amber); }
+  .risk.risk-high { background: var(--rose-soft); color: var(--rose); }
   .ob-top-products { margin-top: 16px; }
   .ob-top-products .tp-h { font-family: var(--fm); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3); margin-bottom: 12px; }
   .ob-tp { display: grid; grid-template-columns: 18px 1fr 90px auto; gap: 12px; align-items: center; padding: 7px 0; }
@@ -23433,9 +23441,26 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   }
 
   // Customer intelligence — derived behaviour metrics.
+  // Lifetime-value distribution across all customers → percentile ranking.
+  let _lifetimes = null, _lifetimesAt = -1;
+  function allLifetimes(){
+    if (_lifetimes && _lifetimesAt === loadedAt) return _lifetimes;
+    const m = {};
+    baseOrders.forEach(o => { if (o.status !== 'Cancelled') m[o.party] = (m[o.party]||0) + (o.totalValue||0); });
+    _lifetimes = Object.values(m).sort((a,b)=>a-b); _lifetimesAt = loadedAt;
+    return _lifetimes;
+  }
+  function lifetimePercentile(value){
+    const arr = allLifetimes(); const n = arr.length; if (!n) return null;
+    let greater = 0; for (let i = arr.length-1; i >= 0 && arr[i] > value; i--) greater++;
+    const top = greater / n;
+    return { top, label: top<=0.10?'Top 10%' : top<=0.25?'Top 25%' : top<=0.50?'Top 50%' : 'Bottom 50%' };
+  }
+  function fmtDateLong(iso){ const m=String(iso||'').match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? (String(+m[3])+' '+MON[+m[2]-1]+' '+m[1]) : '—'; }
+  function fmtTsLong(ms){ if (ms==null) return '—'; const d=new Date(ms); return d.getDate()+' '+MON[d.getMonth()]+' '+d.getFullYear(); }
+
   function customerIntel(ps){
     const active = ps.active, list = ps.list;
-    // top products + favourite category
     const pmap = {}, cmap = {};
     active.forEach(o => o.lines.forEach(li => {
       const key = [li.category, li.model, li.backing, li.colour].filter(Boolean).join(' · ') || li.category || '—';
@@ -23445,20 +23470,51 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     }));
     const topProducts = Object.values(pmap).sort((a,b)=>b.value-a.value).slice(0,3);
     const favCat = Object.entries(cmap).sort((a,b)=>b[1]-a[1])[0];
-    // order frequency + recency
+
     const ts = list.map(o=>o.piDateISO).filter(Boolean).map(d=>new Date(d).getTime()).sort((a,b)=>a-b);
-    const freqDays = ts.length>1 ? Math.round((ts[ts.length-1]-ts[0])/86400000/(ts.length-1)) : null;
-    const daysSince = ts.length ? Math.max(0, Math.round((Date.now()-ts[ts.length-1])/86400000)) : null;
+    const n = ts.length, lastT = n ? ts[n-1] : null;
+    const freqDays = n>1 ? Math.max(1, Math.round((ts[n-1]-ts[0])/86400000/(n-1))) : null;
+    const daysSince = lastT!=null ? Math.max(0, Math.round((Date.now()-lastT)/86400000)) : null;
     const largest = active.reduce((mx,o)=>Math.max(mx,o.totalValue||0), 0);
     const pocCount = {}; list.forEach(o=>{ if(o.poc) pocCount[o.poc]=(pocCount[o.poc]||0)+1; });
     const assigned = Object.entries(pocCount).sort((a,b)=>b[1]-a[1])[0];
-    // sales growth: last 6 months vs the 6 before
+
+    // predictive: next expected order + overdue
+    let nextExpectedT = null, overdueDays = null;
+    if (freqDays!=null && lastT!=null){ nextExpectedT = lastT + freqDays*86400000; overdueDays = Math.round((Date.now()-nextExpectedT)/86400000); }
+
+    // frequency trend (recent gaps vs earlier gaps)
+    let trend = null;
+    if (n >= 4){
+      const gaps = []; for (let i=1;i<n;i++) gaps.push(ts[i]-ts[i-1]);
+      const h = Math.floor(gaps.length/2), avg = a => a.reduce((x,y)=>x+y,0)/a.length;
+      const ao = avg(gaps.slice(0,h)), ar = avg(gaps.slice(h));
+      trend = ar < ao*0.8 ? 'Increasing' : ar > ao*1.25 ? 'Declining' : 'Stable';
+    }
+
+    // churn risk from recency-vs-cadence (+ declining trend)
+    let churn = null;
+    if (freqDays!=null && daysSince!=null){
+      const r = daysSince / freqDays;
+      churn = r <= 1.2 ? 'Low' : r <= 2 ? 'Medium' : 'High';
+      if (trend === 'Declining' && churn === 'Low') churn = 'Medium';
+    }
+
+    // sales growth — last 6 months vs prior 6, with honest fallbacks
     const s = trendState.series;
-    const recent = s.slice(-6).reduce((a,b)=>a+b.value,0);
-    const prior = s.slice(-12,-6).reduce((a,b)=>a+b.value,0);
-    const growth = prior>0 ? Math.round(100*(recent-prior)/prior) : (recent>0 ? null : 0);
-    return { topProducts, favCat: favCat?favCat[0]:'—', freqDays, daysSince, largest,
-      assigned: assigned?assigned[0]:'—', growth };
+    let growth = null, growthMsg = null;
+    if (n < 3) growthMsg = 'Only '+n+' order'+(n!==1?'s':'')+' so far';
+    else {
+      const recent = s.slice(-6).reduce((a,b)=>a+b.value,0);
+      const prior = s.slice(-12,-6).reduce((a,b)=>a+b.value,0);
+      if (prior <= 0) growthMsg = 'First order within last 6 months';
+      else growth = Math.round(100*(recent-prior)/prior);
+    }
+
+    const pct = lifetimePercentile(ps.lifetime);
+    return { topProducts, favCat: favCat?favCat[0]:'—', freqDays, daysSince, lastISO: ps.last,
+      largest, assigned: assigned?assigned[0]:'—', nextExpectedT, overdueDays, trend, churn,
+      growth, growthMsg, pct, orders: n };
   }
 
   function openDrawer(ref){
@@ -23507,19 +23563,43 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       '<div class="ob-stat'+(s.big?' big':'')+(s.tone?' '+s.tone:'')+'"><div class="sl">'+esc(s.l)+'</div>'
       + '<div class="sv">'+esc(s.v)+'</div>'+(s.sub?'<div class="ss">'+esc(s.sub)+'</div>':'')+'</div>').join('');
 
-    // ---- customer intelligence ----
+    // ---- customer intelligence (predictive) ----
     const ci = customerIntel(ps);
-    const growthTxt = ci.growth==null ? (ps.active.length ? 'New activity' : '—') : (ci.growth>=0?'+':'')+ci.growth+'%';
-    const intel = [
-      { l:'Favourite category', v: ci.favCat },
-      { l:'Assigned salesperson', v: ci.assigned },
-      { l:'Avg order frequency', v: ci.freqDays!=null ? ('every '+ci.freqDays+'d') : 'first order' },
-      { l:'Days since last order', v: ci.daysSince!=null ? (ci.daysSince+'d ago') : '—', tone: ci.daysSince!=null && ci.daysSince>90 ? 'amber' : '' },
-      { l:'Largest order', v: inr(ci.largest) },
-      { l:'Sales growth (6m)', v: growthTxt, tone: ci.growth==null?'':ci.growth>0?'up':ci.growth<0?'down':'' },
-    ];
-    $('ob-dr-intel').innerHTML = intel.map(i =>
-      '<div class="ir"><span class="il">'+esc(i.l)+'</span><span class="iv'+(i.tone?' '+i.tone:'')+'">'+esc(i.v)+'</span></div>').join('');
+    const cells = [];
+    // next expected order + overdue
+    let nextSub = 'need ≥2 orders', nextTone = '';
+    if (ci.nextExpectedT != null){
+      if (ci.overdueDays > 0){ nextSub = '⚠ '+ci.overdueDays+' day'+(ci.overdueDays!==1?'s':'')+' overdue'; nextTone = 'down'; }
+      else nextSub = 'in '+(-ci.overdueDays)+' day'+((-ci.overdueDays)!==1?'s':'');
+    }
+    cells.push({ l:'Next expected order', v: ci.nextExpectedT!=null ? fmtTsLong(ci.nextExpectedT) : '—', s: nextSub, tone: nextTone });
+    // average frequency
+    cells.push({ l:'Average frequency', v: ci.freqDays!=null ? ('Every '+ci.freqDays+'d') : 'First order', s: ci.freqDays!=null ? ('across '+ci.orders+' orders') : '' });
+    // frequency trend
+    const tArrow = ci.trend==='Increasing'?'↑ ':ci.trend==='Declining'?'↓ ':ci.trend==='Stable'?'→ ':'';
+    cells.push({ l:'Buying frequency trend', v: ci.trend ? (tArrow+ci.trend) : '—', s: ci.trend ? 'recent vs earlier' : 'need ≥4 orders', tone: ci.trend==='Increasing'?'up':ci.trend==='Declining'?'down':'' });
+    // churn risk
+    cells.push({ l:'Risk of churn', v: ci.churn || '—', s: ci.churn==='High'?'overdue & slowing':ci.churn==='Medium'?'watch this account':ci.churn==='Low'?'ordering on cadence':'', risk: ci.churn });
+    // lifetime percentile
+    cells.push({ l:'Lifetime percentile', v: ci.pct ? ci.pct.label : '—', s: 'by lifetime value', tone: ci.pct && ci.pct.top<=0.25 ? 'up' : '' });
+    // sales growth (6m)
+    let gv, gs = '', gTone = '', gSmall = false;
+    if (ci.growth != null){ gv = (ci.growth>=0?'↑ ':'↓ ')+Math.abs(ci.growth)+'%'; gs = 'vs previous 6 months'; gTone = ci.growth>0?'up':ci.growth<0?'down':''; }
+    else { gv = ci.growthMsg; gTone = 'muted'; gSmall = true; }
+    cells.push({ l:'Sales growth (6m)', v: gv, s: gs, tone: gTone, small: gSmall });
+    // last ordered (relative + absolute)
+    cells.push({ l:'Last ordered', v: fmtDateLong(ci.lastISO), s: ci.daysSince!=null ? (ci.daysSince===0 ? 'today' : ci.daysSince+' day'+(ci.daysSince!==1?'s':'')+' ago') : '' });
+    // favourite category / largest / salesperson / last interaction
+    cells.push({ l:'Favourite category', v: ci.favCat, s:'by value' });
+    cells.push({ l:'Largest order', v: inr(ci.largest), s:'' });
+    cells.push({ l:'Assigned salesperson', v: ci.assigned, s:'most orders' });
+    cells.push({ l:'Last interaction', v: fmtDateLong(ci.lastISO), s:'via orders · CRM soon', tone:'muted', small:true });
+    $('ob-dr-intel').innerHTML = cells.map(c =>
+      '<div class="ic"><div class="icl">'+esc(c.l)+'</div>'
+      + (c.risk ? '<div class="icv"><span class="risk risk-'+c.risk.toLowerCase()+'">'+esc(c.v)+'</span></div>'
+                : '<div class="icv'+(c.tone?' '+c.tone:'')+(c.small?' small':'')+'">'+esc(c.v)+'</div>')
+      + (c.s ? '<div class="ics">'+esc(c.s)+'</div>' : '')
+      + '</div>').join('');
     if (ci.topProducts.length){
       const tpMax = Math.max(1, ...ci.topProducts.map(t=>t.value));
       $('ob-dr-topprod').innerHTML = '<div class="tp-h">Top products purchased</div>' + ci.topProducts.map((t,i) =>
