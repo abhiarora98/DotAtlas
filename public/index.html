@@ -1004,6 +1004,88 @@
     .pi-grid { grid-template-columns: 1fr 1fr; }
   }
 
+  /* Orders workspace tab strip (Order book / Create PI / PI History) */
+  .orders-tabbar {
+    display: inline-flex; gap: 4px;
+    padding: 4px; margin-bottom: 22px;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+  .orders-tabbar button {
+    font-family: var(--fm); font-size: 11px; letter-spacing: 0.04em;
+    color: var(--text-3); background: transparent; border: 0;
+    padding: 9px 18px; border-radius: 7px; cursor: pointer;
+    transition: all 200ms var(--ease); white-space: nowrap;
+  }
+  .orders-tabbar button:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+  .orders-tabbar button.on {
+    color: var(--void); background: var(--emerald); font-weight: 600;
+    box-shadow: 0 2px 10px -3px rgba(78,222,163,0.5);
+  }
+  body[data-mode="light"] .orders-tabbar button.on { color: #fff; }
+
+  /* ============ Receivables · ledgers ============ */
+  .rcv-tabbar { margin-bottom: 18px; }
+  .rcv-ledger-wrap {
+    display: grid; grid-template-columns: 360px 1fr; gap: 18px;
+    margin-top: 14px; align-items: start;
+  }
+  .rcv-parties-card { position: sticky; top: 16px; }
+  .rcv-parties-card .card-b { padding: 14px 16px 16px; }
+  #rcv-search { width: 100%; margin-bottom: 12px; }
+  .rcv-party-list { display: flex; flex-direction: column; gap: 2px; max-height: calc(100vh - 280px); overflow-y: auto; }
+  .rcv-party {
+    display: grid; grid-template-columns: 30px 1fr auto; gap: 11px; align-items: center;
+    padding: 10px 10px; border-radius: 8px; cursor: pointer;
+    border: 1px solid transparent; transition: all 160ms var(--ease);
+  }
+  .rcv-party:hover { background: rgba(255,255,255,0.03); border-color: var(--line); }
+  .rcv-party.active { background: var(--emerald-soft); border-color: var(--emerald-mute); }
+  .rcv-party .av-sq { width: 30px; height: 30px; font-size: 10px; }
+  .rcv-party .rp-name { font-size: 12.5px; color: var(--text); font-weight: 500; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rcv-party .rp-sub { font-family: var(--fm); font-size: 9.5px; color: var(--text-3); letter-spacing: 0.03em; margin-top: 2px; }
+  .rcv-party .rp-bal { font-family: var(--fm); font-size: 12px; font-weight: 600; color: var(--text); text-align: right; font-variant-numeric: tabular-nums; }
+  .rcv-party .rp-bal small { display: block; font-weight: 400; color: var(--text-3); font-size: 9px; margin-top: 1px; }
+
+  .rcv-stmt-head {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 14px; padding-bottom: 16px; margin-bottom: 6px; border-bottom: 1px solid var(--line);
+  }
+  .rcv-stmt-head .rs-name { font-family: var(--fd); font-size: 18px; font-weight: 600; color: var(--text); }
+  .rcv-stmt-head .rs-sub { font-family: var(--fm); font-size: 10.5px; color: var(--text-3); letter-spacing: 0.04em; margin-top: 4px; }
+  .rcv-stmt-head .rs-bal { text-align: right; flex-shrink: 0; }
+  .rcv-stmt-head .rs-bal .rl { font-family: var(--fm); font-size: 9.5px; letter-spacing: 0.14em; color: var(--text-3); text-transform: uppercase; }
+  .rcv-stmt-head .rs-bal .rv { font-family: var(--fd); font-size: 24px; font-weight: 700; color: var(--emerald); letter-spacing: -0.01em; font-variant-numeric: tabular-nums; margin-top: 3px; }
+
+  .rcv-stmt-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; margin-top: 4px; }
+  .rcv-stmt-table thead th {
+    font-family: var(--fm); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text-3); font-weight: 500; text-align: right; padding: 10px 0 9px 12px; border-bottom: 1px solid var(--line);
+  }
+  .rcv-stmt-table th.l, .rcv-stmt-table td.l { text-align: left; }
+  .rcv-stmt-table td { padding: 11px 0 11px 12px; border-bottom: 1px solid var(--line); font-size: 12.5px; color: var(--text-2); text-align: right; }
+  .rcv-stmt-table td.l { padding-left: 0; }
+  .rcv-stmt-table td .rt-date { font-family: var(--fm); font-size: 11px; color: var(--text-3); }
+  .rcv-stmt-table td .rt-ref { font-family: var(--fm); color: var(--text); font-size: 12px; }
+  .rcv-stmt-table td .rt-part { color: var(--text-3); font-size: 11px; margin-top: 2px; }
+  .rcv-stmt-table td.rt-debit { color: var(--text); font-weight: 500; }
+  .rcv-stmt-table td.rt-bal { color: var(--text); font-weight: 600; }
+  .rcv-stmt-table tr:hover td { background: rgba(255,255,255,0.015); }
+  .rcv-stmt-table tfoot td {
+    border-top: 1px solid var(--line-2); border-bottom: none; padding-top: 14px;
+    font-family: var(--fm); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text);
+  }
+  .rcv-stmt-table tfoot td.rt-bal { font-family: var(--fd); font-size: 17px; font-weight: 700; color: var(--emerald); letter-spacing: -0.01em; text-transform: none; }
+
+  .rcv-empty { padding: 32px 16px; text-align: center; color: var(--text-3); font-size: 13px; line-height: 1.6; }
+  .rcv-note { margin-top: 14px; font-size: 11.5px; color: var(--text-3); font-style: italic; }
+
+  @media (max-width: 1100px) {
+    .rcv-ledger-wrap { grid-template-columns: 1fr; }
+    .rcv-parties-card { position: static; }
+    .rcv-party-list { max-height: 320px; }
+  }
+
   /* ============================================================
      Create PI — two-pane workspace + live invoice preview
      ============================================================ */
@@ -1421,12 +1503,6 @@
     </div>
     <div class="nav-item" data-page="dispatch">
       <span class="glyph">→</span><span>Dispatch</span>
-    </div>
-    <div class="nav-item" data-page="create-pi">
-      <span class="glyph">+</span><span>Create PI</span><span class="badge live">NEW</span>
-    </div>
-    <div class="nav-item" data-page="pi-history">
-      <span class="glyph">≡</span><span>PI History</span>
     </div>
 
     <div class="rail-section">Sense</div>
@@ -1874,6 +1950,11 @@
 
     <!-- ORDERS PAGE -->
     <section class="page" data-page="orders" hidden>
+      <div class="orders-tabbar">
+        <button data-tab="orders">Order book</button>
+        <button data-tab="create-pi">Create PI</button>
+        <button data-tab="pi-history">PI History</button>
+      </div>
       <div class="hero-h">
         <div>
           <div class="eb"><span class="live-dot"></span>Order book · 312 in motion</div>
@@ -2011,6 +2092,11 @@
 
     <!-- CREATE PI PAGE -->
     <section class="page" data-page="create-pi" hidden>
+      <div class="orders-tabbar">
+        <button data-tab="orders">Order book</button>
+        <button data-tab="create-pi">Create PI</button>
+        <button data-tab="pi-history">PI History</button>
+      </div>
       <div class="hero-h">
         <div>
           <div class="eb"><span class="live-dot"></span>Operate · create PI · <span id="pi-eb-status">draft</span></div>
@@ -2182,6 +2268,11 @@
 
     <!-- PI HISTORY PAGE -->
     <section class="page" data-page="pi-history" hidden>
+      <div class="orders-tabbar">
+        <button data-tab="orders">Order book</button>
+        <button data-tab="create-pi">Create PI</button>
+        <button data-tab="pi-history">PI History</button>
+      </div>
       <div class="hero-h">
         <div>
           <div class="eb"><span class="live-dot"></span>PI History · <span id="ph-status">syncing…</span></div>
@@ -2237,25 +2328,67 @@
     <!-- RECEIVABLES PAGE -->
     <section class="page" data-page="receivables" hidden>
       <div class="hero-h">
-        <div><div class="eb"><span class="live-dot"></span>Receivables · ₹1.18 Cr outstanding</div><h1>Who <span class="em">owes you</span>, and how <span class="accent">long</span>.</h1></div>
-        <div class="when">PARTIES · <b>42</b><br/>OVERDUE · <b>14</b><br/>OVER 60D · <b>5</b></div>
+        <div><div class="eb"><span class="live-dot"></span>Receivables · <span id="rcv-eb">syncing…</span></div><h1>Who <span class="em">owes you</span>, and the <span class="accent">full ledger</span>.</h1></div>
+        <div class="when">PARTIES · <b id="rcv-w-parties">—</b><br/>PIS · <b id="rcv-w-pis">—</b><br/>OUTSTANDING · <b id="rcv-w-out">—</b></div>
       </div>
-      <div class="kpis">
-        <div class="kpi"><div class="lbl"><span>Total receivables</span><span class="ind a"></span></div><div class="v"><span class="cur">₹</span>1.18<span class="un">Cr</span></div><div class="d dn"><span class="arr">↑</span>+₹14L vs. month avg</div></div>
-        <div class="kpi"><div class="lbl"><span>Avg DSO</span><span class="ind a"></span></div><div class="v">38<span class="un">d</span></div><div class="d dn"><span class="arr">↑</span>+4d this quarter</div></div>
-        <div class="kpi"><div class="lbl"><span>Over 60 days</span><span class="ind r"></span></div><div class="v"><span class="cur">₹</span>32.4<span class="un">L</span></div><div class="d rr"><span class="arr">→</span>2 parties · 5 invoices</div></div>
-        <div class="kpi"><div class="lbl"><span>Collected 7d</span><span class="ind"></span></div><div class="v"><span class="cur">₹</span>24.8<span class="un">L</span></div><div class="d"><span class="arr">↑</span>+₹6L vs. prior</div></div>
+
+      <div class="orders-tabbar rcv-tabbar">
+        <button data-rtab="ledgers" class="on">Ledgers</button>
+        <button data-rtab="aging">Aging book</button>
       </div>
-      <div class="card" style="margin-top:14px;">
-        <div class="card-h"><div class="t"><span class="ic">⋮</span><h3>Aging book</h3><span class="sub">42 PARTIES</span></div><div class="seg"><button>0-30</button><button class="on">31-60</button><button>61-90</button><button>90+</button></div></div>
-        <div class="card-b" style="padding-top:6px;">
-          <table class="table"><thead><tr><th>Party</th><th>Invoice</th><th class="r">Amount</th><th class="r">Aged</th><th>Status</th></tr></thead><tbody>
-            <tr><td><div class="name"><div class="av-sq r" style="background:linear-gradient(135deg,rgba(255,138,168,0.18),rgba(255,138,168,0.04));color:var(--rose);border-color:rgba(255,138,168,0.18);">SI</div><div class="nm-c"><div class="pri">Sai Industries</div><div class="sec">PUNE · 3 invoices</div></div></div></td><td class="mute" style="font-family:var(--fm);">INV-1882</td><td class="num r"><span class="cur">₹</span>11.4 L</td><td class="num r" style="color:var(--rose);">52d</td><td><span class="pill-s bad">CREDIT HOLD</span></td></tr>
-            <tr><td><div class="name"><div class="av-sq a">VT</div><div class="nm-c"><div class="pri">Vinod Trading</div><div class="sec">DELHI · 2 invoices</div></div></div></td><td class="mute" style="font-family:var(--fm);">INV-1875</td><td class="num r"><span class="cur">₹</span>7.0 L</td><td class="num r" style="color:var(--amber);">48d</td><td><span class="pill-s warn">REMIND</span></td></tr>
-            <tr><td><div class="name"><div class="av-sq a">BH</div><div class="nm-c"><div class="pri">Bombay Hospitality</div><div class="sec">MUMBAI · 1 invoice</div></div></div></td><td class="mute" style="font-family:var(--fm);">INV-1854</td><td class="num r"><span class="cur">₹</span>5.2 L</td><td class="num r" style="color:var(--amber);">42d</td><td><span class="pill-s warn">PROMISE 14M</span></td></tr>
-            <tr><td><div class="name"><div class="av-sq b">RM</div><div class="nm-c"><div class="pri">Rajesh Mats</div><div class="sec">JAIPUR · 1 invoice</div></div></div></td><td class="mute" style="font-family:var(--fm);">INV-1812</td><td class="num r"><span class="cur">₹</span>4.8 L</td><td class="num r" style="color:var(--text-3);">38d</td><td><span class="pill-s info">DUE SOON</span></td></tr>
-            <tr><td><div class="name"><div class="av-sq e">KB</div><div class="nm-c"><div class="pri">Khanna Bros.</div><div class="sec">LUDHIANA · 1 invoice</div></div></div></td><td class="mute" style="font-family:var(--fm);">INV-1799</td><td class="num r"><span class="cur">₹</span>4.0 L</td><td class="num r" style="color:var(--text-3);">34d</td><td><span class="pill-s ok">ON CADENCE</span></td></tr>
-          </tbody></table>
+
+      <!-- ============ LEDGERS (live, from PI data) ============ -->
+      <div class="rcv-panel" data-rpanel="ledgers">
+        <div class="kpis">
+          <div class="kpi"><div class="lbl"><span>Total outstanding</span><span class="ind a"></span></div><div class="v"><span class="cur">₹</span><span id="rcv-k-out">0</span></div><div class="d"><span class="arr">→</span>billed via proforma</div></div>
+          <div class="kpi"><div class="lbl"><span>Parties with dues</span><span class="ind"></span></div><div class="v" id="rcv-k-parties">0</div><div class="d"><span class="arr">→</span>open ledgers</div></div>
+          <div class="kpi"><div class="lbl"><span>PIs raised</span><span class="ind b"></span></div><div class="v" id="rcv-k-pis">0</div><div class="d"><span class="arr">→</span>across all parties</div></div>
+          <div class="kpi"><div class="lbl"><span>Largest balance</span><span class="ind r"></span></div><div class="v"><span class="cur">₹</span><span id="rcv-k-top">0</span></div><div class="d" id="rcv-k-topname"><span class="arr">→</span>—</div></div>
+        </div>
+
+        <div class="rcv-ledger-wrap">
+          <div class="card rcv-parties-card">
+            <div class="card-h">
+              <div class="t"><span class="ic">○</span><h3>Parties</h3><span class="sub"><span id="rcv-party-count">0</span> WITH DUES</span></div>
+            </div>
+            <div class="card-b">
+              <input type="text" id="rcv-search" class="pi-input no-upper" placeholder="Search party name or code…" autocomplete="off" spellcheck="false">
+              <div id="rcv-party-list" class="rcv-party-list"><div class="rcv-empty">Loading…</div></div>
+            </div>
+          </div>
+
+          <div class="card rcv-statement-card">
+            <div class="card-h">
+              <div class="t"><span class="ic">≡</span><h3>Ledger statement</h3><span class="sub" id="rcv-stmt-sub">SELECT A PARTY</span></div>
+              <span class="more" id="rcv-refresh">↻ REFRESH</span>
+            </div>
+            <div class="card-b" id="rcv-statement">
+              <div class="rcv-empty">Pick a party on the left to see its full statement of account.</div>
+            </div>
+          </div>
+        </div>
+        <div class="rcv-note">Balances reflect proforma invoices raised (debits). Receipts/credits appear here once payment sync is wired to the sheet.</div>
+      </div>
+
+      <!-- ============ AGING BOOK ============ -->
+      <div class="rcv-panel" data-rpanel="aging" hidden>
+        <div class="kpis">
+          <div class="kpi"><div class="lbl"><span>Total receivables</span><span class="ind a"></span></div><div class="v"><span class="cur">₹</span>1.18<span class="un">Cr</span></div><div class="d dn"><span class="arr">↑</span>+₹14L vs. month avg</div></div>
+          <div class="kpi"><div class="lbl"><span>Avg DSO</span><span class="ind a"></span></div><div class="v">38<span class="un">d</span></div><div class="d dn"><span class="arr">↑</span>+4d this quarter</div></div>
+          <div class="kpi"><div class="lbl"><span>Over 60 days</span><span class="ind r"></span></div><div class="v"><span class="cur">₹</span>32.4<span class="un">L</span></div><div class="d rr"><span class="arr">→</span>2 parties · 5 invoices</div></div>
+          <div class="kpi"><div class="lbl"><span>Collected 7d</span><span class="ind"></span></div><div class="v"><span class="cur">₹</span>24.8<span class="un">L</span></div><div class="d"><span class="arr">↑</span>+₹6L vs. prior</div></div>
+        </div>
+        <div class="card" style="margin-top:14px;">
+          <div class="card-h"><div class="t"><span class="ic">⋮</span><h3>Aging book</h3><span class="sub">42 PARTIES</span></div><div class="seg"><button>0-30</button><button class="on">31-60</button><button>61-90</button><button>90+</button></div></div>
+          <div class="card-b" style="padding-top:6px;">
+            <table class="table"><thead><tr><th>Party</th><th>Invoice</th><th class="r">Amount</th><th class="r">Aged</th><th>Status</th></tr></thead><tbody>
+              <tr><td><div class="name"><div class="av-sq r" style="background:linear-gradient(135deg,rgba(255,138,168,0.18),rgba(255,138,168,0.04));color:var(--rose);border-color:rgba(255,138,168,0.18);">SI</div><div class="nm-c"><div class="pri">Sai Industries</div><div class="sec">PUNE · 3 invoices</div></div></div></td><td class="mute" style="font-family:var(--fm);">INV-1882</td><td class="num r"><span class="cur">₹</span>11.4 L</td><td class="num r" style="color:var(--rose);">52d</td><td><span class="pill-s bad">CREDIT HOLD</span></td></tr>
+              <tr><td><div class="name"><div class="av-sq a">VT</div><div class="nm-c"><div class="pri">Vinod Trading</div><div class="sec">DELHI · 2 invoices</div></div></div></td><td class="mute" style="font-family:var(--fm);">INV-1875</td><td class="num r"><span class="cur">₹</span>7.0 L</td><td class="num r" style="color:var(--amber);">48d</td><td><span class="pill-s warn">REMIND</span></td></tr>
+              <tr><td><div class="name"><div class="av-sq a">BH</div><div class="nm-c"><div class="pri">Bombay Hospitality</div><div class="sec">MUMBAI · 1 invoice</div></div></div></td><td class="mute" style="font-family:var(--fm);">INV-1854</td><td class="num r"><span class="cur">₹</span>5.2 L</td><td class="num r" style="color:var(--amber);">42d</td><td><span class="pill-s warn">PROMISE 14M</span></td></tr>
+              <tr><td><div class="name"><div class="av-sq b">RM</div><div class="nm-c"><div class="pri">Rajesh Mats</div><div class="sec">JAIPUR · 1 invoice</div></div></div></td><td class="mute" style="font-family:var(--fm);">INV-1812</td><td class="num r"><span class="cur">₹</span>4.8 L</td><td class="num r" style="color:var(--text-3);">38d</td><td><span class="pill-s info">DUE SOON</span></td></tr>
+              <tr><td><div class="name"><div class="av-sq e">KB</div><div class="nm-c"><div class="pri">Khanna Bros.</div><div class="sec">LUDHIANA · 1 invoice</div></div></div></td><td class="mute" style="font-family:var(--fm);">INV-1799</td><td class="num r"><span class="cur">₹</span>4.0 L</td><td class="num r" style="color:var(--text-3);">34d</td><td><span class="pill-s ok">ON CADENCE</span></td></tr>
+            </tbody></table>
+          </div>
         </div>
       </div>
     </section>
@@ -2392,25 +2525,44 @@
     cash:'Sense', receivables:'Sense', intel:'Sense', reports:'Sense',
     workflows:'Studio', settings:'Studio'
   };
+  // The three order-workspace views share the "Orders" sidebar item.
+  const ORDERS_TABS = ['orders', 'create-pi', 'pi-history'];
   function setPage(p) {
+    if (!p) return;
     const pages = document.querySelectorAll('section.page');
     pages.forEach(s => { s.hidden = s.getAttribute('data-page') !== p; });
+    // Orders stays highlighted while inside any of its tabs.
+    const navActive = ORDERS_TABS.includes(p) ? 'orders' : p;
     document.querySelectorAll('.nav-item').forEach(n => {
-      n.classList.toggle('active', n.getAttribute('data-page') === p);
+      n.classList.toggle('active', n.getAttribute('data-page') === navActive);
+    });
+    // Sync the in-page tab strip (present on each orders-workspace view).
+    document.querySelectorAll('.orders-tabbar button').forEach(b => {
+      b.classList.toggle('on', b.getAttribute('data-tab') === p);
     });
     const crumb = document.querySelector('.crumb');
     if (crumb && pageTitleMap[p]) {
-      crumb.innerHTML = `<b>atlas</b> <span class="sep">/</span> ${sectionMap[p]||'Operate'} <span class="sep">/</span> <b>${pageTitleMap[p]}</b>`;
+      const parent = ORDERS_TABS.includes(p) && p !== 'orders' ? 'Orders' : (sectionMap[p] || 'Operate');
+      crumb.innerHTML = `<b>atlas</b> <span class="sep">/</span> ${parent} <span class="sep">/</span> <b>${pageTitleMap[p]}</b>`;
     }
     history.replaceState(null, '', '#'+p);
     window.scrollTo({top:0, behavior:'instant'});
     if (p === 'pi-history' && typeof window.atlasLoadHistory === 'function') {
       window.atlasLoadHistory();
     }
+    if (p === 'receivables' && typeof window.atlasLoadReceivables === 'function') {
+      window.atlasLoadReceivables();
+    }
   }
   document.querySelectorAll('.nav-item[data-page]').forEach(n => {
     n.style.cursor = 'pointer';
     n.addEventListener('click', () => setPage(n.getAttribute('data-page')));
+  });
+  // In-page tab strip (Order book / Create PI / PI History).
+  // Scope to [data-tab] so the Receivables tabs (data-rtab, same visual class)
+  // are NOT caught here — they switch panels, not pages.
+  document.querySelectorAll('.orders-tabbar button[data-tab]').forEach(b => {
+    b.addEventListener('click', () => setPage(b.getAttribute('data-tab')));
   });
   window.addEventListener('hashchange', () => {
     const p = location.hash.slice(1);
@@ -4249,6 +4401,192 @@
     if (r) r.addEventListener('click', () => window.atlasLoadHistory(true));
     // If user lands directly on #pi-history, fetch immediately.
     if (location.hash === '#pi-history') window.atlasLoadHistory();
+  });
+})();
+</script>
+
+<!-- ============ Receivables · live party ledgers ============ -->
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const initials = name => {
+    const parts = String(name||'').trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return '··';
+    if (parts.length === 1) return parts[0].slice(0,2).toUpperCase();
+    return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
+  };
+  const avClass = name => ['e','b','a'][(String(name||'').charCodeAt(0)||0) % 3];
+  const inr = n => '₹' + Math.round(Number(n)||0).toLocaleString('en-IN');
+  const compact = n => {
+    n = Number(n)||0;
+    if (n >= 1e7) return (n/1e7).toFixed(2) + ' Cr';
+    if (n >= 1e5) return (n/1e5).toFixed(2) + ' L';
+    if (n >= 1e3) return (n/1e3).toFixed(1) + 'K';
+    return String(Math.round(n));
+  };
+  function parseDate(s){
+    if (!s) return 0;
+    const str = String(s).trim();
+    if (/^\d{4}-\d{1,2}-\d{1,2}/.test(str)) { const d = new Date(str); return isNaN(d) ? 0 : d.getTime(); }
+    if (/^\d{1,2}\/\d{1,2}\/\d{4}/.test(str)) { const [dd,mm,yy] = str.split('/'); return new Date(+yy, +mm-1, +dd).getTime(); }
+    const d = new Date(str); return isNaN(d) ? 0 : d.getTime();
+  }
+  function fmtDate(s){
+    if (!s) return '—';
+    const str = String(s).trim();
+    if (/^\d{4}-\d{1,2}-\d{1,2}/.test(str)){ const [y,m,d] = str.slice(0,10).split('-'); return d.padStart(2,'0')+'/'+m.padStart(2,'0')+'/'+y; }
+    return str;
+  }
+
+  function endpoint(){
+    return (window.ATLAS_APPS_SCRIPT_URL || localStorage.getItem('atlas-apps-script-url') || '/api/pi').trim();
+  }
+  async function fetchPis(){
+    const res = await fetch(endpoint(), {
+      method: 'POST',
+      body: JSON.stringify({ kind: 'list' }),
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    });
+    const j = await res.json();
+    if (!j.ok) throw new Error(j.error || 'list failed');
+    return j.pis || [];
+  }
+
+  // ---- state ----
+  let ledgers = [];        // [{ name, code, pis:[], balance }]
+  let selected = null;     // party name
+  let loadedAt = 0, loading = false;
+
+  function buildLedgers(pis){
+    const map = new Map();
+    for (const p of pis){
+      const name = (p.party || '').trim();
+      if (!name) continue;
+      if (!map.has(name)) map.set(name, { name, code: p.partyCode || '', pis: [], balance: 0 });
+      const L = map.get(name);
+      if (p.partyCode && !L.code) L.code = p.partyCode;
+      L.pis.push(p);
+      L.balance += Number(p.totalIncGst) || 0;
+    }
+    const list = [...map.values()];
+    list.forEach(L => L.pis.sort((a,b) => parseDate(a.date) - parseDate(b.date)));
+    list.sort((a,b) => b.balance - a.balance);
+    return list;
+  }
+
+  function renderKpis(){
+    const total = ledgers.reduce((a,L) => a + L.balance, 0);
+    const pis = ledgers.reduce((a,L) => a + L.pis.length, 0);
+    const top = ledgers[0];
+    $('rcv-k-out').textContent = compact(total);
+    $('rcv-k-parties').textContent = ledgers.length;
+    $('rcv-k-pis').textContent = pis;
+    $('rcv-k-top').textContent = top ? compact(top.balance) : '0';
+    $('rcv-k-topname').innerHTML = '<span class="arr">→</span>' + esc(top ? top.name : '—');
+    $('rcv-w-parties').textContent = ledgers.length;
+    $('rcv-w-pis').textContent = pis;
+    $('rcv-w-out').textContent = '₹' + compact(total);
+    $('rcv-eb').textContent = ledgers.length + ' open ledger' + (ledgers.length === 1 ? '' : 's');
+    $('rcv-party-count').textContent = ledgers.length;
+  }
+
+  function renderPartyList(){
+    const host = $('rcv-party-list');
+    const q = ($('rcv-search').value || '').trim().toLowerCase();
+    const rows = ledgers.filter(L =>
+      !q || L.name.toLowerCase().includes(q) || (L.code || '').toLowerCase().includes(q));
+    if (!rows.length){
+      host.innerHTML = '<div class="rcv-empty">' + (ledgers.length ? 'No party matches.' : 'No receivables yet. Create a PI to open a ledger.') + '</div>';
+      return;
+    }
+    host.innerHTML = rows.map(L =>
+      '<div class="rcv-party' + (L.name === selected ? ' active' : '') + '" data-name="' + esc(L.name) + '">' +
+        '<div class="av-sq ' + avClass(L.name) + '">' + esc(initials(L.name)) + '</div>' +
+        '<div style="min-width:0;">' +
+          '<div class="rp-name">' + esc(L.name) + '</div>' +
+          '<div class="rp-sub">' + (L.code ? esc(L.code) + ' · ' : '') + L.pis.length + ' PI' + (L.pis.length===1?'':'s') + '</div>' +
+        '</div>' +
+        '<div class="rp-bal">' + inr(L.balance) + '<small>balance</small></div>' +
+      '</div>'
+    ).join('');
+    host.querySelectorAll('.rcv-party').forEach(r =>
+      r.addEventListener('click', () => { selected = r.getAttribute('data-name'); renderPartyList(); renderStatement(); }));
+  }
+
+  function renderStatement(){
+    const host = $('rcv-statement');
+    const L = ledgers.find(x => x.name === selected);
+    if (!L){
+      $('rcv-stmt-sub').textContent = 'SELECT A PARTY';
+      host.innerHTML = '<div class="rcv-empty">Pick a party on the left to see its full statement of account.</div>';
+      return;
+    }
+    $('rcv-stmt-sub').textContent = L.pis.length + ' ENTRIES';
+    let running = 0;
+    const body = L.pis.map(p => {
+      const debit = Number(p.totalIncGst) || 0;
+      running += debit;
+      return '<tr>' +
+        '<td class="l"><span class="rt-date">' + fmtDate(p.date) + '</span></td>' +
+        '<td class="l"><div class="rt-ref">PI #' + esc(p.ref) + '</div><div class="rt-part">' + (p.lines||0) + ' line' + ((p.lines||0)===1?'':'s') + (p.poc ? ' · ' + esc(p.poc) : '') + '</div></td>' +
+        '<td class="rt-debit">' + inr(debit) + '</td>' +
+        '<td class="rt-bal">' + inr(running) + '</td>' +
+      '</tr>';
+    }).join('');
+    host.innerHTML =
+      '<div class="rcv-stmt-head">' +
+        '<div><div class="rs-name">' + esc(L.name) + '</div>' +
+          '<div class="rs-sub">' + (L.code ? esc(L.code) + ' · ' : '') + L.pis.length + ' proforma invoice' + (L.pis.length===1?'':'s') + '</div></div>' +
+        '<div class="rs-bal"><div class="rl">Outstanding</div><div class="rv">' + inr(L.balance) + '</div></div>' +
+      '</div>' +
+      '<table class="rcv-stmt-table">' +
+        '<thead><tr><th class="l">Date</th><th class="l">Particulars</th><th>Debit</th><th>Balance</th></tr></thead>' +
+        '<tbody>' + body + '</tbody>' +
+        '<tfoot><tr><td class="l"></td><td class="l">Closing balance</td><td></td><td class="rt-bal">' + inr(L.balance) + '</td></tr></tfoot>' +
+      '</table>';
+  }
+
+  window.atlasLoadReceivables = async function(force){
+    if (loading) return;
+    if (!force && ledgers.length && (Date.now() - loadedAt) < 30000){ return; }
+    loading = true;
+    $('rcv-eb').textContent = 'syncing…';
+    $('rcv-party-list').innerHTML = '<div class="rcv-empty">Loading…</div>';
+    try {
+      const pis = await fetchPis();
+      ledgers = buildLedgers(pis);
+      loadedAt = Date.now();
+      if (!ledgers.find(L => L.name === selected)) selected = ledgers.length ? ledgers[0].name : null;
+      renderKpis();
+      renderPartyList();
+      renderStatement();
+    } catch (err){
+      console.error('[atlas] receivables fetch failed:', err);
+      $('rcv-eb').textContent = 'offline';
+      $('rcv-party-list').innerHTML = '<div class="rcv-empty">Couldn’t load ledgers: ' + esc(err.message || err) + '<br/>Connect the sheet to see live balances.</div>';
+      $('rcv-statement').innerHTML = '<div class="rcv-empty">Ledgers load once the PI sheet is reachable.</div>';
+    } finally {
+      loading = false;
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const search = $('rcv-search');
+    if (search) search.addEventListener('input', renderPartyList);
+    const refresh = $('rcv-refresh');
+    if (refresh) refresh.addEventListener('click', () => window.atlasLoadReceivables(true));
+    // in-page tabs: Ledgers / Aging book
+    document.querySelectorAll('.rcv-tabbar button').forEach(b => {
+      b.addEventListener('click', () => {
+        const tab = b.getAttribute('data-rtab');
+        document.querySelectorAll('.rcv-tabbar button').forEach(x => x.classList.toggle('on', x === b));
+        document.querySelectorAll('.rcv-panel').forEach(pnl =>
+          pnl.hidden = pnl.getAttribute('data-rpanel') !== tab);
+      });
+    });
+    if (location.hash === '#receivables') window.atlasLoadReceivables();
   });
 })();
 </script>
