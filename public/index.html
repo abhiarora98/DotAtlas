@@ -1029,13 +1029,13 @@
      ============================================================ */
   .ob-toolbar {
     display: flex; align-items: center; justify-content: space-between;
-    gap: 16px; flex-wrap: wrap; margin: 18px 0 6px;
+    gap: 16px; flex-wrap: wrap; margin: 22px 0 12px;
   }
-  .ob-status-tabs { display: inline-flex; gap: 4px; flex-wrap: wrap; }
+  .ob-status-tabs { display: inline-flex; gap: 5px; flex-wrap: wrap; }
   .ob-status-tabs button {
     font-family: var(--fm); font-size: 11px; letter-spacing: 0.03em;
     color: var(--text-3); background: var(--surface); border: 1px solid var(--line);
-    padding: 8px 13px; border-radius: 8px; cursor: pointer;
+    padding: 8px 13px; border-radius: 9px; cursor: pointer;
     transition: all 180ms var(--ease); display: inline-flex; align-items: center; gap: 7px;
   }
   .ob-status-tabs button:hover { color: var(--text); border-color: var(--line-2); }
@@ -1045,38 +1045,72 @@
     background: var(--surface-3); color: var(--text-2); font-variant-numeric: tabular-nums;
   }
   .ob-status-tabs button.on .cnt { background: var(--emerald-mute); color: var(--text); }
-  .ob-tools { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .ob-tools .pi-input, .ob-tools .pi-select { width: auto; }
-  #ob-search { min-width: 230px; }
-  #ob-poc { min-width: 120px; }
-  .ob-date-lbl {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-family: var(--fm); font-size: 9.5px; letter-spacing: 0.1em;
-    text-transform: uppercase; color: var(--text-3);
+  /* Quick filters */
+  .ob-quickbar { display: inline-flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+  .ob-quickbar button {
+    font-family: var(--fm); font-size: 10.5px; letter-spacing: 0.02em; color: var(--text-3);
+    background: transparent; border: 1px solid var(--line); padding: 7px 12px;
+    border-radius: 9px; cursor: pointer; transition: all 160ms var(--ease);
   }
-  .ob-date-lbl input { width: 140px; }
-  #ob-clear { cursor: pointer; }
+  .ob-quickbar button:hover { color: var(--text); border-color: var(--line-2); background: rgba(255,255,255,0.03); }
+  .ob-quickbar button.on { color: var(--blue); border-color: rgba(124,168,255,0.42); background: var(--blue-soft); }
+  .ob-qf-sep { width: 1px; height: 16px; background: var(--line-2); margin: 0 3px; }
 
-  /* Order book table */
-  .ob-table { table-layout: auto; }
+  /* Search + filters row */
+  .ob-toolbar2 { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .ob-search-wrap { position: relative; flex: 1 1 360px; min-width: 260px; }
+  .ob-search-ic { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-3); font-size: 16px; pointer-events: none; }
+  .ob-search {
+    width: 100%; background: var(--surface); border: 1px solid var(--line); color: var(--text);
+    border-radius: 10px; padding: 11px 14px 11px 40px; font-family: var(--fb); font-size: 13.5px;
+    transition: border-color 180ms var(--ease), background 180ms var(--ease);
+  }
+  .ob-search::placeholder { color: var(--text-3); }
+  .ob-search:focus { outline: none; border-color: var(--emerald); background: var(--surface-2); box-shadow: 0 0 0 3px rgba(78,222,163,0.08); }
+  #ob-poc { width: auto; min-width: 130px; border-radius: 10px; }
+  .ob-daterange {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 3px 10px;
+    transition: border-color 180ms var(--ease);
+  }
+  .ob-daterange:focus-within { border-color: var(--emerald); }
+  .ob-dr-cal { font-size: 12px; opacity: 0.55; }
+  .ob-dr-arrow { color: var(--text-3); font-size: 11px; }
+  .ob-date-in {
+    background: transparent; border: 0; color: var(--text-2); font-family: var(--fm);
+    font-size: 11.5px; padding: 7px 2px; width: 116px; color-scheme: dark;
+  }
+  .ob-date-in:focus { outline: none; color: var(--text); }
+  #ob-clear { cursor: pointer; border-radius: 9px; }
+
+  /* Order book table — full-width, dense, scannable */
+  .ob-card .card-h { padding: 18px 22px 14px; }
+  .ob-card .card-b { padding: 2px 12px 10px; }
+  .ob-table { table-layout: auto; width: 100%; }
   .ob-table thead th {
     position: sticky; top: 49px; z-index: 2; background: var(--void);
-    font-size: 10px; letter-spacing: 0.1em; padding: 12px 14px 12px 0;
-    white-space: nowrap;
+    font-size: 10px; letter-spacing: 0.1em; padding: 13px 16px 13px 0; white-space: nowrap;
   }
+  .ob-table thead th:first-child, .ob-table tbody td:first-child { padding-left: 14px; }
+  .ob-table thead th:last-child, .ob-table tbody td:last-child { padding-right: 14px; }
+  /* Party column absorbs slack so the table fills the full width */
+  .ob-table th.ob-col-party, .ob-table td.ob-col-party { width: 99%; }
   .ob-table thead th[data-sort] { cursor: pointer; user-select: none; transition: color 150ms var(--ease); }
   .ob-table thead th[data-sort]:hover { color: var(--text); }
   .ob-table thead th[data-sort].sorted::after { content: ' ↓'; color: var(--text-2); }
   .ob-table thead th[data-sort].sorted.asc::after { content: ' ↑'; }
-  .ob-table tbody td { padding: 13px 14px 13px 0; font-size: 12.5px; vertical-align: middle; white-space: nowrap; }
-  .ob-table tbody tr.ob-row { cursor: pointer; transition: background 160ms var(--ease); }
-  .ob-table tbody tr.ob-row:hover td { background: rgba(255,255,255,0.03); }
-  .ob-table .ob-ref { font-family: var(--fm); font-weight: 600; color: var(--text); }
+  .ob-table tbody td { padding: 15px 16px 15px 0; font-size: 12.5px; vertical-align: middle; white-space: nowrap; border-bottom: 1px solid rgba(255,255,255,0.045); }
+  .ob-table tbody tr.ob-row { cursor: pointer; }
+  .ob-table tbody tr.ob-row td { transition: background 140ms var(--ease), box-shadow 140ms var(--ease); }
+  .ob-table tbody tr.ob-row:hover td { background: rgba(124,168,255,0.06); }
+  .ob-table tbody tr.ob-row.selected td { background: var(--emerald-soft); }
+  .ob-table tbody tr.ob-row.selected td:first-child { box-shadow: inset 3px 0 0 var(--emerald); }
+  .ob-table .ob-ref { font-family: var(--fm); font-weight: 600; color: var(--text); font-size: 12.5px; }
   .ob-table .ob-date, .ob-table .ob-est { font-family: var(--fm); font-size: 11.5px; color: var(--text-2); }
-  .ob-table .ob-party { color: var(--text); font-weight: 500; max-width: 230px; overflow: hidden; text-overflow: ellipsis; }
-  .ob-table .ob-party small { display: block; font-family: var(--fm); font-size: 10px; color: var(--text-3); margin-top: 2px; }
+  .ob-table .ob-party { color: var(--text); font-weight: 600; font-size: 13.5px; letter-spacing: -0.01em; max-width: 380px; overflow: hidden; text-overflow: ellipsis; }
+  .ob-table .ob-party small { display: block; font-family: var(--fm); font-size: 10px; color: var(--text-3); margin-top: 3px; font-weight: 400; }
   .ob-table .ob-poc { font-family: var(--fm); font-size: 11px; color: var(--text-2); }
-  .ob-table .ob-val { font-family: var(--fd); font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+  .ob-table .ob-val { font-family: var(--fd); font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; font-size: 13.5px; }
   .ob-table .ob-items-c { font-family: var(--fm); color: var(--text-2); text-align: right; }
   .ob-table .ob-inv { font-family: var(--fm); font-size: 11.5px; color: var(--text-2); }
   .ob-table .ob-inv.none { color: var(--text-4); }
@@ -1133,7 +1167,7 @@
   }
   .ob-drawer-overlay[hidden] { display: none; }
   .ob-drawer-panel {
-    width: clamp(640px, 48vw, 1200px); max-width: 96vw; height: 100%;
+    width: clamp(720px, 53vw, 1320px); max-width: 96vw; height: 100%;
     background:
       radial-gradient(ellipse 900px 300px at 100% 0%, rgba(78,222,163,0.04), transparent 55%),
       var(--void-2);
@@ -1161,36 +1195,51 @@
   .ob-dr-facts .f { display: flex; flex-direction: column; gap: 3px; }
   .ob-dr-facts .f .fl { font-family: var(--fm); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-3); }
   .ob-dr-facts .f .fv { font-size: 14px; color: var(--text); font-weight: 500; font-variant-numeric: tabular-nums; }
-  .ob-dr-facts .f .fv.accent { font-family: var(--fd); font-size: 18px; font-weight: 700; color: var(--emerald); }
+  .ob-dr-facts .f .fv.accent { font-family: var(--fd); font-size: 19px; font-weight: 700; color: var(--emerald); }
+  .ob-dr-facts .f .fv.amber { font-family: var(--fd); font-size: 16px; font-weight: 700; color: var(--amber); }
 
-  /* Quick actions */
-  .ob-dr-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+  /* Quick actions — grouped primary | secondary */
+  .ob-dr-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 24px; }
+  .ob-qa-group { display: inline-flex; flex-wrap: wrap; gap: 8px; }
+  .ob-qa-sep { width: 1px; align-self: stretch; min-height: 24px; background: var(--line-2); margin: 0 4px; }
   .ob-qa {
     display: inline-flex; align-items: center; gap: 7px;
-    font-family: var(--fm); font-size: 11px; letter-spacing: 0.03em;
-    padding: 8px 13px; border-radius: 8px; cursor: pointer;
+    font-family: var(--fm); font-size: 11.5px; letter-spacing: 0.03em;
+    padding: 9px 15px; border-radius: 9px; cursor: pointer;
     border: 1px solid var(--line-2); background: var(--surface); color: var(--text-2);
     transition: all 160ms var(--ease); white-space: nowrap;
   }
   .ob-qa:hover:not(:disabled) { color: var(--text); border-color: var(--line-3); background: rgba(255,255,255,0.03); }
-  .ob-qa .qi { font-size: 13px; line-height: 1; opacity: 0.8; }
+  .ob-qa .qi { font-size: 13px; line-height: 1; opacity: 0.85; display: inline-flex; }
   .ob-qa:disabled { opacity: 0.4; cursor: not-allowed; }
+  .ob-qa.primary { background: var(--emerald-soft); border-color: var(--emerald-mute); color: var(--emerald-2); font-weight: 600; }
+  .ob-qa.primary:hover:not(:disabled) { background: rgba(78,222,163,0.16); border-color: var(--emerald); color: var(--emerald-2); }
   .ob-qa.done { color: var(--emerald); border-color: var(--emerald-mute); background: var(--emerald-soft); }
 
   /* Body */
   .ob-dr-body { flex: 1 1 auto; overflow-y: auto; padding: 28px 38px 36px; }
 
   /* Summary cards */
-  .ob-dr-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
+  .ob-dr-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 14px; }
   .ob-card {
     background: linear-gradient(180deg, var(--surface-2) 0%, rgba(19,24,31,0.4) 100%);
-    border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px;
+    border: 1px solid var(--line-2); border-radius: 14px; padding: 18px 20px 20px;
+    min-height: 96px; display: flex; flex-direction: column; justify-content: space-between;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.03), 0 10px 26px -18px rgba(0,0,0,0.65);
+    transition: border-color 200ms var(--ease), transform 200ms var(--ease);
   }
+  .ob-card:hover { transform: translateY(-1px); border-color: var(--line-3); }
   .ob-card .cl { font-family: var(--fm); font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-3); }
-  .ob-card .cv { font-family: var(--fd); font-size: 20px; font-weight: 600; color: var(--text); margin-top: 8px; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; }
-  .ob-card .cv.sm { font-size: 15px; }
-  .ob-card.accent { border-color: rgba(78,222,163,0.22); background: linear-gradient(180deg, rgba(78,222,163,0.06), rgba(78,222,163,0.01)), linear-gradient(180deg, var(--surface-2) 0%, rgba(19,24,31,0.4) 100%); }
+  .ob-card .cv { font-family: var(--fd); font-size: 25px; font-weight: 700; color: var(--text); margin-top: 12px; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; line-height: 1; }
+  .ob-card .cv.sm { font-size: 17px; font-weight: 600; }
+  .ob-card.accent {
+    border-color: rgba(78,222,163,0.28);
+    background: linear-gradient(180deg, rgba(78,222,163,0.08), rgba(78,222,163,0.015)), linear-gradient(180deg, var(--surface-2) 0%, rgba(19,24,31,0.4) 100%);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.04), 0 12px 30px -18px rgba(78,222,163,0.25);
+  }
   .ob-card.accent .cv { color: var(--emerald); }
+  .ob-card.amberv { border-color: rgba(255,176,121,0.26); }
+  .ob-card.amberv .cv { color: var(--amber); }
 
   .ob-dr-section { padding-top: 32px; }
   .ob-dr-sec-h { font-family: var(--fd); font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 16px; letter-spacing: -0.01em; }
@@ -1201,20 +1250,22 @@
   .ob-items { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
   .ob-items thead th {
     position: sticky; top: 0; z-index: 1; background: var(--surface-2);
-    font-family: var(--fm); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
-    color: var(--text-3); font-weight: 600; text-align: right; padding: 13px 14px; border-bottom: 1px solid var(--line); white-space: nowrap;
+    font-family: var(--fm); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text-3); font-weight: 600; text-align: right; padding: 15px 16px; border-bottom: 1px solid var(--line-2); white-space: nowrap;
   }
   .ob-items thead th:nth-child(1), .ob-items thead th:nth-child(2), .ob-items thead th:nth-child(3) { text-align: left; }
-  .ob-items tbody td { padding: 15px 14px; font-size: 12.5px; color: var(--text-2); text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
-  .ob-items tbody td:nth-child(1) { color: var(--text-3); font-family: var(--fm); font-size: 11px; text-align: left; width: 30px; }
-  .ob-items tbody td.it-prod { text-align: left; color: var(--text); font-weight: 500; white-space: normal; min-width: 150px; }
-  .ob-items tbody td.it-size { text-align: left; font-family: var(--fm); font-size: 11px; color: var(--text-2); }
-  .ob-items tbody tr:nth-child(even) td { background: rgba(255,255,255,0.018); }
-  .ob-items tbody tr:hover td { background: rgba(255,255,255,0.04); }
-  .ob-items tbody td.it-total { color: var(--text); font-weight: 700; }
-  .ob-items tfoot td { padding: 15px 14px; font-family: var(--fm); font-size: 12px; color: var(--text); border-top: 1px solid var(--line-2); text-align: right; font-weight: 600; background: var(--surface); }
+  .ob-items tbody td { padding: 18px 16px; font-size: 13px; color: var(--text-2); text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  .ob-items tbody tr:last-child td { border-bottom: 0; }
+  .ob-items tbody td:nth-child(1) { color: var(--text-3); font-family: var(--fm); font-size: 11px; text-align: left; width: 34px; }
+  .ob-items tbody td.it-prod { text-align: left; color: var(--text); font-weight: 600; white-space: normal; min-width: 160px; }
+  .ob-items tbody td.it-size { text-align: left; font-family: var(--fm); font-size: 11.5px; color: var(--text-2); }
+  .ob-items tbody td.it-num { color: var(--text); }
+  .ob-items tbody tr:nth-child(even) td { background: rgba(255,255,255,0.022); }
+  .ob-items tbody tr:hover td { background: rgba(124,168,255,0.05); }
+  .ob-items tbody td.it-total { color: var(--text); font-weight: 700; font-size: 13.5px; }
+  .ob-items tfoot td { padding: 18px 16px; font-family: var(--fm); font-size: 12.5px; color: var(--text); border-top: 2px solid var(--line-2); text-align: right; font-weight: 600; background: var(--surface); }
   .ob-items tfoot td.it-lbl { text-align: left; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); font-weight: 500; }
-  .ob-items tfoot td.it-grand { color: var(--emerald); font-family: var(--fd); font-size: 15px; }
+  .ob-items tfoot td.it-grand { color: var(--emerald); font-family: var(--fd); font-size: 16px; font-weight: 700; }
 
   /* Workflow stepper */
   .ob-workflow { position: relative; }
@@ -3126,13 +3177,28 @@
           <button data-st="Cancelled">Cancelled <span class="cnt" id="ob-c-Cancelled">0</span></button>
           <button data-st="Repeat">Repeat <span class="cnt" id="ob-c-Repeat">0</span></button>
         </div>
-        <div class="ob-tools">
-          <input id="ob-search" class="pi-input no-upper" placeholder="Search PI #, party, invoice…" autocomplete="off" spellcheck="false">
-          <select id="ob-poc" class="pi-select" title="Filter by sales person"><option value="">All sales</option></select>
-          <label class="ob-date-lbl">From <input id="ob-from" type="date" class="pi-input" title="From PI date"></label>
-          <label class="ob-date-lbl">To <input id="ob-to" type="date" class="pi-input" title="To PI date"></label>
-          <button class="chip" id="ob-clear">CLEAR</button>
+        <div class="ob-quickbar" id="ob-quickbar">
+          <button data-qf="today">Today</button>
+          <button data-qf="week">This week</button>
+          <button data-qf="month">This month</button>
+          <span class="ob-qf-sep"></span>
+          <button data-qf="pending">Pending</button>
+          <button data-qf="ready">Ready</button>
         </div>
+      </div>
+      <div class="ob-toolbar2">
+        <div class="ob-search-wrap">
+          <span class="ob-search-ic">⌕</span>
+          <input id="ob-search" class="ob-search no-upper" placeholder="Search by PI number, party, code or invoice…" autocomplete="off" spellcheck="false">
+        </div>
+        <select id="ob-poc" class="pi-select" title="Filter by sales person"><option value="">All sales</option></select>
+        <div class="ob-daterange">
+          <span class="ob-dr-cal">📅</span>
+          <input id="ob-from" type="date" class="ob-date-in" title="From PI date">
+          <span class="ob-dr-arrow">→</span>
+          <input id="ob-to" type="date" class="ob-date-in" title="To PI date">
+        </div>
+        <button class="chip" id="ob-clear">CLEAR</button>
       </div>
 
       <div class="card ledger-card ob-card">
@@ -3145,7 +3211,7 @@
             <thead><tr>
               <th data-sort="ref">PI #</th>
               <th data-sort="piDateISO">PI Date</th>
-              <th data-sort="party">Party</th>
+              <th data-sort="party" class="ob-col-party">Party</th>
               <th data-sort="poc">Sales</th>
               <th>State</th>
               <th class="r" data-sort="totalValue">Order value</th>
@@ -23037,14 +23103,18 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       ];
     }
 
+    const readyTs = byKind.ready ? byKind.ready.tsISO : '';
     const dispTs = byKind.dispatched ? byKind.dispatched.tsISO : (o.estDispatch || '');
     const stages = [
-      { key:'created',   label:'PI Created',          tsISO:createdTs, sub:o.lineCount+' line items · '+inr(o.totalValue) },
-      { key:'ready',     label:'Ready for Dispatch',  tsISO:byKind.ready ? byKind.ready.tsISO : '', sub:'Packed · ready to leave the factory' },
-      { key:'dispatched',label:'Dispatched',          tsISO:dispTs, sub: o.estDispatch && !byKind.dispatched ? ('Est. '+o.estDispatch) : (byKind.dispatched&&byKind.dispatched.sub) || '' },
-      { key:'invoice',   label:'Invoice Generated',   tsISO: o.invoiceNo ? dispTs : '', sub: o.invoiceNo ? ('Invoice #'+o.invoiceNo) : 'Awaiting invoice' },
+      { key:'created',   label:'PI Created',         tsISO:createdTs, sub:o.lineCount+' line items · '+inr(o.totalValue) },
+      { key:'packed',    label:'Packed',             tsISO:readyTs, sub:'Goods packed & checked' },
+      { key:'ready',     label:'Ready for Dispatch', tsISO:readyTs, sub:'Staged · ready to leave the factory' },
+      { key:'dispatched',label:'Dispatched',         tsISO:dispTs, sub: o.estDispatch && !byKind.dispatched ? ('Est. '+o.estDispatch) : (byKind.dispatched&&byKind.dispatched.sub) || '' },
+      { key:'invoice',   label:'Invoiced',           tsISO: o.invoiceNo ? dispTs : '', sub: o.invoiceNo ? ('Invoice #'+o.invoiceNo) : 'Awaiting invoice' },
+      { key:'delivered', label:'Delivered',          tsISO:'', sub:'Awaiting delivery confirmation' },
     ];
-    const level = o.status === 'Dispatched' ? (o.invoiceNo ? 4 : 3) : o.status === 'Ready for Dispatch' ? 2 : 1;
+    // level = highest completed stage index (1-based)
+    const level = o.status === 'Dispatched' ? (o.invoiceNo ? 5 : 4) : o.status === 'Ready for Dispatch' ? 3 : 1;
     stages.forEach((s, i) => { const idx = i+1; s.state = idx <= level ? 'done' : (idx === level+1 ? 'current' : 'upcoming'); });
     return stages;
   }
@@ -23125,11 +23195,11 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const host = $('ob-rows');
     $('ob-empty').hidden = view.length > 0;
     host.innerHTML = pageRows.map(o => {
-      const av = ['e','b','a'][(String(o.party).charCodeAt(0)||0)%3];
-      return '<tr class="ob-row" data-ref="'+esc(o.ref)+'">'
+      const sel = (drawerRef === o.ref) ? ' selected' : '';
+      return '<tr class="ob-row'+sel+'" data-ref="'+esc(o.ref)+'">'
         + '<td class="ob-ref">'+esc(o.ref)+'</td>'
         + '<td class="ob-date">'+fmtISO(o.piDateISO)+'</td>'
-        + '<td><div class="ob-party">'+esc(o.party)+(o.partyCode?'<small>'+esc(o.partyCode)+'</small>':'')+'</div></td>'
+        + '<td class="ob-col-party"><div class="ob-party">'+esc(o.party)+(o.partyCode?'<small>'+esc(o.partyCode)+'</small>':'')+'</div></td>'
         + '<td class="ob-poc">'+(esc(o.poc)||'—')+'</td>'
         + '<td class="ob-poc">'+(esc(o.state)||'—')+'</td>'
         + '<td class="r ob-val">'+inr(o.totalValue)+'</td>'
@@ -23172,36 +23242,45 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     $('ob-dr-party').textContent = o.party;
     const st = $('ob-dr-status'); st.className = 'ob-pill '+(STATUS_CLASS[o.status]||'st-repeat'); st.textContent = o.status;
 
+    // Outstanding applies once the order is billed (dispatched) — Native does
+    // not track receipts yet, so the full billed value is shown as due.
+    const hasInv = !!o.invoiceNo;
+    const outstanding = (o.status === 'Dispatched') ? o.totalValue : 0;
+
     // header facts — immediately readable
     const facts = [
       { l:'Order Value', v:inr(o.totalValue), accent:true },
-      { l:'Invoice #', v:o.invoiceNo||'—' },
-      { l:'Dispatch', v:o.estDispatch||'—' },
-      { l:'Salesperson', v:o.poc||'—' },
-      { l:'Party Code', v:o.partyCode||'—' },
     ];
+    if (outstanding > 0) facts.push({ l:'Outstanding', v:inr(outstanding), amber:true });
+    facts.push({ l:'Invoice #', v:o.invoiceNo||'—' });
+    facts.push({ l:'Dispatch', v:o.estDispatch||'—' });
+    facts.push({ l:'Salesperson', v:o.poc||'—' });
     $('ob-dr-facts').innerHTML = facts.map(f =>
-      '<div class="f"><div class="fl">'+esc(f.l)+'</div><div class="fv'+(f.accent?' accent':'')+'">'+esc(f.v)+'</div></div>').join('');
+      '<div class="f"><div class="fl">'+esc(f.l)+'</div><div class="fv'+(f.accent?' accent':f.amber?' amber':'')+'">'+esc(f.v)+'</div></div>').join('');
 
-    // quick actions
-    const hasInv = !!o.invoiceNo;
+    // quick actions — grouped: primary | secondary
     $('ob-dr-quick').innerHTML =
-      '<button class="ob-qa" data-qa="viewpi"><span class="qi">📄</span>View PI</button>'
-      + '<button class="ob-qa" data-qa="invoice"'+(hasInv?'':' disabled title="No invoice yet"')+'><span class="qi">🧾</span>Open Invoice</button>'
+      '<div class="ob-qa-group">'
+      + '<button class="ob-qa primary" data-qa="viewpi"><span class="qi">📄</span>View PI</button>'
+      + '<button class="ob-qa primary" data-qa="invoice"'+(hasInv?'':' disabled title="No invoice yet"')+'><span class="qi">🧾</span>Open Invoice</button>'
+      + '</div>'
+      + '<div class="ob-qa-sep"></div>'
+      + '<div class="ob-qa-group">'
       + '<button class="ob-qa" data-qa="print"><span class="qi">🖨</span>Print</button>'
       + '<button class="ob-qa" data-qa="pdf"><span class="qi">⤓</span>Download PDF</button>'
       + '<button class="ob-qa" data-qa="copy"><span class="qi">🔗</span>Copy Link</button>'
-      + '<button class="ob-qa" data-qa="edit" disabled title="Edits flow through Create PI"><span class="qi">✎</span>Edit</button>';
+      + '</div>';
 
     // summary cards
     const cards = [
       { l:'Order Value', v:inr(o.totalValue), cls:'accent' },
-      { l:'Total Qty', v:String(o.totalQty) },
-      { l:'Items', v:String(o.lineCount) },
-      { l:'Invoice No.', v:o.invoiceNo||'—', sm:!o.invoiceNo },
-      { l:'Dispatch Date', v:o.estDispatch||'—', sm:true },
-      { l:'State', v:o.state||'—', sm:true },
     ];
+    if (outstanding > 0) cards.push({ l:'Outstanding', v:inr(outstanding), cls:'amberv' });
+    cards.push({ l:'Total Qty', v:String(o.totalQty) });
+    cards.push({ l:'Items', v:String(o.lineCount) });
+    cards.push({ l:'Invoice No.', v:o.invoiceNo||'—', sm:!o.invoiceNo });
+    cards.push({ l:'Dispatch Date', v:o.estDispatch||'—', sm:true });
+    cards.push({ l:'State', v:o.state||'—', sm:true });
     $('ob-dr-cards').innerHTML = cards.map(c =>
       '<div class="ob-card'+(c.cls?' '+c.cls:'')+'"><div class="cl">'+esc(c.l)+'</div><div class="cv'+(c.sm?' sm':'')+'">'+esc(c.v)+'</div></div>').join('');
 
@@ -23213,9 +23292,9 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       return '<tr><td>'+li.ono+'</td>'
         + '<td class="it-prod">'+esc(d.main)+'</td>'
         + '<td class="it-size">'+(esc(d.dim)||'—')+'</td>'
-        + '<td>'+li.qty+'</td><td>'+(li.units?li.units.toLocaleString('en-IN',{maximumFractionDigits:2}):'—')+'</td>'
-        + '<td>'+(rate?inr(rate):'—')+'</td><td>'+(li.freight?inr(li.freight):'—')+'</td>'
-        + '<td>'+inr(li.taxable)+'</td><td class="it-total">'+inr(li.total)+'</td></tr>';
+        + '<td class="it-num">'+li.qty+'</td><td>'+(li.units?li.units.toLocaleString('en-IN',{maximumFractionDigits:2}):'—')+'</td>'
+        + '<td class="it-num">'+(rate?inr(rate):'—')+'</td><td>'+(li.freight?inr(li.freight):'—')+'</td>'
+        + '<td class="it-num">'+inr(li.taxable)+'</td><td class="it-total">'+inr(li.total)+'</td></tr>';
     }).join('');
     $('ob-dr-items-foot').innerHTML = '<tr><td class="it-lbl" colspan="3">Total · '+o.lineCount+' items</td>'
       + '<td>'+o.totalQty+'</td><td></td><td></td><td></td><td></td><td class="it-grand">'+inr(o.totalValue)+'</td></tr>';
@@ -23241,8 +23320,19 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 
     $('ob-drawer').hidden = false;
     document.body.style.overflow = 'hidden';
+    updateSelectedRow(true);
   }
-  function closeDrawer(){ $('ob-drawer').hidden = true; drawerRef = null; document.body.style.overflow = ''; }
+  function updateSelectedRow(scroll){
+    const host = $('ob-rows'); if (!host) return;
+    let selRow = null;
+    host.querySelectorAll('tr.ob-row').forEach(tr => {
+      const on = tr.getAttribute('data-ref') === drawerRef;
+      tr.classList.toggle('selected', on);
+      if (on) selRow = tr;
+    });
+    if (scroll && selRow) selRow.scrollIntoView({ block:'nearest' });
+  }
+  function closeDrawer(){ $('ob-drawer').hidden = true; drawerRef = null; document.body.style.overflow = ''; updateSelectedRow(false); }
 
   // ---------- drawer toast + quick actions ----------
   let toastT;
@@ -23397,12 +23487,19 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     let searchT;
     $('ob-search').addEventListener('input', e => { clearTimeout(searchT); searchT=setTimeout(()=>{ state.search=e.target.value; state.page=1; render(); }, 120); });
     $('ob-poc').addEventListener('change', e => { state.poc=e.target.value; state.page=1; render(); });
-    $('ob-from').addEventListener('change', e => { state.from=e.target.value; state.page=1; render(); });
-    $('ob-to').addEventListener('change', e => { state.to=e.target.value; state.page=1; render(); });
+    const clearDateChips = () => document.querySelectorAll('#ob-quickbar button[data-qf="today"],#ob-quickbar button[data-qf="week"],#ob-quickbar button[data-qf="month"]').forEach(x=>x.classList.remove('on'));
+    const clearStatusChips = () => document.querySelectorAll('#ob-quickbar button[data-qf="pending"],#ob-quickbar button[data-qf="ready"]').forEach(x=>x.classList.remove('on'));
+    const setStatusTab = (st) => { state.status = st; document.querySelectorAll('#ob-status-tabs button').forEach(x=>x.classList.toggle('on', x.getAttribute('data-st')===st)); };
+    const weekStartISO = () => { const d=new Date(); const day=(d.getDay()+6)%7; d.setDate(d.getDate()-day); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+    const monthStartISO = () => { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-01'; };
+
+    $('ob-from').addEventListener('change', e => { state.from=e.target.value; state.page=1; clearDateChips(); render(); });
+    $('ob-to').addEventListener('change', e => { state.to=e.target.value; state.page=1; clearDateChips(); render(); });
     $('ob-clear').addEventListener('click', () => {
       state.search=''; state.poc=''; state.from=''; state.to=''; state.status='all'; state.page=1;
       $('ob-search').value=''; $('ob-poc').value=''; $('ob-from').value=''; $('ob-to').value='';
       document.querySelectorAll('#ob-status-tabs button').forEach(b=>b.classList.toggle('on', b.getAttribute('data-st')==='all'));
+      document.querySelectorAll('#ob-quickbar button').forEach(b=>b.classList.remove('on'));
       render();
     });
     $('ob-refresh').addEventListener('click', () => window.atlasLoadOrders(true));
@@ -23411,7 +23508,26 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       const b = e.target.closest('button[data-st]'); if(!b) return;
       state.status = b.getAttribute('data-st'); state.page = 1;
       document.querySelectorAll('#ob-status-tabs button').forEach(x=>x.classList.toggle('on', x===b));
+      clearStatusChips();
       render();
+    });
+    // quick filters (date presets + status shortcuts)
+    $('ob-quickbar').addEventListener('click', e => {
+      const b = e.target.closest('button[data-qf]'); if(!b) return;
+      const qf = b.getAttribute('data-qf');
+      if (qf==='today' || qf==='week' || qf==='month'){
+        const wasOn = b.classList.contains('on');
+        clearDateChips();
+        if (wasOn){ state.from=''; state.to=''; }
+        else { b.classList.add('on'); state.to = todayISO(); state.from = qf==='today'?todayISO() : qf==='week'?weekStartISO() : monthStartISO(); }
+        $('ob-from').value = state.from; $('ob-to').value = state.to;
+      } else if (qf==='pending' || qf==='ready'){
+        const st = qf==='pending' ? 'Pending' : 'Ready for Dispatch';
+        const wasOn = b.classList.contains('on');
+        clearStatusChips();
+        if (wasOn) setStatusTab('all'); else { b.classList.add('on'); setStatusTab(st); }
+      }
+      state.page=1; render();
     });
     // sort headers
     document.querySelectorAll('.ob-table thead th[data-sort]').forEach(th => {
