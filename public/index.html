@@ -1251,7 +1251,7 @@
   .ob-dr-items-wrap { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
   .ob-items { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
   .ob-items thead th {
-    position: sticky; top: 0; z-index: 1; background: var(--surface-2);
+    background: var(--surface-2);
     font-family: var(--fm); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase;
     color: var(--text-3); font-weight: 600; text-align: right; padding: 15px 16px; border-bottom: 1px solid var(--line-2); white-space: nowrap;
   }
@@ -1411,7 +1411,10 @@
   .ob-coll[data-open="0"] .ob-coll-b { grid-template-rows: 0fr; }
   /* Hidden while collapsed or animating, visible once fully open so a tall
      section (Customer Intelligence / Recent Orders) is never clipped. */
-  .ob-coll-inner { overflow: hidden; min-height: 0; padding-bottom: 28px; }
+  .ob-coll-inner { overflow: hidden; min-height: 0; }
+  /* Bottom spacing lives on the content (not the clipped box) so grid 0fr can
+     collapse to a true zero height — padding on .ob-coll-inner would floor it. */
+  .ob-coll-inner > :last-child { margin-bottom: 28px; }
   .ob-coll[data-open="1"]:not(.ob-animating) .ob-coll-inner { overflow: visible; }
   .ob-coll-h:hover .ob-coll-t { color: var(--emerald-2); }
 
