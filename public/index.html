@@ -1339,6 +1339,72 @@
   .ob-stat.good .sv { color: var(--emerald); }
   .ob-stat.amber .ss { color: var(--amber); }
   .ob-stat.good .ss { color: var(--emerald); }
+  .ob-stat .sv.sm { font-size: 13px; font-weight: 600; }
+  .ob-stat .sv .risk { font-size: 11.5px; }
+  .ob-stat-grid.concise .ob-stat { min-height: 72px; }
+
+  /* Global risk pill (used in stat grids + intel cells) */
+  .risk { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; font-family: var(--fm); font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em; }
+  .risk::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+  /* Labeled product attributes (Model / Backing / Colour) */
+  .ob-items td.it-prod .ip-attrs { display: block; margin-top: 4px; }
+  .ob-items td.it-prod .ip-seg { display: inline-block; margin-right: 12px; font-family: var(--fm); font-size: 10.5px; color: var(--text-2); white-space: nowrap; }
+  .ob-items td.it-prod .ip-seg .ip-l { color: var(--text-4); text-transform: uppercase; font-size: 8px; letter-spacing: 0.08em; margin-right: 4px; }
+
+  /* Current order summary */
+  .ob-os { margin-bottom: 4px; }
+  .ob-os-head { font-family: var(--fd); font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 14px; letter-spacing: -0.01em; }
+  .ob-os-head span#ob-dr-ref { font-family: var(--fm); }
+  .ob-os-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line-2); border-radius: 14px; overflow: hidden; }
+  @media (max-width: 820px) { .ob-os-grid { grid-template-columns: repeat(2, 1fr); } }
+  .ob-os-grid .ob-stat { background: var(--surface-2); }
+
+  /* Collapsible sections */
+  .ob-coll { border-top: 1px solid var(--line); }
+  .ob-coll-h { display: flex; align-items: center; gap: 10px; padding: 18px 0 18px; cursor: pointer; user-select: none; }
+  .ob-coll-t { font-family: var(--fd); font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+  .ob-coll-meta { font-family: var(--fm); font-size: 10.5px; color: var(--text-3); letter-spacing: 0.03em; }
+  .ob-coll .ob-chev { margin-left: auto; color: var(--text-3); font-size: 13px; transition: transform 200ms var(--ease); }
+  .ob-coll[data-open="1"] .ob-chev { transform: rotate(180deg); }
+  .ob-coll-b { overflow: hidden; padding-bottom: 22px; }
+  .ob-coll[data-open="0"] .ob-coll-b { display: none; }
+  .ob-coll[data-open="0"] .ob-coll-h { padding-bottom: 18px; }
+  .ob-coll-h:hover .ob-coll-t { color: var(--emerald-2); }
+
+  .ob-profile-btn { margin-top: 16px; width: 100%; padding: 12px; border-radius: 10px; cursor: pointer;
+    font-family: var(--fm); font-size: 11.5px; letter-spacing: 0.04em; color: var(--emerald);
+    background: var(--emerald-soft); border: 1px solid var(--emerald-mute); transition: all 160ms var(--ease); }
+  .ob-profile-btn:hover { background: rgba(78,222,163,0.14); color: var(--emerald-2); }
+  .ob-viewall.block { float: none; display: block; width: 100%; text-align: center; margin-top: 14px; padding: 10px; border: 1px dashed var(--line-2); border-radius: 9px; }
+  .ob-viewall.block:hover { border-color: var(--emerald-mute); background: var(--emerald-soft); }
+
+  /* ===== Customer Profile (dedicated page) ===== */
+  .ob-profile-overlay { position: fixed; inset: 0; z-index: 1300; background: rgba(4,7,14,0.7);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: flex; justify-content: center; align-items: flex-start; padding: 4vh 3vw; animation: ap-fade 180ms var(--ease); }
+  .ob-profile-overlay[hidden] { display: none; }
+  .ob-profile-panel { width: min(1180px, 100%); max-height: 92vh; display: flex; flex-direction: column;
+    background: radial-gradient(ellipse 1000px 320px at 100% 0%, rgba(78,222,163,0.04), transparent 55%), var(--void-2);
+    border: 1px solid var(--line-2); border-radius: 18px; box-shadow: 0 40px 100px -30px rgba(0,0,0,0.85); overflow: hidden;
+    animation: ob-slide 260ms var(--ease); }
+  .ob-pf-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding: 26px 32px 22px; border-bottom: 1px solid var(--line); flex-shrink: 0; }
+  .ob-pf-eyebrow { font-family: var(--fm); font-size: 10px; letter-spacing: 0.16em; color: var(--text-3); }
+  .ob-pf-head h2 { font-family: var(--fd); font-size: 26px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; margin: 8px 0 0; }
+  .ob-pf-sub { font-family: var(--fm); font-size: 11.5px; color: var(--text-3); margin-top: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .ob-pf-sub .code { color: var(--text-2); }
+  .ob-pf-head-r { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+  .ob-pf-body { padding: 26px 32px 30px; overflow-y: auto; min-height: 0; }
+  .ob-pf-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; margin-top: 26px; }
+  @media (max-width: 900px) { .ob-pf-cols { grid-template-columns: 1fr; } }
+  .ob-pf-sec { margin-bottom: 26px; }
+  .ob-pf-sec:last-child { margin-bottom: 0; }
+  .ob-pf-sec-h { font-family: var(--fd); font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 14px; letter-spacing: -0.01em; }
+  .ob-pf-sec-h .ob-trend-toggle { float: right; }
+  .ob-pf-empty { padding: 22px; text-align: center; color: var(--text-3); font-size: 12.5px; border: 1px dashed var(--line); border-radius: 10px; }
+  .ob-pf-soon { margin-top: 24px; padding: 14px 16px; border: 1px dashed var(--line-2); border-radius: 10px; font-family: var(--fm); font-size: 11px; color: var(--text-3); letter-spacing: 0.03em; text-align: center; }
+  .ob-pay .ob-stat-grid { grid-template-columns: repeat(2, 1fr); }
+  #ob-pf-kpis { grid-template-columns: repeat(5, 1fr); }
+  @media (max-width: 900px) { #ob-pf-kpis { grid-template-columns: repeat(2, 1fr); } }
 
   /* Customer intelligence — predictive insight cells */
   .ob-intel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
@@ -3350,7 +3416,7 @@
       <div class="ob-drawer-panel" role="dialog" aria-label="Order intelligence">
         <div class="ob-dr-head">
           <div class="ob-dr-head-top">
-            <div class="ob-dr-eyebrow">CUSTOMER INTELLIGENCE</div>
+            <div class="ob-dr-eyebrow">ORDER DETAILS</div>
             <div class="ob-dr-head-actions">
               <div class="ob-toolbar-actions" id="ob-dr-quick"></div>
               <button class="ob-dr-close" id="ob-dr-close" aria-label="Close">×</button>
@@ -3365,53 +3431,108 @@
         </div>
 
         <div class="ob-dr-body">
-          <div class="ob-dr-section">
-            <div class="ob-dr-sec-h">Party overview</div>
-            <div class="ob-stat-grid" id="ob-dr-stats"></div>
+          <!-- 1 · current order summary (always visible) -->
+          <div class="ob-os">
+            <div class="ob-os-head">This order · PI #<span id="ob-dr-ref">—</span> <span id="ob-dr-status-wrap"></span></div>
+            <div class="ob-os-grid" id="ob-dr-ordersum"></div>
           </div>
 
-          <div class="ob-dr-section">
-            <div class="ob-dr-sec-h">Customer intelligence</div>
-            <div class="ob-intel" id="ob-dr-intel"></div>
-            <div class="ob-top-products" id="ob-dr-topprod"></div>
-          </div>
-
-          <div class="ob-dr-section" id="ob-dr-trend-sec">
-            <div class="ob-dr-sec-h">Sales trend <span id="ob-dr-trend-sub"></span>
-              <div class="ob-trend-toggle" id="ob-trend-toggle">
-                <button data-r="6" class="on">6M</button><button data-r="12">12M</button><button data-r="all">All time</button>
+          <!-- 2 · order line items -->
+          <div class="ob-coll" data-open="1">
+            <div class="ob-coll-h"><span class="ob-coll-t">Order line items</span><span class="ob-coll-meta" id="ob-dr-itemcount"></span><span class="ob-chev">▾</span></div>
+            <div class="ob-coll-b">
+              <div class="ob-dr-items-wrap">
+                <table class="ob-items">
+                  <thead><tr>
+                    <th>#</th><th>Product</th><th>Size</th><th class="r">Qty</th><th class="r">Unit</th>
+                    <th class="r">Rate</th><th class="r">Freight</th><th class="r">Tax</th><th class="r">Total</th>
+                  </tr></thead>
+                  <tbody id="ob-dr-items"></tbody>
+                  <tfoot id="ob-dr-items-foot"></tfoot>
+                </table>
               </div>
             </div>
-            <div class="ob-trend-wrap">
-              <div class="ob-trend" id="ob-dr-trend"></div>
-              <div class="ob-trend-tip" id="ob-trend-tip" hidden></div>
+          </div>
+
+          <!-- 3 · workflow timeline -->
+          <div class="ob-coll" data-open="1">
+            <div class="ob-coll-h"><span class="ob-coll-t">Workflow timeline</span><span class="ob-coll-meta" id="ob-dr-wf-meta"></span><span class="ob-chev">▾</span></div>
+            <div class="ob-coll-b"><div class="ob-workflow" id="ob-dr-history"></div></div>
+          </div>
+
+          <!-- 4 · customer intelligence (concise summary) -->
+          <div class="ob-coll" data-open="1">
+            <div class="ob-coll-h"><span class="ob-coll-t">Customer intelligence</span><span class="ob-coll-meta">summary</span><span class="ob-chev">▾</span></div>
+            <div class="ob-coll-b">
+              <div class="ob-stat-grid concise" id="ob-dr-stats"></div>
+              <button class="ob-profile-btn" id="ob-dr-profile">View full customer profile →</button>
             </div>
           </div>
 
-          <div class="ob-dr-section">
-            <div class="ob-dr-sec-h">Recent orders <span id="ob-dr-prev-count"></span>
-              <button class="ob-viewall" id="ob-dr-viewall">View all orders →</button></div>
-            <div class="ob-prev-head"><span>PI #</span><span>Date</span><span class="r">Amount</span><span class="r">Invoice</span><span class="r">Status</span></div>
-            <div class="ob-prev-list" id="ob-dr-prev"></div>
-          </div>
-
-          <div class="ob-dr-section">
-            <div class="ob-dr-sec-h">This order · PI #<span id="ob-dr-ref">—</span> <span id="ob-dr-status-wrap"></span></div>
-            <div class="ob-dr-items-wrap">
-              <table class="ob-items">
-                <thead><tr>
-                  <th>#</th><th>Product</th><th>Size / Variant</th><th class="r">Qty</th><th class="r">Unit</th>
-                  <th class="r">Rate</th><th class="r">Freight</th><th class="r">Tax</th><th class="r">Total</th>
-                </tr></thead>
-                <tbody id="ob-dr-items"></tbody>
-                <tfoot id="ob-dr-items-foot"></tfoot>
-              </table>
+          <!-- 5 · recent orders (collapsed) -->
+          <div class="ob-coll" data-open="0">
+            <div class="ob-coll-h"><span class="ob-coll-t">Recent orders</span><span class="ob-coll-meta" id="ob-dr-prev-count"></span><span class="ob-chev">▾</span></div>
+            <div class="ob-coll-b">
+              <div class="ob-prev-head"><span>PI #</span><span>Date</span><span class="r">Amount</span><span class="r">Invoice</span><span class="r">Status</span></div>
+              <div class="ob-prev-list" id="ob-dr-prev"></div>
+              <button class="ob-viewall block" id="ob-dr-viewall">View all orders for this customer →</button>
             </div>
-            <div class="ob-workflow" id="ob-dr-history"></div>
           </div>
         </div>
         <div class="ob-dr-foot" id="ob-dr-foot"></div>
         <div class="ob-toast" id="ob-dr-toast"></div>
+      </div>
+    </div>
+
+    <!-- CUSTOMER PROFILE (full-screen) -->
+    <div class="ob-profile-overlay" id="ob-profile" hidden>
+      <div class="ob-profile-panel" role="dialog" aria-label="Customer profile">
+        <div class="ob-pf-head">
+          <div>
+            <div class="ob-pf-eyebrow">CUSTOMER PROFILE</div>
+            <h2 id="ob-pf-party">—</h2>
+            <div class="ob-pf-sub" id="ob-pf-sub"></div>
+          </div>
+          <div class="ob-pf-head-r">
+            <button class="ob-viewall" id="ob-pf-viewall">View all orders →</button>
+            <button class="ob-dr-close" id="ob-pf-close" aria-label="Close">×</button>
+          </div>
+        </div>
+        <div class="ob-pf-body">
+          <div class="ob-stat-grid" id="ob-pf-kpis"></div>
+          <div class="ob-pf-cols">
+            <div class="ob-pf-col">
+              <div class="ob-pf-sec">
+                <div class="ob-pf-sec-h">Sales trend <span id="ob-dr-trend-sub"></span>
+                  <div class="ob-trend-toggle" id="ob-trend-toggle">
+                    <button data-r="6" class="on">6M</button><button data-r="12">12M</button><button data-r="all">All time</button>
+                  </div>
+                </div>
+                <div class="ob-trend-wrap"><div class="ob-trend" id="ob-dr-trend"></div><div class="ob-trend-tip" id="ob-trend-tip" hidden></div></div>
+              </div>
+              <div class="ob-pf-sec">
+                <div class="ob-pf-sec-h">Predictive intelligence</div>
+                <div class="ob-intel" id="ob-dr-intel"></div>
+              </div>
+            </div>
+            <div class="ob-pf-col">
+              <div class="ob-pf-sec">
+                <div class="ob-pf-sec-h">Top products</div>
+                <div class="ob-top-products" id="ob-dr-topprod"></div>
+              </div>
+              <div class="ob-pf-sec">
+                <div class="ob-pf-sec-h">Payment behaviour</div>
+                <div class="ob-pay" id="ob-pf-payment"></div>
+              </div>
+            </div>
+          </div>
+          <div class="ob-pf-sec">
+            <div class="ob-pf-sec-h">Order history <span id="ob-pf-prev-count"></span></div>
+            <div class="ob-prev-head"><span>PI #</span><span>Date</span><span class="r">Amount</span><span class="r">Invoice</span><span class="r">Status</span></div>
+            <div class="ob-prev-list" id="ob-pf-prev"></div>
+          </div>
+          <div class="ob-pf-soon">⌁ Outstanding invoices · Contact history · CRM activities · Forecasts — coming soon</div>
+        </div>
       </div>
     </div>
 
@@ -23203,10 +23324,12 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   // Backing, Colour and Size — never one concatenated name.
   function prodDesc(li){
     const product = li.category || '—';
-    const attrs = [li.model, li.backing, li.colour].filter(Boolean).join(' • ');
+    const fields = [['Model', li.model], ['Backing', li.backing], ['Colour', li.colour]].filter(p => p[1]);
+    const attrs = fields.map(p => p[1]).join(' • ');
+    const segs = fields.map(p => '<span class="ip-seg"><span class="ip-l">'+p[0]+'</span>'+esc(p[1])+'</span>').join('');
     const main = [li.category, li.model, li.backing, li.colour].filter(Boolean).join(' · ') || '—';
     let dim = ''; if(li.width&&li.length) dim=li.width+' × '+li.length; else dim=li.width||li.length||'';
-    return { product, attrs, main, dim };
+    return { product, attrs, segs, main, dim };
   }
 
   const OV_KEY = 'atlas-orders-overlay';
@@ -23525,13 +23648,60 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       growth, growthMsg, pct, orders: n };
   }
 
+  // shared renderers
+  function statCell(s){
+    const val = s.risk ? '<span class="risk risk-'+s.risk.toLowerCase()+'">'+esc(s.v)+'</span>' : esc(s.v);
+    return '<div class="ob-stat'+(s.big?' big':'')+(s.tone?' '+s.tone:'')+'">'
+      + '<div class="sl">'+esc(s.l)+'</div>'
+      + '<div class="sv'+(s.small?' sm':'')+'">'+val+'</div>'
+      + (s.sub?'<div class="ss">'+esc(s.sub)+'</div>':'')+'</div>';
+  }
+  function prevRow(p, currentRef){
+    return '<div class="ob-prev'+(p.ref===currentRef?' current':'')+'" data-ref="'+esc(p.ref)+'">'
+      + '<div class="op-ref">'+esc(p.ref)+'</div>'
+      + '<div class="op-d">'+fmtISO(p.piDateISO)+'</div>'
+      + '<div class="op-amt">'+inr(p.totalValue)+'</div>'
+      + '<div class="op-inv">'+(p.invoiceNo?esc(p.invoiceNo):'—')+'</div>'
+      + '<div class="op-st">'+pill(p.status)+'</div></div>';
+  }
+  function predictiveCells(ps, ci){
+    const cells = [];
+    let nextSub='need ≥2 orders', nextTone='';
+    if (ci.nextExpectedT!=null){ if(ci.overdueDays>0){ nextSub='⚠ '+ci.overdueDays+' day'+(ci.overdueDays!==1?'s':'')+' overdue'; nextTone='down'; } else nextSub='in '+(-ci.overdueDays)+' day'+((-ci.overdueDays)!==1?'s':''); }
+    cells.push({ l:'Next expected order', v: ci.nextExpectedT!=null?fmtTsLong(ci.nextExpectedT):'—', s:nextSub, tone:nextTone });
+    cells.push({ l:'Average frequency', v: ci.freqDays!=null?('Every '+ci.freqDays+'d'):'First order', s: ci.freqDays!=null?('across '+ci.orders+' orders'):'' });
+    const tA = ci.trend==='Increasing'?'↑ ':ci.trend==='Declining'?'↓ ':ci.trend==='Stable'?'→ ':'';
+    cells.push({ l:'Buying frequency trend', v: ci.trend?(tA+ci.trend):'—', s: ci.trend?'recent vs earlier':'need ≥4 orders', tone: ci.trend==='Increasing'?'up':ci.trend==='Declining'?'down':'' });
+    cells.push({ l:'Risk of churn', v: ci.churn||'—', s: ci.churn==='High'?'overdue & slowing':ci.churn==='Medium'?'watch this account':ci.churn==='Low'?'ordering on cadence':'', risk: ci.churn });
+    cells.push({ l:'Lifetime percentile', v: ci.pct?ci.pct.label:'—', s:'by lifetime value', tone: ci.pct&&ci.pct.top<=0.25?'up':'' });
+    let gv,gs='',gTone='',gSmall=false;
+    if(ci.growth!=null){ gv=(ci.growth>=0?'↑ ':'↓ ')+Math.abs(ci.growth)+'%'; gs='vs previous 6 months'; gTone=ci.growth>0?'up':ci.growth<0?'down':''; }
+    else { gv=ci.growthMsg; gTone='muted'; gSmall=true; }
+    cells.push({ l:'Sales growth (6m)', v:gv, s:gs, tone:gTone, small:gSmall });
+    cells.push({ l:'Largest order', v: inr(ci.largest), s:'' });
+    cells.push({ l:'Favourite category', v: ci.favCat, s:'by value' });
+    cells.push({ l:'Assigned salesperson', v: ci.assigned, s:'most orders' });
+    cells.push({ l:'Last interaction', v: fmtDateLong(ci.lastISO), s:'via orders · CRM soon', tone:'muted', small:true });
+    return cells;
+  }
+  function topProductsHtml(ci){
+    if (!ci.topProducts.length) return '<div class="ob-pf-empty">No product data.</div>';
+    const tpMax = Math.max(1, ...ci.topProducts.map(t=>t.value));
+    return ci.topProducts.map((t,i)=>{ const parts=t.key.split(' · ');
+      const nm='<b>'+esc(parts[0])+'</b>'+(parts.length>1?' <span class="tp-attrs">'+esc(parts.slice(1).join(' • '))+'</span>':'');
+      return '<div class="ob-tp"><span class="tp-rank">'+(i+1)+'</span><span class="tp-name">'+nm+'</span>'
+        +'<span class="tp-bar"><span class="tp-bar-f" style="width:'+Math.round(100*t.value/tpMax)+'%"></span></span>'
+        +'<span class="tp-val">'+inr(t.value)+'</span></div>'; }).join('');
+  }
+
   function openDrawer(ref){
     const base = baseOrders.find(o => o.ref === ref); if (!base) return;
     const o = eff(base);
     drawerRef = ref;
     const ps = partyStats(o.party);
     const hasInv = !!o.invoiceNo;
-    trendState.series = partyMonthly(ps.active);  // needed by both intel + trend
+    trendState.series = partyMonthly(ps.active);
+    const ci = customerIntel(ps);
 
     // ---- header (customer) ----
     $('ob-dr-party').textContent = o.party;
@@ -23555,93 +23725,41 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       + '<button class="ob-qi-btn" data-qa="pdf" title="Download PDF">⤓</button>'
       + '<button class="ob-qi-btn" data-qa="copy" title="Copy link">🔗</button>';
 
-    // ---- party overview ----
-    const collTag = ps.collRate==null ? '' : ps.collRate>=85 ? 'Excellent' : ps.collRate>=60 ? 'Steady' : 'Watch';
-    const stats = [
-      { l:'Lifetime value', v:inr(ps.lifetime), big:true },
+    // 1 · current order summary
+    const sum = [
+      { l:'Order Value', v:inr(o.totalValue), big:true, tone:'good' },
+      { l:'Line items', v:String(o.lineCount) },
+      { l:'Total qty', v:String(o.totalQty) },
+      { l:'Invoice #', v:o.invoiceNo||'—' },
+      { l:'Est. dispatch', v:o.estDispatch||'—' },
+      { l:'Salesperson', v:o.poc||'—' },
+    ];
+    $('ob-dr-ordersum').innerHTML = sum.map(statCell).join('');
+
+    // 4 · concise customer intelligence (8 most actionable metrics)
+    const concise = [
+      { l:'Lifetime business', v:inr(ps.lifetime), big:true },
+      { l:'Outstanding', v: ps.outstanding!=null?inr(ps.outstanding):'—', tone:(ps.outstanding>0)?'amber':'' },
       { l:'Total orders', v:String(ps.count) },
       { l:'Avg order value', v:inr(ps.avg) },
-      { l:'Outstanding', v: ps.outstanding!=null ? inr(ps.outstanding) : '—', tone: (ps.outstanding!=null && ps.outstanding>0)?'amber':'' },
-      { l:'Last order', v: ps.last ? fmtISO(ps.last) : '—' },
-      { l:'First order', v: ps.first ? fmtISO(ps.first) : '—' },
-      { l:'Payment behaviour', v: ps.collRate!=null ? (ps.collRate+'% collected') : '—', sub: collTag, tone: ps.collRate==null?'':ps.collRate>=85?'good':ps.collRate>=60?'':'amber' },
-      { l:'Customer since', v: ps.sinceYear || '—' },
+      { l:'Next expected order', v: ci.nextExpectedT!=null?fmtTsLong(ci.nextExpectedT):'—', sub: ci.nextExpectedT!=null?(ci.overdueDays>0?('⚠ '+ci.overdueDays+'d overdue'):('in '+(-ci.overdueDays)+'d')):'', tone: ci.overdueDays>0?'down':'' },
+      { l:'Days since last', v: ci.daysSince!=null?(ci.daysSince+'d'):'—', sub: fmtDateLong(ci.lastISO) },
+      { l:'Buying trend', v: ci.trend?((ci.trend==='Increasing'?'↑ ':ci.trend==='Declining'?'↓ ':'→ ')+ci.trend):'—', tone: ci.trend==='Increasing'?'up':ci.trend==='Declining'?'down':'' },
+      { l:'Risk of churn', v: ci.churn||'—', risk: ci.churn },
     ];
-    $('ob-dr-stats').innerHTML = stats.map(s =>
-      '<div class="ob-stat'+(s.big?' big':'')+(s.tone?' '+s.tone:'')+'"><div class="sl">'+esc(s.l)+'</div>'
-      + '<div class="sv">'+esc(s.v)+'</div>'+(s.sub?'<div class="ss">'+esc(s.sub)+'</div>':'')+'</div>').join('');
+    $('ob-dr-stats').innerHTML = concise.map(statCell).join('');
 
-    // ---- customer intelligence (predictive) ----
-    const ci = customerIntel(ps);
-    const cells = [];
-    // next expected order + overdue
-    let nextSub = 'need ≥2 orders', nextTone = '';
-    if (ci.nextExpectedT != null){
-      if (ci.overdueDays > 0){ nextSub = '⚠ '+ci.overdueDays+' day'+(ci.overdueDays!==1?'s':'')+' overdue'; nextTone = 'down'; }
-      else nextSub = 'in '+(-ci.overdueDays)+' day'+((-ci.overdueDays)!==1?'s':'');
-    }
-    cells.push({ l:'Next expected order', v: ci.nextExpectedT!=null ? fmtTsLong(ci.nextExpectedT) : '—', s: nextSub, tone: nextTone });
-    // average frequency
-    cells.push({ l:'Average frequency', v: ci.freqDays!=null ? ('Every '+ci.freqDays+'d') : 'First order', s: ci.freqDays!=null ? ('across '+ci.orders+' orders') : '' });
-    // frequency trend
-    const tArrow = ci.trend==='Increasing'?'↑ ':ci.trend==='Declining'?'↓ ':ci.trend==='Stable'?'→ ':'';
-    cells.push({ l:'Buying frequency trend', v: ci.trend ? (tArrow+ci.trend) : '—', s: ci.trend ? 'recent vs earlier' : 'need ≥4 orders', tone: ci.trend==='Increasing'?'up':ci.trend==='Declining'?'down':'' });
-    // churn risk
-    cells.push({ l:'Risk of churn', v: ci.churn || '—', s: ci.churn==='High'?'overdue & slowing':ci.churn==='Medium'?'watch this account':ci.churn==='Low'?'ordering on cadence':'', risk: ci.churn });
-    // lifetime percentile
-    cells.push({ l:'Lifetime percentile', v: ci.pct ? ci.pct.label : '—', s: 'by lifetime value', tone: ci.pct && ci.pct.top<=0.25 ? 'up' : '' });
-    // sales growth (6m)
-    let gv, gs = '', gTone = '', gSmall = false;
-    if (ci.growth != null){ gv = (ci.growth>=0?'↑ ':'↓ ')+Math.abs(ci.growth)+'%'; gs = 'vs previous 6 months'; gTone = ci.growth>0?'up':ci.growth<0?'down':''; }
-    else { gv = ci.growthMsg; gTone = 'muted'; gSmall = true; }
-    cells.push({ l:'Sales growth (6m)', v: gv, s: gs, tone: gTone, small: gSmall });
-    // last ordered (relative + absolute)
-    cells.push({ l:'Last ordered', v: fmtDateLong(ci.lastISO), s: ci.daysSince!=null ? (ci.daysSince===0 ? 'today' : ci.daysSince+' day'+(ci.daysSince!==1?'s':'')+' ago') : '' });
-    // favourite category / largest / salesperson / last interaction
-    cells.push({ l:'Favourite category', v: ci.favCat, s:'by value' });
-    cells.push({ l:'Largest order', v: inr(ci.largest), s:'' });
-    cells.push({ l:'Assigned salesperson', v: ci.assigned, s:'most orders' });
-    cells.push({ l:'Last interaction', v: fmtDateLong(ci.lastISO), s:'via orders · CRM soon', tone:'muted', small:true });
-    $('ob-dr-intel').innerHTML = cells.map(c =>
-      '<div class="ic"><div class="icl">'+esc(c.l)+'</div>'
-      + (c.risk ? '<div class="icv"><span class="risk risk-'+c.risk.toLowerCase()+'">'+esc(c.v)+'</span></div>'
-                : '<div class="icv'+(c.tone?' '+c.tone:'')+(c.small?' small':'')+'">'+esc(c.v)+'</div>')
-      + (c.s ? '<div class="ics">'+esc(c.s)+'</div>' : '')
-      + '</div>').join('');
-    if (ci.topProducts.length){
-      const tpMax = Math.max(1, ...ci.topProducts.map(t=>t.value));
-      $('ob-dr-topprod').innerHTML = '<div class="tp-h">Top products purchased</div>' + ci.topProducts.map((t,i) => {
-        const parts = t.key.split(' · ');
-        const nm = '<b>'+esc(parts[0])+'</b>'+(parts.length>1 ? ' <span class="tp-attrs">'+esc(parts.slice(1).join(' • '))+'</span>' : '');
-        return '<div class="ob-tp"><span class="tp-rank">'+(i+1)+'</span><span class="tp-name">'+nm+'</span>'
-        + '<span class="tp-bar"><span class="tp-bar-f" style="width:'+Math.round(100*t.value/tpMax)+'%"></span></span>'
-        + '<span class="tp-val">'+inr(t.value)+'</span></div>';
-      }).join('');
-    } else { $('ob-dr-topprod').innerHTML = ''; }
-
-    // ---- sales trend (6M / 12M / All, hover for revenue + orders) ----
-    if (trendState.series.length >= 2){
-      $('ob-dr-trend-sec').hidden = false;
-      document.querySelectorAll('#ob-trend-toggle button').forEach(b=>b.classList.toggle('on', b.getAttribute('data-r')===trendState.range));
-      renderTrend();
-    } else { $('ob-dr-trend-sec').hidden = true; }
-
-    // ---- recent orders (last 8) ----
+    // 5 · recent orders (last 6)
     $('ob-dr-prev-count').textContent = '· '+ps.list.length+' total';
-    $('ob-dr-prev').innerHTML = ps.list.slice(0,8).map(p =>
-      '<div class="ob-prev'+(p.ref===ref?' current':'')+'" data-ref="'+esc(p.ref)+'">'
-      + '<div class="op-ref">'+esc(p.ref)+'</div>'
-      + '<div class="op-d">'+fmtISO(p.piDateISO)+'</div>'
-      + '<div class="op-amt">'+inr(p.totalValue)+'</div>'
-      + '<div class="op-inv">'+(p.invoiceNo?esc(p.invoiceNo):'—')+'</div>'
-      + '<div class="op-st">'+pill(p.status)+'</div></div>').join('');
+    $('ob-dr-prev').innerHTML = ps.list.slice(0,6).map(p => prevRow(p, ref)).join('');
 
-    // ---- this order: line items ----
+    // 2 · line items
+    $('ob-dr-itemcount').textContent = o.lineCount+' item'+(o.lineCount!==1?'s':'');
     $('ob-dr-items').innerHTML = o.lines.map(li => {
       const d = prodDesc(li);
       const rate = li.billRate || li.actualRate || 0;
       return '<tr><td>'+li.ono+'</td>'
-        + '<td class="it-prod"><span class="ip-cat">'+esc(d.product)+'</span>'+(d.attrs?'<span class="ip-attrs">'+esc(d.attrs)+'</span>':'')+'</td>'
+        + '<td class="it-prod"><span class="ip-cat">'+esc(d.product)+'</span>'+(d.segs?'<span class="ip-attrs">'+d.segs+'</span>':'')+'</td>'
         + '<td class="it-size">'+(esc(d.dim)||'—')+'</td>'
         + '<td class="it-num">'+li.qty+'</td><td>'+(li.units?li.units.toLocaleString('en-IN',{maximumFractionDigits:2}):'—')+'</td>'
         + '<td class="it-num">'+(rate?inr(rate):'—')+'</td><td>'+(li.freight?inr(li.freight):'—')+'</td>'
@@ -23650,8 +23768,10 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     $('ob-dr-items-foot').innerHTML = '<tr><td class="it-lbl" colspan="3">Total · '+o.lineCount+' items</td>'
       + '<td>'+o.totalQty+'</td><td></td><td></td><td></td><td></td><td class="it-grand">'+inr(o.totalValue)+'</td></tr>';
 
-    // workflow stepper
+    // 3 · workflow stepper
     const stages = buildWorkflow(o);
+    const curStage = stages.find(s=>s.state==='current') || stages.filter(s=>s.state==='done').pop();
+    $('ob-dr-wf-meta').textContent = curStage ? curStage.label : '';
     $('ob-dr-history').innerHTML = stages.map(s => {
       const mark = s.state==='done' ? '✓' : s.state==='cancelled' ? '×' : s.state==='current' ? '●' : '';
       const ts = wfTs(s.tsISO);
@@ -23687,6 +23807,57 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     if (scroll && selRow) selRow.scrollIntoView({ block:'nearest' });
   }
   function closeDrawer(){ $('ob-drawer').hidden = true; drawerRef = null; document.body.style.overflow = ''; updateSelectedRow(false); }
+
+  // ---------- customer profile (dedicated page) ----------
+  let pfParty = null;
+  function openProfile(party){
+    if (!party) return;
+    pfParty = party;
+    const ps = partyStats(party);
+    trendState.series = partyMonthly(ps.active);
+    const ci = customerIntel(ps);
+    const code = ps.list[0] && ps.list[0].partyCode;
+    $('ob-pf-party').textContent = party;
+    $('ob-pf-sub').innerHTML = (code ? '<span class="code">'+esc(code)+'</span> · ' : '')
+      + (ps.sinceYear ? 'Customer since '+ps.sinceYear : 'New customer') + ' · ' + ps.count + ' orders'
+      + (ps.repeat ? ' · <span class="ob-badge repeat">★ Repeat</span>' : '');
+    // KPIs
+    $('ob-pf-kpis').innerHTML = [
+      { l:'Lifetime business', v:inr(ps.lifetime), big:true },
+      { l:'Outstanding', v: ps.outstanding!=null?inr(ps.outstanding):'—', tone:(ps.outstanding>0)?'amber':'' },
+      { l:'Total orders', v:String(ps.count) },
+      { l:'Avg order value', v:inr(ps.avg) },
+      { l:'Lifetime percentile', v: ci.pct?ci.pct.label:'—', tone: ci.pct&&ci.pct.top<=0.25?'up':'' },
+    ].map(statCell).join('');
+    // trend
+    if (trendState.series.length >= 2){
+      document.querySelectorAll('#ob-trend-toggle button').forEach(b=>b.classList.toggle('on', b.getAttribute('data-r')===trendState.range));
+      renderTrend();
+    } else { $('ob-dr-trend').innerHTML = '<div class="ob-pf-empty">Not enough history for a trend.</div>'; $('ob-dr-trend-sub').textContent=''; }
+    // predictive intelligence
+    $('ob-dr-intel').innerHTML = predictiveCells(ps, ci).map(c =>
+      '<div class="ic"><div class="icl">'+esc(c.l)+'</div>'
+      + (c.risk ? '<div class="icv"><span class="risk risk-'+c.risk.toLowerCase()+'">'+esc(c.v)+'</span></div>'
+                : '<div class="icv'+(c.tone?' '+c.tone:'')+(c.small?' small':'')+'">'+esc(c.v)+'</div>')
+      + (c.s ? '<div class="ics">'+esc(c.s)+'</div>' : '') + '</div>').join('');
+    // top products
+    $('ob-dr-topprod').innerHTML = topProductsHtml(ci);
+    // payment behaviour
+    if (ps.billed != null){
+      $('ob-pf-payment').innerHTML = '<div class="ob-stat-grid">' + [
+        { l:'Collection rate', v: ps.collRate!=null?ps.collRate+'%':'—', tone: ps.collRate>=85?'good':ps.collRate>=60?'':'amber' },
+        { l:'Total billed', v:inr(ps.billed) },
+        { l:'Total received', v:inr(ps.received) },
+        { l:'Outstanding', v:inr(ps.outstanding), tone:(ps.outstanding>0)?'amber':'' },
+      ].map(statCell).join('') + '</div>';
+    } else { $('ob-pf-payment').innerHTML = '<div class="ob-pf-empty">Not linked to the receivables ledger yet.</div>'; }
+    // order history (all orders)
+    $('ob-pf-prev-count').textContent = '· '+ps.list.length+' orders';
+    $('ob-pf-prev').innerHTML = ps.list.map(p => prevRow(p, drawerRef)).join('');
+    $('ob-profile').hidden = false;
+    document.body.style.overflow = 'hidden';
+  }
+  function closeProfile(){ $('ob-profile').hidden = true; pfParty = null; if ($('ob-drawer').hidden) document.body.style.overflow = ''; }
 
   // ---------- drawer toast + quick actions ----------
   let toastT;
@@ -23945,15 +24116,27 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     });
     trendEl.addEventListener('mouseout', e => { if (!e.relatedTarget || !e.relatedTarget.closest || !e.relatedTarget.closest('.ob-bar')) tip.hidden = true; });
     // view all → filter the order book for this customer
-    $('ob-dr-viewall').addEventListener('click', () => {
-      const base = baseOrders.find(o => o.ref === drawerRef); if(!base) return;
-      state.search = base.party; state.status='all'; state.poc=''; state.from=''; state.to=''; state.page=1;
-      $('ob-search').value = base.party;
+    function filterByParty(party){
+      if (!party) return;
+      state.search = party; state.status='all'; state.poc=''; state.from=''; state.to=''; state.page=1;
+      $('ob-search').value = party;
       document.querySelectorAll('#ob-status-tabs button').forEach(b=>b.classList.toggle('on', b.getAttribute('data-st')==='all'));
       document.querySelectorAll('#ob-quickbar button').forEach(b=>b.classList.remove('on'));
       $('ob-poc').value=''; $('ob-from').value=''; $('ob-to').value='';
-      closeDrawer(); render();
+      closeProfile(); closeDrawer(); render();
+    }
+    $('ob-dr-viewall').addEventListener('click', () => { const b = baseOrders.find(o=>o.ref===drawerRef); if(b) filterByParty(b.party); });
+    $('ob-pf-viewall').addEventListener('click', () => filterByParty(pfParty));
+    // collapsible section headers
+    $('ob-drawer').addEventListener('click', e => {
+      const h = e.target.closest('.ob-coll-h'); if(!h) return;
+      const coll = h.parentElement; coll.setAttribute('data-open', coll.getAttribute('data-open')==='1' ? '0' : '1');
     });
+    // customer profile
+    $('ob-dr-profile').addEventListener('click', () => { const b = baseOrders.find(o=>o.ref===drawerRef); if(b) openProfile(b.party); });
+    $('ob-pf-close').addEventListener('click', closeProfile);
+    $('ob-profile').addEventListener('click', e => { if (e.target === $('ob-profile')) closeProfile(); });
+    $('ob-pf-prev').addEventListener('click', e => { const r=e.target.closest('.ob-prev'); if(r){ const ref=r.getAttribute('data-ref'); closeProfile(); openDrawer(ref); } });
     // dispatch modal
     $('ob-disp-close').addEventListener('click', closeDispatch);
     $('ob-disp-cancel').addEventListener('click', closeDispatch);
@@ -23973,7 +24156,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       openDrawer(view[ni].ref);
     }
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape'){ if (!$('ob-dispatch').hidden) closeDispatch(); else if (!$('ob-drawer').hidden) closeDrawer(); return; }
+      if (e.key === 'Escape'){ if (!$('ob-dispatch').hidden) closeDispatch(); else if (!$('ob-profile').hidden) closeProfile(); else if (!$('ob-drawer').hidden) closeDrawer(); return; }
       if (!$('ob-drawer').hidden && (e.key === 'ArrowDown' || e.key === 'ArrowUp')){
         const t = document.activeElement;
         if (t && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
