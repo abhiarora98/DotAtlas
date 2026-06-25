@@ -1338,29 +1338,64 @@
   .ob-stat.amber .ss { color: var(--amber); }
   .ob-stat.good .ss { color: var(--emerald); }
 
-  /* Buying trend bars */
-  .ob-trend { display: flex; align-items: flex-end; gap: 6px; height: 86px; padding: 4px 2px 0; }
-  .ob-bar { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; min-width: 0; cursor: default; }
-  .ob-bar-fill { width: 100%; max-width: 26px; border-radius: 4px 4px 0 0; background: linear-gradient(180deg, var(--blue), rgba(124,168,255,0.35)); transition: opacity 150ms var(--ease); }
-  .ob-bar:hover .ob-bar-fill { opacity: 0.8; }
-  .ob-bar-x { font-family: var(--fm); font-size: 8.5px; color: var(--text-4); margin-top: 6px; }
+  /* Customer intelligence */
+  .ob-intel { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  @media (max-width: 820px) { .ob-intel { grid-template-columns: 1fr; } }
+  .ob-intel .ir { background: var(--void-2); padding: 13px 15px; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .ob-intel .ir .il { font-family: var(--fm); font-size: 9.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); }
+  .ob-intel .ir .iv { font-size: 13px; color: var(--text); font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+  .ob-intel .ir .iv.up { color: var(--emerald); }
+  .ob-intel .ir .iv.down { color: var(--rose); }
+  .ob-intel .ir .iv.amber { color: var(--amber); }
+  .ob-top-products { margin-top: 16px; }
+  .ob-top-products .tp-h { font-family: var(--fm); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3); margin-bottom: 12px; }
+  .ob-tp { display: grid; grid-template-columns: 18px 1fr 90px auto; gap: 12px; align-items: center; padding: 7px 0; }
+  .ob-tp .tp-rank { font-family: var(--fm); font-size: 11px; color: var(--text-3); }
+  .ob-tp .tp-name { font-size: 12.5px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ob-tp .tp-bar { height: 6px; border-radius: 3px; background: var(--surface-3); overflow: hidden; }
+  .ob-tp .tp-bar-f { display: block; height: 100%; background: linear-gradient(90deg, var(--emerald-mute), var(--emerald)); }
+  .ob-tp .tp-val { font-family: var(--fd); font-size: 12.5px; font-weight: 600; color: var(--text); text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* Sales trend bars + range toggle + hover tooltip */
+  .ob-trend-toggle { float: right; display: inline-flex; gap: 3px; }
+  .ob-trend-toggle button { font-family: var(--fm); font-size: 10px; color: var(--text-3); background: var(--surface); border: 1px solid var(--line); padding: 4px 9px; border-radius: 7px; cursor: pointer; transition: all 150ms var(--ease); }
+  .ob-trend-toggle button:hover { color: var(--text); border-color: var(--line-2); }
+  .ob-trend-toggle button.on { color: var(--blue); border-color: rgba(124,168,255,0.42); background: var(--blue-soft); }
+  .ob-trend-wrap { position: relative; }
+  .ob-trend { display: flex; align-items: flex-end; gap: 5px; height: 100px; padding: 4px 2px 0; }
+  .ob-bar { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; min-width: 0; cursor: pointer; }
+  .ob-bar-fill { width: 100%; max-width: 30px; min-height: 2px; border-radius: 4px 4px 0 0; background: linear-gradient(180deg, var(--blue), rgba(124,168,255,0.35)); transition: opacity 150ms var(--ease), background 150ms var(--ease); }
+  .ob-bar.empty .ob-bar-fill { background: var(--surface-3); }
+  .ob-bar:hover .ob-bar-fill { background: linear-gradient(180deg, var(--emerald), rgba(78,222,163,0.4)); }
+  .ob-bar-x { font-family: var(--fm); font-size: 8.5px; color: var(--text-4); margin-top: 6px; white-space: nowrap; }
+  .ob-trend-tip {
+    position: absolute; z-index: 5; transform: translate(-50%, -100%); pointer-events: none;
+    background: var(--surface-4); border: 1px solid var(--line-2); border-radius: 9px; padding: 8px 11px;
+    font-family: var(--fm); font-size: 11px; color: var(--text-2); white-space: nowrap;
+    box-shadow: 0 10px 28px -12px rgba(0,0,0,0.6);
+  }
+  .ob-trend-tip[hidden] { display: none; }
+  .ob-trend-tip b { display: block; color: var(--text); font-size: 10px; letter-spacing: 0.04em; margin-bottom: 3px; }
 
   /* Recent orders list */
   .ob-viewall { float: right; font-family: var(--fm); font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--emerald); background: transparent; border: 0; cursor: pointer; padding: 2px 0; }
   .ob-viewall:hover { color: var(--emerald-2); }
+  .ob-prev-head, .ob-prev { display: grid; grid-template-columns: 64px 92px 1fr 80px 104px; gap: 14px; align-items: center; }
+  .ob-prev-head { padding: 0 16px 9px; font-family: var(--fm); font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-4); }
+  .ob-prev-head .r { text-align: right; }
   .ob-prev-list { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
   .ob-prev {
-    display: grid; grid-template-columns: 1fr auto auto auto; gap: 16px; align-items: center;
     padding: 13px 16px; cursor: pointer; border-bottom: 1px solid var(--line);
     transition: background 140ms var(--ease);
   }
   .ob-prev:last-child { border-bottom: 0; }
-  .ob-prev:hover { background: rgba(255,255,255,0.025); }
-  .ob-prev.current { background: var(--emerald-soft); }
+  .ob-prev:hover { background: rgba(124,168,255,0.06); }
+  .ob-prev.current { background: var(--emerald-soft); box-shadow: inset 3px 0 0 var(--emerald); }
   .ob-prev .op-ref { font-family: var(--fm); font-size: 12px; font-weight: 600; color: var(--text); }
-  .ob-prev .op-d { font-family: var(--fm); font-size: 10.5px; color: var(--text-3); margin-top: 2px; }
-  .ob-prev .op-inv { font-family: var(--fm); font-size: 11px; color: var(--text-3); }
-  .ob-prev .op-amt { font-family: var(--fd); font-size: 13px; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+  .ob-prev .op-d { font-family: var(--fm); font-size: 11px; color: var(--text-2); }
+  .ob-prev .op-amt { font-family: var(--fd); font-size: 13px; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; text-align: right; }
+  .ob-prev .op-inv { font-family: var(--fm); font-size: 11px; color: var(--text-3); text-align: right; }
+  .ob-prev .op-st { text-align: right; }
   .ob-prev .op-st .ob-pill { font-size: 8.5px; padding: 3px 8px; }
 
   #ob-dr-status-wrap .ob-pill { font-size: 9px; padding: 3px 9px; vertical-align: middle; margin-left: 6px; }
@@ -3323,14 +3358,28 @@
             <div class="ob-stat-grid" id="ob-dr-stats"></div>
           </div>
 
+          <div class="ob-dr-section">
+            <div class="ob-dr-sec-h">Customer intelligence</div>
+            <div class="ob-intel" id="ob-dr-intel"></div>
+            <div class="ob-top-products" id="ob-dr-topprod"></div>
+          </div>
+
           <div class="ob-dr-section" id="ob-dr-trend-sec">
-            <div class="ob-dr-sec-h">Buying trend <span id="ob-dr-trend-sub"></span></div>
-            <div class="ob-trend" id="ob-dr-trend"></div>
+            <div class="ob-dr-sec-h">Sales trend <span id="ob-dr-trend-sub"></span>
+              <div class="ob-trend-toggle" id="ob-trend-toggle">
+                <button data-r="6" class="on">6M</button><button data-r="12">12M</button><button data-r="all">All time</button>
+              </div>
+            </div>
+            <div class="ob-trend-wrap">
+              <div class="ob-trend" id="ob-dr-trend"></div>
+              <div class="ob-trend-tip" id="ob-trend-tip" hidden></div>
+            </div>
           </div>
 
           <div class="ob-dr-section">
             <div class="ob-dr-sec-h">Recent orders <span id="ob-dr-prev-count"></span>
               <button class="ob-viewall" id="ob-dr-viewall">View all orders →</button></div>
+            <div class="ob-prev-head"><span>PI #</span><span>Date</span><span class="r">Amount</span><span class="r">Invoice</span><span class="r">Status</span></div>
             <div class="ob-prev-list" id="ob-dr-prev"></div>
           </div>
 
@@ -23349,12 +23398,67 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       repeat: active.length > 1, outstanding, billed, received, collRate };
   }
 
-  function buyingTrend(active){
+  // Full monthly series (revenue + order count) from first order month → now,
+  // gaps filled with zero so the trend reads truthfully.
+  function ymAdd(ym, n){ let [y,m]=ym.split('-').map(Number); m+=n; y+=Math.floor((m-1)/12); m=((m-1)%12+12)%12+1; return y+'-'+String(m).padStart(2,'0'); }
+  function todayYM(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); }
+  function monthLabel(ym, short){ const m=Number(ym.slice(5,7)); const lbl=MON[m-1]; return short ? lbl[0] : lbl; }
+  function monthFull(ym){ return MON[Number(ym.slice(5,7))-1]+" '"+ym.slice(2,4); }
+  function partyMonthly(active){
     const m = {};
-    active.forEach(o => { if (o.piDateISO){ const k=o.piDateISO.slice(0,7); m[k]=(m[k]||0)+(o.totalValue||0); } });
-    const keys = Object.keys(m).sort().slice(-12);
-    const max = keys.length ? Math.max(...keys.map(k=>m[k])) : 0;
-    return { bars: keys.map(k => ({ k, v:m[k], h: max ? Math.max(8, Math.round(100*m[k]/max)) : 8 })) };
+    active.forEach(o => { if (o.piDateISO){ const k=o.piDateISO.slice(0,7); if(!m[k])m[k]={value:0,count:0}; m[k].value+=(o.totalValue||0); m[k].count++; } });
+    const keys = Object.keys(m).sort();
+    if (!keys.length) return [];
+    let start = keys[0]; const end = todayYM() > keys[keys.length-1] ? todayYM() : keys[keys.length-1];
+    const series = [];
+    for (let ym = start; ; ym = ymAdd(ym,1)){ series.push({ ym, value:(m[ym]&&m[ym].value)||0, count:(m[ym]&&m[ym].count)||0 }); if (ym === end) break; if (series.length > 60) break; }
+    return series;
+  }
+
+  let trendState = { series: [], range: '6' };
+  function renderTrend(){
+    const host = $('ob-dr-trend'); if (!host) return;
+    const s = trendState.series;
+    const view = trendState.range==='6' ? s.slice(-6) : trendState.range==='12' ? s.slice(-12) : s;
+    const short = view.length > 9;
+    const max = Math.max(1, ...view.map(b=>b.value));
+    host.innerHTML = view.map(b => {
+      const h = b.value ? Math.max(5, Math.round(100*b.value/max)) : 2;
+      return '<div class="ob-bar'+(b.value?'':' empty')+'" data-ym="'+b.ym+'" data-v="'+b.value+'" data-c="'+b.count+'">'
+        + '<div class="ob-bar-fill" style="height:'+h+'%"></div>'
+        + '<span class="ob-bar-x">'+monthLabel(b.ym, short)+'</span></div>';
+    }).join('');
+    const total = view.reduce((a,b)=>a+b.value,0), orders = view.reduce((a,b)=>a+b.count,0);
+    $('ob-dr-trend-sub').textContent = '· '+inr(total)+' · '+orders+' order'+(orders!==1?'s':'');
+  }
+
+  // Customer intelligence — derived behaviour metrics.
+  function customerIntel(ps){
+    const active = ps.active, list = ps.list;
+    // top products + favourite category
+    const pmap = {}, cmap = {};
+    active.forEach(o => o.lines.forEach(li => {
+      const key = [li.category, li.model, li.backing, li.colour].filter(Boolean).join(' · ') || li.category || '—';
+      if (!pmap[key]) pmap[key] = { key, value:0, qty:0 };
+      pmap[key].value += li.total||0; pmap[key].qty += li.qty||0;
+      const c = li.category || '—'; cmap[c] = (cmap[c]||0) + (li.total||0);
+    }));
+    const topProducts = Object.values(pmap).sort((a,b)=>b.value-a.value).slice(0,3);
+    const favCat = Object.entries(cmap).sort((a,b)=>b[1]-a[1])[0];
+    // order frequency + recency
+    const ts = list.map(o=>o.piDateISO).filter(Boolean).map(d=>new Date(d).getTime()).sort((a,b)=>a-b);
+    const freqDays = ts.length>1 ? Math.round((ts[ts.length-1]-ts[0])/86400000/(ts.length-1)) : null;
+    const daysSince = ts.length ? Math.max(0, Math.round((Date.now()-ts[ts.length-1])/86400000)) : null;
+    const largest = active.reduce((mx,o)=>Math.max(mx,o.totalValue||0), 0);
+    const pocCount = {}; list.forEach(o=>{ if(o.poc) pocCount[o.poc]=(pocCount[o.poc]||0)+1; });
+    const assigned = Object.entries(pocCount).sort((a,b)=>b[1]-a[1])[0];
+    // sales growth: last 6 months vs the 6 before
+    const s = trendState.series;
+    const recent = s.slice(-6).reduce((a,b)=>a+b.value,0);
+    const prior = s.slice(-12,-6).reduce((a,b)=>a+b.value,0);
+    const growth = prior>0 ? Math.round(100*(recent-prior)/prior) : (recent>0 ? null : 0);
+    return { topProducts, favCat: favCat?favCat[0]:'—', freqDays, daysSince, largest,
+      assigned: assigned?assigned[0]:'—', growth };
   }
 
   function openDrawer(ref){
@@ -23363,6 +23467,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     drawerRef = ref;
     const ps = partyStats(o.party);
     const hasInv = !!o.invoiceNo;
+    trendState.series = partyMonthly(ps.active);  // needed by both intel + trend
 
     // ---- header (customer) ----
     $('ob-dr-party').textContent = o.party;
@@ -23402,22 +23507,42 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       '<div class="ob-stat'+(s.big?' big':'')+(s.tone?' '+s.tone:'')+'"><div class="sl">'+esc(s.l)+'</div>'
       + '<div class="sv">'+esc(s.v)+'</div>'+(s.sub?'<div class="ss">'+esc(s.sub)+'</div>':'')+'</div>').join('');
 
-    // ---- buying trend ----
-    const tr = buyingTrend(ps.active);
-    if (tr.bars.length >= 2){
+    // ---- customer intelligence ----
+    const ci = customerIntel(ps);
+    const growthTxt = ci.growth==null ? (ps.active.length ? 'New activity' : '—') : (ci.growth>=0?'+':'')+ci.growth+'%';
+    const intel = [
+      { l:'Favourite category', v: ci.favCat },
+      { l:'Assigned salesperson', v: ci.assigned },
+      { l:'Avg order frequency', v: ci.freqDays!=null ? ('every '+ci.freqDays+'d') : 'first order' },
+      { l:'Days since last order', v: ci.daysSince!=null ? (ci.daysSince+'d ago') : '—', tone: ci.daysSince!=null && ci.daysSince>90 ? 'amber' : '' },
+      { l:'Largest order', v: inr(ci.largest) },
+      { l:'Sales growth (6m)', v: growthTxt, tone: ci.growth==null?'':ci.growth>0?'up':ci.growth<0?'down':'' },
+    ];
+    $('ob-dr-intel').innerHTML = intel.map(i =>
+      '<div class="ir"><span class="il">'+esc(i.l)+'</span><span class="iv'+(i.tone?' '+i.tone:'')+'">'+esc(i.v)+'</span></div>').join('');
+    if (ci.topProducts.length){
+      const tpMax = Math.max(1, ...ci.topProducts.map(t=>t.value));
+      $('ob-dr-topprod').innerHTML = '<div class="tp-h">Top products purchased</div>' + ci.topProducts.map((t,i) =>
+        '<div class="ob-tp"><span class="tp-rank">'+(i+1)+'</span><span class="tp-name">'+esc(t.key)+'</span>'
+        + '<span class="tp-bar"><span class="tp-bar-f" style="width:'+Math.round(100*t.value/tpMax)+'%"></span></span>'
+        + '<span class="tp-val">'+inr(t.value)+'</span></div>').join('');
+    } else { $('ob-dr-topprod').innerHTML = ''; }
+
+    // ---- sales trend (6M / 12M / All, hover for revenue + orders) ----
+    if (trendState.series.length >= 2){
       $('ob-dr-trend-sec').hidden = false;
-      $('ob-dr-trend-sub').textContent = '· '+inr(ps.lifetime)+' across '+ps.active.length+' orders';
-      $('ob-dr-trend').innerHTML = tr.bars.map(b =>
-        '<div class="ob-bar" title="'+esc(b.k)+' · '+inr(b.v)+'"><div class="ob-bar-fill" style="height:'+b.h+'%"></div><span class="ob-bar-x">'+esc(b.k.slice(5))+'</span></div>').join('');
+      document.querySelectorAll('#ob-trend-toggle button').forEach(b=>b.classList.toggle('on', b.getAttribute('data-r')===trendState.range));
+      renderTrend();
     } else { $('ob-dr-trend-sec').hidden = true; }
 
-    // ---- recent orders (last 5) ----
+    // ---- recent orders (last 8) ----
     $('ob-dr-prev-count').textContent = '· '+ps.list.length+' total';
-    $('ob-dr-prev').innerHTML = ps.list.slice(0,5).map(p =>
+    $('ob-dr-prev').innerHTML = ps.list.slice(0,8).map(p =>
       '<div class="ob-prev'+(p.ref===ref?' current':'')+'" data-ref="'+esc(p.ref)+'">'
-      + '<div class="op-l"><div class="op-ref">PI #'+esc(p.ref)+'</div><div class="op-d">'+fmtISO(p.piDateISO)+'</div></div>'
-      + '<div class="op-inv">'+(p.invoiceNo?'Inv '+esc(p.invoiceNo):'—')+'</div>'
+      + '<div class="op-ref">'+esc(p.ref)+'</div>'
+      + '<div class="op-d">'+fmtISO(p.piDateISO)+'</div>'
       + '<div class="op-amt">'+inr(p.totalValue)+'</div>'
+      + '<div class="op-inv">'+(p.invoiceNo?esc(p.invoiceNo):'—')+'</div>'
       + '<div class="op-st">'+pill(p.status)+'</div></div>').join('');
 
     // ---- this order: line items ----
@@ -23508,6 +23633,10 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     doc.text('Grand Total', W-160, endY); doc.text('Rs '+Math.round(o.totalValue).toLocaleString('en-IN'), W-40, endY, {align:'right'});
     if (o.invoiceNo){ doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(110); doc.text('Invoice #'+o.invoiceNo+(o.estDispatch?('  ·  Dispatched '+o.estDispatch):''), 40, endY); }
     return doc;
+  }
+  function openFullOrder(ref){
+    if (drawerRef !== ref) openDrawer(ref);
+    quickAction('viewpi');
   }
   function quickAction(qa){
     const base = baseOrders.find(o => o.ref === drawerRef); if (!base) return;
@@ -23677,19 +23806,46 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         render();
       });
     });
-    // row click + inline actions (delegated)
+    // row click → open panel. A rapid second click (double-click) opens the
+    // full printable order document.
+    let lastOpen = { ref:null, t:0 };
     $('ob-rows').addEventListener('click', e => {
-      const btn = e.target.closest('button[data-act]');
-      if (btn){ e.stopPropagation(); handleAct(btn.getAttribute('data-act'), btn.getAttribute('data-ref')); return; }
-      const tr = e.target.closest('tr.ob-row'); if (tr) openDrawer(tr.getAttribute('data-ref'));
+      const tr = e.target.closest('tr.ob-row'); if (!tr) return;
+      const ref = tr.getAttribute('data-ref');
+      const now = Date.now();
+      if (lastOpen.ref === ref && (now - lastOpen.t) < 400){ openFullOrder(ref); lastOpen.t = 0; return; }
+      openDrawer(ref); lastOpen = { ref, t: now };
     });
-    // drawer
+    // drawer — backdrop click closes, unless it's the 2nd click of a double
     $('ob-dr-close').addEventListener('click', closeDrawer);
-    $('ob-drawer').addEventListener('click', e => { if (e.target === $('ob-drawer')) closeDrawer(); });
+    $('ob-drawer').addEventListener('click', e => {
+      if (e.target !== $('ob-drawer')) return;
+      if (lastOpen.ref && (Date.now() - lastOpen.t) < 400){ openFullOrder(lastOpen.ref); lastOpen.t = 0; return; }
+      closeDrawer();
+    });
     $('ob-dr-foot').addEventListener('click', e => { const b=e.target.closest('button[data-act]'); if(b) handleAct(b.getAttribute('data-act'), b.getAttribute('data-ref')); });
     $('ob-dr-quick').addEventListener('click', e => { const b=e.target.closest('button[data-qa]'); if(b && !b.disabled) quickAction(b.getAttribute('data-qa')); });
     // previous-orders → switch the panel to that order
     $('ob-dr-prev').addEventListener('click', e => { const r=e.target.closest('.ob-prev'); if(r) openDrawer(r.getAttribute('data-ref')); });
+    // sales-trend range toggle
+    $('ob-trend-toggle').addEventListener('click', e => {
+      const b = e.target.closest('button[data-r]'); if(!b) return;
+      trendState.range = b.getAttribute('data-r');
+      document.querySelectorAll('#ob-trend-toggle button').forEach(x=>x.classList.toggle('on', x===b));
+      renderTrend();
+    });
+    // sales-trend hover tooltip (revenue + order count)
+    const trendEl = $('ob-dr-trend'), tip = $('ob-trend-tip');
+    trendEl.addEventListener('mouseover', e => {
+      const bar = e.target.closest('.ob-bar'); if(!bar) return;
+      const c = Number(bar.dataset.c);
+      tip.innerHTML = '<b>'+monthFull(bar.dataset.ym)+'</b>'+inr(bar.dataset.v)+' · '+c+' order'+(c!==1?'s':'');
+      tip.hidden = false;
+      const wr = trendEl.parentElement.getBoundingClientRect(), br = bar.getBoundingClientRect();
+      tip.style.left = (br.left - wr.left + br.width/2) + 'px';
+      tip.style.top = (br.top - wr.top - 10) + 'px';
+    });
+    trendEl.addEventListener('mouseout', e => { if (!e.relatedTarget || !e.relatedTarget.closest || !e.relatedTarget.closest('.ob-bar')) tip.hidden = true; });
     // view all → filter the order book for this customer
     $('ob-dr-viewall').addEventListener('click', () => {
       const base = baseOrders.find(o => o.ref === drawerRef); if(!base) return;
@@ -23706,8 +23862,26 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     $('ob-disp-save').addEventListener('click', saveDispatch);
     $('ob-dispatch').addEventListener('click', e => { if (e.target === $('ob-dispatch')) closeDispatch(); });
     $('ob-dispatch').addEventListener('keydown', e => { if (e.key==='Enter' && e.target.tagName==='INPUT') saveDispatch(); });
+    // ↑/↓ navigate orders while the panel updates instantly
+    function navOrder(delta){
+      if ($('ob-drawer').hidden) return;
+      const view = computeView();
+      const idx = view.findIndex(o => o.ref === drawerRef);
+      if (idx === -1) return;
+      const ni = idx + delta;
+      if (ni < 0 || ni >= view.length) return;
+      const targetPage = Math.floor(ni / state.pageSize) + 1;
+      if (targetPage !== state.page){ state.page = targetPage; render(); }
+      openDrawer(view[ni].ref);
+    }
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape'){ if (!$('ob-dispatch').hidden) closeDispatch(); else if (!$('ob-drawer').hidden) closeDrawer(); }
+      if (e.key === 'Escape'){ if (!$('ob-dispatch').hidden) closeDispatch(); else if (!$('ob-drawer').hidden) closeDrawer(); return; }
+      if (!$('ob-drawer').hidden && (e.key === 'ArrowDown' || e.key === 'ArrowUp')){
+        const t = document.activeElement;
+        if (t && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
+        e.preventDefault();
+        navOrder(e.key === 'ArrowDown' ? 1 : -1);
+      }
     });
     if (location.hash === '#orders') window.atlasLoadOrders();
   });
