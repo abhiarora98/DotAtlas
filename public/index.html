@@ -1072,6 +1072,10 @@
   .kpi.kpi-overdue {
     background:
       linear-gradient(180deg, rgba(255,138,168,0.06), rgba(255,138,168,0.01)),
+      linear-gradient(180deg, var(--surface-2) 0%, rgba(19,24,31,0.4) 100%);
+    border-color: rgba(255,138,168,0.20);
+  }
+  .kpi.kpi-overdue .v { color: var(--rose); }
 
   .table.ledger { table-layout: fixed; }
   .table.ledger td, .table.ledger th { overflow: hidden; text-overflow: ellipsis; }
@@ -1467,7 +1471,15 @@
     padding-bottom: 6px;
     border-top: 1px solid var(--line);
   }
-  .table.ledger .detail-inner .fy-body.open { display: block; }
+  /* Open FY body scrolls independently so hundreds of vouchers stay
+     usable instead of expanding the drawer indefinitely. The column
+     header (.inv-header, first child) stays pinned via position:sticky. */
+  .table.ledger .detail-inner .fy-body.open {
+    display: block;
+    max-height: 460px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
 
   /* Voucher row — Date · Type · Voucher · Amount · Running Balance.
      Running balance column widened so its right-aligned text sits
@@ -1475,11 +1487,12 @@
      between the two numeric columns. */
   .table.ledger .detail-inner .inv-row {
     display: grid;
-    grid-template-columns: 76px 110px 112px 1fr 160px;
-    gap: 18px; padding: 7px 12px;
+    grid-template-columns: 84px 116px 120px 1fr 170px;
+    gap: 18px; padding: 12px;
+    min-height: 44px;
     font-family: var(--fm); font-size: 12px;
     color: #4B5563; letter-spacing: 0.02em;
-    align-items: baseline;
+    align-items: center;
     border-radius: 4px;
   }
   /* Zebra striping — very subtle warm tint on alternating rows */
@@ -1519,7 +1532,7 @@
   /* Sticky column header inside the unified drawer ledger. */
   .table.ledger .detail-inner .inv-header {
     position: sticky;
-    top: 49px;            /* pins below the sticky chip bar above */
+    top: 0;               /* pinned to the top of the scrolling fy-body */
     z-index: 2;
     background: var(--surface-3);
     border-bottom: 1px solid var(--line);
