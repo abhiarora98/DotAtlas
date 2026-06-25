@@ -1381,6 +1381,14 @@
   .ob-os-med .m.status .ob-pill::before { width: 6px; height: 6px; }
   .ob-os-small { margin-top: 14px; padding: 0 4px; font-family: var(--fm); font-size: 11.5px; color: var(--text-2); letter-spacing: 0.01em; line-height: 1.6; }
   .ob-os-small .sep { color: var(--text-4); margin: 0 9px; }
+  /* Brief highlight when the panel switches to a different order */
+  @keyframes obOsFlash {
+    0%   { box-shadow: 0 0 0 0 rgba(78,222,163,0.0); border-color: var(--emerald-mute); }
+    25%  { box-shadow: 0 0 0 4px rgba(78,222,163,0.16); border-color: var(--emerald); }
+    100% { box-shadow: 0 0 0 0 rgba(78,222,163,0); border-color: var(--line); }
+  }
+  .ob-os.ob-os-flash .ob-os-hero { animation: obOsFlash 900ms var(--ease); }
+  @media (prefers-reduced-motion: reduce) { .ob-os.ob-os-flash .ob-os-hero { animation: none; } }
   @media (max-width: 760px) { .ob-os-hero { flex-direction: column; } .ob-os-val { border-right: 0; border-bottom: 1px solid var(--line); padding-right: 0; padding-bottom: 14px; } }
 
   /* Workflow elapsed-time markers */
@@ -23793,6 +23801,11 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 
   function openDrawer(ref){
     const base = baseOrders.find(o => o.ref === ref); if (!base) return;
+    // A fresh open, or a switch to a different order, should feel like opening a
+    // new document (reset to the header/summary). Re-rendering the *same* order
+    // (status change, async financials) must keep the current scroll position.
+    const wasHidden = $('ob-drawer').hidden;
+    const orderChanged = wasHidden || drawerRef !== ref;
     const o = eff(base);
     drawerRef = ref;
     const ps = partyStats(o.party);
@@ -23941,6 +23954,20 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     $('ob-drawer').hidden = false;
     document.body.style.overflow = 'hidden';
     updateSelectedRow(true);
+    // Reset to the top whenever the panel opens for a (different) order — never
+    // resume mid-page from the order you were previously reading. A same-order
+    // refresh (status change / async financials) keeps its scroll position.
+    if (orderChanged){
+      const body = $('ob-drawer').querySelector('.ob-dr-body');
+      if (body){
+        // Set now and again next frame: a panel that was display:none restores
+        // its old scrollTop on layout, so a single synchronous reset is lost.
+        body.scrollTop = 0;
+        requestAnimationFrame(() => { body.scrollTop = 0; });
+        const os = document.querySelector('.ob-os');
+        if (os){ os.classList.remove('ob-os-flash'); void os.offsetWidth; os.classList.add('ob-os-flash'); }
+      }
+    }
     // Pull real party financials (Outstanding / payment behaviour) from the
     // receivables dataset; re-render once when it first arrives.
     if (!recvMap) loadReceivablesMap().then(() => { if (drawerRef === ref && !$('ob-drawer').hidden) openDrawer(ref); });
@@ -23956,6 +23983,13 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     if (scroll && selRow) selRow.scrollIntoView({ block:'nearest' });
   }
   function closeDrawer(){ $('ob-drawer').hidden = true; drawerRef = null; document.body.style.overflow = ''; updateSelectedRow(false); }
+
+  // ---------- in-panel order switching (seamless, no page reload) ----------
+  function pushOrderState(ref){ try { history.pushState({ drawerOrder: ref }, '', location.hash || '#orders'); } catch(e){} }
+  // Open an order and register a history entry so Back returns to the prior one.
+  // Scroll-reset + highlight are handled inside openDrawer when the order
+  // actually changes (a same-order data refresh keeps your scroll position).
+  function navTo(ref){ const same = (ref === drawerRef && !$('ob-drawer').hidden); openDrawer(ref); if (!same) pushOrderState(ref); }
 
   // ---------- customer profile (dedicated page) ----------
   let pfParty = null;
@@ -24242,7 +24276,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       const ref = tr.getAttribute('data-ref');
       const now = Date.now();
       if (lastOpen.ref === ref && (now - lastOpen.t) < 400){ openFullOrder(ref); lastOpen.t = 0; return; }
-      openDrawer(ref); lastOpen = { ref, t: now };
+      navTo(ref); lastOpen = { ref, t: now };
     });
     // drawer — backdrop click closes, unless it's the 2nd click of a double
     $('ob-dr-close').addEventListener('click', closeDrawer);
@@ -24254,7 +24288,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     $('ob-dr-foot').addEventListener('click', e => { const b=e.target.closest('button[data-act]'); if(b) handleAct(b.getAttribute('data-act'), b.getAttribute('data-ref')); });
     $('ob-dr-quick').addEventListener('click', e => { const b=e.target.closest('button[data-qa]'); if(b && !b.disabled) quickAction(b.getAttribute('data-qa')); });
     // previous-orders → switch the panel to that order
-    $('ob-dr-prev').addEventListener('click', e => { const r=e.target.closest('.ob-prev'); if(r) openDrawer(r.getAttribute('data-ref')); });
+    $('ob-dr-prev').addEventListener('click', e => { const r=e.target.closest('.ob-prev'); if(r) navTo(r.getAttribute('data-ref')); });
     // sales-trend range toggle
     $('ob-trend-toggle').addEventListener('click', e => {
       const b = e.target.closest('button[data-r]'); if(!b) return;
@@ -24300,7 +24334,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     $('ob-dr-profile').addEventListener('click', () => { const b = baseOrders.find(o=>o.ref===drawerRef); if(b) openProfile(b.party); });
     $('ob-pf-close').addEventListener('click', closeProfile);
     $('ob-profile').addEventListener('click', e => { if (e.target === $('ob-profile')) closeProfile(); });
-    $('ob-pf-prev').addEventListener('click', e => { const r=e.target.closest('.ob-prev'); if(r){ const ref=r.getAttribute('data-ref'); closeProfile(); openDrawer(ref); } });
+    $('ob-pf-prev').addEventListener('click', e => { const r=e.target.closest('.ob-prev'); if(r){ const ref=r.getAttribute('data-ref'); closeProfile(); navTo(ref); } });
     // dispatch modal
     $('ob-disp-close').addEventListener('click', closeDispatch);
     $('ob-disp-cancel').addEventListener('click', closeDispatch);
@@ -24317,7 +24351,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       if (ni < 0 || ni >= view.length) return;
       const targetPage = Math.floor(ni / state.pageSize) + 1;
       if (targetPage !== state.page){ state.page = targetPage; render(); }
-      openDrawer(view[ni].ref);
+      navTo(view[ni].ref);
     }
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape'){ if (!$('ob-dispatch').hidden) closeDispatch(); else if (!$('ob-profile').hidden) closeProfile(); else if (!$('ob-drawer').hidden) closeDrawer(); return; }
@@ -24327,6 +24361,14 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         e.preventDefault();
         navOrder(e.key === 'ArrowDown' ? 1 : -1);
       }
+    });
+    // Back / forward steps through the orders viewed in the panel; stepping
+    // back past the first open closes the drawer. No page reload.
+    window.addEventListener('popstate', e => {
+      if (!$('ob-rows')) return;
+      const ref = e.state && e.state.drawerOrder;
+      if (ref && baseOrders.find(o => o.ref === ref)){ openDrawer(ref); }
+      else if (!$('ob-drawer').hidden){ closeDrawer(); }
     });
     if (location.hash === '#orders') window.atlasLoadOrders();
   });
