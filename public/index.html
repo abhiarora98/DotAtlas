@@ -1025,6 +1025,183 @@
   body[data-mode="light"] .orders-tabbar button.on { color: #fff; }
 
   /* ============================================================
+     Order Book — ERP order workspace
+     ============================================================ */
+  .ob-toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap; margin: 18px 0 6px;
+  }
+  .ob-status-tabs { display: inline-flex; gap: 4px; flex-wrap: wrap; }
+  .ob-status-tabs button {
+    font-family: var(--fm); font-size: 11px; letter-spacing: 0.03em;
+    color: var(--text-3); background: var(--surface); border: 1px solid var(--line);
+    padding: 8px 13px; border-radius: 8px; cursor: pointer;
+    transition: all 180ms var(--ease); display: inline-flex; align-items: center; gap: 7px;
+  }
+  .ob-status-tabs button:hover { color: var(--text); border-color: var(--line-2); }
+  .ob-status-tabs button.on { color: var(--text); border-color: var(--emerald-mute); background: var(--emerald-soft); }
+  .ob-status-tabs button .cnt {
+    font-size: 9.5px; padding: 1px 6px; border-radius: 999px;
+    background: var(--surface-3); color: var(--text-2); font-variant-numeric: tabular-nums;
+  }
+  .ob-status-tabs button.on .cnt { background: var(--emerald-mute); color: var(--text); }
+  .ob-tools { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .ob-tools .pi-input, .ob-tools .pi-select { width: auto; }
+  #ob-search { min-width: 230px; }
+  #ob-poc { min-width: 120px; }
+  .ob-date-lbl {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--fm); font-size: 9.5px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--text-3);
+  }
+  .ob-date-lbl input { width: 140px; }
+  #ob-clear { cursor: pointer; }
+
+  /* Order book table */
+  .ob-table { table-layout: auto; }
+  .ob-table thead th {
+    position: sticky; top: 49px; z-index: 2; background: var(--void);
+    font-size: 10px; letter-spacing: 0.1em; padding: 12px 14px 12px 0;
+    white-space: nowrap;
+  }
+  .ob-table thead th[data-sort] { cursor: pointer; user-select: none; transition: color 150ms var(--ease); }
+  .ob-table thead th[data-sort]:hover { color: var(--text); }
+  .ob-table thead th[data-sort].sorted::after { content: ' ↓'; color: var(--text-2); }
+  .ob-table thead th[data-sort].sorted.asc::after { content: ' ↑'; }
+  .ob-table tbody td { padding: 13px 14px 13px 0; font-size: 12.5px; vertical-align: middle; white-space: nowrap; }
+  .ob-table tbody tr.ob-row { cursor: pointer; transition: background 160ms var(--ease); }
+  .ob-table tbody tr.ob-row:hover td { background: rgba(255,255,255,0.03); }
+  .ob-table .ob-ref { font-family: var(--fm); font-weight: 600; color: var(--text); }
+  .ob-table .ob-date, .ob-table .ob-est { font-family: var(--fm); font-size: 11.5px; color: var(--text-2); }
+  .ob-table .ob-party { color: var(--text); font-weight: 500; max-width: 230px; overflow: hidden; text-overflow: ellipsis; }
+  .ob-table .ob-party small { display: block; font-family: var(--fm); font-size: 10px; color: var(--text-3); margin-top: 2px; }
+  .ob-table .ob-poc { font-family: var(--fm); font-size: 11px; color: var(--text-2); }
+  .ob-table .ob-val { font-family: var(--fd); font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+  .ob-table .ob-items-c { font-family: var(--fm); color: var(--text-2); text-align: right; }
+  .ob-table .ob-inv { font-family: var(--fm); font-size: 11.5px; color: var(--text-2); }
+  .ob-table .ob-inv.none { color: var(--text-4); }
+  .ob-table td.ob-actions { text-align: right; }
+
+  /* Status pills */
+  .ob-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 999px;
+    font-family: var(--fm); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .ob-pill::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+  .ob-pill.st-pending   { background: var(--amber-soft); color: var(--amber); }
+  .ob-pill.st-ready     { background: var(--blue-soft); color: var(--blue); }
+  .ob-pill.st-dispatched{ background: var(--emerald-soft); color: var(--emerald); }
+  .ob-pill.st-cancelled { background: var(--rose-soft); color: var(--rose); }
+  .ob-pill.st-repeat    { background: var(--surface-3); color: var(--text-2); }
+
+  /* Inline row action buttons */
+  .ob-act {
+    font-family: var(--fm); font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase;
+    padding: 6px 11px; border-radius: 7px; cursor: pointer; white-space: nowrap;
+    border: 1px solid var(--line-2); background: var(--surface); color: var(--text-2);
+    transition: all 160ms var(--ease);
+  }
+  .ob-act:hover { color: var(--text); border-color: var(--line-3); }
+  .ob-act.prime { background: var(--emerald); color: var(--void); border-color: var(--emerald); font-weight: 600; }
+  .ob-act.prime:hover { background: var(--emerald-2); border-color: var(--emerald-2); }
+  .ob-act.blue { border-color: rgba(124,168,255,0.4); color: var(--blue); }
+  .ob-act.blue:hover { background: var(--blue-soft); }
+
+  .ob-empty { padding: 40px 16px; text-align: center; color: var(--text-3); font-size: 13px; }
+  .ob-pager {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 14px 2px 4px; font-family: var(--fm); font-size: 11px; color: var(--text-3);
+  }
+  .ob-pager .ob-pg-btns { display: inline-flex; gap: 8px; }
+  .ob-pager button {
+    font-family: var(--fm); font-size: 11px; padding: 6px 12px; border-radius: 7px;
+    border: 1px solid var(--line-2); background: var(--surface); color: var(--text-2); cursor: pointer;
+    transition: all 160ms var(--ease);
+  }
+  .ob-pager button:hover:not(:disabled) { color: var(--text); border-color: var(--line-3); }
+  .ob-pager button:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* Order details drawer (slide-over) */
+  .ob-drawer-overlay {
+    position: fixed; inset: 0; z-index: 1100;
+    background: rgba(5,9,18,0.55); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+    display: flex; justify-content: flex-end;
+    animation: ap-fade 160ms var(--ease);
+  }
+  .ob-drawer-overlay[hidden] { display: none; }
+  .ob-drawer-panel {
+    width: min(680px, 94vw); height: 100%;
+    background: var(--void-2); border-left: 1px solid var(--line-2);
+    box-shadow: -24px 0 60px -20px rgba(0,0,0,0.7);
+    display: flex; flex-direction: column;
+    animation: ob-slide 240ms var(--ease);
+  }
+  @keyframes ob-slide { from { transform: translateX(40px); opacity: 0.4; } to { transform: none; opacity: 1; } }
+  .ob-dr-head {
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
+    padding: 24px 26px 18px; border-bottom: 1px solid var(--line);
+  }
+  .ob-dr-eyebrow { font-family: var(--fm); font-size: 10px; letter-spacing: 0.14em; color: var(--text-3); }
+  .ob-dr-party { font-family: var(--fd); font-size: 20px; font-weight: 600; color: var(--text); margin-top: 6px; letter-spacing: -0.01em; }
+  .ob-dr-sub { font-family: var(--fm); font-size: 11px; color: var(--text-3); margin-top: 4px; letter-spacing: 0.03em; }
+  .ob-dr-head-r { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .ob-dr-close {
+    background: transparent; border: 1px solid var(--line); color: var(--text-3);
+    width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 18px;
+    display: inline-flex; align-items: center; justify-content: center; transition: all 160ms var(--ease);
+  }
+  .ob-dr-close:hover { color: var(--text); border-color: var(--line-3); }
+  .ob-dr-body { flex: 1 1 auto; overflow-y: auto; padding: 22px 26px 28px; }
+  .ob-dr-meta {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px 18px;
+    padding-bottom: 22px; border-bottom: 1px solid var(--line);
+  }
+  .ob-dr-meta .m { min-width: 0; }
+  .ob-dr-meta .m .ml { font-family: var(--fm); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-3); }
+  .ob-dr-meta .m .mv { font-size: 13px; color: var(--text); margin-top: 5px; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; }
+  .ob-dr-meta .m .mv.big { font-family: var(--fd); font-size: 16px; font-weight: 600; }
+  .ob-dr-section { padding-top: 22px; }
+  .ob-dr-sec-h { font-family: var(--fm); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-2); margin-bottom: 12px; }
+  .ob-dr-sec-h span { color: var(--text-3); }
+  .ob-dr-items-wrap { max-height: 320px; overflow-y: auto; border: 1px solid var(--line); border-radius: 10px; }
+  .ob-items { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  .ob-items thead th {
+    position: sticky; top: 0; z-index: 1; background: var(--surface-2);
+    font-family: var(--fm); font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text-3); font-weight: 600; text-align: right; padding: 9px 12px; border-bottom: 1px solid var(--line);
+  }
+  .ob-items thead th:nth-child(1), .ob-items thead th:nth-child(2) { text-align: left; }
+  .ob-items tbody td { padding: 10px 12px; font-size: 11.5px; color: var(--text-2); text-align: right; border-bottom: 1px solid var(--line); }
+  .ob-items tbody td:nth-child(1) { color: var(--text-3); font-family: var(--fm); font-size: 10px; text-align: left; }
+  .ob-items tbody td.it-prod { text-align: left; color: var(--text); }
+  .ob-items tbody td.it-prod small { display: block; color: var(--text-3); font-size: 10px; margin-top: 2px; font-family: var(--fm); }
+  .ob-items tbody tr:nth-child(even) td { background: rgba(255,255,255,0.015); }
+  .ob-items tbody td.it-total { color: var(--text); font-weight: 600; }
+  .ob-items tfoot td { padding: 11px 12px; font-family: var(--fm); font-size: 11px; color: var(--text); border-top: 1px solid var(--line-2); text-align: right; font-weight: 600; }
+  .ob-items tfoot td.it-lbl { text-align: left; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); font-weight: 500; }
+
+  /* Status timeline */
+  .ob-timeline { position: relative; padding-left: 8px; }
+  .ob-tl-item { position: relative; padding: 0 0 18px 26px; }
+  .ob-tl-item:last-child { padding-bottom: 0; }
+  .ob-tl-item::before { content: ''; position: absolute; left: 4px; top: 4px; width: 9px; height: 9px; border-radius: 50%; background: var(--emerald); box-shadow: 0 0 0 3px var(--emerald-soft); }
+  .ob-tl-item::after { content: ''; position: absolute; left: 8px; top: 14px; bottom: -4px; width: 1px; background: var(--line-2); }
+  .ob-tl-item:last-child::after { display: none; }
+  .ob-tl-item.pending::before { background: var(--amber); box-shadow: 0 0 0 3px var(--amber-soft); }
+  .ob-tl-item.ready::before { background: var(--blue); box-shadow: 0 0 0 3px var(--blue-soft); }
+  .ob-tl-label { font-size: 13px; color: var(--text); font-weight: 500; }
+  .ob-tl-sub { font-family: var(--fm); font-size: 10.5px; color: var(--text-3); margin-top: 3px; letter-spacing: 0.02em; }
+  .ob-tl-ts { font-family: var(--fm); font-size: 10px; color: var(--text-2); margin-top: 2px; }
+
+  .ob-dr-foot { padding: 16px 26px; border-top: 1px solid var(--line); display: flex; gap: 10px; justify-content: flex-end; }
+  .ob-dr-foot:empty { display: none; }
+  .ob-dr-foot .ob-act { font-size: 11px; padding: 11px 18px; }
+
+  .ob-dispatch-overlay .ap-modal { max-width: 520px; }
+
+  /* ============================================================
      Receivables — full party ledgers (ported from stoic-volta)
      ============================================================ */
   [data-page="receivables"] .kpis { grid-template-columns: 1.35fr 1fr 1fr 1fr; }
@@ -2862,36 +3039,157 @@
       </div>
       <div class="hero-h">
         <div>
-          <div class="eb"><span class="live-dot"></span>Order book · 312 in motion</div>
-          <h1>Everything <span class="em">moving</span>, every <span class="accent">stage</span>.</h1>
+          <div class="eb"><span class="live-dot"></span>Order book · <span id="ob-eb">syncing…</span></div>
+          <h1>Every <span class="em">order</span>, one <span class="accent">source of truth</span>.</h1>
         </div>
-        <div class="when">OPEN · <b>74</b><br/>PICKING · <b>38</b><br/>DISPATCHED · <b>200</b></div>
+        <div class="when when-stack">
+          <div><b id="ob-w-total">—</b> orders on book</div>
+          <div><b id="ob-w-open">—</b> open · <b id="ob-w-disp">—</b> dispatched</div>
+          <div><b class="amt" id="ob-w-value">—</b> total order value</div>
+        </div>
       </div>
-      <div class="range-bar">
-        <div class="range"><button>ALL</button><button class="on">OPEN</button><button>PICKING</button><button>DISPATCHED</button><button>HOLD</button></div>
-        <div class="actions"><button class="chip">+ NEW ORDER</button><button class="chip">⤓ EXPORT</button><button class="chip emerald">◆ ASK ATLAS</button></div>
-      </div>
+
       <div class="kpis">
-        <div class="kpi"><div class="lbl"><span>Open value</span><span class="ind"></span></div><div class="v"><span class="cur">₹</span>1.84<span class="un">Cr</span></div><div class="d"><span class="arr">↑</span>+8.2% week-on-week</div></div>
-        <div class="kpi"><div class="lbl"><span>Avg lead time</span><span class="ind b"></span></div><div class="v">4.2<span class="un">d</span></div><div class="d"><span class="arr">↓</span>−0.6d this month</div></div>
-        <div class="kpi"><div class="lbl"><span>On-time rate</span><span class="ind"></span></div><div class="v">91.4<span class="un">%</span></div><div class="d"><span class="arr">↑</span>+2.1 pts</div></div>
-        <div class="kpi"><div class="lbl"><span>On hold</span><span class="ind r"></span></div><div class="v">6</div><div class="d rr"><span class="arr">↑</span>3 awaiting credit</div></div>
+        <div class="kpi kpi-hero"><div class="lbl"><span>Total order value</span><span class="ind b"></span></div><div class="v"><span class="cur">₹</span><span id="ob-k-value">0</span></div><div class="d"><span class="arr">→</span><span id="ob-k-count">0</span> orders</div></div>
+        <div class="kpi"><div class="lbl"><span>Pending</span><span class="ind a"></span></div><div class="v" id="ob-k-pending">0</div><div class="d dn"><span class="arr">→</span>awaiting packing</div></div>
+        <div class="kpi"><div class="lbl"><span>Ready for dispatch</span><span class="ind"></span></div><div class="v" id="ob-k-ready">0</div><div class="d"><span class="arr">→</span>packed · leaving factory</div></div>
+        <div class="kpi"><div class="lbl"><span>Dispatched</span><span class="ind"></span></div><div class="v" id="ob-k-disp">0</div><div class="d"><span class="arr">→</span>left the factory</div></div>
       </div>
-      <div class="card" style="margin-top:14px;">
-        <div class="card-h"><div class="t"><span class="ic">◇</span><h3>Order book</h3><span class="sub">SORTED · LATEST</span></div><div class="seg"><button class="on">CARDS</button><button>TABLE</button></div></div>
+
+      <div class="ob-toolbar">
+        <div class="ob-status-tabs" id="ob-status-tabs">
+          <button data-st="all" class="on">All <span class="cnt" id="ob-c-all">0</span></button>
+          <button data-st="Pending">Pending <span class="cnt" id="ob-c-Pending">0</span></button>
+          <button data-st="Ready for Dispatch">Ready for Dispatch <span class="cnt" id="ob-c-Ready">0</span></button>
+          <button data-st="Dispatched">Dispatched <span class="cnt" id="ob-c-Dispatched">0</span></button>
+          <button data-st="Cancelled">Cancelled <span class="cnt" id="ob-c-Cancelled">0</span></button>
+          <button data-st="Repeat">Repeat <span class="cnt" id="ob-c-Repeat">0</span></button>
+        </div>
+        <div class="ob-tools">
+          <input id="ob-search" class="pi-input no-upper" placeholder="Search PI #, party, invoice…" autocomplete="off" spellcheck="false">
+          <select id="ob-poc" class="pi-select" title="Filter by sales person"><option value="">All sales</option></select>
+          <label class="ob-date-lbl">From <input id="ob-from" type="date" class="pi-input" title="From PI date"></label>
+          <label class="ob-date-lbl">To <input id="ob-to" type="date" class="pi-input" title="To PI date"></label>
+          <button class="chip" id="ob-clear">CLEAR</button>
+        </div>
+      </div>
+
+      <div class="card ledger-card ob-card">
+        <div class="card-h">
+          <div class="t"><span class="ic">◇</span><h3>Order book</h3><span class="sub"><span id="ob-count">0</span> ORDERS</span></div>
+          <span class="more" id="ob-refresh">↻ REFRESH</span>
+        </div>
         <div class="card-b" style="padding-top:6px;">
-          <table class="table"><thead><tr><th>Order</th><th>Party</th><th>Stage</th><th class="r">Value</th><th class="r">ETA</th></tr></thead><tbody>
-            <tr><td class="mute" style="font-family:var(--fm);">#ORD-2118</td><td><div class="name"><div class="av-sq e">GC</div><div class="nm-c"><div class="pri">Goyal Carpets</div><div class="sec">PANIPAT · 6 SKU</div></div></div></td><td><span class="pill-s ok">DISPATCHED</span></td><td class="num r"><span class="cur">₹</span>9.42 L</td><td class="mute r">today</td></tr>
-            <tr><td class="mute" style="font-family:var(--fm);">#ORD-2117</td><td><div class="name"><div class="av-sq b">VT</div><div class="nm-c"><div class="pri">Vinod Trading</div><div class="sec">DELHI · 4 SKU</div></div></div></td><td><span class="pill-s warn">PICKING</span></td><td class="num r"><span class="cur">₹</span>11.20 L</td><td class="mute r">tomorrow</td></tr>
-            <tr><td class="mute" style="font-family:var(--fm);">#ORD-2116</td><td><div class="name"><div class="av-sq a">SI</div><div class="nm-c"><div class="pri">Sai Industries</div><div class="sec">PUNE · 8 SKU</div></div></div></td><td><span class="pill-s bad">ON HOLD</span></td><td class="num r"><span class="cur">₹</span>7.18 L</td><td class="mute r">credit review</td></tr>
-            <tr><td class="mute" style="font-family:var(--fm);">#ORD-2115</td><td><div class="name"><div class="av-sq e">RM</div><div class="nm-c"><div class="pri">Rajesh Mats</div><div class="sec">JAIPUR · 3 SKU</div></div></div></td><td><span class="pill-s info">CONFIRMED</span></td><td class="num r"><span class="cur">₹</span>4.86 L</td><td class="mute r">14 May</td></tr>
-            <tr><td class="mute" style="font-family:var(--fm);">#ORD-2114</td><td><div class="name"><div class="av-sq b">KB</div><div class="nm-c"><div class="pri">Khanna Bros.</div><div class="sec">LUDHIANA · 12 SKU</div></div></div></td><td><span class="pill-s warn">PICKING</span></td><td class="num r"><span class="cur">₹</span>14.20 L</td><td class="mute r">12 May</td></tr>
-            <tr><td class="mute" style="font-family:var(--fm);">#ORD-2113</td><td><div class="name"><div class="av-sq e">PA</div><div class="nm-c"><div class="pri">Pune Auto Mats</div><div class="sec">PUNE · 2 SKU</div></div></div></td><td><span class="pill-s ok">DISPATCHED</span></td><td class="num r"><span class="cur">₹</span>3.40 L</td><td class="mute r">delivered</td></tr>
-            <tr><td class="mute" style="font-family:var(--fm);">#ORD-2112</td><td><div class="name"><div class="av-sq a">TN</div><div class="nm-c"><div class="pri">TEFNO Foam</div><div class="sec">SUPPLIER · #PO-0814</div></div></div></td><td><span class="pill-s muted">DRAFT</span></td><td class="num r"><span class="cur">₹</span>2.95 L</td><td class="mute r">await sign-off</td></tr>
-          </tbody></table>
+          <table class="table ob-table">
+            <thead><tr>
+              <th data-sort="ref">PI #</th>
+              <th data-sort="piDateISO">PI Date</th>
+              <th data-sort="party">Party</th>
+              <th data-sort="poc">Sales</th>
+              <th>State</th>
+              <th class="r" data-sort="totalValue">Order value</th>
+              <th class="r" data-sort="lineCount">Items</th>
+              <th data-sort="estDispatch">Est. dispatch</th>
+              <th>Invoice #</th>
+              <th data-sort="status">Status</th>
+              <th class="r">Actions</th>
+            </tr></thead>
+            <tbody id="ob-rows"></tbody>
+          </table>
+          <div id="ob-empty" class="ob-empty" hidden>No orders match the current filters.</div>
+          <div class="ob-pager" id="ob-pager"></div>
         </div>
       </div>
     </section>
+
+    <!-- ORDER DETAILS DRAWER -->
+    <div class="ob-drawer-overlay" id="ob-drawer" hidden>
+      <div class="ob-drawer-panel" role="dialog" aria-label="Order details">
+        <div class="ob-dr-head">
+          <div>
+            <div class="ob-dr-eyebrow">ORDER · <span id="ob-dr-ref">—</span></div>
+            <div class="ob-dr-party" id="ob-dr-party">—</div>
+            <div class="ob-dr-sub" id="ob-dr-sub">—</div>
+          </div>
+          <div class="ob-dr-head-r">
+            <span id="ob-dr-status" class="ob-pill">—</span>
+            <button class="ob-dr-close" id="ob-dr-close" aria-label="Close">×</button>
+          </div>
+        </div>
+        <div class="ob-dr-body">
+          <div class="ob-dr-meta" id="ob-dr-meta"></div>
+
+          <div class="ob-dr-section">
+            <div class="ob-dr-sec-h">Line items <span id="ob-dr-itemcount"></span></div>
+            <div class="ob-dr-items-wrap">
+              <table class="ob-items">
+                <thead><tr>
+                  <th>#</th><th>Product</th><th class="r">Qty</th><th class="r">Units</th>
+                  <th class="r">Rate</th><th class="r">Freight</th><th class="r">Taxable</th><th class="r">Total</th>
+                </tr></thead>
+                <tbody id="ob-dr-items"></tbody>
+                <tfoot id="ob-dr-items-foot"></tfoot>
+              </table>
+            </div>
+          </div>
+
+          <div class="ob-dr-section">
+            <div class="ob-dr-sec-h">Status history</div>
+            <div class="ob-timeline" id="ob-dr-history"></div>
+          </div>
+        </div>
+        <div class="ob-dr-foot" id="ob-dr-foot"></div>
+      </div>
+    </div>
+
+    <!-- DISPATCH MODAL -->
+    <div class="ap-overlay ob-dispatch-overlay" id="ob-dispatch" hidden>
+      <div class="ap-modal" role="dialog" aria-modal="true" aria-labelledby="ob-disp-title">
+        <div class="ap-head">
+          <div>
+            <div class="eb" style="margin-bottom: 6px;"><span class="live-dot"></span>Dispatch · <span id="ob-disp-ref">—</span></div>
+            <h2 id="ob-disp-title">Mark <span style="font-style:italic;font-weight:500;" id="ob-disp-party">order</span> as <span style="color: var(--emerald);">dispatched</span>.</h2>
+          </div>
+          <button class="ap-close" id="ob-disp-close" aria-label="Close">×</button>
+        </div>
+        <div class="ap-body">
+          <div class="pi-field">
+            <label for="ob-disp-invoice">Invoice Number <span class="ap-req">*</span></label>
+            <input class="pi-input mono no-upper" id="ob-disp-invoice" placeholder="e.g. 1142" autocomplete="off">
+          </div>
+          <div class="ap-row-2">
+            <div class="pi-field">
+              <label for="ob-disp-date">Dispatch Date</label>
+              <input class="pi-input" type="date" id="ob-disp-date">
+            </div>
+            <div class="pi-field">
+              <label for="ob-disp-transporter">Transporter</label>
+              <input class="pi-input no-upper" id="ob-disp-transporter" placeholder="optional" autocomplete="off">
+            </div>
+          </div>
+          <div class="ap-row-2">
+            <div class="pi-field">
+              <label for="ob-disp-lr">LR / GR Number</label>
+              <input class="pi-input mono no-upper" id="ob-disp-lr" placeholder="optional" autocomplete="off">
+            </div>
+            <div class="pi-field">
+              <label for="ob-disp-vehicle">Vehicle Number</label>
+              <input class="pi-input mono no-upper" id="ob-disp-vehicle" placeholder="optional" autocomplete="off">
+            </div>
+          </div>
+          <div class="pi-field">
+            <label for="ob-disp-remarks">Remarks</label>
+            <input class="pi-input no-upper" id="ob-disp-remarks" placeholder="optional" autocomplete="off">
+          </div>
+          <div class="ap-status" id="ob-disp-status"></div>
+          <div class="ap-actions">
+            <button class="pi-btn" id="ob-disp-cancel">Cancel</button>
+            <button class="pi-btn prime" id="ob-disp-save">Confirm dispatch →</button>
+          </div>
+          <div class="ap-foot">Invoice number is stored as a reference only — Native does not generate the tax invoice yet.</div>
+        </div>
+      </div>
+    </div>
 
     <!-- PARTIES PAGE -->
     <section class="page" data-page="parties" hidden>
@@ -18964,6 +19262,9 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     if (p === 'pi-history' && typeof window.atlasLoadHistory === 'function') {
       window.atlasLoadHistory();
     }
+    if (p === 'orders' && typeof window.atlasLoadOrders === 'function') {
+      window.atlasLoadOrders();
+    }
   }
   document.querySelectorAll('.nav-item[data-page]').forEach(n => {
     n.style.cursor = 'pointer';
@@ -22610,6 +22911,359 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       });
     })();
   })();
+</script>
+
+<!-- ============ Order Book — ERP order workspace ============ -->
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const inr = n => '₹' + Math.round(Number(n)||0).toLocaleString('en-IN');
+  const compact = n => { n = Number(n)||0; if (n>=1e7) return (n/1e7).toFixed(2)+' Cr'; if (n>=1e5) return (n/1e5).toFixed(2)+' L'; if (n>=1e3) return (n/1e3).toFixed(1)+'K'; return String(Math.round(n)); };
+  const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function fmtISO(iso){ const m=String(iso||'').match(/^(\d{4})-(\d{2})-(\d{2})/); if(!m) return iso||'—'; return String(+m[3])+' '+MON[+m[2]-1]+" '"+m[1].slice(2); }
+  function todayISO(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  const initials = name => { const p=String(name||'').trim().split(/\s+/).filter(Boolean); if(!p.length) return '··'; return (p.length===1?p[0].slice(0,2):p[0][0]+p[p.length-1][0]).toUpperCase(); };
+  const STATUS_CLASS = { 'Pending':'st-pending', 'Ready for Dispatch':'st-ready', 'Dispatched':'st-dispatched', 'Cancelled':'st-cancelled', 'Repeat':'st-repeat' };
+  function pill(status){ return '<span class="ob-pill '+(STATUS_CLASS[status]||'st-repeat')+'">'+esc(status)+'</span>'; }
+  function prodDesc(li){
+    const main = [li.category, li.model, li.backing, li.colour].filter(Boolean).join(' · ');
+    let dim = ''; if(li.width&&li.length) dim=li.width+' × '+li.length; else dim=li.width||li.length||'';
+    return { main: main||'—', dim };
+  }
+
+  const OV_KEY = 'atlas-orders-overlay';
+  let overlay = {};
+  try { overlay = JSON.parse(localStorage.getItem(OV_KEY) || '{}') || {}; } catch(e){}
+  function saveOverlay(){ try { localStorage.setItem(OV_KEY, JSON.stringify(overlay)); } catch(e){} }
+
+  let baseOrders = [];     // raw from orders.json
+  let loadedAt = 0, loading = false;
+  const state = { status:'all', search:'', poc:'', from:'', to:'', sortKey:'piDateISO', sortDir:'desc', page:1, pageSize:40 };
+
+  function endpoint(){ return 'data/orders.json'; }
+  async function fetchOrders(){
+    const res = await fetch(endpoint());
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const j = await res.json();
+    return j.orders || [];
+  }
+
+  // Merge a base order with its localStorage overlay → effective record.
+  function eff(o){
+    const ov = overlay[o.ref];
+    const status = (ov && ov.status) || o.status;
+    const dispatch = ov && ov.dispatch;
+    const invoiceNo = (dispatch && dispatch.invoiceNo) || o.invoiceNo || '';
+    const estDispatch = (dispatch && dispatch.date) ? fmtISO(dispatch.date) : o.estDispatch;
+    return Object.assign({}, o, { status, invoiceNo, estDispatch, _ov: ov, _dispatch: dispatch });
+  }
+
+  function buildHistory(o){
+    const ev = [];
+    ev.push({ label:'PI Created', tsISO: o.piDateISO ? o.piDateISO+'T00:00:00' : '', sub:'Order entered from PI · '+o.lineCount+' line item'+(o.lineCount!==1?'s':''), kind:'created' });
+    const ov = o._ov;
+    if (ov && ov.history && ov.history.length){
+      ov.history.forEach(e => ev.push(e));
+    } else {
+      if (o.status === 'Dispatched') ev.push({ label:'Dispatched', tsISO:'', sub: (o.invoiceNo?('Invoice #'+o.invoiceNo):'')+(o.estDispatch?(o.invoiceNo?' · ':'')+o.estDispatch:''), kind:'dispatched' });
+      else if (o.status === 'Cancelled') ev.push({ label:'Cancelled', tsISO:'', sub:'Marked cancelled in master sheet', kind:'cancelled' });
+    }
+    return ev;
+  }
+
+  // ---------- view computation ----------
+  function computeView(){
+    const q = state.search.trim().toLowerCase();
+    let rows = baseOrders.map(eff);
+    if (state.status !== 'all') rows = rows.filter(o => o.status === state.status);
+    if (state.poc) rows = rows.filter(o => (o.poc||'') === state.poc);
+    if (state.from) rows = rows.filter(o => o.piDateISO && o.piDateISO >= state.from);
+    if (state.to) rows = rows.filter(o => o.piDateISO && o.piDateISO <= state.to);
+    if (q) rows = rows.filter(o =>
+      String(o.ref).toLowerCase().includes(q) ||
+      (o.party||'').toLowerCase().includes(q) ||
+      (o.invoiceNo||'').toLowerCase().includes(q) ||
+      (o.partyCode||'').toLowerCase().includes(q));
+    const k = state.sortKey, dir = state.sortDir === 'asc' ? 1 : -1;
+    const numeric = (k==='totalValue'||k==='lineCount'||k==='ref'||k==='totalQty');
+    rows.sort((a,b) => {
+      let av=a[k], bv=b[k];
+      if (numeric){ av=parseFloat(String(av).replace(/[^0-9.\-]/g,''))||0; bv=parseFloat(String(bv).replace(/[^0-9.\-]/g,''))||0; return (av-bv)*dir; }
+      av=String(av||'').toLowerCase(); bv=String(bv||'').toLowerCase();
+      return av<bv?-1*dir:av>bv?1*dir:0;
+    });
+    return rows;
+  }
+
+  function statusCounts(){
+    const c = { all: baseOrders.length, 'Pending':0, 'Ready for Dispatch':0, 'Dispatched':0, 'Cancelled':0, 'Repeat':0 };
+    baseOrders.forEach(o => { const s = eff(o).status; if (c[s] != null) c[s]++; });
+    return c;
+  }
+
+  function renderKpis(view){
+    const counts = statusCounts();
+    const totalValue = baseOrders.reduce((a,o)=>a+(o.totalValue||0),0);
+    const set=(id,v)=>{ const e=$(id); if(e) e.textContent=v; };
+    set('ob-k-value', compact(totalValue));
+    set('ob-k-count', baseOrders.length);
+    set('ob-k-pending', counts['Pending']);
+    set('ob-k-ready', counts['Ready for Dispatch']);
+    set('ob-k-disp', counts['Dispatched']);
+    set('ob-w-total', baseOrders.length);
+    set('ob-w-open', counts['Pending'] + counts['Ready for Dispatch']);
+    set('ob-w-disp', counts['Dispatched']);
+    set('ob-w-value', '₹'+compact(totalValue));
+    set('ob-eb', baseOrders.length + ' orders · single source of truth');
+    set('ob-c-all', counts.all);
+    set('ob-c-Pending', counts['Pending']);
+    set('ob-c-Ready', counts['Ready for Dispatch']);
+    set('ob-c-Dispatched', counts['Dispatched']);
+    set('ob-c-Cancelled', counts['Cancelled']);
+    set('ob-c-Repeat', counts['Repeat']);
+  }
+
+  function actionBtn(o){
+    if (o.status === 'Pending') return '<button class="ob-act blue" data-act="ready" data-ref="'+esc(o.ref)+'">Ready for dispatch</button>';
+    if (o.status === 'Ready for Dispatch') return '<button class="ob-act prime" data-act="sent" data-ref="'+esc(o.ref)+'">Sent →</button>';
+    return '<button class="ob-act" data-act="view" data-ref="'+esc(o.ref)+'">View</button>';
+  }
+
+  function render(){
+    if (!$('ob-rows')) return;
+    const view = computeView();
+    renderKpis(view);
+    // sort indicators
+    document.querySelectorAll('.ob-table thead th[data-sort]').forEach(th => {
+      const on = th.getAttribute('data-sort') === state.sortKey;
+      th.classList.toggle('sorted', on);
+      th.classList.toggle('asc', on && state.sortDir === 'asc');
+    });
+    $('ob-count').textContent = view.length;
+    const pages = Math.max(1, Math.ceil(view.length / state.pageSize));
+    if (state.page > pages) state.page = pages;
+    const start = (state.page-1)*state.pageSize;
+    const pageRows = view.slice(start, start + state.pageSize);
+    const host = $('ob-rows');
+    $('ob-empty').hidden = view.length > 0;
+    host.innerHTML = pageRows.map(o => {
+      const av = ['e','b','a'][(String(o.party).charCodeAt(0)||0)%3];
+      return '<tr class="ob-row" data-ref="'+esc(o.ref)+'">'
+        + '<td class="ob-ref">'+esc(o.ref)+'</td>'
+        + '<td class="ob-date">'+fmtISO(o.piDateISO)+'</td>'
+        + '<td><div class="ob-party">'+esc(o.party)+(o.partyCode?'<small>'+esc(o.partyCode)+'</small>':'')+'</div></td>'
+        + '<td class="ob-poc">'+(esc(o.poc)||'—')+'</td>'
+        + '<td class="ob-poc">'+(esc(o.state)||'—')+'</td>'
+        + '<td class="r ob-val">'+inr(o.totalValue)+'</td>'
+        + '<td class="ob-items-c">'+o.lineCount+'</td>'
+        + '<td class="ob-est">'+(esc(o.estDispatch)||'—')+'</td>'
+        + '<td class="ob-inv'+(o.invoiceNo?'':' none')+'">'+(o.invoiceNo?esc(o.invoiceNo):'—')+'</td>'
+        + '<td>'+pill(o.status)+'</td>'
+        + '<td class="ob-actions">'+actionBtn(o)+'</td>'
+        + '</tr>';
+    }).join('');
+    // pager
+    const pg = $('ob-pager');
+    if (view.length <= state.pageSize) { pg.innerHTML = view.length ? '<span>Showing all '+view.length+' orders</span>' : ''; }
+    else {
+      pg.innerHTML = '<span>Showing '+(start+1)+'–'+Math.min(start+state.pageSize, view.length)+' of '+view.length+'</span>'
+        + '<span class="ob-pg-btns"><button id="ob-prev"'+(state.page<=1?' disabled':'')+'>← Prev</button>'
+        + '<span style="padding:6px 4px;">Page '+state.page+' / '+pages+'</span>'
+        + '<button id="ob-next"'+(state.page>=pages?' disabled':'')+'>Next →</button></span>';
+      const pv=$('ob-prev'), nx=$('ob-next');
+      if(pv) pv.onclick=()=>{ state.page--; render(); document.querySelector('.ob-card').scrollIntoView({block:'nearest'}); };
+      if(nx) nx.onclick=()=>{ state.page++; render(); document.querySelector('.ob-card').scrollIntoView({block:'nearest'}); };
+    }
+  }
+
+  // ---------- details drawer ----------
+  let drawerRef = null;
+  function openDrawer(ref){
+    const base = baseOrders.find(o => o.ref === ref); if (!base) return;
+    const o = eff(base);
+    drawerRef = ref;
+    $('ob-dr-ref').textContent = o.ref;
+    $('ob-dr-party').textContent = o.party;
+    $('ob-dr-sub').textContent = (o.partyCode?o.partyCode+' · ':'') + 'PI '+fmtISO(o.piDateISO) + (o.poc?' · '+o.poc:'');
+    const st = $('ob-dr-status'); st.className = 'ob-pill '+(STATUS_CLASS[o.status]||'st-repeat'); st.textContent = o.status;
+    // meta grid
+    const meta = [
+      ['PI Number', o.ref], ['PI Date', fmtISO(o.piDateISO)], ['Sales person', o.poc||'—'],
+      ['State', o.state||'—'], ['Est. dispatch', o.estDispatch||'—'], ['Invoice #', o.invoiceNo||'—'],
+      ['Line items', o.lineCount], ['Total qty', o.totalQty],
+    ];
+    $('ob-dr-meta').innerHTML = meta.map(m => '<div class="m"><div class="ml">'+esc(m[0])+'</div><div class="mv">'+esc(m[1])+'</div></div>').join('')
+      + '<div class="m"><div class="ml">Order value</div><div class="mv big">'+inr(o.totalValue)+'</div></div>';
+    // line items
+    $('ob-dr-itemcount').textContent = '· '+o.lineCount;
+    $('ob-dr-items').innerHTML = o.lines.map(li => {
+      const d = prodDesc(li);
+      const rate = li.billRate || li.actualRate || 0;
+      return '<tr><td>'+li.ono+'</td>'
+        + '<td class="it-prod">'+esc(d.main)+(d.dim?'<small>'+esc(d.dim)+'</small>':'')+'</td>'
+        + '<td>'+li.qty+'</td><td>'+(li.units?li.units.toLocaleString('en-IN',{maximumFractionDigits:2}):'—')+'</td>'
+        + '<td>'+(rate?inr(rate):'—')+'</td><td>'+(li.freight?inr(li.freight):'—')+'</td>'
+        + '<td>'+inr(li.taxable)+'</td><td class="it-total">'+inr(li.total)+'</td></tr>';
+    }).join('');
+    $('ob-dr-items-foot').innerHTML = '<tr><td class="it-lbl" colspan="2">Total · '+o.lineCount+' items</td>'
+      + '<td>'+o.totalQty+'</td><td></td><td></td><td></td><td></td><td>'+inr(o.totalValue)+'</td></tr>';
+    // history
+    const hist = buildHistory(o);
+    $('ob-dr-history').innerHTML = hist.map(e => {
+      const cls = e.kind==='created'?'' : e.kind==='ready'?'ready' : e.kind==='dispatched'?'' : e.kind==='pending'?'pending':'';
+      const ts = e.tsISO ? new Date(e.tsISO) : null;
+      const tsTxt = ts && !isNaN(ts) ? (fmtISO(e.tsISO.slice(0,10)) + (e.tsISO.length>10 ? ' · '+String(ts.getHours()).padStart(2,'0')+':'+String(ts.getMinutes()).padStart(2,'0') : '')) : '';
+      return '<div class="ob-tl-item '+cls+'"><div class="ob-tl-label">'+esc(e.label)+'</div>'
+        + (e.sub?'<div class="ob-tl-sub">'+esc(e.sub)+'</div>':'')
+        + (tsTxt?'<div class="ob-tl-ts">'+tsTxt+'</div>':'')+'</div>';
+    }).join('');
+    // foot actions
+    let foot = '';
+    if (o.status === 'Pending') foot = '<button class="ob-act blue" data-act="ready" data-ref="'+esc(o.ref)+'">Mark ready for dispatch →</button>';
+    else if (o.status === 'Ready for Dispatch') foot = '<button class="ob-act prime" data-act="sent" data-ref="'+esc(o.ref)+'">Mark as sent →</button>';
+    $('ob-dr-foot').innerHTML = foot;
+    $('ob-drawer').hidden = false;
+  }
+  function closeDrawer(){ $('ob-drawer').hidden = true; drawerRef = null; }
+
+  // ---------- actions ----------
+  function nowISO(){ return new Date().toISOString(); }
+  function ensureOv(ref){ if(!overlay[ref]) overlay[ref] = {}; if(!overlay[ref].history) overlay[ref].history = []; return overlay[ref]; }
+
+  function markReady(ref){
+    const ov = ensureOv(ref);
+    ov.status = 'Ready for Dispatch';
+    ov.history.push({ label:'Moved to Ready for Dispatch', tsISO: nowISO(), sub:'Packed · ready to leave the factory', kind:'ready' });
+    saveOverlay();
+    render();
+    if (drawerRef === ref) openDrawer(ref);
+  }
+
+  let dispatchRef = null;
+  function openDispatch(ref){
+    const base = baseOrders.find(o=>o.ref===ref); if(!base) return;
+    dispatchRef = ref;
+    $('ob-disp-ref').textContent = ref;
+    $('ob-disp-party').textContent = base.party;
+    $('ob-disp-invoice').value = '';
+    $('ob-disp-date').value = todayISO();
+    ['ob-disp-transporter','ob-disp-lr','ob-disp-vehicle','ob-disp-remarks'].forEach(id=>$(id).value='');
+    setDispStatus('', '');
+    $('ob-dispatch').hidden = false;
+    setTimeout(()=>$('ob-disp-invoice').focus(), 40);
+  }
+  function closeDispatch(){ $('ob-dispatch').hidden = true; dispatchRef = null; }
+  function setDispStatus(kind,msg){ const s=$('ob-disp-status'); s.className='ap-status'+(kind?' '+kind:''); s.textContent=msg||''; }
+
+  function saveDispatch(){
+    const ref = dispatchRef; if(!ref) return;
+    const inv = $('ob-disp-invoice').value.trim();
+    if (!inv){ setDispStatus('err','Invoice number is required.'); $('ob-disp-invoice').focus(); return; }
+    const date = $('ob-disp-date').value || todayISO();
+    const ov = ensureOv(ref);
+    ov.status = 'Dispatched';
+    ov.dispatch = {
+      invoiceNo: inv, date,
+      transporter: $('ob-disp-transporter').value.trim(),
+      lr: $('ob-disp-lr').value.trim(),
+      vehicle: $('ob-disp-vehicle').value.trim(),
+      remarks: $('ob-disp-remarks').value.trim(),
+    };
+    const subBits = ['Invoice #'+inv];
+    if (ov.dispatch.transporter) subBits.push(ov.dispatch.transporter);
+    if (ov.dispatch.lr) subBits.push('LR '+ov.dispatch.lr);
+    if (ov.dispatch.vehicle) subBits.push(ov.dispatch.vehicle);
+    ov.history.push({ label:'Dispatched', tsISO: date+'T'+nowISO().slice(11), sub: subBits.join(' · '), kind:'dispatched' });
+    saveOverlay();
+    closeDispatch();
+    render();
+    if (drawerRef === ref) openDrawer(ref);
+  }
+
+  function handleAct(act, ref){
+    if (act === 'ready') markReady(ref);
+    else if (act === 'sent') openDispatch(ref);
+    else if (act === 'view') openDrawer(ref);
+  }
+
+  // ---------- load + wire ----------
+  window.atlasLoadOrders = async function(force){
+    if (loading) return;
+    if (!force && baseOrders.length && (Date.now()-loadedAt) < 60000){ render(); return; }
+    loading = true;
+    const eb = $('ob-eb'); if (eb) eb.textContent = 'syncing…';
+    try {
+      baseOrders = await fetchOrders();
+      loadedAt = Date.now();
+      // populate POC filter
+      const pocSel = $('ob-poc');
+      if (pocSel && pocSel.options.length <= 1){
+        [...new Set(baseOrders.map(o=>o.poc).filter(Boolean))].sort().forEach(p=>{
+          const o=document.createElement('option'); o.value=p; o.textContent=p; pocSel.appendChild(o);
+        });
+      }
+      render();
+    } catch(err){
+      console.error('[atlas] orders load failed:', err);
+      if (eb) eb.textContent = 'offline';
+      const host=$('ob-rows'); if(host) host.innerHTML='';
+      const empty=$('ob-empty'); if(empty){ empty.hidden=false; empty.textContent='Couldn’t load orders: '+(err.message||err)+'. The Master sheet data ships at data/orders.json.'; }
+    } finally { loading = false; }
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!$('ob-rows')) return;
+    let searchT;
+    $('ob-search').addEventListener('input', e => { clearTimeout(searchT); searchT=setTimeout(()=>{ state.search=e.target.value; state.page=1; render(); }, 120); });
+    $('ob-poc').addEventListener('change', e => { state.poc=e.target.value; state.page=1; render(); });
+    $('ob-from').addEventListener('change', e => { state.from=e.target.value; state.page=1; render(); });
+    $('ob-to').addEventListener('change', e => { state.to=e.target.value; state.page=1; render(); });
+    $('ob-clear').addEventListener('click', () => {
+      state.search=''; state.poc=''; state.from=''; state.to=''; state.status='all'; state.page=1;
+      $('ob-search').value=''; $('ob-poc').value=''; $('ob-from').value=''; $('ob-to').value='';
+      document.querySelectorAll('#ob-status-tabs button').forEach(b=>b.classList.toggle('on', b.getAttribute('data-st')==='all'));
+      render();
+    });
+    $('ob-refresh').addEventListener('click', () => window.atlasLoadOrders(true));
+    // status tabs
+    $('ob-status-tabs').addEventListener('click', e => {
+      const b = e.target.closest('button[data-st]'); if(!b) return;
+      state.status = b.getAttribute('data-st'); state.page = 1;
+      document.querySelectorAll('#ob-status-tabs button').forEach(x=>x.classList.toggle('on', x===b));
+      render();
+    });
+    // sort headers
+    document.querySelectorAll('.ob-table thead th[data-sort]').forEach(th => {
+      th.addEventListener('click', () => {
+        const k = th.getAttribute('data-sort');
+        if (state.sortKey === k) state.sortDir = state.sortDir==='asc'?'desc':'asc';
+        else { state.sortKey = k; state.sortDir = (k==='totalValue'||k==='lineCount'||k==='piDateISO'||k==='ref') ? 'desc' : 'asc'; }
+        render();
+      });
+    });
+    // row click + inline actions (delegated)
+    $('ob-rows').addEventListener('click', e => {
+      const btn = e.target.closest('button[data-act]');
+      if (btn){ e.stopPropagation(); handleAct(btn.getAttribute('data-act'), btn.getAttribute('data-ref')); return; }
+      const tr = e.target.closest('tr.ob-row'); if (tr) openDrawer(tr.getAttribute('data-ref'));
+    });
+    // drawer
+    $('ob-dr-close').addEventListener('click', closeDrawer);
+    $('ob-drawer').addEventListener('click', e => { if (e.target === $('ob-drawer')) closeDrawer(); });
+    $('ob-dr-foot').addEventListener('click', e => { const b=e.target.closest('button[data-act]'); if(b) handleAct(b.getAttribute('data-act'), b.getAttribute('data-ref')); });
+    // dispatch modal
+    $('ob-disp-close').addEventListener('click', closeDispatch);
+    $('ob-disp-cancel').addEventListener('click', closeDispatch);
+    $('ob-disp-save').addEventListener('click', saveDispatch);
+    $('ob-dispatch').addEventListener('click', e => { if (e.target === $('ob-dispatch')) closeDispatch(); });
+    $('ob-dispatch').addEventListener('keydown', e => { if (e.key==='Enter' && e.target.tagName==='INPUT') saveDispatch(); });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape'){ if (!$('ob-dispatch').hidden) closeDispatch(); else if (!$('ob-drawer').hidden) closeDrawer(); }
+    });
+    if (location.hash === '#orders') window.atlasLoadOrders();
+  });
+})();
 </script>
 
 </body>
