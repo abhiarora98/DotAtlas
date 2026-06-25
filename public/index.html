@@ -1258,7 +1258,9 @@
   .ob-items tbody td { padding: 18px 16px; font-size: 13px; color: var(--text-2); text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
   .ob-items tbody tr:last-child td { border-bottom: 0; }
   .ob-items tbody td:nth-child(1) { color: var(--text-3); font-family: var(--fm); font-size: 11px; text-align: left; width: 34px; }
-  .ob-items tbody td.it-prod { text-align: left; color: var(--text); font-weight: 600; white-space: normal; min-width: 160px; }
+  .ob-items tbody td.it-prod { text-align: left; white-space: normal; min-width: 160px; }
+  .ob-items tbody td.it-prod .ip-cat { display: block; font-weight: 600; color: var(--text); }
+  .ob-items tbody td.it-prod .ip-attrs { display: block; font-family: var(--fm); font-size: 10.5px; color: var(--text-3); margin-top: 3px; letter-spacing: 0.02em; }
   .ob-items tbody td.it-size { text-align: left; font-family: var(--fm); font-size: 11.5px; color: var(--text-2); }
   .ob-items tbody td.it-num { color: var(--text); }
   .ob-items tbody tr:nth-child(even) td { background: rgba(255,255,255,0.022); }
@@ -1359,7 +1361,9 @@
   .ob-top-products .tp-h { font-family: var(--fm); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3); margin-bottom: 12px; }
   .ob-tp { display: grid; grid-template-columns: 18px 1fr 90px auto; gap: 12px; align-items: center; padding: 7px 0; }
   .ob-tp .tp-rank { font-family: var(--fm); font-size: 11px; color: var(--text-3); }
-  .ob-tp .tp-name { font-size: 12.5px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ob-tp .tp-name { font-size: 12.5px; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ob-tp .tp-name b { color: var(--text); font-weight: 600; }
+  .ob-tp .tp-name .tp-attrs { font-family: var(--fm); font-size: 10.5px; color: var(--text-3); }
   .ob-tp .tp-bar { height: 6px; border-radius: 3px; background: var(--surface-3); overflow: hidden; }
   .ob-tp .tp-bar-f { display: block; height: 100%; background: linear-gradient(90deg, var(--emerald-mute), var(--emerald)); }
   .ob-tp .tp-val { font-family: var(--fd); font-size: 12.5px; font-weight: 600; color: var(--text); text-align: right; font-variant-numeric: tabular-nums; }
@@ -3302,7 +3306,7 @@
       <div class="ob-toolbar2">
         <div class="ob-search-wrap">
           <span class="ob-search-ic">⌕</span>
-          <input id="ob-search" class="ob-search no-upper" placeholder="Search by PI number, party, code or invoice…" autocomplete="off" spellcheck="false">
+          <input id="ob-search" class="ob-search no-upper" placeholder="Search PI, party, invoice or product — CIRRO, Spike, Grey, 4ft…" autocomplete="off" spellcheck="false">
         </div>
         <select id="ob-poc" class="pi-select" title="Filter by sales person"><option value="">All sales</option></select>
         <div class="ob-daterange">
@@ -23195,10 +23199,14 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   const initials = name => { const p=String(name||'').trim().split(/\s+/).filter(Boolean); if(!p.length) return '··'; return (p.length===1?p[0].slice(0,2):p[0][0]+p[p.length-1][0]).toUpperCase(); };
   const STATUS_CLASS = { 'Pending':'st-pending', 'Ready for Dispatch':'st-ready', 'Dispatched':'st-dispatched', 'Cancelled':'st-cancelled', 'Repeat':'st-repeat' };
   function pill(status){ return '<span class="ob-pill '+(STATUS_CLASS[status]||'st-repeat')+'">'+esc(status)+'</span>'; }
+  // Product hierarchy is kept as separate fields — Product (category), Model,
+  // Backing, Colour and Size — never one concatenated name.
   function prodDesc(li){
-    const main = [li.category, li.model, li.backing, li.colour].filter(Boolean).join(' · ');
+    const product = li.category || '—';
+    const attrs = [li.model, li.backing, li.colour].filter(Boolean).join(' • ');
+    const main = [li.category, li.model, li.backing, li.colour].filter(Boolean).join(' · ') || '—';
     let dim = ''; if(li.width&&li.length) dim=li.width+' × '+li.length; else dim=li.width||li.length||'';
-    return { main: main||'—', dim };
+    return { product, attrs, main, dim };
   }
 
   const OV_KEY = 'atlas-orders-overlay';
@@ -23267,11 +23275,11 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     if (state.poc) rows = rows.filter(o => (o.poc||'') === state.poc);
     if (state.from) rows = rows.filter(o => o.piDateISO && o.piDateISO >= state.from);
     if (state.to) rows = rows.filter(o => o.piDateISO && o.piDateISO <= state.to);
+    // Search matches PI #, party, invoice, code AND any product attribute
+    // (Product / Model / Backing / Colour / Size) on the order's line items.
     if (q) rows = rows.filter(o =>
-      String(o.ref).toLowerCase().includes(q) ||
-      (o.party||'').toLowerCase().includes(q) ||
-      (o.invoiceNo||'').toLowerCase().includes(q) ||
-      (o.partyCode||'').toLowerCase().includes(q));
+      (o._psearch || '').includes(q) ||
+      (o.invoiceNo||'').toLowerCase().includes(q));
     const k = state.sortKey, dir = state.sortDir === 'asc' ? 1 : -1;
     const numeric = (k==='totalValue'||k==='lineCount'||k==='ref'||k==='totalQty');
     rows.sort((a,b) => {
@@ -23602,10 +23610,13 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       + '</div>').join('');
     if (ci.topProducts.length){
       const tpMax = Math.max(1, ...ci.topProducts.map(t=>t.value));
-      $('ob-dr-topprod').innerHTML = '<div class="tp-h">Top products purchased</div>' + ci.topProducts.map((t,i) =>
-        '<div class="ob-tp"><span class="tp-rank">'+(i+1)+'</span><span class="tp-name">'+esc(t.key)+'</span>'
+      $('ob-dr-topprod').innerHTML = '<div class="tp-h">Top products purchased</div>' + ci.topProducts.map((t,i) => {
+        const parts = t.key.split(' · ');
+        const nm = '<b>'+esc(parts[0])+'</b>'+(parts.length>1 ? ' <span class="tp-attrs">'+esc(parts.slice(1).join(' • '))+'</span>' : '');
+        return '<div class="ob-tp"><span class="tp-rank">'+(i+1)+'</span><span class="tp-name">'+nm+'</span>'
         + '<span class="tp-bar"><span class="tp-bar-f" style="width:'+Math.round(100*t.value/tpMax)+'%"></span></span>'
-        + '<span class="tp-val">'+inr(t.value)+'</span></div>').join('');
+        + '<span class="tp-val">'+inr(t.value)+'</span></div>';
+      }).join('');
     } else { $('ob-dr-topprod').innerHTML = ''; }
 
     // ---- sales trend (6M / 12M / All, hover for revenue + orders) ----
@@ -23630,7 +23641,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       const d = prodDesc(li);
       const rate = li.billRate || li.actualRate || 0;
       return '<tr><td>'+li.ono+'</td>'
-        + '<td class="it-prod">'+esc(d.main)+'</td>'
+        + '<td class="it-prod"><span class="ip-cat">'+esc(d.product)+'</span>'+(d.attrs?'<span class="ip-attrs">'+esc(d.attrs)+'</span>':'')+'</td>'
         + '<td class="it-size">'+(esc(d.dim)||'—')+'</td>'
         + '<td class="it-num">'+li.qty+'</td><td>'+(li.units?li.units.toLocaleString('en-IN',{maximumFractionDigits:2}):'—')+'</td>'
         + '<td class="it-num">'+(rate?inr(rate):'—')+'</td><td>'+(li.freight?inr(li.freight):'—')+'</td>'
@@ -23813,6 +23824,13 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     try {
       baseOrders = await fetchOrders();
       loadedAt = Date.now();
+      // Build a per-order search blob over PI #, party, code and every line
+      // item's product attributes so any field finds the order.
+      baseOrders.forEach(o => {
+        const bits = [o.ref, o.party, o.partyCode, o.poc, o.state];
+        (o.lines||[]).forEach(li => bits.push(li.category, li.model, li.backing, li.colour, li.width, li.length));
+        o._psearch = bits.filter(Boolean).join(' ').toLowerCase();
+      });
       loadReceivablesMap();  // preload party financials for the intelligence panel
       // populate POC filter
       const pocSel = $('ob-poc');
