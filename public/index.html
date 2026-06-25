@@ -23553,17 +23553,62 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   // ---------- party intelligence (mini-CRM) ----------
   let recvMap = null;
   function normName(s){ return String(s||'').toUpperCase().replace(/[^A-Z0-9]+/g,' ').trim(); }
+  function normCode(s){ return String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,''); }
+  // Tokens used for fuzzy name matching — drop legal-form / connective words so
+  // "M/S Kamla Polymer" and "Kamla Polymer" share the same distinctive tokens.
+  const RECV_STOP = new Set(['AND','THE','PVT','PRIVATE','LTD','LIMITED','CO','COMPANY','CORPORATION','CORP','INC','INDIA','M','S']);
+  function recToks(s){ return new Set(normName(s).split(' ').filter(t => t.length > 1 && !RECV_STOP.has(t))); }
+
   async function loadReceivablesMap(){
     if (recvMap) return recvMap;
     let parties = window.__recvParties;
     if (!parties){
       try { const r = await fetch('data/receivables.json'); if (r.ok){ const j = await r.json(); parties = j.parties || {}; } } catch(e){}
     }
-    recvMap = {};
-    for (const k in (parties||{})){ const p = parties[k]; if (p && p.name) recvMap[normName(p.name)] = p; }
+    recvMap = { _byName:{}, _byCode:{}, _entries:[], _fuzzyCache:{} };
+    for (const k in (parties||{})){
+      const p = parties[k];
+      if (!p || !p.name) continue;
+      recvMap._byName[normName(p.name)] = p;
+      // Code-first join: lights up automatically once receivables carries codes.
+      const c = normCode(p.code || p.partyCode || p.ledgerCode);
+      if (c) recvMap._byCode[c] = p;
+      const t = recToks(p.name);
+      if (t.size) recvMap._entries.push({ p, t, n: t.size });
+    }
     return recvMap;
   }
-  function recvFor(party){ return recvMap ? (recvMap[normName(party)] || null) : null; }
+
+  // Symmetric-containment fuzzy fallback: the smaller distinctive-token set must
+  // be fully contained in the larger, with a unique closest candidate. Rejects
+  // ambiguous matches (e.g. same name across multiple cities) rather than guess.
+  function fuzzyRecv(party){
+    if (!recvMap) return null;
+    const nn = normName(party);
+    if (nn in recvMap._fuzzyCache) return recvMap._fuzzyCache[nn];
+    const Q = recToks(party); let res = null;
+    if (Q.size >= 2){
+      const cands = [];
+      for (const e of recvMap._entries){
+        if (e.n < 2) continue;
+        let hit = 0; for (const w of Q) if (e.t.has(w)) hit++;
+        if (hit === Math.min(Q.size, e.n)) cands.push({ p:e.p, diff:Math.abs(e.n - Q.size) });
+      }
+      cands.sort((a,b) => a.diff - b.diff);
+      if (cands.length && !(cands.length > 1 && cands[1].diff === cands[0].diff)) res = cands[0].p;
+    }
+    recvMap._fuzzyCache[nn] = res;
+    return res;
+  }
+
+  function recvFor(party, code){
+    if (!recvMap) return null;
+    const c = normCode(code);
+    if (c && recvMap._byCode[c]) return recvMap._byCode[c];          // 1 · code (exact)
+    const byName = recvMap._byName[normName(party)];
+    if (byName) return byName;                                        // 2 · name (exact)
+    return fuzzyRecv(party);                                          // 3 · name (fuzzy)
+  }
 
   function partyStats(party){
     const list = baseOrders.filter(o => o.party === party).map(eff)
@@ -23572,7 +23617,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const lifetime = active.reduce((a,o)=>a+(o.totalValue||0),0);
     const dates = list.map(o=>o.piDateISO).filter(Boolean).sort();
     const first = dates[0]||'', last = dates[dates.length-1]||'';
-    const r = recvFor(party);
+    const code = (list[0] && list[0].partyCode) || '';
+    const r = recvFor(party, code);
     const billed = r ? (Number(r.billed)||0) : null;
     const received = r ? (Number(r.received)||0) : null;
     const outstanding = r ? Math.max(0, Number(r.outstanding)||0) : null;
