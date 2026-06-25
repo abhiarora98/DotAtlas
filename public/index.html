@@ -1123,82 +1123,143 @@
   .ob-pager button:hover:not(:disabled) { color: var(--text); border-color: var(--line-3); }
   .ob-pager button:disabled { opacity: 0.35; cursor: not-allowed; }
 
-  /* Order details drawer (slide-over) */
+  /* Order details drawer (slide-over) — premium ERP panel */
   .ob-drawer-overlay {
     position: fixed; inset: 0; z-index: 1100;
-    background: rgba(5,9,18,0.55); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+    background: rgba(4,7,14,0.62);
+    backdrop-filter: blur(9px) saturate(0.8); -webkit-backdrop-filter: blur(9px) saturate(0.8);
     display: flex; justify-content: flex-end;
-    animation: ap-fade 160ms var(--ease);
+    animation: ap-fade 180ms var(--ease);
   }
   .ob-drawer-overlay[hidden] { display: none; }
   .ob-drawer-panel {
-    width: min(680px, 94vw); height: 100%;
-    background: var(--void-2); border-left: 1px solid var(--line-2);
-    box-shadow: -24px 0 60px -20px rgba(0,0,0,0.7);
+    width: clamp(640px, 48vw, 1200px); max-width: 96vw; height: 100%;
+    background:
+      radial-gradient(ellipse 900px 300px at 100% 0%, rgba(78,222,163,0.04), transparent 55%),
+      var(--void-2);
+    border-left: 1px solid var(--line-2);
+    box-shadow: -32px 0 80px -24px rgba(0,0,0,0.8);
     display: flex; flex-direction: column;
-    animation: ob-slide 240ms var(--ease);
+    animation: ob-slide 260ms var(--ease);
+    position: relative;
   }
-  @keyframes ob-slide { from { transform: translateX(40px); opacity: 0.4; } to { transform: none; opacity: 1; } }
-  .ob-dr-head {
-    display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
-    padding: 24px 26px 18px; border-bottom: 1px solid var(--line);
-  }
-  .ob-dr-eyebrow { font-family: var(--fm); font-size: 10px; letter-spacing: 0.14em; color: var(--text-3); }
-  .ob-dr-party { font-family: var(--fd); font-size: 20px; font-weight: 600; color: var(--text); margin-top: 6px; letter-spacing: -0.01em; }
-  .ob-dr-sub { font-family: var(--fm); font-size: 11px; color: var(--text-3); margin-top: 4px; letter-spacing: 0.03em; }
-  .ob-dr-head-r { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  @keyframes ob-slide { from { transform: translateX(48px); opacity: 0.3; } to { transform: none; opacity: 1; } }
+
+  /* Header */
+  .ob-dr-head { padding: 30px 38px 24px; border-bottom: 1px solid var(--line); }
+  .ob-dr-head-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .ob-dr-eyebrow { font-family: var(--fm); font-size: 11px; letter-spacing: 0.16em; color: var(--text-3); }
   .ob-dr-close {
     background: transparent; border: 1px solid var(--line); color: var(--text-3);
-    width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 18px;
+    width: 34px; height: 34px; border-radius: 9px; cursor: pointer; font-size: 19px;
     display: inline-flex; align-items: center; justify-content: center; transition: all 160ms var(--ease);
   }
-  .ob-dr-close:hover { color: var(--text); border-color: var(--line-3); }
-  .ob-dr-body { flex: 1 1 auto; overflow-y: auto; padding: 22px 26px 28px; }
-  .ob-dr-meta {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px 18px;
-    padding-bottom: 22px; border-bottom: 1px solid var(--line);
+  .ob-dr-close:hover { color: var(--text); border-color: var(--line-3); background: rgba(255,255,255,0.03); }
+  .ob-dr-title-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .ob-dr-party { font-family: var(--fd); font-size: 28px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; margin: 0; line-height: 1.1; }
+  .ob-dr-facts { display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: 18px; }
+  .ob-dr-facts .f { display: flex; flex-direction: column; gap: 3px; }
+  .ob-dr-facts .f .fl { font-family: var(--fm); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-3); }
+  .ob-dr-facts .f .fv { font-size: 14px; color: var(--text); font-weight: 500; font-variant-numeric: tabular-nums; }
+  .ob-dr-facts .f .fv.accent { font-family: var(--fd); font-size: 18px; font-weight: 700; color: var(--emerald); }
+
+  /* Quick actions */
+  .ob-dr-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+  .ob-qa {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: var(--fm); font-size: 11px; letter-spacing: 0.03em;
+    padding: 8px 13px; border-radius: 8px; cursor: pointer;
+    border: 1px solid var(--line-2); background: var(--surface); color: var(--text-2);
+    transition: all 160ms var(--ease); white-space: nowrap;
   }
-  .ob-dr-meta .m { min-width: 0; }
-  .ob-dr-meta .m .ml { font-family: var(--fm); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-3); }
-  .ob-dr-meta .m .mv { font-size: 13px; color: var(--text); margin-top: 5px; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; }
-  .ob-dr-meta .m .mv.big { font-family: var(--fd); font-size: 16px; font-weight: 600; }
-  .ob-dr-section { padding-top: 22px; }
-  .ob-dr-sec-h { font-family: var(--fm); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-2); margin-bottom: 12px; }
-  .ob-dr-sec-h span { color: var(--text-3); }
-  .ob-dr-items-wrap { max-height: 320px; overflow-y: auto; border: 1px solid var(--line); border-radius: 10px; }
+  .ob-qa:hover:not(:disabled) { color: var(--text); border-color: var(--line-3); background: rgba(255,255,255,0.03); }
+  .ob-qa .qi { font-size: 13px; line-height: 1; opacity: 0.8; }
+  .ob-qa:disabled { opacity: 0.4; cursor: not-allowed; }
+  .ob-qa.done { color: var(--emerald); border-color: var(--emerald-mute); background: var(--emerald-soft); }
+
+  /* Body */
+  .ob-dr-body { flex: 1 1 auto; overflow-y: auto; padding: 28px 38px 36px; }
+
+  /* Summary cards */
+  .ob-dr-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
+  .ob-card {
+    background: linear-gradient(180deg, var(--surface-2) 0%, rgba(19,24,31,0.4) 100%);
+    border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px;
+  }
+  .ob-card .cl { font-family: var(--fm); font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-3); }
+  .ob-card .cv { font-family: var(--fd); font-size: 20px; font-weight: 600; color: var(--text); margin-top: 8px; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; }
+  .ob-card .cv.sm { font-size: 15px; }
+  .ob-card.accent { border-color: rgba(78,222,163,0.22); background: linear-gradient(180deg, rgba(78,222,163,0.06), rgba(78,222,163,0.01)), linear-gradient(180deg, var(--surface-2) 0%, rgba(19,24,31,0.4) 100%); }
+  .ob-card.accent .cv { color: var(--emerald); }
+
+  .ob-dr-section { padding-top: 32px; }
+  .ob-dr-sec-h { font-family: var(--fd); font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 16px; letter-spacing: -0.01em; }
+  .ob-dr-sec-h span { font-family: var(--fm); font-size: 11px; font-weight: 400; color: var(--text-3); letter-spacing: 0.04em; }
+
+  /* Line items — richer table */
+  .ob-dr-items-wrap { max-height: 380px; overflow-y: auto; border: 1px solid var(--line); border-radius: 12px; }
   .ob-items { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
   .ob-items thead th {
     position: sticky; top: 0; z-index: 1; background: var(--surface-2);
-    font-family: var(--fm); font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase;
-    color: var(--text-3); font-weight: 600; text-align: right; padding: 9px 12px; border-bottom: 1px solid var(--line);
+    font-family: var(--fm); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text-3); font-weight: 600; text-align: right; padding: 13px 14px; border-bottom: 1px solid var(--line); white-space: nowrap;
   }
-  .ob-items thead th:nth-child(1), .ob-items thead th:nth-child(2) { text-align: left; }
-  .ob-items tbody td { padding: 10px 12px; font-size: 11.5px; color: var(--text-2); text-align: right; border-bottom: 1px solid var(--line); }
-  .ob-items tbody td:nth-child(1) { color: var(--text-3); font-family: var(--fm); font-size: 10px; text-align: left; }
-  .ob-items tbody td.it-prod { text-align: left; color: var(--text); }
-  .ob-items tbody td.it-prod small { display: block; color: var(--text-3); font-size: 10px; margin-top: 2px; font-family: var(--fm); }
-  .ob-items tbody tr:nth-child(even) td { background: rgba(255,255,255,0.015); }
-  .ob-items tbody td.it-total { color: var(--text); font-weight: 600; }
-  .ob-items tfoot td { padding: 11px 12px; font-family: var(--fm); font-size: 11px; color: var(--text); border-top: 1px solid var(--line-2); text-align: right; font-weight: 600; }
+  .ob-items thead th:nth-child(1), .ob-items thead th:nth-child(2), .ob-items thead th:nth-child(3) { text-align: left; }
+  .ob-items tbody td { padding: 15px 14px; font-size: 12.5px; color: var(--text-2); text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  .ob-items tbody td:nth-child(1) { color: var(--text-3); font-family: var(--fm); font-size: 11px; text-align: left; width: 30px; }
+  .ob-items tbody td.it-prod { text-align: left; color: var(--text); font-weight: 500; white-space: normal; min-width: 150px; }
+  .ob-items tbody td.it-size { text-align: left; font-family: var(--fm); font-size: 11px; color: var(--text-2); }
+  .ob-items tbody tr:nth-child(even) td { background: rgba(255,255,255,0.018); }
+  .ob-items tbody tr:hover td { background: rgba(255,255,255,0.04); }
+  .ob-items tbody td.it-total { color: var(--text); font-weight: 700; }
+  .ob-items tfoot td { padding: 15px 14px; font-family: var(--fm); font-size: 12px; color: var(--text); border-top: 1px solid var(--line-2); text-align: right; font-weight: 600; background: var(--surface); }
   .ob-items tfoot td.it-lbl { text-align: left; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); font-weight: 500; }
+  .ob-items tfoot td.it-grand { color: var(--emerald); font-family: var(--fd); font-size: 15px; }
 
-  /* Status timeline */
-  .ob-timeline { position: relative; padding-left: 8px; }
-  .ob-tl-item { position: relative; padding: 0 0 18px 26px; }
-  .ob-tl-item:last-child { padding-bottom: 0; }
-  .ob-tl-item::before { content: ''; position: absolute; left: 4px; top: 4px; width: 9px; height: 9px; border-radius: 50%; background: var(--emerald); box-shadow: 0 0 0 3px var(--emerald-soft); }
-  .ob-tl-item::after { content: ''; position: absolute; left: 8px; top: 14px; bottom: -4px; width: 1px; background: var(--line-2); }
-  .ob-tl-item:last-child::after { display: none; }
-  .ob-tl-item.pending::before { background: var(--amber); box-shadow: 0 0 0 3px var(--amber-soft); }
-  .ob-tl-item.ready::before { background: var(--blue); box-shadow: 0 0 0 3px var(--blue-soft); }
-  .ob-tl-label { font-size: 13px; color: var(--text); font-weight: 500; }
-  .ob-tl-sub { font-family: var(--fm); font-size: 10.5px; color: var(--text-3); margin-top: 3px; letter-spacing: 0.02em; }
-  .ob-tl-ts { font-family: var(--fm); font-size: 10px; color: var(--text-2); margin-top: 2px; }
+  /* Workflow stepper */
+  .ob-workflow { position: relative; }
+  .ob-wf-step { display: grid; grid-template-columns: 26px 1fr; gap: 16px; padding-bottom: 26px; position: relative; }
+  .ob-wf-step:last-child { padding-bottom: 0; }
+  .ob-wf-step::after { content: ''; position: absolute; left: 12px; top: 26px; bottom: 0; width: 2px; background: var(--line-2); }
+  .ob-wf-step:last-child::after { display: none; }
+  .ob-wf-step.done::after { background: var(--emerald-mute); }
+  .ob-wf-marker {
+    width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    border: 2px solid var(--line-2); background: var(--surface); color: var(--text-3);
+    font-size: 13px; font-weight: 700; z-index: 1; flex-shrink: 0;
+  }
+  .ob-wf-step.done .ob-wf-marker { background: var(--emerald); border-color: var(--emerald); color: var(--void); }
+  .ob-wf-step.current .ob-wf-marker { border-color: var(--emerald); color: var(--emerald); background: var(--emerald-soft); box-shadow: 0 0 0 4px rgba(78,222,163,0.12); animation: pulseDot 2.4s var(--ease) infinite; }
+  .ob-wf-step.cancelled .ob-wf-marker { background: var(--rose); border-color: var(--rose); color: var(--void); }
+  .ob-wf-body { padding-top: 2px; min-width: 0; }
+  .ob-wf-label { font-size: 14px; color: var(--text-2); font-weight: 500; }
+  .ob-wf-step.done .ob-wf-label, .ob-wf-step.current .ob-wf-label { color: var(--text); }
+  .ob-wf-step.current .ob-wf-label { font-weight: 600; }
+  .ob-wf-step.current .ob-wf-label::after { content: ' · NOW'; font-family: var(--fm); font-size: 9px; letter-spacing: 0.12em; color: var(--emerald); }
+  .ob-wf-sub { font-family: var(--fm); font-size: 10.5px; color: var(--text-3); margin-top: 4px; letter-spacing: 0.02em; }
+  .ob-wf-ts { font-family: var(--fm); font-size: 11px; color: var(--text-2); margin-top: 3px; }
+  .ob-wf-step.upcoming .ob-wf-label { color: var(--text-3); }
 
-  .ob-dr-foot { padding: 16px 26px; border-top: 1px solid var(--line); display: flex; gap: 10px; justify-content: flex-end; }
+  .ob-dr-foot { padding: 20px 38px; border-top: 1px solid var(--line); display: flex; gap: 12px; justify-content: flex-end; background: rgba(0,0,0,0.15); }
   .ob-dr-foot:empty { display: none; }
-  .ob-dr-foot .ob-act { font-size: 11px; padding: 11px 18px; }
+  .ob-dr-foot .ob-act { font-size: 12px; padding: 13px 22px; }
 
+  /* Drawer toast */
+  .ob-toast {
+    position: absolute; bottom: 92px; left: 50%; transform: translateX(-50%) translateY(8px);
+    background: var(--surface-4); color: var(--text); border: 1px solid var(--line-2);
+    padding: 10px 18px; border-radius: 10px; font-size: 12.5px; font-family: var(--fm);
+    box-shadow: 0 12px 32px -12px rgba(0,0,0,0.6); opacity: 0; pointer-events: none;
+    transition: opacity 200ms var(--ease), transform 200ms var(--ease); z-index: 5;
+  }
+  .ob-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 760px) {
+    .ob-dr-head, .ob-dr-body, .ob-dr-foot { padding-left: 22px; padding-right: 22px; }
+    .ob-dr-party { font-size: 23px; }
+  }
+
+  .ob-dispatch-overlay { z-index: 1200; }
   .ob-dispatch-overlay .ap-modal { max-width: 520px; }
 
   /* ============================================================
@@ -3106,26 +3167,27 @@
     <div class="ob-drawer-overlay" id="ob-drawer" hidden>
       <div class="ob-drawer-panel" role="dialog" aria-label="Order details">
         <div class="ob-dr-head">
-          <div>
-            <div class="ob-dr-eyebrow">ORDER · <span id="ob-dr-ref">—</span></div>
-            <div class="ob-dr-party" id="ob-dr-party">—</div>
-            <div class="ob-dr-sub" id="ob-dr-sub">—</div>
-          </div>
-          <div class="ob-dr-head-r">
-            <span id="ob-dr-status" class="ob-pill">—</span>
+          <div class="ob-dr-head-top">
+            <div class="ob-dr-eyebrow">ORDER · PI #<span id="ob-dr-ref">—</span></div>
             <button class="ob-dr-close" id="ob-dr-close" aria-label="Close">×</button>
           </div>
+          <div class="ob-dr-title-row">
+            <h2 class="ob-dr-party" id="ob-dr-party">—</h2>
+            <span id="ob-dr-status" class="ob-pill">—</span>
+          </div>
+          <div class="ob-dr-facts" id="ob-dr-facts"></div>
+          <div class="ob-dr-actions" id="ob-dr-quick"></div>
         </div>
         <div class="ob-dr-body">
-          <div class="ob-dr-meta" id="ob-dr-meta"></div>
+          <div class="ob-dr-cards" id="ob-dr-cards"></div>
 
           <div class="ob-dr-section">
             <div class="ob-dr-sec-h">Line items <span id="ob-dr-itemcount"></span></div>
             <div class="ob-dr-items-wrap">
               <table class="ob-items">
                 <thead><tr>
-                  <th>#</th><th>Product</th><th class="r">Qty</th><th class="r">Units</th>
-                  <th class="r">Rate</th><th class="r">Freight</th><th class="r">Taxable</th><th class="r">Total</th>
+                  <th>#</th><th>Product</th><th>Size / Variant</th><th class="r">Qty</th><th class="r">Unit</th>
+                  <th class="r">Rate</th><th class="r">Freight</th><th class="r">Tax</th><th class="r">Total</th>
                 </tr></thead>
                 <tbody id="ob-dr-items"></tbody>
                 <tfoot id="ob-dr-items-foot"></tfoot>
@@ -3134,11 +3196,12 @@
           </div>
 
           <div class="ob-dr-section">
-            <div class="ob-dr-sec-h">Status history</div>
-            <div class="ob-timeline" id="ob-dr-history"></div>
+            <div class="ob-dr-sec-h">Workflow</div>
+            <div class="ob-workflow" id="ob-dr-history"></div>
           </div>
         </div>
         <div class="ob-dr-foot" id="ob-dr-foot"></div>
+        <div class="ob-toast" id="ob-dr-toast"></div>
       </div>
     </div>
 
@@ -22959,17 +23022,31 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     return Object.assign({}, o, { status, invoiceNo, estDispatch, _ov: ov, _dispatch: dispatch });
   }
 
-  function buildHistory(o){
-    const ev = [];
-    ev.push({ label:'PI Created', tsISO: o.piDateISO ? o.piDateISO+'T00:00:00' : '', sub:'Order entered from PI · '+o.lineCount+' line item'+(o.lineCount!==1?'s':''), kind:'created' });
+  // Canonical order workflow → each stage marked done / current / upcoming,
+  // with timestamps pulled from the stored transition history where available.
+  function buildWorkflow(o){
     const ov = o._ov;
-    if (ov && ov.history && ov.history.length){
-      ov.history.forEach(e => ev.push(e));
-    } else {
-      if (o.status === 'Dispatched') ev.push({ label:'Dispatched', tsISO:'', sub: (o.invoiceNo?('Invoice #'+o.invoiceNo):'')+(o.estDispatch?(o.invoiceNo?' · ':'')+o.estDispatch:''), kind:'dispatched' });
-      else if (o.status === 'Cancelled') ev.push({ label:'Cancelled', tsISO:'', sub:'Marked cancelled in master sheet', kind:'cancelled' });
+    const byKind = {};
+    if (ov && ov.history) ov.history.forEach(e => { if (e.kind) byKind[e.kind] = e; });
+    const createdTs = o.piDateISO ? o.piDateISO+'T00:00:00' : '';
+
+    if (o.status === 'Cancelled' || o.status === 'Repeat'){
+      return [
+        { label:'PI Created', state:'done', tsISO:createdTs, sub:o.lineCount+' line items' },
+        { label:o.status, state:(o.status==='Cancelled'?'cancelled':'done'), tsISO:'', sub:(o.status==='Cancelled'?'Marked cancelled in master sheet':'Repeat order') },
+      ];
     }
-    return ev;
+
+    const dispTs = byKind.dispatched ? byKind.dispatched.tsISO : (o.estDispatch || '');
+    const stages = [
+      { key:'created',   label:'PI Created',          tsISO:createdTs, sub:o.lineCount+' line items · '+inr(o.totalValue) },
+      { key:'ready',     label:'Ready for Dispatch',  tsISO:byKind.ready ? byKind.ready.tsISO : '', sub:'Packed · ready to leave the factory' },
+      { key:'dispatched',label:'Dispatched',          tsISO:dispTs, sub: o.estDispatch && !byKind.dispatched ? ('Est. '+o.estDispatch) : (byKind.dispatched&&byKind.dispatched.sub) || '' },
+      { key:'invoice',   label:'Invoice Generated',   tsISO: o.invoiceNo ? dispTs : '', sub: o.invoiceNo ? ('Invoice #'+o.invoiceNo) : 'Awaiting invoice' },
+    ];
+    const level = o.status === 'Dispatched' ? (o.invoiceNo ? 4 : 3) : o.status === 'Ready for Dispatch' ? 2 : 1;
+    stages.forEach((s, i) => { const idx = i+1; s.state = idx <= level ? 'done' : (idx === level+1 ? 'current' : 'upcoming'); });
+    return stages;
   }
 
   // ---------- view computation ----------
@@ -23079,53 +23156,156 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 
   // ---------- details drawer ----------
   let drawerRef = null;
+  function wfTs(tsISO){
+    if (!tsISO) return '';
+    const m = String(tsISO).match(/^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2}))?/);
+    if (!m) return esc(tsISO);
+    let s = String(+m[3])+' '+MON[+m[2]-1]+" '"+m[1].slice(2);
+    if (m[4]) s += ' · ' + m[4] + ':' + m[5];
+    return s;
+  }
   function openDrawer(ref){
     const base = baseOrders.find(o => o.ref === ref); if (!base) return;
     const o = eff(base);
     drawerRef = ref;
     $('ob-dr-ref').textContent = o.ref;
     $('ob-dr-party').textContent = o.party;
-    $('ob-dr-sub').textContent = (o.partyCode?o.partyCode+' · ':'') + 'PI '+fmtISO(o.piDateISO) + (o.poc?' · '+o.poc:'');
     const st = $('ob-dr-status'); st.className = 'ob-pill '+(STATUS_CLASS[o.status]||'st-repeat'); st.textContent = o.status;
-    // meta grid
-    const meta = [
-      ['PI Number', o.ref], ['PI Date', fmtISO(o.piDateISO)], ['Sales person', o.poc||'—'],
-      ['State', o.state||'—'], ['Est. dispatch', o.estDispatch||'—'], ['Invoice #', o.invoiceNo||'—'],
-      ['Line items', o.lineCount], ['Total qty', o.totalQty],
+
+    // header facts — immediately readable
+    const facts = [
+      { l:'Order Value', v:inr(o.totalValue), accent:true },
+      { l:'Invoice #', v:o.invoiceNo||'—' },
+      { l:'Dispatch', v:o.estDispatch||'—' },
+      { l:'Salesperson', v:o.poc||'—' },
+      { l:'Party Code', v:o.partyCode||'—' },
     ];
-    $('ob-dr-meta').innerHTML = meta.map(m => '<div class="m"><div class="ml">'+esc(m[0])+'</div><div class="mv">'+esc(m[1])+'</div></div>').join('')
-      + '<div class="m"><div class="ml">Order value</div><div class="mv big">'+inr(o.totalValue)+'</div></div>';
-    // line items
+    $('ob-dr-facts').innerHTML = facts.map(f =>
+      '<div class="f"><div class="fl">'+esc(f.l)+'</div><div class="fv'+(f.accent?' accent':'')+'">'+esc(f.v)+'</div></div>').join('');
+
+    // quick actions
+    const hasInv = !!o.invoiceNo;
+    $('ob-dr-quick').innerHTML =
+      '<button class="ob-qa" data-qa="viewpi"><span class="qi">📄</span>View PI</button>'
+      + '<button class="ob-qa" data-qa="invoice"'+(hasInv?'':' disabled title="No invoice yet"')+'><span class="qi">🧾</span>Open Invoice</button>'
+      + '<button class="ob-qa" data-qa="print"><span class="qi">🖨</span>Print</button>'
+      + '<button class="ob-qa" data-qa="pdf"><span class="qi">⤓</span>Download PDF</button>'
+      + '<button class="ob-qa" data-qa="copy"><span class="qi">🔗</span>Copy Link</button>'
+      + '<button class="ob-qa" data-qa="edit" disabled title="Edits flow through Create PI"><span class="qi">✎</span>Edit</button>';
+
+    // summary cards
+    const cards = [
+      { l:'Order Value', v:inr(o.totalValue), cls:'accent' },
+      { l:'Total Qty', v:String(o.totalQty) },
+      { l:'Items', v:String(o.lineCount) },
+      { l:'Invoice No.', v:o.invoiceNo||'—', sm:!o.invoiceNo },
+      { l:'Dispatch Date', v:o.estDispatch||'—', sm:true },
+      { l:'State', v:o.state||'—', sm:true },
+    ];
+    $('ob-dr-cards').innerHTML = cards.map(c =>
+      '<div class="ob-card'+(c.cls?' '+c.cls:'')+'"><div class="cl">'+esc(c.l)+'</div><div class="cv'+(c.sm?' sm':'')+'">'+esc(c.v)+'</div></div>').join('');
+
+    // line items — separate product / size columns
     $('ob-dr-itemcount').textContent = '· '+o.lineCount;
     $('ob-dr-items').innerHTML = o.lines.map(li => {
       const d = prodDesc(li);
       const rate = li.billRate || li.actualRate || 0;
       return '<tr><td>'+li.ono+'</td>'
-        + '<td class="it-prod">'+esc(d.main)+(d.dim?'<small>'+esc(d.dim)+'</small>':'')+'</td>'
+        + '<td class="it-prod">'+esc(d.main)+'</td>'
+        + '<td class="it-size">'+(esc(d.dim)||'—')+'</td>'
         + '<td>'+li.qty+'</td><td>'+(li.units?li.units.toLocaleString('en-IN',{maximumFractionDigits:2}):'—')+'</td>'
         + '<td>'+(rate?inr(rate):'—')+'</td><td>'+(li.freight?inr(li.freight):'—')+'</td>'
         + '<td>'+inr(li.taxable)+'</td><td class="it-total">'+inr(li.total)+'</td></tr>';
     }).join('');
-    $('ob-dr-items-foot').innerHTML = '<tr><td class="it-lbl" colspan="2">Total · '+o.lineCount+' items</td>'
-      + '<td>'+o.totalQty+'</td><td></td><td></td><td></td><td></td><td>'+inr(o.totalValue)+'</td></tr>';
-    // history
-    const hist = buildHistory(o);
-    $('ob-dr-history').innerHTML = hist.map(e => {
-      const cls = e.kind==='created'?'' : e.kind==='ready'?'ready' : e.kind==='dispatched'?'' : e.kind==='pending'?'pending':'';
-      const ts = e.tsISO ? new Date(e.tsISO) : null;
-      const tsTxt = ts && !isNaN(ts) ? (fmtISO(e.tsISO.slice(0,10)) + (e.tsISO.length>10 ? ' · '+String(ts.getHours()).padStart(2,'0')+':'+String(ts.getMinutes()).padStart(2,'0') : '')) : '';
-      return '<div class="ob-tl-item '+cls+'"><div class="ob-tl-label">'+esc(e.label)+'</div>'
-        + (e.sub?'<div class="ob-tl-sub">'+esc(e.sub)+'</div>':'')
-        + (tsTxt?'<div class="ob-tl-ts">'+tsTxt+'</div>':'')+'</div>';
+    $('ob-dr-items-foot').innerHTML = '<tr><td class="it-lbl" colspan="3">Total · '+o.lineCount+' items</td>'
+      + '<td>'+o.totalQty+'</td><td></td><td></td><td></td><td></td><td class="it-grand">'+inr(o.totalValue)+'</td></tr>';
+
+    // workflow stepper
+    const stages = buildWorkflow(o);
+    $('ob-dr-history').innerHTML = stages.map(s => {
+      const mark = s.state==='done' ? '✓' : s.state==='cancelled' ? '×' : s.state==='current' ? '●' : '';
+      const ts = wfTs(s.tsISO);
+      return '<div class="ob-wf-step '+s.state+'">'
+        + '<div class="ob-wf-marker">'+mark+'</div>'
+        + '<div class="ob-wf-body"><div class="ob-wf-label">'+esc(s.label)+'</div>'
+        + (s.sub?'<div class="ob-wf-sub">'+esc(s.sub)+'</div>':'')
+        + (ts?'<div class="ob-wf-ts">'+ts+'</div>':'')
+        + '</div></div>';
     }).join('');
-    // foot actions
+
+    // foot workflow actions
     let foot = '';
     if (o.status === 'Pending') foot = '<button class="ob-act blue" data-act="ready" data-ref="'+esc(o.ref)+'">Mark ready for dispatch →</button>';
     else if (o.status === 'Ready for Dispatch') foot = '<button class="ob-act prime" data-act="sent" data-ref="'+esc(o.ref)+'">Mark as sent →</button>';
     $('ob-dr-foot').innerHTML = foot;
+
     $('ob-drawer').hidden = false;
+    document.body.style.overflow = 'hidden';
   }
-  function closeDrawer(){ $('ob-drawer').hidden = true; drawerRef = null; }
+  function closeDrawer(){ $('ob-drawer').hidden = true; drawerRef = null; document.body.style.overflow = ''; }
+
+  // ---------- drawer toast + quick actions ----------
+  let toastT;
+  function toast(msg){
+    const t = $('ob-dr-toast'); if (!t) return;
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 1800);
+  }
+  function buildOrderPdf(o){
+    if (!window.jspdf || !window.jspdf.jsPDF) return null;
+    const doc = new window.jspdf.jsPDF({ unit:'pt', format:'a4' });
+    const W = doc.internal.pageSize.getWidth();
+    doc.setFont('helvetica','bold'); doc.setFontSize(17); doc.text('COMFORT INDUSTRIES', 40, 48);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(120);
+    doc.text('Proforma Invoice / Order', 40, 64);
+    doc.setTextColor(20); doc.setFontSize(11); doc.setFont('helvetica','bold');
+    doc.text('PI #'+o.ref, W-40, 48, {align:'right'});
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(120);
+    doc.text(fmtISO(o.piDateISO), W-40, 64, {align:'right'});
+    doc.setTextColor(20); doc.setFontSize(12); doc.setFont('helvetica','bold');
+    doc.text(o.party, 40, 96);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(110);
+    const sub = [o.partyCode, o.poc?('POC '+o.poc):'', o.status].filter(Boolean).join('  ·  ');
+    doc.text(sub, 40, 111);
+    const body = o.lines.map(li => { const d=prodDesc(li); const rate=li.billRate||li.actualRate||0;
+      return [li.ono, d.main, d.dim||'—', li.qty, li.units?li.units.toFixed(2):'—', rate?('Rs '+rate):'—', li.freight?('Rs '+li.freight):'—', 'Rs '+Math.round(li.taxable).toLocaleString('en-IN'), 'Rs '+Math.round(li.total).toLocaleString('en-IN')]; });
+    doc.autoTable({
+      startY: 130, head:[['#','Product','Size','Qty','Unit','Rate','Freight','Tax','Total']], body,
+      styles:{ fontSize:8, cellPadding:5 }, headStyles:{ fillColor:[20,24,34], textColor:[220,224,230] },
+      columnStyles:{ 0:{cellWidth:22}, 3:{halign:'right'}, 4:{halign:'right'}, 5:{halign:'right'}, 6:{halign:'right'}, 7:{halign:'right'}, 8:{halign:'right'} },
+      theme:'striped',
+    });
+    const endY = doc.lastAutoTable.finalY + 24;
+    doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(20);
+    doc.text('Grand Total', W-160, endY); doc.text('Rs '+Math.round(o.totalValue).toLocaleString('en-IN'), W-40, endY, {align:'right'});
+    if (o.invoiceNo){ doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(110); doc.text('Invoice #'+o.invoiceNo+(o.estDispatch?('  ·  Dispatched '+o.estDispatch):''), 40, endY); }
+    return doc;
+  }
+  function quickAction(qa){
+    const base = baseOrders.find(o => o.ref === drawerRef); if (!base) return;
+    const o = eff(base);
+    if (qa === 'copy'){
+      const link = location.origin + location.pathname + '#orders';
+      const ref = String(o.ref);
+      const txt = link + ' (PI #'+ref+')';
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(()=>toast('Link copied to clipboard')).catch(()=>toast('Copy failed'));
+      else toast('Clipboard unavailable');
+    } else if (qa === 'pdf'){
+      const doc = buildOrderPdf(o);
+      if (!doc) return toast('PDF engine still loading…');
+      doc.save('PI-'+o.ref+'-'+(o.party||'').replace(/[^A-Za-z0-9]+/g,'_').slice(0,24)+'.pdf');
+      toast('PDF downloaded');
+    } else if (qa === 'print' || qa === 'viewpi'){
+      const doc = buildOrderPdf(o);
+      if (!doc){ toast('Document engine still loading…'); return; }
+      const url = doc.output('bloburl');
+      const w = window.open(url, '_blank');
+      if (qa === 'print' && w){ w.addEventListener('load', () => { try { w.print(); } catch(e){} }); }
+      if (!w) toast('Pop-up blocked — allow pop-ups to view');
+    } else if (qa === 'invoice'){
+      if (o.invoiceNo) toast('Invoice #'+o.invoiceNo+' — stored as reference');
+    }
+  }
 
   // ---------- actions ----------
   function nowISO(){ return new Date().toISOString(); }
@@ -23252,6 +23432,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     $('ob-dr-close').addEventListener('click', closeDrawer);
     $('ob-drawer').addEventListener('click', e => { if (e.target === $('ob-drawer')) closeDrawer(); });
     $('ob-dr-foot').addEventListener('click', e => { const b=e.target.closest('button[data-act]'); if(b) handleAct(b.getAttribute('data-act'), b.getAttribute('data-ref')); });
+    $('ob-dr-quick').addEventListener('click', e => { const b=e.target.closest('button[data-qa]'); if(b && !b.disabled) quickAction(b.getAttribute('data-qa')); });
     // dispatch modal
     $('ob-disp-close').addEventListener('click', closeDispatch);
     $('ob-disp-cancel').addEventListener('click', closeDispatch);
