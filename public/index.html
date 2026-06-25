@@ -1004,6 +1004,156 @@
     .pi-grid { grid-template-columns: 1fr 1fr; }
   }
 
+  /* ============================================================
+     Create PI — two-pane workspace + live invoice preview
+     ============================================================ */
+  .pi-workspace {
+    display: grid;
+    grid-template-columns: 65fr 35fr;
+    gap: 28px;
+    align-items: start;
+    margin-top: 26px;
+  }
+  .pi-editor { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+
+  /* More breathing room inside the editor cards */
+  .pi-editor .card-h { padding: 20px 26px 16px; }
+  .pi-editor .card-b { padding: 24px 26px 26px; }
+  .pi-editor .card-h .t h3 { font-size: 15.5px; }
+  .pi-editor .pi-grid { gap: 20px 20px; }
+  .pi-editor .pi-lines { gap: 16px; }
+  .pi-editor .card-h .pi-add-line { margin-top: 0; }
+
+  /* Roomier line grids now that the editor is ~65% wide */
+  .pi-editor .pi-line-grid.grid-9 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  @media (max-width: 1380px) {
+    .pi-editor .pi-line-grid.grid-9 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .pi-editor .pi-line-grid.grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 720px) {
+    .pi-editor .pi-line-grid.grid-9 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  /* Finalize card readouts */
+  .pi-foot-tot {
+    font-family: var(--fm); font-size: 11px; color: var(--text-3);
+    letter-spacing: 0.04em; display: inline-flex; align-items: baseline; gap: 10px;
+  }
+  .pi-foot-tot b {
+    font-family: var(--fd); font-size: 16px; color: var(--emerald);
+    font-weight: 700; letter-spacing: -0.01em; font-variant-numeric: tabular-nums;
+  }
+  .pi-mini-tot {
+    display: flex; flex-wrap: wrap; gap: 8px 22px;
+    padding-bottom: 16px; margin-bottom: 16px;
+    border-bottom: 1px solid var(--line);
+    font-size: 12px; color: var(--text-3);
+  }
+  .pi-mini-tot b {
+    color: var(--text-2); font-family: var(--fm); font-weight: 500;
+    font-variant-numeric: tabular-nums; margin-left: 5px;
+  }
+
+  /* ---- Live preview column (sticky) ---- */
+  .pi-preview-col {
+    position: sticky; top: 16px; align-self: start;
+    display: flex; flex-direction: column; gap: 12px;
+    min-width: 0;
+  }
+  .pi-preview-head {
+    display: flex; align-items: center; gap: 9px;
+    font-family: var(--fm); font-size: 10px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--text-3);
+  }
+  .pi-preview-head .dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--emerald);
+    box-shadow: 0 0 0 3px rgba(78,222,163,0.18), 0 0 10px var(--emerald);
+    animation: pulseDot 2.6s var(--ease) infinite;
+  }
+  .pi-preview-head .pi-preview-sub {
+    margin-left: auto; letter-spacing: 0.04em; text-transform: none; color: var(--text-4);
+  }
+
+  /* The "paper" — white document, A4-leaning aspect, internal scroll */
+  .pi-doc {
+    background: #FFFFFF;
+    color: #10131A;
+    border-radius: 14px;
+    box-shadow: 0 28px 64px -28px rgba(0,0,0,0.75), 0 1px 0 rgba(255,255,255,0.05);
+    display: flex; flex-direction: column;
+    max-height: calc(100vh - 64px);
+    min-height: 540px;
+    overflow: hidden;
+    font-family: var(--fb);
+  }
+  .pi-doc__scroll { overflow-y: auto; padding: 32px 32px 18px; flex: 1 1 auto; }
+  .pi-doc__scroll::-webkit-scrollbar { width: 8px; }
+  .pi-doc__scroll::-webkit-scrollbar-thumb { background: #D8DBE0; border-radius: 4px; }
+
+  .pi-doc__top {
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 18px;
+    padding-bottom: 22px; border-bottom: 2px solid #10131A;
+  }
+  .pi-doc__co { font-family: var(--fd); font-size: 19px; font-weight: 700; letter-spacing: -0.01em; color: #0B0E14; }
+  .pi-doc__co-sub { font-size: 11px; color: #6B7280; margin-top: 4px; letter-spacing: 0.01em; }
+  .pi-doc__title { text-align: right; flex-shrink: 0; }
+  .pi-doc__title-lbl {
+    font-family: var(--fm); font-size: 11px; letter-spacing: 0.22em;
+    color: #9097A1; font-weight: 600; margin-bottom: 10px;
+  }
+  .pi-doc__meta { display: flex; justify-content: flex-end; gap: 8px; font-size: 11px; margin-top: 4px; }
+  .pi-doc__meta span { color: #9097A1; letter-spacing: 0.03em; }
+  .pi-doc__meta b { color: #10131A; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  .pi-doc__bill { padding: 20px 0 4px; }
+  .pi-doc__bill-lbl { font-family: var(--fm); font-size: 9.5px; letter-spacing: 0.18em; color: #9097A1; margin-bottom: 7px; }
+  .pi-doc__party { font-family: var(--fd); font-size: 16px; font-weight: 600; color: #0B0E14; }
+  .pi-doc__party-meta { font-size: 11.5px; color: #5B616B; margin-top: 3px; letter-spacing: 0.01em; }
+  .pi-doc__party-meta:empty { display: none; }
+
+  .pi-doc__table { width: 100%; border-collapse: collapse; margin-top: 16px; font-variant-numeric: tabular-nums; }
+  .pi-doc__table thead th {
+    font-family: var(--fm); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: #9097A1; font-weight: 600; text-align: right; padding: 0 0 9px 8px; border-bottom: 1px solid #E5E7EB;
+  }
+  .pi-doc__table th.c-no, .pi-doc__table th.c-desc { text-align: left; }
+  .pi-doc__table th.c-no { padding-left: 0; }
+  .pi-doc__table td {
+    padding: 10px 0 10px 8px; border-bottom: 1px solid #F0F1F3;
+    font-size: 11.5px; color: #10131A; vertical-align: top; text-align: right;
+  }
+  .pi-doc__table td.c-no { text-align: left; color: #9097A1; font-family: var(--fm); font-size: 10px; width: 22px; padding-left: 0; }
+  .pi-doc__table td.c-desc { text-align: left; }
+  .pi-doc__table td .d-main { font-weight: 600; line-height: 1.3; }
+  .pi-doc__table td .d-main:empty::after { content: '—'; color: #C0C4CC; }
+  .pi-doc__table td .d-dim { color: #6B7280; font-size: 10.5px; margin-top: 2px; }
+  .pi-doc__table td.c-total { font-weight: 700; }
+
+  .pi-doc__empty { text-align: center; color: #9097A1; font-size: 12px; padding: 28px 0; }
+
+  /* Sticky summary — always visible while the line area scrolls */
+  .pi-doc__summary { border-top: 2px solid #10131A; padding: 18px 32px 22px; background: #FAFAFB; flex-shrink: 0; }
+  .pi-doc__sumrow { display: flex; justify-content: space-between; align-items: baseline; padding: 5px 0; font-size: 12.5px; color: #3A3F4A; }
+  .pi-doc__sumrow b { font-variant-numeric: tabular-nums; font-weight: 600; color: #10131A; }
+  .pi-doc__sumrow.muted { color: #9097A1; font-size: 11px; padding: 3px 0; }
+  .pi-doc__sumrow.muted b { color: #6B7280; font-weight: 500; }
+  .pi-doc__sumrow.grand { margin-top: 10px; padding-top: 13px; border-top: 1px solid #E5E7EB; }
+  .pi-doc__sumrow.grand span { font-family: var(--fm); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #10131A; }
+  .pi-doc__sumrow.grand b { font-family: var(--fd); font-size: 24px; font-weight: 700; color: #0B0E14; letter-spacing: -0.01em; }
+
+  /* Row interactions — brief highlight on edit, entrance on add */
+  .pi-doc-row { transition: background 220ms var(--ease); }
+  .pi-doc-row--hot { background: rgba(78,222,163,0.18); }
+  .pi-doc-row--hot td { border-bottom-color: rgba(78,222,163,0.45); }
+  @keyframes piRowIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: none; } }
+  .pi-doc-row--enter { animation: piRowIn 320ms var(--ease); }
+
+  @media (max-width: 1180px) {
+    .pi-workspace { grid-template-columns: 1fr; gap: 22px; }
+    .pi-preview-col { position: static; }
+    .pi-doc { max-height: none; min-height: 0; }
+  }
+
   /* Add new party modal */
   .ap-overlay {
     position: fixed; inset: 0; z-index: 1000;
@@ -1882,101 +2032,151 @@
         <span><kbd>⌘</kbd>+<kbd>Enter</kbd> create PI</span>
       </div>
 
-      <!-- HEADER CARD -->
-      <div class="card">
-        <div class="card-h">
-          <div class="t">
-            <span class="ic">+</span>
-            <h3>Header</h3>
-            <span class="sub">PARTY · POC · DATE · REF</span>
-          </div>
-          <span class="more" id="pi-clear">RESET</span>
-        </div>
-        <div class="card-b">
-          <div class="pi-grid">
-            <div class="pi-field pi-party-wrap">
-              <label for="pi-party">Party</label>
-              <input class="pi-input" id="pi-party" placeholder="Start typing party name or code…" autocomplete="off" spellcheck="false">
-              <div class="pi-typeahead" id="pi-party-results" role="listbox" aria-label="Party suggestions" hidden></div>
-            </div>
-            <div class="pi-field">
-              <label for="pi-party-code">Party Code</label>
-              <input class="pi-input mono" id="pi-party-code" placeholder="auto-fills" autocomplete="off">
-            </div>
-            <div class="pi-field">
-              <label for="pi-date">PI Date</label>
-              <input class="pi-input" type="date" id="pi-date">
-            </div>
-            <div class="pi-field">
-              <label for="pi-poc">Sales POC</label>
-              <select class="pi-select" id="pi-poc"></select>
-            </div>
-            <div class="pi-field">
-              <label for="pi-ref">REF #</label>
-              <input class="pi-input mono" type="number" id="pi-ref" placeholder="auto" autocomplete="off">
-            </div>
-          </div>
-        </div>
-      </div>
+      <!-- WORKSPACE: editor (≈65%) + live invoice preview (≈35%) -->
+      <div class="pi-workspace">
 
-      <!-- LINE ITEMS CARD -->
-      <div class="card">
-        <div class="card-h">
-          <div class="t">
-            <span class="ic">◆</span>
-            <h3>Line items</h3>
-            <span class="sub"><span id="pi-line-count">0</span> LINES</span>
-          </div>
-        </div>
-        <div class="card-b">
-          <div class="pi-lines-wrap">
-            <div id="pi-lines" class="pi-lines"></div>
-            <div id="pi-empty-lines" class="pi-empty-lines">No lines yet. Add the first one →</div>
-          </div>
-          <button class="pi-add-line" id="pi-add-line">+ add line</button>
-        </div>
-      </div>
+        <!-- ===================== EDITOR ===================== -->
+        <div class="pi-editor">
 
-      <!-- TOTALS + ACTIONS -->
-      <div class="row-2" style="grid-template-columns: 1fr 1fr;">
-        <div class="card">
-          <div class="card-h">
-            <div class="t">
-              <span class="ic">∑</span>
-              <h3>Totals</h3>
-              <span class="sub">LIVE</span>
+          <!-- HEADER CARD -->
+          <div class="card">
+            <div class="card-h">
+              <div class="t">
+                <span class="ic">+</span>
+                <h3>Header</h3>
+                <span class="sub">PARTY · POC · DATE · REF</span>
+              </div>
+              <span class="more" id="pi-clear">RESET</span>
+            </div>
+            <div class="card-b">
+              <div class="pi-grid">
+                <div class="pi-field pi-party-wrap">
+                  <label for="pi-party">Party</label>
+                  <input class="pi-input" id="pi-party" placeholder="Start typing party name or code…" autocomplete="off" spellcheck="false">
+                  <div class="pi-typeahead" id="pi-party-results" role="listbox" aria-label="Party suggestions" hidden></div>
+                </div>
+                <div class="pi-field">
+                  <label for="pi-party-code">Party Code</label>
+                  <input class="pi-input mono" id="pi-party-code" placeholder="auto-fills" autocomplete="off">
+                </div>
+                <div class="pi-field">
+                  <label for="pi-date">PI Date</label>
+                  <input class="pi-input" type="date" id="pi-date">
+                </div>
+                <div class="pi-field">
+                  <label for="pi-poc">Sales POC</label>
+                  <select class="pi-select" id="pi-poc"></select>
+                </div>
+                <div class="pi-field">
+                  <label for="pi-ref">REF #</label>
+                  <input class="pi-input mono" type="number" id="pi-ref" placeholder="auto" autocomplete="off">
+                </div>
+              </div>
             </div>
           </div>
-          <div class="card-b pi-totals">
-            <div class="kr"><span>Lines</span><b id="pi-tot-lines">0</b></div>
-            <div class="kr"><span>Units total (sq.ft./pc)</span><b id="pi-tot-units">0</b></div>
-            <div class="kr"><span>Trade discount tracked</span><b id="pi-tot-td">₹0</b></div>
-            <div class="kr"><span>Freight</span><b id="pi-tot-freight">₹0</b></div>
-            <div class="kr"><span>Taxable value</span><b id="pi-tot-taxable">₹0</b></div>
-            <div class="kr"><span>GST 18%</span><b id="pi-tot-gst">₹0</b></div>
-            <div class="kr big"><span>Total (inc GST)</span><b id="pi-tot-total">₹0</b></div>
+
+          <!-- LINE ITEMS CARD -->
+          <div class="card">
+            <div class="card-h">
+              <div class="t">
+                <span class="ic">◆</span>
+                <h3>Line items</h3>
+                <span class="sub"><span id="pi-line-count">0</span> LINES</span>
+              </div>
+              <button class="pi-add-line" id="pi-add-line">+ add line</button>
+            </div>
+            <div class="card-b">
+              <div class="pi-lines-wrap">
+                <div id="pi-lines" class="pi-lines"></div>
+                <div id="pi-empty-lines" class="pi-empty-lines">No lines yet. Add the first one →</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- FINALIZE CARD -->
+          <div class="card">
+            <div class="card-h">
+              <div class="t">
+                <span class="ic">→</span>
+                <h3>Finalize</h3>
+                <span class="sub">DRAFT → CREATE</span>
+              </div>
+              <div class="pi-foot-tot"><span id="pi-foot-lines">0</span> lines<b id="pi-foot-total">₹0</b></div>
+            </div>
+            <div class="card-b">
+              <div class="pi-mini-tot">
+                <span>Units total <b id="pi-mini-units">0</b></span>
+                <span>Trade discount tracked <b id="pi-mini-td">₹0</b></span>
+              </div>
+              <div class="pi-note">
+                Clicking <i>Create PI</i> appends one row per line to the Comfort_atlas sheet. The button enables once you've selected a party, entered a REF#, and have at least one line with quantity and rate.
+              </div>
+              <div class="pi-actions">
+                <button class="pi-btn" id="pi-save-draft">Save draft</button>
+                <button class="pi-btn prime" id="pi-submit">Create PI →</button>
+              </div>
+              <div class="pi-status" id="pi-status"></div>
+            </div>
           </div>
         </div>
 
-        <div class="card">
-          <div class="card-h">
-            <div class="t">
-              <span class="ic">→</span>
-              <h3>Submit</h3>
-              <span class="sub">DRAFT</span>
+        <!-- ================= LIVE INVOICE PREVIEW ================= -->
+        <aside class="pi-preview-col">
+          <div class="pi-preview-head">
+            <span class="dot"></span>LIVE PREVIEW
+            <span class="pi-preview-sub">exact print / PDF representation</span>
+          </div>
+
+          <div class="pi-doc" id="pi-doc">
+            <div class="pi-doc__scroll">
+              <div class="pi-doc__top">
+                <div class="pi-doc__brand">
+                  <div class="pi-doc__co">COMFORT INDUSTRIES</div>
+                  <div class="pi-doc__co-sub">Mats · Turf · Rolls · Car Sets</div>
+                </div>
+                <div class="pi-doc__title">
+                  <div class="pi-doc__title-lbl">PROFORMA INVOICE</div>
+                  <div class="pi-doc__meta"><span>REF #</span><b id="dv-ref">—</b></div>
+                  <div class="pi-doc__meta"><span>DATE</span><b id="dv-date">—</b></div>
+                  <div class="pi-doc__meta"><span>SALES POC</span><b id="dv-poc">—</b></div>
+                </div>
+              </div>
+
+              <div class="pi-doc__bill">
+                <div class="pi-doc__bill-lbl">BILL TO</div>
+                <div class="pi-doc__party" id="dv-party">—</div>
+                <div class="pi-doc__party-meta" id="dv-code"></div>
+                <div class="pi-doc__party-meta" id="dv-gstno"></div>
+                <div class="pi-doc__party-meta" id="dv-addr"></div>
+              </div>
+
+              <table class="pi-doc__table">
+                <thead>
+                  <tr>
+                    <th class="c-no">#</th>
+                    <th class="c-desc">Description</th>
+                    <th class="c-num">Qty</th>
+                    <th class="c-num">Units</th>
+                    <th class="c-num">Rate</th>
+                    <th class="c-num">Freight</th>
+                    <th class="c-num">Taxable</th>
+                    <th class="c-num">Total</th>
+                  </tr>
+                </thead>
+                <tbody id="dv-lines"></tbody>
+              </table>
+              <div class="pi-doc__empty" id="dv-empty">Add a line to see it on the invoice.</div>
+            </div>
+
+            <div class="pi-doc__summary">
+              <div class="pi-doc__sumrow"><span>Subtotal (goods)</span><b id="dv-subtotal">₹0</b></div>
+              <div class="pi-doc__sumrow muted"><span>Freight</span><b id="dv-freight">₹0</b></div>
+              <div class="pi-doc__sumrow"><span>Taxable amount</span><b id="dv-taxable">₹0</b></div>
+              <div class="pi-doc__sumrow"><span>GST @ 18%</span><b id="dv-gst">₹0</b></div>
+              <div class="pi-doc__sumrow grand"><span>Grand Total</span><b id="dv-grand">₹0</b></div>
             </div>
           </div>
-          <div class="card-b">
-            <div class="pi-note">
-              Clicking <i>Create PI</i> appends one row per line to the Comfort_atlas sheet. The button enables once you've selected a party, entered a REF#, and have at least one line with quantity and rate.
-            </div>
-            <div class="pi-actions">
-              <button class="pi-btn" id="pi-save-draft">Save draft</button>
-              <button class="pi-btn prime" id="pi-submit">Create PI →</button>
-            </div>
-            <div class="pi-status" id="pi-status"></div>
-          </div>
-        </div>
+        </aside>
       </div>
     </section>
 
@@ -2689,8 +2889,8 @@
     set('total', inr(d.total));
   }
 
-  function renderTotals(){
-    let lines = state.lines.length;
+  // Single source of truth for every aggregate — derived purely from `state`.
+  function computeTotals(){
     let units = 0, td = 0, freight = 0, taxable = 0, gst = 0, total = 0;
     for (const ln of state.lines){
       const d = derived(ln);
@@ -2701,15 +2901,170 @@
       gst += d.gst;
       total += d.total;
     }
-    $('pi-tot-lines').textContent = lines;
-    $('pi-tot-units').textContent = num(units, 2);
-    $('pi-tot-td').textContent = inr(td);
-    $('pi-tot-freight').textContent = inr(freight);
-    $('pi-tot-taxable').textContent = inr(taxable);
-    $('pi-tot-gst').textContent = inr(gst);
-    $('pi-tot-total').textContent = inr(total);
+    return { lines: state.lines.length, units, td, freight, taxable, gst, total, subtotal: taxable - freight };
+  }
 
-    $('pi-submit').disabled = !canSubmit();
+  function renderTotals(){
+    const t = computeTotals();
+    const set = (id, val) => { const e = $(id); if (e) e.textContent = val; };
+    set('pi-line-count', t.lines);
+    set('pi-foot-lines', t.lines);
+    set('pi-foot-total', inr(t.total));
+    set('pi-mini-units', num(t.units, 2));
+    set('pi-mini-td', inr(t.td));
+
+    const sub = $('pi-submit');
+    if (sub) sub.disabled = !canSubmit();
+
+    // Preview is the canonical document view — keep it in lock-step.
+    schedulePreview();
+  }
+
+  // ---------- live invoice preview ----------
+  // Coalesce preview rebuilds into a single frame so rapid keystrokes stay
+  // smooth even with 100+ lines (the cheap left-side totals stay instant).
+  let _previewRaf = 0;
+  function schedulePreview(){
+    if (_previewRaf) return;
+    _previewRaf = requestAnimationFrame(() => { _previewRaf = 0; renderPreview(); });
+  }
+
+  function fmtDocDate(s){
+    const m = String(s || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    return m ? (m[3] + '/' + m[2] + '/' + m[1]) : (s || '—');
+  }
+
+  function lineDesc(ln){
+    const main = [ln.category, ln.model, ln.backing, ln.colour].filter(Boolean).join(' · ');
+    let dim = '';
+    if (ln.width && ln.length) dim = ln.width + ' × ' + ln.length;
+    else if (ln.width) dim = ln.width;
+    else if (ln.length) dim = ln.length;
+    return { main, dim };
+  }
+
+  // Look up extended details (GST / city / state) for locally-added parties.
+  function partyDetails(name){
+    try {
+      const raw = localStorage.getItem('atlas-custom-parties');
+      if (!raw) return null;
+      const n = String(name || '').toLowerCase();
+      return (JSON.parse(raw) || []).find(p => String(p.name || '').toLowerCase() === n) || null;
+    } catch(e){ return null; }
+  }
+
+  // Smoothly tween a money figure to its new value (easeOutCubic).
+  const _tweens = new WeakMap();
+  function animateNumber(elm, to, fmt){
+    if (!elm) return;
+    const prev = _tweens.get(elm);
+    const from = prev ? prev.cur : (Number(elm.dataset.v) || 0);
+    if (prev) cancelAnimationFrame(prev.raf);
+    elm.dataset.v = to;
+    if (from === to){ elm.textContent = fmt(to); _tweens.delete(elm); return; }
+    const t0 = performance.now(), dur = 340;
+    const rec = { cur: from, raf: 0 };
+    const step = (now) => {
+      const p = Math.min(1, (now - t0) / dur);
+      const e = 1 - Math.pow(1 - p, 3);
+      const v = from + (to - from) * e;
+      rec.cur = v;
+      elm.textContent = fmt(v);
+      if (p < 1){ rec.raf = requestAnimationFrame(step); }
+      else { elm.textContent = fmt(to); _tweens.delete(elm); }
+    };
+    rec.raf = requestAnimationFrame(step);
+    _tweens.set(elm, rec);
+  }
+
+  function makePreviewRow(){
+    const tr = el('tr', { class: 'pi-doc-row pi-doc-row--enter' });
+    tr.appendChild(el('td', { class: 'c-no' }));
+    const desc = el('td', { class: 'c-desc' });
+    desc.appendChild(el('div', { class: 'd-main' }));
+    desc.appendChild(el('div', { class: 'd-dim' }));
+    tr.appendChild(desc);
+    ['c-qty','c-units','c-rate','c-freight','c-taxable','c-total']
+      .forEach(c => tr.appendChild(el('td', { class: 'c-num ' + c })));
+    setTimeout(() => tr.classList.remove('pi-doc-row--enter'), 360);
+    return tr;
+  }
+
+  function reconcilePreviewLines(){
+    const host = $('dv-lines');
+    if (!host) return;
+    const n = state.lines.length;
+    while (host.children.length > n) host.removeChild(host.lastChild);
+    while (host.children.length < n) host.appendChild(makePreviewRow());
+
+    state.lines.forEach((ln, i) => {
+      const tr = host.children[i];
+      if (!tr) return;
+      const d = derived(ln);
+      const desc = lineDesc(ln);
+      const br = Number(ln.billRate) || Number(ln.actualRate) || 0;
+      const fr = Number(ln.freight) || 0;
+      tr.children[0].textContent = String(i + 1);
+      tr.children[1].children[0].textContent = desc.main;
+      tr.children[1].children[1].textContent = desc.dim;
+      tr.children[2].textContent = num(Number(ln.qty) || 0, 0);
+      tr.children[3].textContent = num(d.units, 2);
+      tr.children[4].textContent = br ? inr(br) : '—';
+      tr.children[5].textContent = fr ? inr(fr) : '—';
+      tr.children[6].textContent = inr(d.taxable);
+      tr.children[7].textContent = inr(d.total);
+    });
+  }
+
+  let _hlTimer = 0;
+  function highlightTouched(){
+    const host = $('dv-lines');
+    if (!host) return;
+    host.querySelectorAll('.pi-doc-row--hot').forEach(r => r.classList.remove('pi-doc-row--hot'));
+    const i = state._touched;
+    if (i == null || i < 0 || i >= host.children.length) return;
+    const row = host.children[i];
+    row.classList.add('pi-doc-row--hot');
+    if (_hlTimer) clearTimeout(_hlTimer);
+    _hlTimer = setTimeout(() => { row.classList.remove('pi-doc-row--hot'); state._touched = null; }, 650);
+  }
+
+  function renderPreview(){
+    if (!$('pi-doc')) return;
+    const set = (id, val, dash) => {
+      const e = $(id);
+      if (e) e.textContent = (val == null || val === '') ? (dash || '') : val;
+    };
+
+    // header / meta
+    set('dv-ref', state.ref ? String(state.ref) : '', '—');
+    set('dv-date', state.date ? fmtDocDate(state.date) : '', '—');
+    set('dv-poc', state.poc, '—');
+
+    // bill-to
+    set('dv-party', state.party, '—');
+    set('dv-code', state.partyCode ? ('CODE · ' + state.partyCode) : '');
+    const det = partyDetails(state.party);
+    const gst  = state.partyGst   || (det && det.gst)   || '';
+    const city = state.partyCity  || (det && det.city)  || '';
+    const stt  = state.partyState || (det && det.state) || '';
+    set('dv-gstno', gst ? ('GSTIN · ' + gst) : '');
+    set('dv-addr', [city, stt].filter(Boolean).join(', '));
+
+    // lines
+    reconcilePreviewLines();
+    const empty = $('dv-empty');
+    if (empty) empty.style.display = state.lines.length ? 'none' : 'block';
+
+    // summary (animated)
+    const t = computeTotals();
+    animateNumber($('dv-subtotal'), t.subtotal, inr);
+    animateNumber($('dv-freight'),  t.freight,  inr);
+    animateNumber($('dv-taxable'),  t.taxable,  inr);
+    animateNumber($('dv-gst'),      t.gst,      inr);
+    animateNumber($('dv-grand'),    t.total,    inr);
+
+    highlightTouched();
   }
 
   function canSubmit(){
@@ -2801,6 +3156,11 @@
     const codeU = String(p.code || '').toUpperCase();
     state.party = nameU;
     state.partyCode = codeU;
+    // Pull through GST / address when we have them (locally-added parties).
+    const det = partyDetails(nameU);
+    state.partyGst   = p.gst   || (det && det.gst)   || '';
+    state.partyCity  = p.city  || (det && det.city)  || '';
+    state.partyState = p.state || (det && det.state) || '';
     $('pi-party').value = nameU;
     $('pi-party-code').value = codeU;
     $('pi-party-results').hidden = true;
@@ -2817,6 +3177,8 @@
     const partyInp = $('pi-party');
     partyInp.addEventListener('input', e => {
       state.party = e.target.value;
+      // Typing a fresh name invalidates any GST/address pulled from a prior pick.
+      state.partyGst = ''; state.partyCity = ''; state.partyState = '';
       const exact = V.parties.find(p => p.name === state.party);
       if (exact) { state.partyCode = exact.code || ''; $('pi-party-code').value = state.partyCode; }
       renderPartyResults(state.party);
@@ -2853,9 +3215,9 @@
         partyTypeahead.open = false;
       }
     });
-    $('pi-party-code').addEventListener('input', e => { state.partyCode = e.target.value; });
-    $('pi-date').addEventListener('input', e => { state.date = e.target.value; });
-    $('pi-poc').addEventListener('change', e => { state.poc = e.target.value; });
+    $('pi-party-code').addEventListener('input', e => { state.partyCode = e.target.value; schedulePreview(); });
+    $('pi-date').addEventListener('input', e => { state.date = e.target.value; schedulePreview(); });
+    $('pi-poc').addEventListener('change', e => { state.poc = e.target.value; schedulePreview(); });
     $('pi-ref').addEventListener('input', e => {
       state.ref = e.target.value;
       $('pi-eb-ref').textContent = state.ref || '—';
@@ -2864,9 +3226,22 @@
 
     $('pi-add-line').addEventListener('click', () => {
       state.lines.push(newLine());
+      state._touched = state.lines.length - 1;
       renderLines(); renderTotals();
       saveDraft();
     });
+
+    // Track which line is being edited so the preview can highlight it.
+    // Capture phase → runs before each cell's own oninput schedules a render.
+    const linesHost = $('pi-lines');
+    if (linesHost){
+      linesHost.addEventListener('input', (e) => {
+        const card = e.target.closest('.pi-line-card');
+        if (!card) return;
+        const idx = Array.prototype.indexOf.call(linesHost.children, card);
+        if (idx >= 0) state._touched = idx;
+      }, true);
+    }
 
     $('pi-clear').addEventListener('click', () => {
       if (!confirm('Reset the form? Unsaved changes will be lost.')) return;
