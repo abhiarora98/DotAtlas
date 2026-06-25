@@ -1122,6 +1122,7 @@
     padding: 4px 10px; border-radius: 999px;
     font-family: var(--fm); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase;
     white-space: nowrap;
+    transition: background 200ms var(--ease), color 200ms var(--ease), box-shadow 200ms var(--ease);
   }
   .ob-pill::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
   .ob-pill.st-pending   { background: var(--amber-soft); color: var(--amber); }
@@ -1247,7 +1248,7 @@
   .ob-dr-sec-h span { font-family: var(--fm); font-size: 11px; font-weight: 400; color: var(--text-3); letter-spacing: 0.04em; }
 
   /* Line items — richer table */
-  .ob-dr-items-wrap { max-height: 380px; overflow-y: auto; border: 1px solid var(--line); border-radius: 12px; }
+  .ob-dr-items-wrap { max-height: 380px; overflow-y: auto; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 14px 34px -26px rgba(0,0,0,0.7); }
   .ob-items { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
   .ob-items thead th {
     position: sticky; top: 0; z-index: 1; background: var(--surface-2);
@@ -1255,12 +1256,16 @@
     color: var(--text-3); font-weight: 600; text-align: right; padding: 15px 16px; border-bottom: 1px solid var(--line-2); white-space: nowrap;
   }
   .ob-items thead th:nth-child(1), .ob-items thead th:nth-child(2), .ob-items thead th:nth-child(3) { text-align: left; }
-  .ob-items tbody td { padding: 18px 16px; font-size: 13px; color: var(--text-2); text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  .ob-items tbody td { padding: 16px; font-size: 13px; color: var(--text-2); text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; vertical-align: top; transition: background 150ms var(--ease); }
   .ob-items tbody tr:last-child td { border-bottom: 0; }
   .ob-items tbody td:nth-child(1) { color: var(--text-3); font-family: var(--fm); font-size: 11px; text-align: left; width: 34px; }
-  .ob-items tbody td.it-prod { text-align: left; white-space: normal; min-width: 160px; }
-  .ob-items tbody td.it-prod .ip-cat { display: block; font-weight: 600; color: var(--text); }
-  .ob-items tbody td.it-prod .ip-attrs { display: block; font-family: var(--fm); font-size: 10.5px; color: var(--text-3); margin-top: 3px; letter-spacing: 0.02em; }
+  .ob-items tbody td.it-prod { text-align: left; white-space: normal; min-width: 188px; padding-top: 14px; padding-bottom: 14px; vertical-align: top; }
+  /* Labelled product hierarchy — Product / Model / Backing / Colour */
+  .ob-items td.it-prod .ip-row { display: grid; grid-template-columns: 56px 1fr; gap: 10px; align-items: baseline; line-height: 1.5; }
+  .ob-items td.it-prod .ip-row + .ip-row { margin-top: 2px; }
+  .ob-items td.it-prod .ip-row .ip-k { font-family: var(--fm); font-size: 8.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text-4); }
+  .ob-items td.it-prod .ip-row .ip-v { font-size: 12.5px; color: var(--text-2); }
+  .ob-items td.it-prod .ip-row.lead .ip-v { font-size: 13.5px; font-weight: 600; color: var(--text); }
   .ob-items tbody td.it-size { text-align: left; font-family: var(--fm); font-size: 11.5px; color: var(--text-2); }
   .ob-items tbody td.it-num { color: var(--text); }
   .ob-items tbody tr:nth-child(even) td { background: rgba(255,255,255,0.022); }
@@ -1330,7 +1335,8 @@
   /* Party overview — neutral stat grid, colour only where it matters */
   .ob-stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
   @media (max-width: 820px) { .ob-stat-grid { grid-template-columns: repeat(2, 1fr); } }
-  .ob-stat { background: var(--void-2); padding: 16px 18px; min-height: 80px; display: flex; flex-direction: column; justify-content: center; }
+  .ob-stat { background: var(--void-2); padding: 16px 18px; min-height: 80px; display: flex; flex-direction: column; justify-content: center; transition: background 160ms var(--ease); }
+  .ob-stat:hover { background: var(--surface-2); }
   .ob-stat .sl { font-family: var(--fm); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-3); }
   .ob-stat .sv { font-family: var(--fd); font-size: 18px; font-weight: 600; color: var(--text); margin-top: 8px; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; }
   .ob-stat.big .sv { font-size: 23px; font-weight: 700; color: var(--text); }
@@ -1347,40 +1353,49 @@
   .risk { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; font-family: var(--fm); font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em; }
   .risk::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
 
-  /* Compact product attributes (Model • Backing • Colour) */
-  .ob-items td.it-prod .ip-cat { display: block; font-weight: 600; color: var(--text); }
-  .ob-items td.it-prod .ip-attrs { display: block; margin-top: 3px; font-family: var(--fm); font-size: 10.5px; color: var(--text-3); letter-spacing: 0.01em; }
-
   /* Current order summary — value-led hierarchy */
-  .ob-os { margin-bottom: 4px; }
-  .ob-os-head { font-family: var(--fd); font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 14px; letter-spacing: -0.01em; }
-  .ob-os-head span#ob-dr-ref { font-family: var(--fm); }
-  .ob-os-hero { display: flex; align-items: stretch; gap: 18px; background: var(--surface-2); border: 1px solid var(--line-2); border-radius: 14px; padding: 18px 22px; }
-  .ob-os-val { flex: 0 0 auto; padding-right: 20px; border-right: 1px solid var(--line); }
+  .ob-os { margin-bottom: 10px; }
+  .ob-os-head { font-family: var(--fd); font-size: 12.5px; font-weight: 600; color: var(--text-3); margin-bottom: 14px; letter-spacing: 0.02em; }
+  .ob-os-head span#ob-dr-ref { font-family: var(--fm); color: var(--text-2); }
+  .ob-os-hero { display: flex; align-items: stretch; gap: 18px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 16px;
+    padding: 20px 24px; box-shadow: 0 1px 0 rgba(255,255,255,0.03), 0 18px 40px -28px rgba(0,0,0,0.7);
+    transition: border-color 200ms var(--ease), box-shadow 200ms var(--ease), transform 200ms var(--ease); }
+  .ob-os-hero:hover { border-color: var(--line-2); box-shadow: 0 1px 0 rgba(255,255,255,0.04), 0 22px 48px -26px rgba(0,0,0,0.8); transform: translateY(-1px); }
+  .ob-os-val { flex: 0 0 auto; padding-right: 22px; border-right: 1px solid var(--line); }
   .ob-os-val .lbl { font-family: var(--fm); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-3); }
-  .ob-os-val .val { font-family: var(--fd); font-size: 30px; font-weight: 700; color: var(--emerald); letter-spacing: -0.02em; margin-top: 8px; font-variant-numeric: tabular-nums; }
+  .ob-os-val .val { font-family: var(--fd); font-size: 31px; font-weight: 700; color: var(--emerald); letter-spacing: -0.02em; margin-top: 8px; font-variant-numeric: tabular-nums; }
   .ob-os-med { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: center; min-width: 0; }
   .ob-os-med .m { min-width: 0; }
   .ob-os-med .m .ml { font-family: var(--fm); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3); }
   .ob-os-med .m .mv { font-size: 15px; font-weight: 600; color: var(--text); margin-top: 7px; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; }
   .ob-os-med .m .mv.amber { color: var(--amber); }
-  .ob-os-small { display: flex; flex-wrap: wrap; gap: 7px 24px; margin-top: 13px; padding: 0 4px; font-family: var(--fm); font-size: 11px; color: var(--text-3); }
+  /* Status is one of the first things scanned → larger, more prominent badge */
+  .ob-os-med .m.status .mv { margin-top: 5px; overflow: visible; }
+  .ob-os-med .m.status .ob-pill { font-size: 11px; padding: 6px 13px; gap: 7px; box-shadow: 0 6px 16px -10px currentColor; }
+  .ob-os-med .m.status .ob-pill::before { width: 6px; height: 6px; }
+  .ob-os-small { display: flex; flex-wrap: wrap; gap: 7px 24px; margin-top: 14px; padding: 0 4px; font-family: var(--fm); font-size: 11px; color: var(--text-3); }
   .ob-os-small b { color: var(--text-2); font-weight: 600; margin-left: 5px; }
   @media (max-width: 760px) { .ob-os-hero { flex-direction: column; } .ob-os-val { border-right: 0; border-bottom: 1px solid var(--line); padding-right: 0; padding-bottom: 14px; } }
 
   /* Workflow elapsed-time markers */
   .ob-wf-gap { margin: -10px 0 8px 42px; font-family: var(--fm); font-size: 10px; color: var(--text-3); letter-spacing: 0.04em; }
+  /* Workflow collapsed preview — current stage at a glance */
+  .ob-wf-cur { display: inline-flex; align-items: center; gap: 7px; font-family: var(--fm); font-size: 10.5px; letter-spacing: 0.02em; color: var(--text-3); }
+  .ob-wf-cur .wc-check { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border-radius: 50%; background: var(--emerald); color: var(--void); font-size: 9px; font-weight: 800; }
+  .ob-wf-cur .wc-stage { color: var(--text); font-weight: 600; }
+  .ob-wf-cur .wc-dot { color: var(--text-4); }
+  .ob-wf-cur.cancelled .wc-check { background: var(--rose); }
 
-  /* Collapsible sections */
+  /* Collapsible sections — generous whitespace, animated open/close */
   .ob-coll { border-top: 1px solid var(--line); }
-  .ob-coll-h { display: flex; align-items: center; gap: 10px; padding: 18px 0 18px; cursor: pointer; user-select: none; }
-  .ob-coll-t { font-family: var(--fd); font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+  .ob-coll-h { display: flex; align-items: center; gap: 11px; padding: 26px 0; cursor: pointer; user-select: none; }
+  .ob-coll-t { font-family: var(--fd); font-size: 15.5px; font-weight: 700; color: var(--text); letter-spacing: -0.015em; transition: color 160ms var(--ease); }
   .ob-coll-meta { font-family: var(--fm); font-size: 10.5px; color: var(--text-3); letter-spacing: 0.03em; }
-  .ob-coll .ob-chev { margin-left: auto; color: var(--text-3); font-size: 13px; transition: transform 200ms var(--ease); }
+  .ob-coll .ob-chev { margin-left: auto; color: var(--text-3); font-size: 13px; transition: transform 240ms var(--ease); }
   .ob-coll[data-open="1"] .ob-chev { transform: rotate(180deg); }
-  .ob-coll-b { overflow: hidden; padding-bottom: 22px; }
-  .ob-coll[data-open="0"] .ob-coll-b { display: none; }
-  .ob-coll[data-open="0"] .ob-coll-h { padding-bottom: 18px; }
+  .ob-coll-b { display: grid; grid-template-rows: 1fr; transition: grid-template-rows 280ms var(--ease); }
+  .ob-coll[data-open="0"] .ob-coll-b { grid-template-rows: 0fr; }
+  .ob-coll-inner { overflow: hidden; min-height: 0; padding-bottom: 28px; }
   .ob-coll-h:hover .ob-coll-t { color: var(--emerald-2); }
 
   .ob-profile-btn { margin-top: 16px; width: 100%; padding: 12px; border-radius: 10px; cursor: pointer;
@@ -3451,7 +3466,7 @@
           <!-- 2 · order line items -->
           <div class="ob-coll" data-open="1">
             <div class="ob-coll-h"><span class="ob-coll-t">Order line items</span><span class="ob-coll-meta" id="ob-dr-itemcount"></span><span class="ob-chev">▾</span></div>
-            <div class="ob-coll-b">
+            <div class="ob-coll-b"><div class="ob-coll-inner">
               <div class="ob-dr-items-wrap">
                 <table class="ob-items">
                   <thead><tr>
@@ -3461,32 +3476,32 @@
                   <tfoot id="ob-dr-items-foot"></tfoot>
                 </table>
               </div>
-            </div>
+            </div></div>
           </div>
 
           <!-- 3 · workflow timeline -->
           <div class="ob-coll" data-open="1">
             <div class="ob-coll-h"><span class="ob-coll-t">Workflow timeline</span><span class="ob-coll-meta" id="ob-dr-wf-meta"></span><span class="ob-chev">▾</span></div>
-            <div class="ob-coll-b"><div class="ob-workflow" id="ob-dr-history"></div></div>
+            <div class="ob-coll-b"><div class="ob-coll-inner"><div class="ob-workflow" id="ob-dr-history"></div></div></div>
           </div>
 
           <!-- 4 · customer intelligence (concise summary, collapsed) -->
           <div class="ob-coll" data-open="0">
             <div class="ob-coll-h"><span class="ob-coll-t">Customer intelligence</span><span class="ob-coll-meta" id="ob-dr-ci-meta"></span><span class="ob-chev">▾</span></div>
-            <div class="ob-coll-b">
+            <div class="ob-coll-b"><div class="ob-coll-inner">
               <div class="ob-stat-grid concise" id="ob-dr-stats"></div>
               <button class="ob-profile-btn" id="ob-dr-profile">View full customer profile →</button>
-            </div>
+            </div></div>
           </div>
 
           <!-- 5 · recent orders (collapsed) -->
           <div class="ob-coll" data-open="0">
             <div class="ob-coll-h"><span class="ob-coll-t">Recent orders</span><span class="ob-coll-meta" id="ob-dr-prev-count"></span><span class="ob-chev">▾</span></div>
-            <div class="ob-coll-b">
+            <div class="ob-coll-b"><div class="ob-coll-inner">
               <div class="ob-prev-head"><span>PI #</span><span>Date</span><span class="r">Amount</span><span class="r">Invoice</span><span class="r">Status</span></div>
               <div class="ob-prev-list" id="ob-dr-prev"></div>
               <button class="ob-viewall block" id="ob-dr-viewall">View all orders for this customer →</button>
-            </div>
+            </div></div>
           </div>
         </div>
         <div class="ob-dr-foot" id="ob-dr-foot"></div>
@@ -23334,12 +23349,22 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   // Backing, Colour and Size — never one concatenated name.
   function prodDesc(li){
     const product = li.category || '—';
-    const fields = [['Model', li.model], ['Backing', li.backing], ['Colour', li.colour]].filter(p => p[1]);
+    const pn = String(product).trim().toLowerCase();
+    // Model / Backing / Colour kept as separate, labelled fields. Any value
+    // that merely repeats the product (e.g. backing "Turf" under product
+    // "Turf") is dropped so the same word never appears twice.
+    const fields = [['Model', li.model], ['Backing', li.backing], ['Colour', li.colour]]
+      .filter(p => p[1] && String(p[1]).trim().toLowerCase() !== pn);
     const attrs = fields.map(p => p[1]).join(' • ');
+    // Full labelled hierarchy (Product first, then de-duped attributes).
+    const labelled = [['Product', li.category || '—']].concat(fields);
+    const rows = labelled.map((p,i) =>
+      '<span class="ip-row'+(i===0?' lead':'')+'"><span class="ip-k">'+p[0]+'</span><span class="ip-v">'+esc(p[1])+'</span></span>'
+    ).join('');
     const segs = fields.map(p => '<span class="ip-seg"><span class="ip-l">'+p[0]+'</span>'+esc(p[1])+'</span>').join('');
     const main = [li.category, li.model, li.backing, li.colour].filter(Boolean).join(' · ') || '—';
     let dim = ''; if(li.width&&li.length) dim=li.width+' × '+li.length; else dim=li.width||li.length||'';
-    return { product, attrs, segs, main, dim };
+    return { product, attrs, segs, rows, main, dim };
   }
 
   const OV_KEY = 'atlas-orders-overlay';
@@ -23600,6 +23625,10 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   function fmtElapsed(ms){ const min=Math.round(ms/60000); if(min<1) return 'moments'; if(min<60) return min+' min'+(min!==1?'s':''); const hr=Math.round(min/60); if(hr<24) return hr+' hr'+(hr!==1?'s':''); const d=Math.round(hr/24); return d+' day'+(d!==1?'s':''); }
   function fmtDateLong(iso){ const m=String(iso||'').match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? (String(+m[3])+' '+MON[+m[2]-1]+' '+m[1]) : '—'; }
   function fmtTsLong(ms){ if (ms==null) return '—'; const d=new Date(ms); return d.getDate()+' '+MON[d.getMonth()]+' '+d.getFullYear(); }
+  function fmtTsShort(ms){ if (ms==null) return '—'; const d=new Date(ms); return d.getDate()+' '+MON[d.getMonth()]; }
+  function fmtDateShort(iso){ const m=String(iso||'').match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? (String(+m[3])+' '+MON[+m[2]-1]+' '+m[1]) : ''; }
+  // Compact money for inline previews: ₹18.8L / ₹2.4Cr / ₹7.7K (1 dp, no trailing .0)
+  function money(n){ n = Number(n)||0; const t = v => v.toFixed(1).replace(/\.0$/,''); if (n>=1e7) return '₹'+t(n/1e7)+'Cr'; if (n>=1e5) return '₹'+t(n/1e5)+'L'; if (n>=1e3) return '₹'+t(n/1e3)+'K'; return '₹'+Math.round(n); }
 
   function customerIntel(ps){
     const active = ps.active, list = ps.list;
@@ -23744,7 +23773,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       + '<div class="ob-os-med">'
       +   '<div class="m"><div class="ml">Outstanding</div><div class="mv'+(orderOut>0?' amber':'')+'">'+(orderOut>0?inr(orderOut):'—')+'</div></div>'
       +   '<div class="m"><div class="ml">Invoice</div><div class="mv">'+esc(o.invoiceNo||'—')+'</div></div>'
-      +   '<div class="m"><div class="ml">Status</div><div class="mv">'+pill(o.status)+'</div></div>'
+      +   '<div class="m status"><div class="ml">Status</div><div class="mv">'+pill(o.status)+'</div></div>'
       + '</div></div>'
       + '<div class="ob-os-small"><span>Items<b>'+o.lineCount+'</b></span><span>Qty<b>'+o.totalQty+'</b></span>'
       +   '<span>Salesperson<b>'+esc(o.poc||'—')+'</b></span><span>Est. dispatch<b>'+esc(o.estDispatch||'—')+'</b></span></div>';
@@ -23761,11 +23790,13 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       { l:'Risk of churn', v: ci.churn||'—', risk: ci.churn },
     ];
     $('ob-dr-stats').innerHTML = concise.map(statCell).join('');
-    const nextTxt = ci.nextExpectedT!=null ? (ci.overdueDays>0?('overdue '+ci.overdueDays+'d'):('next in '+(-ci.overdueDays)+'d')) : '';
-    $('ob-dr-ci-meta').textContent = ps.count+' orders · ₹'+compact(ps.lifetime)+' lifetime'+(nextTxt?' · '+nextTxt:'');
+    const nextTxt = ci.nextExpectedT!=null ? (ci.overdueDays>0?('Overdue '+ci.overdueDays+'d'):('Expected '+fmtTsShort(ci.nextExpectedT))) : '';
+    $('ob-dr-ci-meta').textContent = ps.count+' Orders • '+money(ps.lifetime)+' Lifetime'+(nextTxt?' • '+nextTxt:'');
 
     // 5 · recent orders (last 6) with preview meta
-    $('ob-dr-prev-count').textContent = ps.count+' order'+(ps.count!==1?'s':'')+(ps.list[0]?' · last '+inr(ps.list[0].totalValue):'');
+    const last = ps.list[0];
+    $('ob-dr-prev-count').textContent = ps.count+' Previous Order'+(ps.count!==1?'s':'')
+      + (last ? ' • Last '+inr(last.totalValue)+(fmtDateShort(last.piDateISO)?' · '+fmtDateShort(last.piDateISO):'') : '');
     $('ob-dr-prev').innerHTML = ps.list.slice(0,6).map(p => prevRow(p, ref)).join('');
 
     // 2 · line items — compact: # · Product · Size · Qty · Rate · Total (units/freight/tax in tooltip)
@@ -23775,7 +23806,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       const rate = li.billRate || li.actualRate || 0;
       const tip = 'Units '+(li.units?li.units.toLocaleString('en-IN',{maximumFractionDigits:2}):'—')+'  ·  Freight '+inr(li.freight||0)+'  ·  Taxable '+inr(li.taxable);
       return '<tr title="'+esc(tip)+'"><td>'+li.ono+'</td>'
-        + '<td class="it-prod"><span class="ip-cat">'+esc(d.product)+'</span>'+(d.attrs?'<span class="ip-attrs">'+esc(d.attrs)+'</span>':'')+'</td>'
+        + '<td class="it-prod">'+d.rows+'</td>'
         + '<td class="it-size">'+(esc(d.dim)||'—')+'</td>'
         + '<td class="it-num">'+li.qty+'</td>'
         + '<td class="it-num">'+(rate?inr(rate):'—')+'</td>'
@@ -23786,7 +23817,24 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 
     // 3 · workflow stepper with elapsed time between stages
     const stages = buildWorkflow(o);
-    $('ob-dr-wf-meta').textContent = o.status + (o.estDispatch ? ' • '+o.estDispatch : '');
+    // Collapsed preview → the furthest milestone the order has actually
+    // reached (last completed stage), ✓ + date. 'current' is the *next*
+    // awaiting step, so it isn't shown as the order's stage.
+    const curStage = stages.find(s => s.state==='cancelled')
+      || stages.slice().reverse().find(s => s.state==='done')
+      || stages.find(s => s.state==='current')
+      || stages[stages.length-1];
+    if (curStage){
+      // tsISO may be a real ISO timestamp or an already-formatted display
+      // string (e.g. "24 Jun 26") for estimated dispatch — handle both.
+      const curDate = fmtDateShort(curStage.tsISO) || (/[A-Za-z]/.test(curStage.tsISO||'') ? curStage.tsISO : '');
+      const cancelled = curStage.state==='cancelled';
+      $('ob-dr-wf-meta').innerHTML = '<span class="ob-wf-cur'+(cancelled?' cancelled':'')+'">'
+        + '<span class="wc-check">'+(cancelled?'×':'✓')+'</span>'
+        + '<span class="wc-stage">'+esc(curStage.label)+'</span>'
+        + (curDate?'<span class="wc-dot">·</span>'+esc(curDate):'')
+        + '</span>';
+    } else { $('ob-dr-wf-meta').textContent = o.status; }
     let prevMs = null;
     $('ob-dr-history').innerHTML = stages.map(s => {
       const mark = s.state==='done' ? '✓' : s.state==='cancelled' ? '×' : s.state==='current' ? '●' : '';
