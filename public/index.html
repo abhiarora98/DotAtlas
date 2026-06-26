@@ -1598,11 +1598,22 @@
   .ob-de-row .de-ship label { font-family: var(--fm); font-size: 9px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-4); }
   .ob-de-row input.de-qty { width: 56px; text-align: right; font-family: var(--fm); font-variant-numeric: tabular-nums; font-size: 12.5px; padding: 7px 8px; border: 1px solid var(--line-2); border-radius: 7px; background: var(--surface); color: var(--text); }
   .ob-de-row input.de-qty:disabled { opacity: 0.5; }
-  .ob-de-row input.de-qty.over { border-color: var(--rose); color: var(--rose); }
-  .ob-de-row .de-rem { font-family: var(--fm); font-size: 10px; color: var(--text-4); text-align: right; white-space: nowrap; }
-  .ob-de-row .de-rem b { font-size: 12px; font-variant-numeric: tabular-nums; margin-left: 5px; }
-  .ob-de-row .de-rem b.r0 { color: var(--emerald); }
-  .ob-de-row .de-rem b.rPos { color: var(--rose); }
+  /* Live per-colour variance chip: − under order (rose), + over order (blue), ✓ on order (emerald) */
+  .ob-de-row .de-var { justify-self: end; font-family: var(--fm); font-size: 12px; font-variant-numeric: tabular-nums; font-weight: 700; text-align: right; white-space: nowrap; padding: 3px 9px; border-radius: 999px; border: 1px solid transparent; }
+  .ob-de-row .de-var.ok { color: var(--emerald); background: var(--emerald-soft); }
+  .ob-de-row .de-var.under { color: var(--rose); background: var(--rose-soft); }
+  .ob-de-row .de-var.over { color: var(--blue); background: var(--blue-soft); }
+  /* Live variance summary strip below the editor */
+  .ob-disp-varsum { margin-top: 10px; padding: 11px 13px; border-radius: 11px; background: var(--amber-soft); border: 1px solid rgba(255,176,121,0.34); }
+  .ob-disp-varsum[hidden] { display: none; }
+  .ob-disp-varsum .dv-head { display: flex; align-items: center; gap: 8px; font-family: var(--fm); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--amber); }
+  .ob-disp-varsum .dv-body { display: flex; flex-wrap: wrap; gap: 7px; margin: 8px 0 0; }
+  .ob-disp-varsum .dv-grp { font-family: var(--fm); font-size: 11px; font-weight: 600; padding: 4px 9px; border-radius: 7px; background: var(--surface); border: 1px solid var(--line); }
+  .ob-disp-varsum .dv-grp.dv-red { color: var(--rose); }
+  .ob-disp-varsum .dv-grp.dv-inc { color: var(--blue); }
+  .ob-disp-varsum .dv-grp.dv-sub { color: var(--blue); }
+  .ob-disp-varsum .dv-tot { margin-top: 9px; font-family: var(--fm); font-size: 11.5px; font-weight: 700; color: var(--text-2); }
+  .ob-disp-varsum .dv-tot.ok { color: var(--emerald); }
   /* Substitution rows + add button inside a group */
   .ob-de-addsub { display: block; width: 100%; text-align: left; padding: 9px 14px; font-family: var(--fm); font-size: 10.5px; letter-spacing: 0.02em; color: var(--blue); background: transparent; border: 0; border-top: 1px dashed var(--line); cursor: pointer; }
   .ob-de-addsub:hover { background: var(--blue-soft); }
@@ -1620,12 +1631,20 @@
   .ob-variance-overlay { z-index: 1260; }
   .live-dot.warn { background: var(--amber); box-shadow: 0 0 0 4px rgba(255,176,121,0.12); }
   .ob-var-intro { font-size: 12.5px; color: var(--text-2); margin: 0 0 14px; }
-  .ob-var-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
-  .ob-var-item { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text); padding: 11px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); }
-  .ob-var-item .vi-ic { font-size: 14px; }
-  .ob-var-item.short { border-color: var(--rose-soft); } .ob-var-item.short .vi-ic { color: var(--rose); }
-  .ob-var-item.sub { border-color: rgba(124,168,255,0.3); } .ob-var-item.sub .vi-ic { color: var(--blue); }
-  .ob-var-item .vi-mut { color: var(--text-3); font-family: var(--fm); font-size: 11px; }
+  .ob-var-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 4px; }
+  .ob-var-grp { border: 1px solid var(--line); border-radius: 11px; overflow: hidden; background: var(--surface-2); }
+  .ob-var-grp .vg-h { font-family: var(--fm); font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; padding: 8px 14px; background: var(--surface-3); border-bottom: 1px solid var(--line); }
+  .ob-var-grp.red .vg-h { color: var(--rose); }
+  .ob-var-grp.inc .vg-h { color: var(--blue); }
+  .ob-var-grp.sub .vg-h { color: var(--blue); }
+  .ob-var-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--text); padding: 10px 14px; border-bottom: 1px solid var(--line); }
+  .ob-var-item:last-child { border-bottom: 0; }
+  .ob-var-item .vi-c { font-weight: 600; }
+  .ob-var-item .vi-d { font-family: var(--fm); font-variant-numeric: tabular-nums; font-weight: 700; }
+  .ob-var-grp.red .vi-d { color: var(--rose); }
+  .ob-var-grp.inc .vi-d, .ob-var-grp.sub .vi-d { color: var(--blue); }
+  .ob-var-total { margin: 14px 0 4px; padding: 12px 14px; border-radius: 11px; font-size: 13px; font-weight: 700; color: var(--text); background: var(--surface-2); border: 1px solid var(--line); }
+  .ob-var-total.ok { color: var(--emerald); background: var(--emerald-soft); border-color: var(--emerald-soft); }
 
   /* Sales variance banner */
   .ob-var-banner { display: flex; align-items: center; gap: 12px; margin: 0 0 12px; padding: 12px 14px; border-radius: 11px; background: var(--amber-soft); border: 1px solid rgba(255,176,121,0.34); }
@@ -1691,6 +1710,8 @@
 
   /* Fulfilment cells in the line-item table */
   .ob-items td.it-disp { color: var(--emerald); }
+  /* Over-shipment marker (colour-mix variance) — dispatched more of this colour than ordered */
+  .ob-items td.it-disp .it-over { font-family: var(--fm); font-size: 10px; font-weight: 700; color: var(--blue); background: var(--blue-soft); border-radius: 5px; padding: 1px 4px; margin-left: 4px; }
   .ob-items td.it-pend { color: var(--text-3); }
   /* Remaining stays red until it reaches zero, then turns green. */
   .ob-items td.it-pend.has { color: var(--rose); font-weight: 700; }
@@ -3997,8 +4018,9 @@
             </div>
           </div>
           <div class="pi-field" id="ob-disp-lines-wrap">
-            <label>Quantities <span class="ap-muted" id="ob-disp-lines-hint">— full dispatch ships all pending units</span></label>
+            <label>Loading <span class="ap-muted" id="ob-disp-lines-hint">— enter what's actually being loaded</span></label>
             <div class="ob-disp-editor" id="ob-disp-lines"></div>
+            <div class="ob-disp-varsum" id="ob-disp-varsum" hidden></div>
           </div>
           <div class="pi-field">
             <label for="ob-disp-lr">LR / Docket Number <span class="ap-req">*</span></label>
@@ -4043,14 +4065,15 @@
       <div class="ap-modal" role="dialog" aria-modal="true" aria-labelledby="ob-var-title">
         <div class="ap-head">
           <div>
-            <div class="eb" style="margin-bottom:6px;"><span class="live-dot warn"></span>Variance check</div>
-            <h2 id="ob-var-title">Dispatch <span style="color: var(--amber);">variance</span> detected.</h2>
+            <div class="eb" style="margin-bottom:6px;"><span class="live-dot warn"></span>Variance summary</div>
+            <h2 id="ob-var-title">Changes from the <span style="color: var(--amber);">Sales Order</span>.</h2>
           </div>
           <button class="ap-close" id="ob-var-close" aria-label="Close">×</button>
         </div>
         <div class="ap-body">
-          <p class="ob-var-intro">The dispatched quantities differ from the Sales Order:</p>
+          <p class="ob-var-intro">Dispatch is loading a different mix than ordered. Nothing is blocked — the shipment is recorded as-is.</p>
           <div class="ob-var-list" id="ob-var-list"></div>
+          <div class="ob-var-total" id="ob-var-total"></div>
           <div class="ap-actions">
             <button class="pi-btn" id="ob-var-cancel">Back</button>
             <button class="pi-btn prime" id="ob-var-continue">Continue dispatch →</button>
@@ -23897,12 +23920,18 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     records.forEach(d => { const ls = d.lines || {}; for (const ono in ls) disp[ono] = (disp[ono]||0) + (Number(ls[ono])||0); });
     // Legacy master "Dispatched" with no granular records → treat as fully shipped.
     const legacyFull = !records.length && base.status === 'Dispatched';
-    let totalOrdered = 0, totalDisp = 0;
+    // Dispatch may load more of a colour than ordered (colour-mix change), so we
+    // track the raw shipped qty AND the capped fulfilment separately.
+    let totalOrdered = 0, totalDisp = 0, totalLineShipped = 0, totalOver = 0;
     const perLine = base.lines.map(li => {
-      const d = legacyFull ? li.qty : Math.min(li.qty, disp[li.ono]||0);
-      totalOrdered += li.qty; totalDisp += d;
-      return { ono: li.ono, ordered: li.qty, dispatched: d, pending: Math.max(0, li.qty - d) };
+      const raw = legacyFull ? li.qty : (disp[li.ono]||0);
+      const fulfilled = Math.min(li.qty, raw);
+      const over = Math.max(0, raw - li.qty);
+      totalOrdered += li.qty; totalDisp += fulfilled; totalLineShipped += raw; totalOver += over;
+      return { ono: li.ono, ordered: li.qty, dispatched: raw, fulfilled, pending: Math.max(0, li.qty - raw), over };
     });
+    let subTotal = 0; records.forEach(d => (d.subs||[]).forEach(s => subTotal += (+s.qty||0)));
+    const totalShipped = totalLineShipped + subTotal;
     let status;
     if (base.status === 'Cancelled' || base.status === 'Repeat') status = base.status;
     else if (ov.delivery) status = 'Delivered';
@@ -23910,7 +23939,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     else if (legacyFull) status = 'Fully Dispatched';
     else if (ov.ready) status = 'Ready for Dispatch';
     else status = base.status;  // Pending
-    return { status, perLine, totalOrdered, totalDisp, records, legacyFull, ready: ov.ready, delivery: ov.delivery };
+    return { status, perLine, totalOrdered, totalDisp, totalLineShipped, totalShipped, totalOver, subTotal, records, legacyFull, ready: ov.ready, delivery: ov.delivery };
   }
 
   // Merge a base order with its overlay → effective record (status derived from
@@ -24522,12 +24551,26 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       + '</div></div>'
       + '<div class="ob-os-small">'+meta.join('<span class="sep">•</span>')+'</div>';
 
-    // Dispatch variance banner — surfaced to Sales until reviewed.
+    // Dispatch variance banner — surfaced to Sales until reviewed. Triggered by
+    // any colour-mix change (reduced / increased) or substitution, not just subs.
     const vb = $('ob-dr-varbanner');
-    const allSubs = (o._ov && o._ov.dispatches || []).flatMap(d => (d.subs||[]).map(s => ({ ...s, n: d.n })));
-    if (o._ov && o._ov.variance && !o._ov.varianceReviewed && allSubs.length){
-      const subTxt = allSubs.map(s => s.qty+' '+s.label).join(', ');
-      vb.innerHTML = '<div class="vb-main"><span class="vb-ic">⚠</span><div><b>Dispatch completed with variance</b><span class="vb-sub">Substituted: '+esc(subTxt)+' · review before invoice generation</span></div></div>'
+    if (o._ov && o._ov.variance && !o._ov.varianceReviewed){
+      const vdat = o._ov.varianceData;
+      let sub;
+      if (vdat){
+        const bits = [];
+        (vdat.reduced||[]).forEach(r => bits.push(esc(r.colour)+' '+r.delta));
+        (vdat.increased||[]).forEach(r => bits.push(esc(r.colour)+' +'+r.delta));
+        (vdat.subs||[]).forEach(s => bits.push(esc(s.label)+' +'+s.qty));
+        const tot = vdat.totalDelta===0 ? 'total quantity unchanged'
+          : vdat.totalDelta<0 ? ((-vdat.totalDelta)+' pending')
+          : ('+'+vdat.totalDelta+' over order');
+        sub = (bits.join(', ') || 'mix changed') + ' · ' + tot + ' · review before invoice';
+      } else {
+        const allSubs = (o._ov.dispatches||[]).flatMap(d => (d.subs||[]).map(s => ({ ...s, n: d.n })));
+        sub = (allSubs.length ? 'Substituted: '+esc(allSubs.map(s=>s.qty+' '+s.label).join(', '))+' · ' : '') + 'review before invoice generation';
+      }
+      vb.innerHTML = '<div class="vb-main"><span class="vb-ic">🟡</span><div><b>Dispatch variance — colour mix changed</b><span class="vb-sub">'+sub+'</span></div></div>'
         + (state.dept !== 'dispatch' ? '<button class="vb-ack" data-act="ackvar" data-ref="'+esc(o.ref)+'">Reviewed</button>' : '');
       vb.hidden = false;
     } else { vb.hidden = true; vb.innerHTML = ''; }
@@ -24602,13 +24645,13 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         + '<td class="it-prod">'+d.rows+'</td>'
         + '<td class="it-size">'+(esc(d.dim)||'—')+'</td>'
         + '<td class="it-num">'+li.qty+'</td>'
-        + '<td class="it-num it-disp">'+(pl.dispatched||0)+'</td>'
+        + '<td class="it-num it-disp">'+(pl.dispatched||0)+(pl.over>0?'<span class="it-over">+'+pl.over+'</span>':'')+'</td>'
         + '<td class="it-num it-pend'+(pl.pending>0?' has':(pl.dispatched>0?' done':''))+'">'+(pl.pending||0)+'</td>'
         + '<td class="it-total">'+inr(li.total)+'</td></tr>';
     }).join('');
     $('ob-dr-items-foot').innerHTML = '<tr><td class="it-lbl" colspan="3">Total · '+o.lineCount+' items</td>'
       + '<td class="it-num">'+f.totalOrdered+'</td>'
-      + '<td class="it-num it-disp">'+f.totalDisp+'</td>'
+      + '<td class="it-num it-disp">'+f.totalLineShipped+(f.totalOver>0?'<span class="it-over">+'+f.totalOver+'</span>':'')+'</td>'
       + '<td class="it-num it-pend'+((f.totalOrdered-f.totalDisp)>0?' has':(f.totalDisp>0?' done':''))+'">'+(f.totalOrdered-f.totalDisp)+'</td>'
       + '<td class="it-grand">'+inr(o.totalValue)+'</td></tr>';
 
@@ -25066,8 +25109,9 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const f = fulfil(base);
     const pendByOno = {}; f.perLine.forEach(p => pendByOno[p.ono] = p.pending);
     const ordByOno = {}; base.lines.forEach(li => ordByOno[li.ono] = li.qty);
+    const alreadyByOno = {}; f.perLine.forEach(p => alreadyByOno[p.ono] = p.dispatched);
     const partial = segValue('ob-disp-type') === 'partial';
-    $('ob-disp-lines-hint').textContent = partial ? '— enter the quantity shipping now beside each colour' : '— full dispatch ships all pending units';
+    $('ob-disp-lines-hint').textContent = partial ? "— enter what's actually being loaded; Native reconciles against the order" : '— full dispatch ships all remaining units';
     // group pending lines like the dispatch summary
     const groups = [], gidx = {};
     base.lines.forEach(li => {
@@ -25075,23 +25119,24 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       const key = [li.category, li.model, li.backing, li.width, li.length].map(x=>x||'').join('|');
       let g = gidx[key];
       if (!g){ g = { product:li.category||'—', model:li.model||'', backing:li.backing||'', width:li.width||'', length:li.length||'', rows:[] }; gidx[key] = g; groups.push(g); }
-      g.rows.push({ ono: li.ono, colour: li.colour||'—', ordered: ordByOno[li.ono]||0, pending: pend });
+      g.rows.push({ ono: li.ono, colour: li.colour||'—', ordered: ordByOno[li.ono]||0, already: alreadyByOno[li.ono]||0, pending: pend });
     });
     $('ob-disp-lines').innerHTML = groups.length ? groups.map(g => {
       const spec = dgSpec(g);
       return '<div class="ob-de-grp"><div class="ob-de-grp-h"><span class="de-g-prod">'+esc(g.product)+'</span>'+(spec?'<span class="de-g-spec">'+esc(spec)+'</span>':'')+'</div>'
         + '<div class="ob-de-rows">'
         + g.rows.map(r =>
-          '<div class="ob-de-row" data-ono="'+r.ono+'" data-pending="'+r.pending+'">'
+          '<div class="ob-de-row" data-ono="'+r.ono+'" data-ordered="'+r.ordered+'" data-already="'+r.already+'" data-pending="'+r.pending+'">'
           + '<span class="de-colour">'+esc(r.colour)+'</span>'
-          + '<span class="de-ord">Ordered <b>'+r.ordered+'</b>'+(r.pending!==r.ordered?' · Pending <b>'+r.pending+'</b>':'')+'</span>'
-          + '<span class="de-ship"><label>Dispatch</label><input class="de-qty" type="number" min="0" max="'+r.pending+'" value="'+r.pending+'"'+(partial?'':' disabled')+'></span>'
-          + '<span class="de-rem">Remaining <b class="r0">0</b></span>'
+          + '<span class="de-ord">Ordered <b>'+r.ordered+'</b>'+(r.already>0?' · Shipped <b>'+r.already+'</b>':'')+'</span>'
+          + '<span class="de-ship"><label>Loading</label><input class="de-qty" type="number" min="0" value="'+r.pending+'"'+(partial?'':' disabled')+'></span>'
+          + '<span class="de-var ok">✓</span>'
           + '</div>').join('')
         + '<div class="ob-de-subs" data-prod="'+esc(g.product)+'" data-spec="'+esc(spec)+'"></div>'
         + '<button type="button" class="ob-de-addsub">+ Substitute a different SKU</button>'
         + '</div></div>';
     }).join('') : '<div class="ob-pack-empty">Nothing pending to dispatch.</div>';
+    updateDispVariance();
   }
   function addSubRow(container){
     const row = document.createElement('div');
@@ -25129,29 +25174,82 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     });
     return subs;
   }
+  // Reconcile what Dispatch is loading against the Sales Order. Quantities are
+  // free — colour mix can change and totals can differ — so this never blocks;
+  // it just classifies the per-colour deltas (reduced / increased / substituted)
+  // and the order-level total so the variance can be surfaced honestly.
+  function dispVarianceData(){
+    const base = baseOrders.find(o=>o.ref===dispatchRef);
+    const f = base ? fulfil(base) : { totalOrdered:0, totalShipped:0 };
+    // Over-ships and substitutions are always surprising and always flagged.
+    // A colour landing UNDER its order is only a variance when it's the other
+    // side of a mix change — i.e. something else over-shipped or substituted to
+    // compensate — or when this is a Full dispatch declaring the order complete.
+    // A plain partial with only shortfalls is just pending, not a variance.
+    const partial = segValue('ob-disp-type') === 'partial';
+    const rows = [...$('ob-disp-lines').querySelectorAll('.ob-de-row')];
+    const reducedRaw = [], increased = [];
+    let thisShipment = 0;
+    rows.forEach(rw => {
+      const ordered = +rw.getAttribute('data-ordered') || 0;
+      const already = +rw.getAttribute('data-already') || 0;
+      let q = Math.floor(+rw.querySelector('.de-qty').value || 0); if (q < 0) q = 0;
+      thisShipment += q;
+      const delta = (already + q) - ordered;
+      const colour = rw.querySelector('.de-colour').textContent;
+      if (delta < 0) reducedRaw.push({ colour, delta });
+      else if (delta > 0) increased.push({ colour, delta });
+    });
+    const subs = collectSubs();
+    let subTotal = 0; subs.forEach(s => subTotal += s.qty);
+    thisShipment += subTotal;
+    const compensated = increased.length > 0 || subs.length > 0;
+    const reduced = (!partial || compensated) ? reducedRaw : [];
+    const grandOrdered = f.totalOrdered;
+    const grandShipped = f.totalShipped + thisShipment;
+    return { reduced, increased, subs, subTotal, grandOrdered, grandShipped, thisShipment,
+             totalDelta: grandShipped - grandOrdered, hasVar: reduced.length>0 || increased.length>0 || subs.length>0 };
+  }
+  function totalVarianceLine(d, longForm){
+    if (d.totalDelta === 0) return 'Total quantity unchanged ✓';
+    if (d.totalDelta < 0) return 'Ordered '+d.grandOrdered+', dispatching '+d.grandShipped+(longForm?' — '+(-d.totalDelta)+' remain pending':' · '+(-d.totalDelta)+' pending');
+    return 'Ordered '+d.grandOrdered+', dispatching '+d.grandShipped+(longForm?' — +'+d.totalDelta+' over order':' · +'+d.totalDelta+' over');
+  }
+  // Live summary strip under the editor — updates as Dispatch types.
+  function updateDispVariance(){
+    const strip = $('ob-disp-varsum'); if(!strip) return;
+    const d = dispVarianceData();
+    if (!d.hasVar){ strip.hidden = true; strip.innerHTML = ''; return; }
+    const parts = [];
+    if (d.reduced.length) parts.push('<span class="dv-grp dv-red">▼ '+d.reduced.map(r=>esc(r.colour)+' '+r.delta).join(' · ')+'</span>');
+    if (d.increased.length) parts.push('<span class="dv-grp dv-inc">▲ '+d.increased.map(r=>esc(r.colour)+' +'+r.delta).join(' · ')+'</span>');
+    if (d.subs.length) parts.push('<span class="dv-grp dv-sub">⇄ '+d.subs.map(s=>esc(s.label)+' +'+s.qty).join(' · ')+'</span>');
+    strip.innerHTML = '<div class="dv-head"><span class="live-dot warn"></span>Dispatch variance</div>'
+      + '<div class="dv-body">'+parts.join('')+'</div>'
+      + '<div class="dv-tot'+(d.totalDelta===0?' ok':'')+'">'+totalVarianceLine(d, false)+'</div>';
+    strip.hidden = false;
+  }
   let varianceOK = false;
   function saveDispatch(){
     const ref = dispatchRef; if(!ref) return;
     const lr = $('ob-disp-lr').value.trim();
     if (!lr){ setApStatus('ob-disp-status','err','LR / Docket number is required.'); $('ob-disp-lr').focus(); return; }
-    // collect ship-now quantities (per original line / ono) + short lines
+    // collect loaded quantities (per original line / ono) — raw, uncapped:
+    // Dispatch may load more of a colour than ordered when the mix changes.
     const rows = [...$('ob-disp-lines').querySelectorAll('.ob-de-row')];
-    const linesObj = {}; let total = 0, over = false; const shortList = [];
+    const linesObj = {}; let total = 0;
     rows.forEach(rw => {
-      const ono = rw.getAttribute('data-ono'), pend = +rw.getAttribute('data-pending');
-      let q = Math.floor(+rw.querySelector('.de-qty').value || 0);
-      if (q < 0) q = 0; if (q > pend){ over = true; }
-      if (q > 0) { linesObj[ono] = Math.min(q, pend); total += linesObj[ono]; }
-      const short = pend - (linesObj[ono]||0);
-      if (short > 0) shortList.push({ colour: rw.querySelector('.de-colour').textContent, qty: short });
+      const ono = rw.getAttribute('data-ono');
+      let q = Math.floor(+rw.querySelector('.de-qty').value || 0); if (q < 0) q = 0;
+      if (q > 0) { linesObj[ono] = q; total += q; }
     });
-    if (over){ setApStatus('ob-disp-status','err','Ship-now quantity cannot exceed pending.'); return; }
     const subs = collectSubs();
     const subTotal = subs.reduce((a,s)=>a+s.qty, 0);
     if (total + subTotal <= 0){ setApStatus('ob-disp-status','err','Enter at least one quantity to dispatch.'); return; }
-    // Variance gate: substitutions reconcile against the Sales Order, so confirm
-    // before recording (Sales will review before the invoice).
-    if (subs.length && !varianceOK){ showVariance(subs, shortList); return; }
+    // Non-blocking variance review: if the loaded mix differs from the order,
+    // show the summary once before recording. Never prevents the dispatch.
+    const vd = dispVarianceData();
+    if (vd.hasVar && !varianceOK){ showVariance(); return; }
     varianceOK = false;
     const dtLocal = $('ob-disp-dt').value || nowLocalDT();
     const dispatchAt = dtLocal.length===16 ? dtLocal+':00' : dtLocal;
@@ -25169,23 +25267,36 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     };
     ov.dispatches.push(rec);
     delete ov.status;
-    if (subs.length){ ov.variance = true; ov.varianceReviewed = false; } // flag Sales to reconcile
+    // Flag Sales to reconcile whenever the loaded mix differs from the order —
+    // a reduced/increased colour OR a substitution. Snapshot the variance for
+    // the banner so Sales sees exactly what changed.
+    if (vd.hasVar){
+      ov.variance = true; ov.varianceReviewed = false;
+      ov.varianceData = { reduced: vd.reduced, increased: vd.increased,
+        subs: vd.subs.map(s=>({ label:s.label, qty:s.qty })),
+        grandOrdered: vd.grandOrdered, grandShipped: vd.grandShipped, totalDelta: vd.totalDelta };
+    }
     const f = fulfil(baseOrders.find(o=>o.ref===ref));
     const full = f.totalDisp >= f.totalOrdered;
     const shipped = total + subTotal;
-    const kindWord = subs.length ? 'Dispatched with variance' : (full ? 'Full dispatch' : 'Partial dispatch');
+    const kindWord = vd.hasVar ? 'Dispatched with variance' : (full ? 'Full dispatch' : 'Partial dispatch');
     const histSub = kindWord + ' · ' + shipped + ' units · LR ' + lr + (rec.vehicle?(' · '+rec.vehicle):'');
     ov.history.push({ kind:'dispatched', label: full?'Dispatched':'Partially Dispatched', tsISO: dispatchAt, by:'Dispatch Team', sub: histSub, remarks: rec.remarks });
     saveOverlay(); closeDispatch(); render(); if (drawerRef === ref) openDrawer(ref);
-    showSuccess((subs.length ? 'Dispatched with variance' : full ? 'Dispatched' : 'Partially dispatched') + '\n' + shipped + ' units · LR ' + lr);
+    showSuccess((vd.hasVar ? 'Dispatched with variance' : full ? 'Dispatched' : 'Partially dispatched') + '\n' + shipped + ' units · LR ' + lr);
   }
 
-  // ---- dispatch variance check (substitution / short) ----
-  function showVariance(subs, shortList){
-    const items = [];
-    shortList.forEach(s => items.push('<div class="ob-var-item short"><span class="vi-ic">⚠</span>'+s.qty+' '+esc(s.colour)+' not shipped</div>'));
-    subs.forEach(s => items.push('<div class="ob-var-item sub"><span class="vi-ic">⇄</span>'+s.qty+' '+esc(s.label)+' substituted'+(s.product?(' <span class="vi-mut">· '+esc(s.product)+'</span>'):'')+'</div>'));
-    $('ob-var-list').innerHTML = items.join('') || '<div class="ob-var-item">Quantities differ from the Sales Order.</div>';
+  // ---- dispatch variance summary (grouped reduced / increased / substituted) ----
+  function showVariance(){
+    const d = dispVarianceData();
+    const blocks = [];
+    if (d.reduced.length) blocks.push('<div class="ob-var-grp red"><div class="vg-h">▼ Reduced</div>'+d.reduced.map(r=>'<div class="ob-var-item"><span class="vi-c">'+esc(r.colour)+'</span><span class="vi-d">'+r.delta+'</span></div>').join('')+'</div>');
+    if (d.increased.length) blocks.push('<div class="ob-var-grp inc"><div class="vg-h">▲ Increased</div>'+d.increased.map(r=>'<div class="ob-var-item"><span class="vi-c">'+esc(r.colour)+'</span><span class="vi-d">+'+r.delta+'</span></div>').join('')+'</div>');
+    if (d.subs.length) blocks.push('<div class="ob-var-grp sub"><div class="vg-h">⇄ Substituted</div>'+d.subs.map(s=>'<div class="ob-var-item"><span class="vi-c">'+esc(s.label)+'</span><span class="vi-d">+'+s.qty+'</span></div>').join('')+'</div>');
+    $('ob-var-list').innerHTML = blocks.join('') || '<div class="ob-var-item"><span class="vi-c">Quantities differ from the Sales Order.</span></div>';
+    const tot = $('ob-var-total');
+    tot.innerHTML = totalVarianceLine(d, true);
+    tot.className = 'ob-var-total'+(d.totalDelta===0?' ok':'');
     $('ob-variance').hidden = false;
   }
   function closeVariance(){ $('ob-variance').hidden = true; }
@@ -25412,22 +25523,27 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     $('ob-disp-cancel').addEventListener('click', closeDispatch);
     $('ob-disp-save').addEventListener('click', saveDispatch);
     $('ob-dispatch').addEventListener('click', e => { if (e.target === $('ob-dispatch')) closeDispatch(); });
-    // live-validate ship-now quantities + update the remaining-after figure
+    // live-reconcile loaded quantities: per-colour variance chip + summary strip
     $('ob-disp-lines').addEventListener('input', e => {
-      const inp = e.target.closest('.de-qty'); if(!inp) return;
-      const row = inp.closest('.ob-de-row');
-      const pend = +row.getAttribute('data-pending');
-      const v = Math.max(0, +inp.value||0);
-      const over = v > pend;
-      inp.classList.toggle('over', over);
-      const rem = Math.max(0, pend - Math.min(v, pend));
-      const remEl = row.querySelector('.de-rem b');
-      if (remEl){ remEl.textContent = over ? '!' : rem; remEl.className = rem > 0 ? 'rPos' : 'r0'; }
+      const inp = e.target.closest('.de-qty');
+      if (inp){
+        const row = inp.closest('.ob-de-row');
+        const ordered = +row.getAttribute('data-ordered') || 0;
+        const already = +row.getAttribute('data-already') || 0;
+        const v = Math.max(0, Math.floor(+inp.value||0));
+        const delta = (already + v) - ordered;
+        const varEl = row.querySelector('.de-var');
+        if (varEl){
+          varEl.className = 'de-var ' + (delta===0 ? 'ok' : delta < 0 ? 'under' : 'over');
+          varEl.textContent = delta===0 ? '✓' : (delta > 0 ? '+'+delta : String(delta));
+        }
+      }
+      updateDispVariance();
     });
     // add / remove substitution rows
     $('ob-disp-lines').addEventListener('click', e => {
       const add = e.target.closest('.ob-de-addsub'); if (add){ addSubRow(add.previousElementSibling); return; }
-      const rm = e.target.closest('.de-sub-x'); if (rm){ rm.closest('.ob-de-sub').remove(); }
+      const rm = e.target.closest('.de-sub-x'); if (rm){ rm.closest('.ob-de-sub').remove(); updateDispVariance(); }
     });
     // variance check modal
     $('ob-var-close').addEventListener('click', closeVariance);
