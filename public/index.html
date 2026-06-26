@@ -1678,8 +1678,33 @@
   .ls-grp td { padding: 7px 6px; border-bottom: 1px solid #dde2e8; font-size: 13px; }
   .ls-grp td.q { text-align: right; font-weight: 700; width: 80px; }
   .ls-grp .ls-grp-tot td { border-bottom: 0; border-top: 2px solid #11151c; font-weight: 800; padding-top: 8px; }
+  .ls-pack { margin-top: 22px; border: 1px solid #cdd4dd; border-radius: 8px; padding: 14px 16px; break-inside: avoid; }
+  .ls-pack-h { font-family: var(--fd); font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; color: #11151c; margin-bottom: 12px; }
+  .ls-pack-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 18px; }
+  .ls-pack-grid > div span { display: block; font-family: var(--fm); font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: #889; }
+  .ls-pack-grid > div b { font-size: 13px; font-weight: 700; }
+  .ls-pack-rmk { margin-top: 12px; padding-top: 10px; border-top: 1px dashed #cdd4dd; font-size: 12.5px; color: #334; line-height: 1.5; }
   .ls-foot { margin-top: 24px; display: flex; justify-content: space-between; gap: 30px; }
   .ls-foot .sig { flex: 1; border-top: 1px solid #99a; padding-top: 6px; font-family: var(--fm); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #667; }
+  .ob-loadsheet-btn .ls-sub { color: var(--text-3); font-size: 10px; }
+
+  /* ===== Success tick (status transition) ===== */
+  .ob-success { position: fixed; inset: 0; z-index: 1400; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+  .ob-success[hidden] { display: none; }
+  .ob-success-card { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 30px 40px; border-radius: 18px;
+    background: rgba(10,14,20,0.86); border: 1px solid var(--emerald-mute); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 30px 80px -24px rgba(0,0,0,0.8); opacity: 0; transform: scale(0.9); }
+  .ob-success.show .ob-success-card { animation: obSuccPop 280ms var(--ease) forwards; }
+  @keyframes obSuccPop { to { opacity: 1; transform: scale(1); } }
+  .ob-check { width: 64px; height: 64px; }
+  .ob-check-c { stroke: var(--emerald); stroke-width: 2.5; stroke-dasharray: 145; stroke-dashoffset: 145; }
+  .ob-check-k { stroke: var(--emerald); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 48; stroke-dashoffset: 48; }
+  .ob-success.show .ob-check-c { animation: obCheckCircle 400ms var(--ease) 80ms forwards; }
+  .ob-success.show .ob-check-k { animation: obCheckKick 320ms var(--ease) 380ms forwards; }
+  @keyframes obCheckCircle { to { stroke-dashoffset: 0; } }
+  @keyframes obCheckKick { to { stroke-dashoffset: 0; } }
+  .ob-success-msg { font-family: var(--fd); font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: -0.01em; text-align: center; white-space: pre-line; line-height: 1.4; }
+  @media (prefers-reduced-motion: reduce) { .ob-success.show .ob-success-card, .ob-success.show .ob-check-c, .ob-success.show .ob-check-k { animation-duration: 1ms; } }
   @media print {
     body * { visibility: hidden !important; }
     .ob-ls-overlay, .ob-ls-overlay * { visibility: visible !important; }
@@ -3636,17 +3661,25 @@
             <div class="ob-os-grid" id="ob-dr-ordersum"></div>
           </div>
 
-          <!-- 1b · dispatch summary (grouped pick view — dispatch sheet only) -->
+          <!-- 1b · packing instructions (sales handover — dispatch sheet, on top) -->
+          <div class="ob-coll dr-dispatch-only" data-open="1" data-default="1" data-sec="packing">
+            <div class="ob-coll-h"><span class="ob-coll-t">Packing instructions</span><span class="ob-coll-meta" id="ob-dr-pack-meta"></span><span class="ob-chev">▾</span></div>
+            <div class="ob-coll-b"><div class="ob-coll-inner">
+              <div class="ob-pack" id="ob-dr-pack"></div>
+            </div></div>
+          </div>
+
+          <!-- 1c · dispatch summary (grouped pick view — dispatch sheet only) -->
           <div class="ob-coll dr-dispatch-only" data-open="1" data-default="1" data-sec="dsum">
             <div class="ob-coll-h"><span class="ob-coll-t">Dispatch summary</span><span class="ob-coll-meta" id="ob-dr-dsum-meta"></span><span class="ob-chev">▾</span></div>
             <div class="ob-coll-b"><div class="ob-coll-inner">
               <div class="ob-dsum" id="ob-dr-dsum"></div>
-              <button class="ob-loadsheet-btn" id="ob-dr-loadsheet">🖨  Generate load sheet</button>
+              <button class="ob-loadsheet-btn" id="ob-dr-loadsheet">🖨  Generate load sheet <span class="ls-sub">— includes packing instructions</span></button>
             </div></div>
           </div>
 
-          <!-- 2 · order line items -->
-          <div class="ob-coll" data-open="1" data-default="1" data-sec="items">
+          <!-- 2 · order line items (sales overview only) -->
+          <div class="ob-coll dr-sales-only" data-open="1" data-default="1" data-sec="items">
             <div class="ob-coll-h"><span class="ob-coll-t">Order line items</span><span class="ob-coll-meta" id="ob-dr-itemcount"></span><span class="ob-chev">▾</span></div>
             <div class="ob-coll-b"><div class="ob-coll-inner">
               <div class="ob-dr-items-wrap">
@@ -3666,14 +3699,6 @@
             <div class="ob-coll-h"><span class="ob-coll-t">Dispatch history</span><span class="ob-coll-meta" id="ob-dr-disp-meta"></span><span class="ob-chev">▾</span></div>
             <div class="ob-coll-b"><div class="ob-coll-inner">
               <div class="ob-disp-list" id="ob-dr-disp-list"></div>
-            </div></div>
-          </div>
-
-          <!-- 2c · packing instructions (from sales handover — dispatch sheet only) -->
-          <div class="ob-coll dr-dispatch-only" data-open="1" data-default="1" data-sec="packing">
-            <div class="ob-coll-h"><span class="ob-coll-t">Packing instructions</span><span class="ob-coll-meta" id="ob-dr-pack-meta"></span><span class="ob-chev">▾</span></div>
-            <div class="ob-coll-b"><div class="ob-coll-inner">
-              <div class="ob-pack" id="ob-dr-pack"></div>
             </div></div>
           </div>
 
@@ -3917,6 +3942,14 @@
           </div>
         </div>
         <div class="ob-ls-doc" id="ob-ls-doc"></div>
+      </div>
+    </div>
+
+    <!-- SUCCESS TICK (status transition confirmation) -->
+    <div class="ob-success" id="ob-success" hidden>
+      <div class="ob-success-card">
+        <svg class="ob-check" viewBox="0 0 52 52" aria-hidden="true"><circle class="ob-check-c" cx="26" cy="26" r="23" fill="none"/><path class="ob-check-k" fill="none" d="M14.5 27l7.5 7.5 15.5-15.5"/></svg>
+        <div class="ob-success-msg" id="ob-success-msg">Done</div>
       </div>
     </div>
 
@@ -24492,13 +24525,32 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
           + '<tr class="ls-grp-tot"><td>Total</td><td class="q">'+g.totalQty+'</td></tr>'
           + '</tbody></table></div>').join('')
       + '</div>'
-      + (r.remarks?'<div class="ls-sum" style="margin-top:18px"><span>Remarks<b style="font-weight:500">'+esc(r.remarks)+'</b></span></div>':'')
+      + '<div class="ls-pack"><div class="ls-pack-h">Packing &amp; dispatch instructions</div>'
+      +   '<div class="ls-pack-grid">'
+      +     '<div><span>Payment</span><b>'+esc(r.paymentStatus||'—')+'</b></div>'
+      +     '<div><span>Packing</span><b>'+esc(r.packingType||'—')+'</b></div>'
+      +     '<div><span>CC attached</span><b>'+(r.ccAttached!=null?(r.ccAttached?'Yes':'No'):'—')+'</b></div>'
+      +     '<div><span>Samples</span><b>'+((r.samples&&r.samples.has)?esc(r.samples.qty||'Yes'):'None')+'</b></div>'
+      +     '<div><span>Transporter</span><b>'+esc(r.transporter||'—')+'</b></div>'
+      +   '</div>'
+      +   (r.remarks?'<div class="ls-pack-rmk"><b>Remarks:</b> '+esc(r.remarks)+'</div>':'')
+      + '</div>'
       + '<div class="ls-foot"><div class="sig">Picked by</div><div class="sig">Checked by</div><div class="sig">Loaded by</div></div>';
     $('ob-ls-ref').textContent = '#'+o.ref;
     $('ob-ls-doc').innerHTML = doc;
     $('ob-loadsheet').hidden = false;
   }
   function closeLoadSheet(){ $('ob-loadsheet').hidden = true; }
+
+  // brief animated tick confirming a status transition
+  let successT;
+  function showSuccess(msg){
+    const o = $('ob-success'); if (!o) return;
+    $('ob-success-msg').textContent = msg;
+    o.hidden = false; o.classList.remove('show'); void o.offsetWidth; o.classList.add('show');
+    clearTimeout(successT);
+    successT = setTimeout(() => { o.classList.remove('show'); setTimeout(() => { o.hidden = true; }, 250); }, 1700);
+  }
 
   // ---------- in-panel order switching (seamless, no page reload) ----------
   function pushOrderState(ref){ try { history.pushState({ drawerOrder: ref }, '', location.hash || '#orders'); } catch(e){} }
@@ -24690,6 +24742,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     if (ov.ready.samples.has) subBits.push('Samples'+(ov.ready.samples.qty?(' '+ov.ready.samples.qty):''));
     ov.history.push({ kind:'ready', label:'Ready for Dispatch', tsISO: nowISO(), by:'Sales Team', sub: subBits.join(' · '), remarks: ov.ready.remarks });
     saveOverlay(); closeReady(); render(); if (drawerRef === ref) openDrawer(ref);
+    showSuccess('Ready for dispatch\nHanded to dispatch team');
   }
 
   // ---- Dispatch (Dispatch team) — append-only records, full or partial ----
@@ -24765,6 +24818,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const sub = (full ? 'Full dispatch' : 'Partial dispatch') + ' · ' + total + ' units · LR ' + lr + (rec.vehicle?(' · '+rec.vehicle):'');
     ov.history.push({ kind:'dispatched', label: full?'Dispatched':'Partially Dispatched', tsISO: dispatchAt, by:'Dispatch Team', sub, remarks: rec.remarks });
     saveOverlay(); closeDispatch(); render(); if (drawerRef === ref) openDrawer(ref);
+    showSuccess((full ? 'Dispatched' : 'Partially dispatched') + '\n' + total + ' units · LR ' + lr);
   }
 
   function markDelivered(ref){
@@ -24772,6 +24826,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     ov.delivery = { date: todayISO(), ts: nowISO(), by: 'Dispatch Team' };
     ov.history.push({ kind:'delivered', label:'Delivered', tsISO: nowISO(), by:'Dispatch Team', sub:'Delivery confirmed' });
     saveOverlay(); render(); if (drawerRef === ref) openDrawer(ref);
+    showSuccess('Delivered\nOrder complete');
   }
 
   function handleAct(act, ref){
