@@ -1582,20 +1582,27 @@
   .ob-seg.invalid { outline: 1px solid var(--rose); outline-offset: 3px; border-radius: 11px; }
   .pi-input.pi-invalid { border-color: var(--rose) !important; }
 
-  /* Partial-dispatch line editor */
-  .ob-disp-editor { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
-  .ob-disp-er-head, .ob-disp-er { display: grid; grid-template-columns: 1fr 64px 64px 84px; gap: 10px; align-items: center; padding: 9px 12px; }
-  .ob-disp-er-head { font-family: var(--fm); font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-4); background: var(--surface-2); border-bottom: 1px solid var(--line); }
-  .ob-disp-er-head .r, .ob-disp-er .r { text-align: right; }
-  .ob-disp-er { border-bottom: 1px solid var(--line); font-size: 12px; }
-  .ob-disp-er:last-child { border-bottom: 0; }
-  .ob-disp-er .de-prod b { color: var(--text); font-weight: 600; }
-  .ob-disp-er .de-prod span { font-family: var(--fm); font-size: 10px; color: var(--text-3); }
-  .ob-disp-er .de-num { font-variant-numeric: tabular-nums; color: var(--text-2); text-align: right; }
-  .ob-disp-er .de-pend { color: var(--amber); }
-  .ob-disp-er input.de-qty { width: 100%; text-align: right; font-family: var(--fm); font-variant-numeric: tabular-nums; font-size: 12px; padding: 7px 9px; border: 1px solid var(--line-2); border-radius: 7px; background: var(--surface); color: var(--text); }
-  .ob-disp-er input.de-qty:disabled { opacity: 0.55; }
-  .ob-disp-er input.de-qty.over { border-color: var(--rose); color: var(--rose); }
+  /* Dispatch quantity entry — grouped like the Dispatch Summary */
+  .ob-disp-editor { display: flex; flex-direction: column; gap: 10px; }
+  .ob-de-grp { border: 1px solid var(--line); border-radius: 11px; overflow: hidden; background: var(--surface-2); }
+  .ob-de-grp-h { display: flex; align-items: baseline; gap: 10px; padding: 10px 14px; background: var(--surface-3); border-bottom: 1px solid var(--line); }
+  .ob-de-grp-h .de-g-prod { font-family: var(--fd); font-size: 13px; font-weight: 700; color: var(--text); }
+  .ob-de-grp-h .de-g-spec { font-family: var(--fm); font-size: 10.5px; color: var(--text-3); }
+  .ob-de-rows { display: flex; flex-direction: column; }
+  .ob-de-row { display: grid; grid-template-columns: minmax(70px, 1fr) auto 92px 96px; gap: 10px; align-items: center; padding: 9px 14px; border-bottom: 1px solid var(--line); }
+  .ob-de-row:last-child { border-bottom: 0; }
+  .ob-de-row .de-colour { font-size: 12.5px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ob-de-row .de-ord { font-family: var(--fm); font-size: 10.5px; color: var(--text-3); white-space: nowrap; }
+  .ob-de-row .de-ord b { color: var(--text-2); font-weight: 700; }
+  .ob-de-row .de-ship { display: inline-flex; align-items: center; gap: 7px; justify-self: end; }
+  .ob-de-row .de-ship label { font-family: var(--fm); font-size: 9px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-4); }
+  .ob-de-row input.de-qty { width: 56px; text-align: right; font-family: var(--fm); font-variant-numeric: tabular-nums; font-size: 12.5px; padding: 7px 8px; border: 1px solid var(--line-2); border-radius: 7px; background: var(--surface); color: var(--text); }
+  .ob-de-row input.de-qty:disabled { opacity: 0.5; }
+  .ob-de-row input.de-qty.over { border-color: var(--rose); color: var(--rose); }
+  .ob-de-row .de-rem { font-family: var(--fm); font-size: 10px; color: var(--text-4); text-align: right; white-space: nowrap; }
+  .ob-de-row .de-rem b { font-size: 12px; font-variant-numeric: tabular-nums; margin-left: 5px; }
+  .ob-de-row .de-rem b.r0 { color: var(--emerald); }
+  .ob-de-row .de-rem b.rPos { color: var(--rose); }
 
   /* Dispatch history records (drawer) */
   .ob-disp-list { display: flex; flex-direction: column; gap: 12px; }
@@ -1645,7 +1652,12 @@
   /* Fulfilment cells in the line-item table */
   .ob-items td.it-disp { color: var(--emerald); }
   .ob-items td.it-pend { color: var(--text-3); }
-  .ob-items td.it-pend.has { color: var(--amber); font-weight: 600; }
+  /* Remaining stays red until it reaches zero, then turns green. */
+  .ob-items td.it-pend.has { color: var(--rose); font-weight: 700; }
+  .ob-items td.it-pend.done { color: var(--emerald); }
+  .ob-items td.it-pend.has::before, .ob-items td.it-pend.done::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+  .ob-items td.it-pend.has::before { background: var(--rose); }
+  .ob-items td.it-pend.done::before { background: var(--emerald); }
   .ob-wf-by { font-family: var(--fm); font-size: 10px; color: var(--text-3); margin-top: 3px; letter-spacing: 0.02em; }
   .ob-wf-remark { font-family: var(--fm); font-size: 10.5px; color: var(--text-2); font-style: italic; margin-top: 4px; }
 
@@ -24518,13 +24530,13 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         + '<td class="it-size">'+(esc(d.dim)||'—')+'</td>'
         + '<td class="it-num">'+li.qty+'</td>'
         + '<td class="it-num it-disp">'+(pl.dispatched||0)+'</td>'
-        + '<td class="it-num it-pend'+(pl.pending>0?' has':'')+'">'+(pl.pending||0)+'</td>'
+        + '<td class="it-num it-pend'+(pl.pending>0?' has':(pl.dispatched>0?' done':''))+'">'+(pl.pending||0)+'</td>'
         + '<td class="it-total">'+inr(li.total)+'</td></tr>';
     }).join('');
     $('ob-dr-items-foot').innerHTML = '<tr><td class="it-lbl" colspan="3">Total · '+o.lineCount+' items</td>'
       + '<td class="it-num">'+f.totalOrdered+'</td>'
       + '<td class="it-num it-disp">'+f.totalDisp+'</td>'
-      + '<td class="it-num it-pend'+((f.totalOrdered-f.totalDisp)>0?' has':'')+'">'+(f.totalOrdered-f.totalDisp)+'</td>'
+      + '<td class="it-num it-pend'+((f.totalOrdered-f.totalDisp)>0?' has':(f.totalDisp>0?' done':''))+'">'+(f.totalOrdered-f.totalDisp)+'</td>'
       + '<td class="it-grand">'+inr(o.totalValue)+'</td></tr>';
 
     // 2b · dispatch history — each shipment tells the full Ordered → Dispatched
@@ -24969,19 +24981,39 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const f = fulfil(base);
     return base.lines.map(li => { const pl = f.perLine.find(p=>p.ono===li.ono) || {pending:li.qty}; const d=prodDesc(li); return { ono: li.ono, product:d.product, attrs:d.attrs, ordered:li.qty, pending: pl.pending }; }).filter(l => l.pending > 0);
   }
+  // Quantity entry mirrors the Dispatch Summary: grouped Product → Model •
+  // Backing • Size, with a Dispatching field beside each colour. The original
+  // per-line (ono) mapping is preserved on each input for the backend.
   function renderDispLines(){
     const ref = dispatchRef; if(!ref) return;
-    const partial = segValue('ob-disp-type')==='partial';
-    const lines = pendingLines(ref);
-    $('ob-disp-lines-hint').textContent = partial ? '— enter the quantity shipping now' : '— full dispatch ships all pending units';
-    $('ob-disp-lines').innerHTML = '<div class="ob-disp-er-head"><span>Product</span><span class="r">Ordered</span><span class="r">Pending</span><span class="r">Ship now</span></div>'
-      + lines.map(l =>
-        '<div class="ob-disp-er" data-ono="'+l.ono+'" data-pending="'+l.pending+'">'
-        + '<span class="de-prod"><b>'+esc(l.product)+'</b>'+(l.attrs?' <span>'+esc(l.attrs)+'</span>':'')+'</span>'
-        + '<span class="de-num">'+l.ordered+'</span>'
-        + '<span class="de-num de-pend">'+l.pending+'</span>'
-        + '<input class="de-qty" type="number" min="0" max="'+l.pending+'" value="'+l.pending+'"'+(partial?'':' disabled')+'>'
-        + '</div>').join('');
+    const base = baseOrders.find(o=>o.ref===ref); if(!base) return;
+    const f = fulfil(base);
+    const pendByOno = {}; f.perLine.forEach(p => pendByOno[p.ono] = p.pending);
+    const ordByOno = {}; base.lines.forEach(li => ordByOno[li.ono] = li.qty);
+    const partial = segValue('ob-disp-type') === 'partial';
+    $('ob-disp-lines-hint').textContent = partial ? '— enter the quantity shipping now beside each colour' : '— full dispatch ships all pending units';
+    // group pending lines like the dispatch summary
+    const groups = [], gidx = {};
+    base.lines.forEach(li => {
+      const pend = pendByOno[li.ono] || 0; if (pend <= 0) return;
+      const key = [li.category, li.model, li.backing, li.width, li.length].map(x=>x||'').join('|');
+      let g = gidx[key];
+      if (!g){ g = { product:li.category||'—', model:li.model||'', backing:li.backing||'', width:li.width||'', length:li.length||'', rows:[] }; gidx[key] = g; groups.push(g); }
+      g.rows.push({ ono: li.ono, colour: li.colour||'—', ordered: ordByOno[li.ono]||0, pending: pend });
+    });
+    $('ob-disp-lines').innerHTML = groups.length ? groups.map(g => {
+      const spec = dgSpec(g);
+      return '<div class="ob-de-grp"><div class="ob-de-grp-h"><span class="de-g-prod">'+esc(g.product)+'</span>'+(spec?'<span class="de-g-spec">'+esc(spec)+'</span>':'')+'</div>'
+        + '<div class="ob-de-rows">'
+        + g.rows.map(r =>
+          '<div class="ob-de-row" data-ono="'+r.ono+'" data-pending="'+r.pending+'">'
+          + '<span class="de-colour">'+esc(r.colour)+'</span>'
+          + '<span class="de-ord">Ordered <b>'+r.ordered+'</b>'+(r.pending!==r.ordered?' · Pending <b>'+r.pending+'</b>':'')+'</span>'
+          + '<span class="de-ship"><label>Dispatch</label><input class="de-qty" type="number" min="0" max="'+r.pending+'" value="'+r.pending+'"'+(partial?'':' disabled')+'></span>'
+          + '<span class="de-rem">Remaining <b class="r0">0</b></span>'
+          + '</div>').join('')
+        + '</div></div>';
+    }).join('') : '<div class="ob-pack-empty">Nothing pending to dispatch.</div>';
   }
   function openDispatch(ref){
     const base = baseOrders.find(o=>o.ref===ref); if(!base) return;
@@ -25003,8 +25035,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const ref = dispatchRef; if(!ref) return;
     const lr = $('ob-disp-lr').value.trim();
     if (!lr){ setApStatus('ob-disp-status','err','LR / Docket number is required.'); $('ob-disp-lr').focus(); return; }
-    // collect ship-now quantities
-    const rows = [...$('ob-disp-lines').querySelectorAll('.ob-disp-er')];
+    // collect ship-now quantities (per original line / ono)
+    const rows = [...$('ob-disp-lines').querySelectorAll('.ob-de-row')];
     const linesObj = {}; let total = 0, over = false;
     rows.forEach(rw => {
       const ono = rw.getAttribute('data-ono'), pend = +rw.getAttribute('data-pending');
@@ -25253,11 +25285,17 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     $('ob-disp-cancel').addEventListener('click', closeDispatch);
     $('ob-disp-save').addEventListener('click', saveDispatch);
     $('ob-dispatch').addEventListener('click', e => { if (e.target === $('ob-dispatch')) closeDispatch(); });
-    // live-validate ship-now quantities against pending
+    // live-validate ship-now quantities + update the remaining-after figure
     $('ob-disp-lines').addEventListener('input', e => {
       const inp = e.target.closest('.de-qty'); if(!inp) return;
-      const pend = +inp.closest('.ob-disp-er').getAttribute('data-pending');
-      inp.classList.toggle('over', (+inp.value||0) > pend);
+      const row = inp.closest('.ob-de-row');
+      const pend = +row.getAttribute('data-pending');
+      const v = Math.max(0, +inp.value||0);
+      const over = v > pend;
+      inp.classList.toggle('over', over);
+      const rem = Math.max(0, pend - Math.min(v, pend));
+      const remEl = row.querySelector('.de-rem b');
+      if (remEl){ remEl.textContent = over ? '!' : rem; remEl.className = rem > 0 ? 'rPos' : 'r0'; }
     });
     // ↑/↓ navigate orders while the panel updates instantly
     function navOrder(delta){
