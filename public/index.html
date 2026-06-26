@@ -1650,14 +1650,25 @@
   .ob-wf-remark { font-family: var(--fm); font-size: 10.5px; color: var(--text-2); font-style: italic; margin-top: 4px; }
 
   /* ===== Sales / Dispatch view toggle ===== */
-  /* Order summary — grouped products for a fast read (sales) */
+  /* Order summary — Width Mix + Product → Width → Model (fast read, sales) */
   .ob-osum { display: flex; flex-direction: column; gap: 10px; }
+  .ob-osum-wmix { border: 1px solid var(--emerald-mute); border-radius: 12px; padding: 13px 16px; background: var(--emerald-soft); }
+  .ob-osum-wmix .wmix-h { font-family: var(--fm); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--emerald-2); margin-bottom: 10px; }
+  .ob-osum-wmix .wmix-rows { display: flex; flex-wrap: wrap; gap: 8px 10px; }
+  .ob-osum-wmix .wmix-row { display: inline-flex; align-items: baseline; gap: 9px; background: var(--surface); border: 1px solid var(--line-2); border-radius: 9px; padding: 7px 12px; }
+  .ob-osum-wmix .wmix-w { font-family: var(--fm); font-size: 11px; color: var(--text-3); }
+  .ob-osum-wmix .wmix-row b { font-family: var(--fd); font-size: 14px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
   .ob-osum-g { border: 1px solid var(--line); border-radius: 12px; padding: 13px 16px; background: var(--surface-2); }
   .ob-osum-g-h { display: flex; align-items: baseline; gap: 10px; }
   .ob-osum-g-h .osg-prod { font-family: var(--fd); font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: -0.01em; }
   .ob-osum-g-h .osg-tot { margin-left: auto; font-family: var(--fd); font-size: 16px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
   .ob-osum-g-h .osg-tot small { font-family: var(--fm); font-size: 9px; color: var(--text-3); font-weight: 400; }
-  .ob-osum-subs { display: flex; flex-direction: column; gap: 4px; margin-top: 10px; }
+  .ob-osum-widths { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+  .ob-osum-w { border-left: 2px solid var(--line-2); padding-left: 12px; }
+  .ob-osum-w .osw-h { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+  .ob-osum-w .osw-w { font-family: var(--fm); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); }
+  .ob-osum-w .osw-tot { margin-left: auto; font-family: var(--fm); font-size: 11px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+  .ob-osum-subs { display: flex; flex-direction: column; gap: 4px; }
   .ob-osum-subs .osg-sub { display: flex; justify-content: space-between; align-items: baseline; font-size: 12.5px; color: var(--text-2); }
   .ob-osum-subs .osg-sub span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .ob-osum-subs .osg-sub b { color: var(--text); font-weight: 700; font-variant-numeric: tabular-nums; margin-left: 12px; }
@@ -3721,8 +3732,8 @@
             </div></div>
           </div>
 
-          <!-- 2 · order line items (sales overview only) -->
-          <div class="ob-coll dr-sales-only" data-open="1" data-default="1" data-sec="items">
+          <!-- 2 · order line items (sales overview only — collapsed by default) -->
+          <div class="ob-coll dr-sales-only" data-open="0" data-default="0" data-sec="items">
             <div class="ob-coll-h"><span class="ob-coll-t">Order line items</span><span class="ob-coll-meta" id="ob-dr-itemcount"></span><span class="ob-chev">▾</span></div>
             <div class="ob-coll-b"><div class="ob-coll-inner">
               <div class="ob-dr-items-wrap">
@@ -23730,6 +23741,16 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   const esc = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   const inr = n => '₹' + Math.round(Number(n)||0).toLocaleString('en-IN');
   const compact = n => { n = Number(n)||0; if (n>=1e7) return (n/1e7).toFixed(2)+' Cr'; if (n>=1e5) return (n/1e5).toFixed(2)+' L'; if (n>=1e3) return (n/1e3).toFixed(1)+'K'; return String(Math.round(n)); };
+  // Counting unit by product type: Foot Mat → pcs, Car Set → sets, everything
+  // else (Rolls, S-Mat, Turf, Grass, WIRE…) → rolls.
+  function unitFor(cat, qty){
+    const c = String(cat||'').toLowerCase();
+    if (c.includes('foot')) return 'pcs';
+    if (c.includes('set')) return (qty===1) ? 'set' : 'sets';
+    return (qty===1) ? 'roll' : 'rolls';
+  }
+  // Unit for a set of products: their shared unit, or "units" when they differ.
+  function unitForAll(cats, qty){ const us = new Set(cats.map(c => unitFor(c, 2))); return us.size===1 ? unitFor(cats[0], qty) : 'units'; }
   const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   function fmtISO(iso){ const m=String(iso||'').match(/^(\d{4})-(\d{2})-(\d{2})/); if(!m) return iso||'—'; return String(+m[3])+' '+MON[+m[2]-1]+" '"+m[1].slice(2); }
   function todayISO(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -24264,21 +24285,35 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     return groups;
   }
   function dgSpec(g){ const p=String(g.product).trim().toLowerCase(); const a=[g.model, g.backing].filter(x=>x && String(x).trim().toLowerCase()!==p).join(' • '); const dim=(g.width&&g.length)?(g.width+'×'+g.length):(g.width||g.length||''); return [a, dim].filter(Boolean).join(' · '); }
-  // Order summary grouping: Product → Model • Backing, totalling qty (colours
-  // and sizes collapsed) — a 30-second read of what the order contains.
-  function orderSummaryGroups(lines){
-    const prods = {}, order = [];
+  // Order summary tree: a top-level Width Mix, then Product → Width →
+  // Model • Backing quantities (colours collapsed). A 30-second read covering
+  // total, width distribution and model distribution.
+  const widthNum = x => parseFloat(String(x).replace(/[^0-9.]/g,'')) || 0;
+  function orderSummaryTree(lines){
+    const widthMix = {}, widthCats = {}, widthOrder = [];
+    const prods = {}, prodOrder = [];
     lines.forEach(li => {
+      const qty = li.qty||0;
       const product = li.category || '—';
-      if (!prods[product]){ prods[product] = { product, total:0, subs:{}, subOrder:[] }; order.push(product); }
-      const p = prods[product];
-      p.total += li.qty||0;
+      const width = li.width || '—';
       const pn = product.trim().toLowerCase();
-      const mb = [li.model, li.backing].filter(x => x && String(x).trim().toLowerCase() !== pn).join(' • ') || li.model || '—';
-      if (!p.subs[mb]){ p.subs[mb] = { label: mb, qty:0 }; p.subOrder.push(mb); }
-      p.subs[mb].qty += li.qty||0;
+      const model = [li.model, li.backing].filter(x => x && String(x).trim().toLowerCase() !== pn).join(' • ') || li.model || '—';
+      if (!(width in widthMix)){ widthMix[width] = 0; widthCats[width] = new Set(); widthOrder.push(width); }
+      widthMix[width] += qty; widthCats[width].add(product);
+      if (!prods[product]){ prods[product] = { product, total:0, widths:{}, wOrder:[] }; prodOrder.push(product); }
+      const p = prods[product]; p.total += qty;
+      if (!p.widths[width]){ p.widths[width] = { width, total:0, models:{}, mOrder:[] }; p.wOrder.push(width); }
+      const w = p.widths[width]; w.total += qty;
+      if (!w.models[model]){ w.models[model] = { label: model, qty:0 }; w.mOrder.push(model); }
+      w.models[model].qty += qty;
     });
-    return order.map(k => { const p = prods[k]; return { product: p.product, total: p.total, subs: p.subOrder.map(s => p.subs[s]) }; });
+    widthOrder.sort((a,b) => widthNum(a) - widthNum(b));
+    const widthMixArr = widthOrder.map(w => ({ width:w, qty:widthMix[w], cats:[...widthCats[w]] }));
+    const products = prodOrder.map(k => { const p = prods[k];
+      p.wOrder.sort((a,b) => widthNum(a) - widthNum(b));
+      return { product:p.product, total:p.total, widths: p.wOrder.map(wk => { const w = p.widths[wk]; return { width:w.width, total:w.total, models: w.mOrder.map(mk => w.models[mk]) }; }) };
+    });
+    return { widthMix: widthMixArr, products };
   }
   function packCell(l, v, tone, muted){ return '<div class="pk"><div class="pkl">'+esc(l)+'</div><div class="pkv'+(tone?' '+tone:'')+(muted?' muted':'')+'">'+esc(v)+'</div></div>'; }
   // labelled ordered/dispatched/remaining triple (group summary) and bare cells (variant rows)
@@ -24452,12 +24487,20 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 
     // 1a · order summary — grouped products (Product → Model • Backing) for a
     // fast read of the order without scanning every colour/SKU.
-    const osumGroups = orderSummaryGroups(o.lines);
-    $('ob-dr-osum-meta').textContent = osumGroups.length + ' product' + (osumGroups.length!==1?'s':'') + ' · ' + o.totalQty + ' pcs';
-    $('ob-dr-osum').innerHTML = osumGroups.map(g =>
-      '<div class="ob-osum-g"><div class="ob-osum-g-h"><span class="osg-prod">'+esc(g.product)+'</span><span class="osg-tot">'+g.total+'<small> pcs</small></span></div>'
-      + '<div class="ob-osum-subs">' + g.subs.map(s => '<div class="osg-sub"><span>'+esc(s.label)+'</span><b>'+s.qty+'</b></div>').join('') + '</div>'
-      + '</div>').join('');
+    const osum = orderSummaryTree(o.lines);
+    $('ob-dr-osum-meta').textContent = osum.products.length + ' product' + (osum.products.length!==1?'s':'') + ' · ' + o.totalQty + ' ' + unitForAll(osum.products.map(g=>g.product), o.totalQty);
+    const wmix = osum.widthMix.length > 1
+      ? '<div class="ob-osum-wmix"><div class="wmix-h">Width mix</div><div class="wmix-rows">'
+        + osum.widthMix.map(w => '<div class="wmix-row"><span class="wmix-w">'+esc(w.width)+'</span><b>'+w.qty+' '+unitForAll(w.cats, w.qty)+'</b></div>').join('')
+        + '</div></div>'
+      : '';
+    $('ob-dr-osum').innerHTML = wmix + osum.products.map(g =>
+      '<div class="ob-osum-g"><div class="ob-osum-g-h"><span class="osg-prod">'+esc(g.product)+'</span><span class="osg-tot">'+g.total+'<small> '+unitFor(g.product, g.total)+'</small></span></div>'
+      + '<div class="ob-osum-widths">' + g.widths.map(w =>
+          '<div class="ob-osum-w"><div class="osw-h"><span class="osw-w">'+esc(w.width)+'</span><span class="osw-tot">'+w.total+'</span></div>'
+          + '<div class="ob-osum-subs">' + w.models.map(s => '<div class="osg-sub"><span>'+esc(s.label)+'</span><b>'+s.qty+'</b></div>').join('') + '</div></div>'
+        ).join('')
+      + '</div></div>').join('');
 
     // 2 · line items — original order: # · Product · Size · Ordered · Dispatched · Pending · Value
     // The ordered quantities are immutable; dispatched/pending come from records.
@@ -24558,12 +24601,13 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const qtyMap = remaining > 0 ? pendByOno : null; // null → show ordered qty
     const dgroups = groupForDispatch(o.lines, qtyMap);
     const dsumUnits = qtyMap ? remaining : f.totalOrdered;
-    $('ob-dr-dsum-meta').textContent = (qtyMap ? ('Pick '+dsumUnits+' units') : (dsumUnits+' units')) + ' · ' + dgroups.length + ' group' + (dgroups.length!==1?'s':'');
+    const dsumUnitWord = unitForAll(dgroups.map(g=>g.product), dsumUnits);
+    $('ob-dr-dsum-meta').textContent = (qtyMap ? 'Pick ' : '') + dsumUnits + ' ' + dsumUnitWord + ' · ' + dgroups.length + ' group' + (dgroups.length!==1?'s':'');
     $('ob-dr-dsum').innerHTML = dgroups.length ? dgroups.map(g =>
       '<div class="ob-dsum-g"><div class="ob-dsum-g-h">'
       + '<span class="dg-prod">'+esc(g.product)+'</span>'
       + (dgSpec(g)?'<span class="dg-spec">'+esc(dgSpec(g))+'</span>':'')
-      + '<span class="dg-tot">'+g.totalQty+'<small>QTY</small></span></div>'
+      + '<span class="dg-tot">'+g.totalQty+'<small> '+unitFor(g.product, g.totalQty)+'</small></span></div>'
       + '<div class="ob-dsum-cols">'+g.colours.map(c=>'<span class="ob-dsum-col">'+esc(c.colour)+'<b>'+c.qty+'</b></span>').join('')+'</div>'
       + '</div>').join('') : '<div class="ob-pack-empty">Nothing pending to pick — fully dispatched.</div>';
     $('ob-dr-loadsheet').style.display = dgroups.length ? '' : 'none';
@@ -24688,14 +24732,14 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       +   metaCell('Customer', o.party) + metaCell('Dispatch date', dispDate) + metaCell('Transporter', r.transporter||'—')
       +   metaCell('LR / Docket No.', '', true) + metaCell('Salesperson', o.poc||'—') + metaCell('Packing', r.packingType||'—')
       + '</div>'
-      + '<div class="ls-sum"><span>Line items<b>'+skuLines+'</b></span><span>Groups<b>'+groups.length+'</b></span><span>Total qty<b>'+totalUnits+'</b></span>'
+      + '<div class="ls-sum"><span>Line items<b>'+skuLines+'</b></span><span>Groups<b>'+groups.length+'</b></span><span>Total qty<b>'+totalUnits+' '+unitForAll(groups.map(g=>g.product), totalUnits)+'</b></span>'
       +   (r.ccAttached!=null?'<span>CC<b>'+(r.ccAttached?'Yes':'No')+'</b></span>':'') + ((r.samples&&r.samples.has)?'<span>Samples<b>'+(r.samples.qty||'Yes')+'</b></span>':'') + '</div>'
       + '<div class="ls-mat">'
       + groups.map(g =>
           '<div class="ls-grp"><div class="ls-grp-h">'+esc(g.product)+(dgSpec(g)?'<small>'+esc(dgSpec(g))+'</small>':'')+'</div>'
           + '<table><tbody>'
           + g.colours.map(c => '<tr><td>'+esc(c.colour)+'</td><td class="q">'+c.qty+'</td></tr>').join('')
-          + '<tr class="ls-grp-tot"><td>Total</td><td class="q">'+g.totalQty+'</td></tr>'
+          + '<tr class="ls-grp-tot"><td>Total '+unitFor(g.product, g.totalQty)+'</td><td class="q">'+g.totalQty+'</td></tr>'
           + '</tbody></table></div>').join('')
       + '</div>'
       + '<div class="ls-pack"><div class="ls-pack-h">Packing &amp; dispatch instructions</div>'
