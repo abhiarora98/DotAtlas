@@ -1603,6 +1603,46 @@
   .ob-de-row .de-rem b { font-size: 12px; font-variant-numeric: tabular-nums; margin-left: 5px; }
   .ob-de-row .de-rem b.r0 { color: var(--emerald); }
   .ob-de-row .de-rem b.rPos { color: var(--rose); }
+  /* Substitution rows + add button inside a group */
+  .ob-de-addsub { display: block; width: 100%; text-align: left; padding: 9px 14px; font-family: var(--fm); font-size: 10.5px; letter-spacing: 0.02em; color: var(--blue); background: transparent; border: 0; border-top: 1px dashed var(--line); cursor: pointer; }
+  .ob-de-addsub:hover { background: var(--blue-soft); }
+  .ob-de-subs:empty { display: none; }
+  .ob-de-sub { display: grid; grid-template-columns: 38px 1fr 96px 28px; gap: 9px; align-items: center; padding: 9px 14px; border-top: 1px solid var(--line); background: rgba(124,168,255,0.05); }
+  .ob-de-sub .de-sub-tag { font-family: var(--fm); font-size: 8.5px; font-weight: 700; letter-spacing: 0.08em; color: var(--blue); background: var(--blue-soft); border-radius: 5px; padding: 4px 0; text-align: center; }
+  .ob-de-sub input.de-sub-label { font-size: 12px; padding: 7px 9px; border: 1px solid var(--line-2); border-radius: 7px; background: var(--surface); color: var(--text); }
+  .ob-de-sub .de-sub-ship { display: inline-flex; align-items: center; gap: 6px; }
+  .ob-de-sub .de-sub-ship label { font-family: var(--fm); font-size: 9px; text-transform: uppercase; color: var(--text-4); }
+  .ob-de-sub input.de-sub-qty { width: 54px; text-align: right; font-family: var(--fm); font-variant-numeric: tabular-nums; font-size: 12.5px; padding: 7px 8px; border: 1px solid var(--line-2); border-radius: 7px; background: var(--surface); color: var(--text); }
+  .ob-de-sub .de-sub-x { border: 0; background: transparent; color: var(--text-3); cursor: pointer; font-size: 14px; }
+  .ob-de-sub .de-sub-x:hover { color: var(--rose); }
+
+  /* Variance check modal */
+  .ob-variance-overlay { z-index: 1260; }
+  .live-dot.warn { background: var(--amber); box-shadow: 0 0 0 4px rgba(255,176,121,0.12); }
+  .ob-var-intro { font-size: 12.5px; color: var(--text-2); margin: 0 0 14px; }
+  .ob-var-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
+  .ob-var-item { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text); padding: 11px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); }
+  .ob-var-item .vi-ic { font-size: 14px; }
+  .ob-var-item.short { border-color: var(--rose-soft); } .ob-var-item.short .vi-ic { color: var(--rose); }
+  .ob-var-item.sub { border-color: rgba(124,168,255,0.3); } .ob-var-item.sub .vi-ic { color: var(--blue); }
+  .ob-var-item .vi-mut { color: var(--text-3); font-family: var(--fm); font-size: 11px; }
+
+  /* Sales variance banner */
+  .ob-var-banner { display: flex; align-items: center; gap: 12px; margin: 0 0 12px; padding: 12px 14px; border-radius: 11px; background: var(--amber-soft); border: 1px solid rgba(255,176,121,0.34); }
+  .ob-var-banner[hidden] { display: none; }
+  .ob-var-banner .vb-main { display: flex; align-items: center; gap: 11px; min-width: 0; }
+  .ob-var-banner .vb-ic { font-size: 16px; flex-shrink: 0; }
+  .ob-var-banner b { display: block; font-size: 12.5px; color: var(--text); }
+  .ob-var-banner .vb-sub { display: block; font-family: var(--fm); font-size: 10.5px; color: var(--amber); margin-top: 3px; }
+  .ob-var-banner .vb-ack { margin-left: auto; flex-shrink: 0; font-family: var(--fm); font-size: 11px; color: var(--amber); background: var(--surface); border: 1px solid rgba(255,176,121,0.4); padding: 8px 14px; border-radius: 8px; cursor: pointer; }
+  .ob-var-banner .vb-ack:hover { background: rgba(255,176,121,0.12); }
+
+  /* Dispatch-record substitutions */
+  .ob-disp-subs { margin-top: 10px; border-top: 1px dashed var(--line); padding-top: 10px; }
+  .ob-disp-subs .ds-h { font-family: var(--fm); font-size: 9.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--blue); margin-bottom: 7px; }
+  .ob-disp-subs .ds-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-2); padding: 3px 0; }
+  .ob-disp-subs .ds-row b { color: var(--text); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .ob-disp-subs .ds-mut { color: var(--text-3); font-family: var(--fm); font-size: 10.5px; }
 
   /* Dispatch history records (drawer) */
   .ob-disp-list { display: flex; flex-direction: column; gap: 12px; }
@@ -3716,6 +3756,7 @@
           <!-- 1 · current order summary (always visible) -->
           <div class="ob-os">
             <div class="ob-os-head">This order · PI #<span id="ob-dr-ref">—</span> <span id="ob-dr-status-wrap"></span></div>
+            <div class="ob-var-banner" id="ob-dr-varbanner" hidden></div>
             <div class="ob-os-grid" id="ob-dr-ordersum"></div>
           </div>
 
@@ -3993,6 +4034,28 @@
             <button class="pi-btn prime" id="ob-disp-save">Save &amp; Mark Dispatched →</button>
           </div>
           <div class="ap-foot">The original order is never changed — this is recorded as a separate dispatch record. Transporter &amp; packing carry over from the sales handover.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DISPATCH VARIANCE CHECK -->
+    <div class="ap-overlay ob-dispatch-overlay ob-variance-overlay" id="ob-variance" hidden>
+      <div class="ap-modal" role="dialog" aria-modal="true" aria-labelledby="ob-var-title">
+        <div class="ap-head">
+          <div>
+            <div class="eb" style="margin-bottom:6px;"><span class="live-dot warn"></span>Variance check</div>
+            <h2 id="ob-var-title">Dispatch <span style="color: var(--amber);">variance</span> detected.</h2>
+          </div>
+          <button class="ap-close" id="ob-var-close" aria-label="Close">×</button>
+        </div>
+        <div class="ap-body">
+          <p class="ob-var-intro">The dispatched quantities differ from the Sales Order:</p>
+          <div class="ob-var-list" id="ob-var-list"></div>
+          <div class="ap-actions">
+            <button class="pi-btn" id="ob-var-cancel">Back</button>
+            <button class="pi-btn prime" id="ob-var-continue">Continue dispatch →</button>
+          </div>
+          <div class="ap-foot">The Sales Order stays unchanged. This shipment is recorded as-is and Sales is notified to review the variance before the invoice is generated.</div>
         </div>
       </div>
     </div>
@@ -24459,6 +24522,16 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       + '</div></div>'
       + '<div class="ob-os-small">'+meta.join('<span class="sep">•</span>')+'</div>';
 
+    // Dispatch variance banner — surfaced to Sales until reviewed.
+    const vb = $('ob-dr-varbanner');
+    const allSubs = (o._ov && o._ov.dispatches || []).flatMap(d => (d.subs||[]).map(s => ({ ...s, n: d.n })));
+    if (o._ov && o._ov.variance && !o._ov.varianceReviewed && allSubs.length){
+      const subTxt = allSubs.map(s => s.qty+' '+s.label).join(', ');
+      vb.innerHTML = '<div class="vb-main"><span class="vb-ic">⚠</span><div><b>Dispatch completed with variance</b><span class="vb-sub">Substituted: '+esc(subTxt)+' · review before invoice generation</span></div></div>'
+        + (state.dept !== 'dispatch' ? '<button class="vb-ack" data-act="ackvar" data-ref="'+esc(o.ref)+'">Reviewed</button>' : '');
+      vb.hidden = false;
+    } else { vb.hidden = true; vb.innerHTML = ''; }
+
     // 4 · concise customer intelligence — the 5 most actionable signals.
     // Payment behaviour is derived from the customer's receivables balance.
     const payBehav = ps.outstanding == null ? { v:'—' }
@@ -24602,6 +24675,9 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
           +   '<div class="df-stat"><div class="df-l">Remaining</div><div class="df-v '+(afterTotal>0?'red':'green')+'">'+afterTotal+'</div></div>'
           + '</div>'
           + '<div class="ob-dl-groups">'+groupsHtml+'</div>'
+          + ((d.subs && d.subs.length) ? '<div class="ob-disp-subs"><div class="ds-h">⇄ Substituted</div>'
+              + d.subs.map(s => '<div class="ds-row"><span>'+esc(s.label)+(s.product?' <span class="ds-mut">· '+esc(s.product)+'</span>':'')+'</span><b>'+s.qty+'</b></div>').join('')
+              + '</div>' : '')
           + (d.remarks?'<div class="ob-disp-rec-remark">“'+esc(d.remarks)+'”</div>':'')
           + '</div>';
       }).join('');
@@ -25012,8 +25088,20 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
           + '<span class="de-ship"><label>Dispatch</label><input class="de-qty" type="number" min="0" max="'+r.pending+'" value="'+r.pending+'"'+(partial?'':' disabled')+'></span>'
           + '<span class="de-rem">Remaining <b class="r0">0</b></span>'
           + '</div>').join('')
+        + '<div class="ob-de-subs" data-prod="'+esc(g.product)+'" data-spec="'+esc(spec)+'"></div>'
+        + '<button type="button" class="ob-de-addsub">+ Substitute a different SKU</button>'
         + '</div></div>';
     }).join('') : '<div class="ob-pack-empty">Nothing pending to dispatch.</div>';
+  }
+  function addSubRow(container){
+    const row = document.createElement('div');
+    row.className = 'ob-de-sub';
+    row.innerHTML = '<span class="de-sub-tag">SUB</span>'
+      + '<input class="de-sub-label no-upper" placeholder="Shipped instead — e.g. CIRRO Black">'
+      + '<span class="de-sub-ship"><label>Qty</label><input class="de-sub-qty" type="number" min="1" placeholder="0"></span>'
+      + '<button type="button" class="de-sub-x" aria-label="Remove">✕</button>';
+    container.appendChild(row);
+    row.querySelector('.de-sub-label').focus();
   }
   function openDispatch(ref){
     const base = baseOrders.find(o=>o.ref===ref); if(!base) return;
@@ -25029,23 +25117,42 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     $('ob-dispatch').hidden = false;
     setTimeout(()=>$('ob-disp-lr').focus(), 40);
   }
-  function closeDispatch(){ $('ob-dispatch').hidden = true; dispatchRef = null; }
+  function closeDispatch(){ $('ob-dispatch').hidden = true; dispatchRef = null; varianceOK = false; }
 
+  // Collect substitutions typed into the entry (a label + qty per SUB row).
+  function collectSubs(){
+    const subs = [];
+    $('ob-disp-lines').querySelectorAll('.ob-de-sub').forEach(s => {
+      const label = s.querySelector('.de-sub-label').value.trim();
+      const qty = Math.floor(+s.querySelector('.de-sub-qty').value || 0);
+      if (label && qty > 0){ const c = s.closest('.ob-de-subs'); subs.push({ label, qty, product: c.getAttribute('data-prod')||'', spec: c.getAttribute('data-spec')||'' }); }
+    });
+    return subs;
+  }
+  let varianceOK = false;
   function saveDispatch(){
     const ref = dispatchRef; if(!ref) return;
     const lr = $('ob-disp-lr').value.trim();
     if (!lr){ setApStatus('ob-disp-status','err','LR / Docket number is required.'); $('ob-disp-lr').focus(); return; }
-    // collect ship-now quantities (per original line / ono)
+    // collect ship-now quantities (per original line / ono) + short lines
     const rows = [...$('ob-disp-lines').querySelectorAll('.ob-de-row')];
-    const linesObj = {}; let total = 0, over = false;
+    const linesObj = {}; let total = 0, over = false; const shortList = [];
     rows.forEach(rw => {
       const ono = rw.getAttribute('data-ono'), pend = +rw.getAttribute('data-pending');
       let q = Math.floor(+rw.querySelector('.de-qty').value || 0);
       if (q < 0) q = 0; if (q > pend){ over = true; }
       if (q > 0) { linesObj[ono] = Math.min(q, pend); total += linesObj[ono]; }
+      const short = pend - (linesObj[ono]||0);
+      if (short > 0) shortList.push({ colour: rw.querySelector('.de-colour').textContent, qty: short });
     });
     if (over){ setApStatus('ob-disp-status','err','Ship-now quantity cannot exceed pending.'); return; }
-    if (total <= 0){ setApStatus('ob-disp-status','err','Enter at least one quantity to dispatch.'); return; }
+    const subs = collectSubs();
+    const subTotal = subs.reduce((a,s)=>a+s.qty, 0);
+    if (total + subTotal <= 0){ setApStatus('ob-disp-status','err','Enter at least one quantity to dispatch.'); return; }
+    // Variance gate: substitutions reconcile against the Sales Order, so confirm
+    // before recording (Sales will review before the invoice).
+    if (subs.length && !varianceOK){ showVariance(subs, shortList); return; }
+    varianceOK = false;
     const dtLocal = $('ob-disp-dt').value || nowLocalDT();
     const dispatchAt = dtLocal.length===16 ? dtLocal+':00' : dtLocal;
     const ov = ensureOv(ref);
@@ -25058,17 +25165,31 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       lr, vehicle: $('ob-disp-vehicle').value.trim(),
       driver: { name: $('ob-disp-driver').value.trim(), mobile: $('ob-disp-mobile').value.trim() },
       remarks: $('ob-disp-remarks').value.trim(), by: 'Dispatch Team',
-      lines: linesObj,
+      lines: linesObj, subs,
     };
     ov.dispatches.push(rec);
     delete ov.status;
+    if (subs.length){ ov.variance = true; ov.varianceReviewed = false; } // flag Sales to reconcile
     const f = fulfil(baseOrders.find(o=>o.ref===ref));
     const full = f.totalDisp >= f.totalOrdered;
-    const sub = (full ? 'Full dispatch' : 'Partial dispatch') + ' · ' + total + ' units · LR ' + lr + (rec.vehicle?(' · '+rec.vehicle):'');
-    ov.history.push({ kind:'dispatched', label: full?'Dispatched':'Partially Dispatched', tsISO: dispatchAt, by:'Dispatch Team', sub, remarks: rec.remarks });
+    const shipped = total + subTotal;
+    const kindWord = subs.length ? 'Dispatched with variance' : (full ? 'Full dispatch' : 'Partial dispatch');
+    const histSub = kindWord + ' · ' + shipped + ' units · LR ' + lr + (rec.vehicle?(' · '+rec.vehicle):'');
+    ov.history.push({ kind:'dispatched', label: full?'Dispatched':'Partially Dispatched', tsISO: dispatchAt, by:'Dispatch Team', sub: histSub, remarks: rec.remarks });
     saveOverlay(); closeDispatch(); render(); if (drawerRef === ref) openDrawer(ref);
-    showSuccess((full ? 'Dispatched' : 'Partially dispatched') + '\n' + total + ' units · LR ' + lr);
+    showSuccess((subs.length ? 'Dispatched with variance' : full ? 'Dispatched' : 'Partially dispatched') + '\n' + shipped + ' units · LR ' + lr);
   }
+
+  // ---- dispatch variance check (substitution / short) ----
+  function showVariance(subs, shortList){
+    const items = [];
+    shortList.forEach(s => items.push('<div class="ob-var-item short"><span class="vi-ic">⚠</span>'+s.qty+' '+esc(s.colour)+' not shipped</div>'));
+    subs.forEach(s => items.push('<div class="ob-var-item sub"><span class="vi-ic">⇄</span>'+s.qty+' '+esc(s.label)+' substituted'+(s.product?(' <span class="vi-mut">· '+esc(s.product)+'</span>'):'')+'</div>'));
+    $('ob-var-list').innerHTML = items.join('') || '<div class="ob-var-item">Quantities differ from the Sales Order.</div>';
+    $('ob-variance').hidden = false;
+  }
+  function closeVariance(){ $('ob-variance').hidden = true; }
+  function continueVariance(){ varianceOK = true; closeVariance(); saveDispatch(); }
 
   function markDelivered(ref){
     const ov = ensureOv(ref);
@@ -25076,6 +25197,12 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     ov.history.push({ kind:'delivered', label:'Delivered', tsISO: nowISO(), by:'Dispatch Team', sub:'Delivery confirmed' });
     saveOverlay(); render(); if (drawerRef === ref) openDrawer(ref);
     showSuccess('Delivered\nOrder complete');
+  }
+
+  function markVarianceReviewed(ref){
+    const ov = ensureOv(ref); ov.varianceReviewed = true;
+    saveOverlay(); render(); if (drawerRef === ref) openDrawer(ref);
+    showSuccess('Variance reviewed\nCleared for invoicing');
   }
 
   function handleAct(act, ref){
@@ -25297,6 +25424,18 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       const remEl = row.querySelector('.de-rem b');
       if (remEl){ remEl.textContent = over ? '!' : rem; remEl.className = rem > 0 ? 'rPos' : 'r0'; }
     });
+    // add / remove substitution rows
+    $('ob-disp-lines').addEventListener('click', e => {
+      const add = e.target.closest('.ob-de-addsub'); if (add){ addSubRow(add.previousElementSibling); return; }
+      const rm = e.target.closest('.de-sub-x'); if (rm){ rm.closest('.ob-de-sub').remove(); }
+    });
+    // variance check modal
+    $('ob-var-close').addEventListener('click', closeVariance);
+    $('ob-var-cancel').addEventListener('click', closeVariance);
+    $('ob-var-continue').addEventListener('click', continueVariance);
+    $('ob-variance').addEventListener('click', e => { if (e.target === $('ob-variance')) closeVariance(); });
+    // Sales: acknowledge a dispatch variance
+    $('ob-dr-varbanner').addEventListener('click', e => { const b = e.target.closest('[data-act="ackvar"]'); if (b) markVarianceReviewed(b.getAttribute('data-ref')); });
     // ↑/↓ navigate orders while the panel updates instantly
     function navOrder(delta){
       if ($('ob-drawer').hidden) return;
@@ -25310,7 +25449,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       navTo(view[ni].ref);
     }
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape'){ if (!$('ob-loadsheet').hidden) closeLoadSheet(); else if (!$('ob-ready').hidden) closeReady(); else if (!$('ob-dispatch').hidden) closeDispatch(); else if (!$('ob-profile').hidden) closeProfile(); else if (!$('ob-drawer').hidden) closeDrawer(); return; }
+      if (e.key === 'Escape'){ if (!$('ob-variance').hidden) closeVariance(); else if (!$('ob-loadsheet').hidden) closeLoadSheet(); else if (!$('ob-ready').hidden) closeReady(); else if (!$('ob-dispatch').hidden) closeDispatch(); else if (!$('ob-profile').hidden) closeProfile(); else if (!$('ob-drawer').hidden) closeDrawer(); return; }
       if (!$('ob-drawer').hidden && (e.key === 'ArrowDown' || e.key === 'ArrowUp')){
         const t = document.activeElement;
         if (t && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
