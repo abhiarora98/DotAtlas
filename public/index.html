@@ -3120,16 +3120,16 @@
       <span class="glyph">◆</span><span>Today</span><span class="badge live">LIVE</span>
     </div>
     <div class="nav-item" data-page="orders">
-      <span class="glyph">◇</span><span>Orders</span><span class="badge">74</span>
+      <span class="glyph">◇</span><span>Sales Orders</span>
     </div>
-    <div class="nav-item" data-page="parties">
-      <span class="glyph">○</span><span>Parties</span>
+    <div class="nav-item" data-page="dispatch">
+      <span class="glyph">→</span><span>Dispatch</span><span class="badge" id="nav-disp-count" hidden>0</span>
     </div>
     <div class="nav-item" data-page="inventory">
       <span class="glyph">▢</span><span>Inventory</span><span class="badge warn">8</span>
     </div>
-    <div class="nav-item" data-page="dispatch">
-      <span class="glyph">→</span><span>Dispatch</span>
+    <div class="nav-item" data-page="parties">
+      <span class="glyph">○</span><span>Parties</span>
     </div>
 
     <div class="rail-section">Sense</div>
@@ -20020,7 +20020,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 <script>
   // ── Routing ──────────────────────────────────────────────
   const pageTitleMap = {
-    today:'Today', orders:'Orders', parties:'Parties', inventory:'Inventory',
+    today:'Today', orders:'Sales Orders', parties:'Parties', inventory:'Inventory',
     dispatch:'Dispatch', 'create-pi':'Create PI', 'pi-history':'PI History',
     cash:'Cash & finance', receivables:'Receivables',
     intel:'Intelligence', reports:'Reports', workflows:'Workflows', settings:'Settings'
@@ -20035,9 +20035,13 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   const ORDERS_TABS = ['orders', 'create-pi', 'pi-history'];
   function setPage(p) {
     if (!p) return;
+    // Sales Orders and Dispatch share the order workspace, scoped by department.
+    const orderDept = (p === 'orders') ? 'sales' : (p === 'dispatch') ? 'dispatch' : null;
+    const showPage = orderDept ? 'orders' : p;
     const pages = document.querySelectorAll('section.page');
-    pages.forEach(s => { s.hidden = s.getAttribute('data-page') !== p; });
-    // Orders stays highlighted while inside any of its tabs.
+    pages.forEach(s => { s.hidden = s.getAttribute('data-page') !== showPage; });
+    // Orders stays highlighted while inside any of its sales tabs; Dispatch is
+    // its own nav item.
     const navActive = ORDERS_TABS.includes(p) ? 'orders' : p;
     document.querySelectorAll('.nav-item').forEach(n => {
       n.classList.toggle('active', n.getAttribute('data-page') === navActive);
@@ -20056,8 +20060,9 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     if (p === 'pi-history' && typeof window.atlasLoadHistory === 'function') {
       window.atlasLoadHistory();
     }
-    if (p === 'orders' && typeof window.atlasLoadOrders === 'function') {
-      window.atlasLoadOrders();
+    if (orderDept) {
+      if (typeof window.atlasSetDept === 'function') window.atlasSetDept(orderDept);
+      if (typeof window.atlasLoadOrders === 'function') window.atlasLoadOrders();
     }
   }
   document.querySelectorAll('.nav-item[data-page]').forEach(n => {
@@ -23749,7 +23754,23 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 
   let baseOrders = [];     // raw from orders.json
   let loadedAt = 0, loading = false;
-  const state = { status:'all', search:'', poc:'', from:'', to:'', sortKey:'piDateISO', sortDir:'desc', page:1, pageSize:40 };
+  const state = { status:'all', search:'', poc:'', from:'', to:'', sortKey:'piDateISO', sortDir:'desc', page:1, pageSize:40, dept:'sales' };
+
+  // Departmental ownership — the order moves between teams as work completes.
+  // Sales (Pending) → Dispatch (Ready / Partially / Fully dispatched) →
+  // Accounts (Delivered) → Completed. Cancelled / Repeat stay terminal/Sales.
+  function ownerOf(status){
+    if (status === 'Ready for Dispatch' || status === 'Partially Dispatched' || status === 'Fully Dispatched') return 'dispatch';
+    if (status === 'Delivered') return 'accounts';
+    return 'sales';
+  }
+  // Switch the order workspace between the Sales Orders and Dispatch queues.
+  window.atlasSetDept = function(d){
+    state.dept = (d === 'dispatch') ? 'dispatch' : 'sales';
+    state.status = 'all'; state.search = ''; state.poc = ''; state.from = ''; state.to = ''; state.page = 1;
+    const sb = $('ob-search'); if (sb) sb.value = '';
+    if (baseOrders.length) render(); else applyDeptChrome();
+  };
 
   function endpoint(){ return 'data/orders.json'; }
   async function fetchOrders(){
@@ -23864,6 +23885,14 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     if (q) rows = rows.filter(o =>
       (o._psearch || '').includes(q) ||
       (o.invoiceNo||'').toLowerCase().includes(q));
+    // Department scope: Dispatch only ever sees its own queue; Sales' default
+    // queue is its own work, but any search or specific status reveals all
+    // orders (so Sales can still find and open anything).
+    if (state.dept === 'dispatch') {
+      rows = rows.filter(o => ownerOf(o.status) === 'dispatch');
+    } else if (state.status === 'all' && !q && !state.poc && !state.from && !state.to) {
+      rows = rows.filter(o => ownerOf(o.status) === 'sales');
+    }
     const k = state.sortKey, dir = state.sortDir === 'asc' ? 1 : -1;
     const numeric = (k==='totalValue'||k==='lineCount'||k==='ref'||k==='totalQty');
     rows.sort((a,b) => {
@@ -23876,9 +23905,41 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   }
 
   function statusCounts(){
-    const c = { all: baseOrders.length, 'Pending':0, 'Ready for Dispatch':0, 'Partially Dispatched':0, 'Fully Dispatched':0, 'Delivered':0, 'Cancelled':0, 'Repeat':0 };
-    baseOrders.forEach(o => { const s = eff(o).status; if (c[s] != null) c[s]++; });
+    const c = { all: 0, 'Pending':0, 'Ready for Dispatch':0, 'Partially Dispatched':0, 'Fully Dispatched':0, 'Delivered':0, 'Cancelled':0, 'Repeat':0 };
+    baseOrders.forEach(o => {
+      const s = eff(o).status;
+      // Dispatch counts only its own queue; Sales counts every status (so its
+      // status tabs work) but the headline "queue" count is Sales-owned only.
+      if (state.dept === 'dispatch' && ownerOf(s) !== 'dispatch') return;
+      if (c[s] != null) c[s]++;
+    });
+    c.all = baseOrders.filter(o => {
+      const owner = ownerOf(eff(o).status);
+      return state.dept === 'dispatch' ? owner === 'dispatch' : owner === 'sales';
+    }).length;
     return c;
+  }
+
+  // Adapt the order-workspace chrome to the active department.
+  function applyDeptChrome(){
+    const dispatch = state.dept === 'dispatch';
+    const sec = document.querySelector('section[data-page="orders"]');
+    if (!sec) return;
+    const eb = sec.querySelector('.hero-h .eb');
+    const h1 = sec.querySelector('.hero-h h1');
+    if (h1) h1.innerHTML = dispatch
+      ? 'Dispatch <span class="em">queue</span>, ready to <span class="accent">ship</span>.'
+      : 'Every <span class="em">order</span>, one <span class="accent">source of truth</span>.';
+    if (eb) eb.innerHTML = '<span class="live-dot"></span>'+(dispatch ? 'Dispatch queue' : 'Order book')+' · <span id="ob-eb">'+( $('ob-eb') ? $('ob-eb').textContent : 'syncing…')+'</span>';
+    // Create PI / PI History are Sales functions only.
+    sec.querySelectorAll('.orders-tabbar').forEach(tb => tb.style.display = dispatch ? 'none' : '');
+    // Show only the status tabs relevant to the department.
+    const show = dispatch
+      ? new Set(['all','Ready for Dispatch','Partially Dispatched','Fully Dispatched','Delivered'])
+      : new Set(['all','Pending','Cancelled','Repeat']);
+    sec.querySelectorAll('#ob-status-tabs button').forEach(b => { b.style.display = show.has(b.getAttribute('data-st')) ? '' : 'none'; });
+    const allBtn = sec.querySelector('#ob-status-tabs button[data-st="all"]');
+    if (allBtn && allBtn.firstChild) allBtn.firstChild.textContent = dispatch ? 'Queue ' : 'My queue ';
   }
 
   function renderKpis(view){
@@ -23904,6 +23965,10 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     set('ob-c-Delivered', counts['Delivered']);
     set('ob-c-Cancelled', counts['Cancelled']);
     set('ob-c-Repeat', counts['Repeat']);
+    // Dispatch sidebar badge — live count of orders waiting in the Dispatch queue.
+    const dispQueue = baseOrders.filter(o => ownerOf(eff(o).status) === 'dispatch').length;
+    const nb = $('nav-disp-count');
+    if (nb){ nb.textContent = dispQueue; nb.hidden = dispQueue === 0; nb.className = 'badge' + (dispQueue > 0 ? ' warn' : ''); }
   }
 
   function actionBtn(o){
@@ -23914,6 +23979,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 
   function render(){
     if (!$('ob-rows')) return;
+    applyDeptChrome();
     const view = computeView();
     renderKpis(view);
     // sort indicators
@@ -24265,7 +24331,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     // sheet; everything else opens in the sales overview. Applied on open, on
     // order switch, and whenever the status changes — but a same-status
     // re-render keeps the user's manual toggle.
-    const desiredView = (o.status === 'Ready for Dispatch' || o.status === 'Partially Dispatched') ? 'dispatch' : 'overview';
+    const desiredView = (state.dept === 'dispatch' || o.status === 'Ready for Dispatch' || o.status === 'Partially Dispatched') ? 'dispatch' : 'overview';
     const statusKey = o.ref + '|' + o.status;
     if (orderChanged || drawerStatusKey !== statusKey) setDrawerView(desiredView);
     drawerStatusKey = statusKey;
@@ -25150,7 +25216,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       if (ref && baseOrders.find(o => o.ref === ref)){ openDrawer(ref); }
       else if (!$('ob-drawer').hidden){ closeDrawer(); }
     });
-    if (location.hash === '#orders') window.atlasLoadOrders();
+    if (location.hash === '#dispatch') { state.dept = 'dispatch'; window.atlasLoadOrders(); }
+    else if (location.hash === '#orders') window.atlasLoadOrders();
   });
 })();
 </script>
