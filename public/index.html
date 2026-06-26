@@ -1605,10 +1605,42 @@
   .ob-disp-rec-h .dr-date { font-family: var(--fm); font-size: 10.5px; color: var(--text-3); margin-left: auto; }
   .ob-disp-rec-meta { display: flex; flex-wrap: wrap; gap: 6px 18px; font-family: var(--fm); font-size: 11px; color: var(--text-3); margin-bottom: 10px; }
   .ob-disp-rec-meta b { color: var(--text-2); font-weight: 600; margin-left: 5px; }
-  .ob-disp-rec-lines { display: flex; flex-direction: column; gap: 5px; border-top: 1px solid var(--line); padding-top: 10px; }
-  .ob-disp-rec-line { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-2); }
-  .ob-disp-rec-line b { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
-  .ob-disp-rec-remark { font-family: var(--fm); font-size: 10.5px; color: var(--text-2); font-style: italic; margin-top: 9px; }
+  .ob-disp-rec-remark { font-family: var(--fm); font-size: 10.5px; color: var(--text-2); font-style: italic; margin-top: 12px; }
+
+  /* Dispatch flow card: Ordered/before → Dispatched → Remaining */
+  .ob-disp-flow { display: flex; align-items: center; gap: 10px; padding: 12px 14px; margin: 4px 0 14px; background: var(--void-2); border: 1px solid var(--line); border-radius: 10px; }
+  .ob-disp-flow .df-stat { flex: 1; text-align: center; min-width: 0; }
+  .ob-disp-flow .df-l { font-family: var(--fm); font-size: 8px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); }
+  .ob-disp-flow .df-v { font-family: var(--fd); font-size: 21px; font-weight: 700; color: var(--text); margin-top: 4px; font-variant-numeric: tabular-nums; line-height: 1; }
+  .ob-disp-flow .df-v.green { color: var(--emerald); }
+  .ob-disp-flow .df-v.red { color: var(--rose); }
+  .ob-disp-flow .df-arrow { color: var(--text-4); font-size: 14px; flex-shrink: 0; }
+
+  /* Per-product groups inside a dispatch record (collapsible colour variants) */
+  .ob-dl-groups { display: flex; flex-direction: column; gap: 8px; }
+  .ob-dl-grp { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+  .ob-dl-grp.single { display: flex; align-items: center; gap: 12px; padding: 11px 14px; }
+  .ob-dl-grp summary { display: flex; align-items: center; gap: 12px; padding: 11px 14px; cursor: pointer; list-style: none; }
+  .ob-dl-grp summary::-webkit-details-marker { display: none; }
+  .ob-dl-grp summary:hover { background: rgba(255,255,255,0.02); border-radius: 10px; }
+  .dl-g-prod { font-size: 12.5px; font-weight: 600; color: var(--text); min-width: 0; flex-shrink: 1; }
+  .dl-g-prod small { font-family: var(--fm); font-weight: 400; color: var(--text-3); margin-left: 6px; font-size: 10.5px; }
+  .dl-g-var { font-family: var(--fm); font-size: 9.5px; letter-spacing: 0.04em; color: var(--blue); background: var(--blue-soft); padding: 3px 8px; border-radius: 999px; white-space: nowrap; }
+  .dl-g-nums { display: inline-flex; gap: 14px; margin-left: auto; white-space: nowrap; }
+  .dl-n { font-family: var(--fd); font-size: 14px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+  .dl-n i { font-style: normal; font-family: var(--fm); font-size: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-4); margin-right: 5px; }
+  .dl-n.green { color: var(--emerald); }
+  .dl-n.red { color: var(--rose); }
+  .dl-n.muted { color: var(--text-3); }
+  .dl-g-chev { color: var(--text-3); font-size: 11px; transition: transform 200ms var(--ease); flex-shrink: 0; }
+  .ob-dl-grp[open] .dl-g-chev { transform: rotate(180deg); }
+  .dl-g-variants { padding: 4px 14px 12px; border-top: 1px solid var(--line); }
+  .dl-v-row { display: grid; grid-template-columns: 1fr 52px 52px 52px; gap: 8px; align-items: center; padding: 6px 0; font-size: 12px; }
+  .dl-v-row .dl-n { font-size: 12.5px; text-align: right; }
+  .dl-v-head { font-family: var(--fm); font-size: 8.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-4); padding-bottom: 2px; }
+  .dl-v-head span { text-align: right; }
+  .dl-v-head span:first-child { text-align: left; }
+  .dl-v-c { color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   /* Fulfilment cells in the line-item table */
   .ob-items td.it-disp { color: var(--emerald); }
@@ -24156,6 +24188,9 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   }
   function dgSpec(g){ const p=String(g.product).trim().toLowerCase(); const a=[g.model, g.backing].filter(x=>x && String(x).trim().toLowerCase()!==p).join(' • '); const dim=(g.width&&g.length)?(g.width+'×'+g.length):(g.width||g.length||''); return [a, dim].filter(Boolean).join(' · '); }
   function packCell(l, v, tone, muted){ return '<div class="pk"><div class="pkl">'+esc(l)+'</div><div class="pkv'+(tone?' '+tone:'')+(muted?' muted':'')+'">'+esc(v)+'</div></div>'; }
+  // labelled ordered/dispatched/remaining triple (group summary) and bare cells (variant rows)
+  function numTriple(ord, disp, rem){ return '<span class="dl-g-nums"><span class="dl-n"><i>Ord</i>'+ord+'</span><span class="dl-n green"><i>Disp</i>'+disp+'</span><span class="dl-n '+(rem>0?'red':'muted')+'"><i>Rem</i>'+rem+'</span></span>'; }
+  function numCells(ord, disp, rem){ return '<span class="dl-n">'+ord+'</span><span class="dl-n green">'+disp+'</span><span class="dl-n '+(rem>0?'red':'muted')+'">'+rem+'</span>'; }
 
   function statCell(s){
     const val = s.risk ? '<span class="risk risk-'+s.risk.toLowerCase()+'">'+esc(s.v)+'</span>' : esc(s.v);
@@ -24352,26 +24387,69 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       + '<td class="it-num it-pend'+((f.totalOrdered-f.totalDisp)>0?' has':'')+'">'+(f.totalOrdered-f.totalDisp)+'</td>'
       + '<td class="it-grand">'+inr(o.totalValue)+'</td></tr>';
 
-    // 2b · dispatch history — separate record per shipment (audit trail)
+    // 2b · dispatch history — each shipment tells the full Ordered → Dispatched
+    // → Remaining story, computed cumulatively at that point in time.
     const dsec = $('ob-dr-disp-sec');
     if (f.records.length){
       dsec.hidden = false;
       $('ob-dr-disp-meta').textContent = f.records.length+' dispatch'+(f.records.length!==1?'es':'')+' · '+f.totalDisp+'/'+f.totalOrdered+' units';
-      const onoProd = {}; o.lines.forEach(li => onoProd[li.ono] = prodDesc(li));
+      const orderedByOno = {}, lineByOno = {};
+      o.lines.forEach(li => { orderedByOno[li.ono] = (orderedByOno[li.ono]||0) + li.qty; lineByOno[li.ono] = li; });
+      const cum = {};                 // cumulative dispatched per ono BEFORE current record
+      let cumTotal = 0; const totalOrdered = f.totalOrdered;
       $('ob-dr-disp-list').innerHTML = f.records.map((d, i) => {
+        const thisLines = d.lines || {};
+        // group this record's shipped lines by product / model / backing / size
+        const groups = [], gidx = {}; let thisTotal = 0;
+        Object.keys(thisLines).forEach(ono => {
+          const li = lineByOno[ono]; if(!li) return;
+          const thisQ = +thisLines[ono]||0; thisTotal += thisQ;
+          const ordered = orderedByOno[ono]||0;
+          const after = Math.max(0, ordered - ((cum[ono]||0) + thisQ));
+          const key = [li.category, li.model, li.backing, li.width, li.length].map(x=>x||'').join('|');
+          let g = gidx[key];
+          if(!g){ g = { product:li.category||'—', model:li.model||'', backing:li.backing||'', width:li.width||'', length:li.length||'', ordered:0, dispatched:0, remaining:0, variants:[] }; gidx[key]=g; groups.push(g); }
+          g.ordered += ordered; g.dispatched += thisQ; g.remaining += after;
+          g.variants.push({ colour: li.colour||'—', ordered, dispatched: thisQ, remaining: after });
+        });
+        const beforeTotal = totalOrdered - cumTotal;
+        Object.keys(thisLines).forEach(ono => cum[ono] = (cum[ono]||0) + (+thisLines[ono]||0));
+        cumTotal += thisTotal; const afterTotal = totalOrdered - cumTotal;
+
         const meta = [];
-        if (d.transporter) meta.push('<span>Transporter<b>'+esc(d.transporter)+'</b></span>');
-        if (d.lr) meta.push('<span>LR<b>'+esc(d.lr)+'</b></span>');
+        meta.push('<span>Transporter<b>'+esc(d.transporter||'—')+'</b></span>');
+        meta.push('<span>LR<b>'+esc(d.lr||'Pending')+'</b></span>');
         if (d.vehicle) meta.push('<span>Vehicle<b>'+esc(d.vehicle)+'</b></span>');
         if (d.driver && d.driver.name) meta.push('<span>Driver<b>'+esc(d.driver.name)+(d.driver.mobile?' · '+esc(d.driver.mobile):'')+'</b></span>');
-        const lines = Object.keys(d.lines||{}).map(ono => {
-          const pd = onoProd[ono] || { product:'#'+ono, attrs:'' };
-          return '<div class="ob-disp-rec-line"><span>'+esc(pd.product)+(pd.attrs?' <span style="color:var(--text-3)">'+esc(pd.attrs)+'</span>':'')+'</span><b>'+(+d.lines[ono]||0)+' units</b></div>';
+
+        const groupsHtml = groups.map(g => {
+          const lbl = [g.product].concat([g.model, g.backing].filter(x => x && String(x).trim().toLowerCase() !== String(g.product).trim().toLowerCase())).join(' • ');
+          const size = (g.width&&g.length)?(g.width+'×'+g.length):(g.width||g.length||'');
+          const nums = numTriple(g.ordered, g.dispatched, g.remaining);
+          if (g.variants.length > 1){
+            const vhead = '<div class="dl-v-row dl-v-head"><span>Colour</span><span>Ord</span><span>Disp</span><span>Rem</span></div>';
+            const vrows = g.variants.map(v => '<div class="dl-v-row"><span class="dl-v-c">'+esc(v.colour)+'</span>'+numCells(v.ordered, v.dispatched, v.remaining)+'</div>').join('');
+            return '<details class="ob-dl-grp"><summary>'
+              + '<span class="dl-g-prod">'+esc(lbl)+(size?'<small>'+esc(size)+'</small>':'')+'</span>'
+              + '<span class="dl-g-var">'+g.variants.length+' variants</span>'
+              + nums + '<span class="dl-g-chev">▾</span></summary>'
+              + '<div class="dl-g-variants">'+vhead+vrows+'</div></details>';
+          }
+          const colour = g.variants[0] && g.variants[0].colour && g.variants[0].colour!=='—' ? ' • '+g.variants[0].colour : '';
+          return '<div class="ob-dl-grp single"><span class="dl-g-prod">'+esc(lbl+colour)+(size?'<small>'+esc(size)+'</small>':'')+'</span>'+nums+'</div>';
         }).join('');
+
         return '<div class="ob-disp-rec"><div class="ob-disp-rec-h"><span class="dr-n">Dispatch #'+(i+1)+'</span>'
           + '<span class="dr-date">'+wfTs(d.dispatchAt)+'</span></div>'
           + (meta.length?'<div class="ob-disp-rec-meta">'+meta.join('')+'</div>':'')
-          + '<div class="ob-disp-rec-lines">'+lines+'</div>'
+          + '<div class="ob-disp-flow">'
+          +   '<div class="df-stat"><div class="df-l">'+(i===0?'Ordered':'Remaining before')+'</div><div class="df-v">'+beforeTotal+'</div></div>'
+          +   '<span class="df-arrow">→</span>'
+          +   '<div class="df-stat"><div class="df-l">Dispatched</div><div class="df-v green">'+thisTotal+'</div></div>'
+          +   '<span class="df-arrow">→</span>'
+          +   '<div class="df-stat"><div class="df-l">Remaining</div><div class="df-v '+(afterTotal>0?'red':'green')+'">'+afterTotal+'</div></div>'
+          + '</div>'
+          + '<div class="ob-dl-groups">'+groupsHtml+'</div>'
           + (d.remarks?'<div class="ob-disp-rec-remark">“'+esc(d.remarks)+'”</div>':'')
           + '</div>';
       }).join('');
