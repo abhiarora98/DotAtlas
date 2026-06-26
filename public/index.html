@@ -1650,10 +1650,17 @@
   .ob-wf-remark { font-family: var(--fm); font-size: 10.5px; color: var(--text-2); font-style: italic; margin-top: 4px; }
 
   /* ===== Sales / Dispatch view toggle ===== */
-  .ob-dr-vtoggle { display: inline-flex; gap: 4px; margin-top: 16px; padding: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 11px; }
-  .ob-dr-vtoggle button { font-family: var(--fm); font-size: 11px; letter-spacing: 0.02em; color: var(--text-3); background: transparent; border: 0; padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: all 150ms var(--ease); }
-  .ob-dr-vtoggle button:hover { color: var(--text); }
-  .ob-dr-vtoggle button.on { color: var(--text); background: var(--surface-3); box-shadow: 0 1px 2px rgba(0,0,0,0.25); }
+  /* Order summary — grouped products for a fast read (sales) */
+  .ob-osum { display: flex; flex-direction: column; gap: 10px; }
+  .ob-osum-g { border: 1px solid var(--line); border-radius: 12px; padding: 13px 16px; background: var(--surface-2); }
+  .ob-osum-g-h { display: flex; align-items: baseline; gap: 10px; }
+  .ob-osum-g-h .osg-prod { font-family: var(--fd); font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: -0.01em; }
+  .ob-osum-g-h .osg-tot { margin-left: auto; font-family: var(--fd); font-size: 16px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+  .ob-osum-g-h .osg-tot small { font-family: var(--fm); font-size: 9px; color: var(--text-3); font-weight: 400; }
+  .ob-osum-subs { display: flex; flex-direction: column; gap: 4px; margin-top: 10px; }
+  .ob-osum-subs .osg-sub { display: flex; justify-content: space-between; align-items: baseline; font-size: 12.5px; color: var(--text-2); }
+  .ob-osum-subs .osg-sub span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ob-osum-subs .osg-sub b { color: var(--text); font-weight: 700; font-variant-numeric: tabular-nums; margin-left: 12px; }
   /* show only the sections relevant to the active view */
   .ob-dr-body[data-view="dispatch"] .dr-sales-only { display: none; }
   .ob-dr-body[data-view="overview"] .dr-dispatch-only { display: none; }
@@ -3680,10 +3687,6 @@
           </div>
           <div class="ob-dr-since" id="ob-dr-since">—</div>
           <div class="ob-ctx" id="ob-dr-ctx"></div>
-          <div class="ob-dr-vtoggle" id="ob-dr-vtoggle">
-            <button data-v="overview">Sales overview</button>
-            <button data-v="dispatch">Dispatch sheet</button>
-          </div>
         </div>
 
         <div class="ob-dr-body" id="ob-dr-body" data-view="overview">
@@ -3691,6 +3694,14 @@
           <div class="ob-os">
             <div class="ob-os-head">This order · PI #<span id="ob-dr-ref">—</span> <span id="ob-dr-status-wrap"></span></div>
             <div class="ob-os-grid" id="ob-dr-ordersum"></div>
+          </div>
+
+          <!-- 1a · order summary — grouped products for a 30-second read (sales) -->
+          <div class="ob-coll dr-sales-only" data-open="1" data-default="1" data-sec="osum">
+            <div class="ob-coll-h"><span class="ob-coll-t">Order summary</span><span class="ob-coll-meta" id="ob-dr-osum-meta"></span><span class="ob-chev">▾</span></div>
+            <div class="ob-coll-b"><div class="ob-coll-inner">
+              <div class="ob-osum" id="ob-dr-osum"></div>
+            </div></div>
           </div>
 
           <!-- 1b · packing instructions (sales handover — dispatch sheet, on top) -->
@@ -3726,8 +3737,8 @@
             </div></div>
           </div>
 
-          <!-- 2b · dispatch history (shown only when shipments exist) -->
-          <div class="ob-coll" data-open="0" data-default="0" data-sec="disphist" id="ob-dr-disp-sec" hidden>
+          <!-- 2b · dispatch history (dispatch sheet only; shown when shipments exist) -->
+          <div class="ob-coll dr-dispatch-only" data-open="0" data-default="0" data-sec="disphist" id="ob-dr-disp-sec" hidden>
             <div class="ob-coll-h"><span class="ob-coll-t">Dispatch history</span><span class="ob-coll-meta" id="ob-dr-disp-meta"></span><span class="ob-chev">▾</span></div>
             <div class="ob-coll-b"><div class="ob-coll-inner">
               <div class="ob-disp-list" id="ob-dr-disp-list"></div>
@@ -24025,7 +24036,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   }
 
   // ---------- details drawer ----------
-  let drawerRef = null, drawerStatusKey = null;
+  let drawerRef = null;
   function wfTs(tsISO){
     if (!tsISO) return '';
     const m = String(tsISO).match(/^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2}))?/);
@@ -24253,6 +24264,22 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     return groups;
   }
   function dgSpec(g){ const p=String(g.product).trim().toLowerCase(); const a=[g.model, g.backing].filter(x=>x && String(x).trim().toLowerCase()!==p).join(' • '); const dim=(g.width&&g.length)?(g.width+'×'+g.length):(g.width||g.length||''); return [a, dim].filter(Boolean).join(' · '); }
+  // Order summary grouping: Product → Model • Backing, totalling qty (colours
+  // and sizes collapsed) — a 30-second read of what the order contains.
+  function orderSummaryGroups(lines){
+    const prods = {}, order = [];
+    lines.forEach(li => {
+      const product = li.category || '—';
+      if (!prods[product]){ prods[product] = { product, total:0, subs:{}, subOrder:[] }; order.push(product); }
+      const p = prods[product];
+      p.total += li.qty||0;
+      const pn = product.trim().toLowerCase();
+      const mb = [li.model, li.backing].filter(x => x && String(x).trim().toLowerCase() !== pn).join(' • ') || li.model || '—';
+      if (!p.subs[mb]){ p.subs[mb] = { label: mb, qty:0 }; p.subOrder.push(mb); }
+      p.subs[mb].qty += li.qty||0;
+    });
+    return order.map(k => { const p = prods[k]; return { product: p.product, total: p.total, subs: p.subOrder.map(s => p.subs[s]) }; });
+  }
   function packCell(l, v, tone, muted){ return '<div class="pk"><div class="pkl">'+esc(l)+'</div><div class="pkv'+(tone?' '+tone:'')+(muted?' muted':'')+'">'+esc(v)+'</div></div>'; }
   // labelled ordered/dispatched/remaining triple (group summary) and bare cells (variant rows)
   function numTriple(ord, disp, rem){ return '<span class="dl-g-nums"><span class="dl-n"><i>Ord</i>'+ord+'</span><span class="dl-n green"><i>Disp</i>'+disp+'</span><span class="dl-n '+(rem>0?'red':'muted')+'"><i>Rem</i>'+rem+'</span></span>'; }
@@ -24327,14 +24354,9 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         c.setAttribute('data-open', c.getAttribute('data-default') || '0');
       });
     }
-    // Dispatch-relevant orders open straight into the dispatch instruction
-    // sheet; everything else opens in the sales overview. Applied on open, on
-    // order switch, and whenever the status changes — but a same-status
-    // re-render keeps the user's manual toggle.
-    const desiredView = (state.dept === 'dispatch' || o.status === 'Ready for Dispatch' || o.status === 'Partially Dispatched') ? 'dispatch' : 'overview';
-    const statusKey = o.ref + '|' + o.status;
-    if (orderChanged || drawerStatusKey !== statusKey) setDrawerView(desiredView);
-    drawerStatusKey = statusKey;
+    // The view is purely department-driven now: Sales sees the sales view, the
+    // Dispatch module sees the dispatch sheet. No manual toggle.
+    setDrawerView(state.dept === 'dispatch' ? 'dispatch' : 'overview');
 
     // ---- header (customer) ----
     $('ob-dr-party').textContent = o.party;
@@ -24427,6 +24449,15 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     $('ob-dr-prev-count').textContent = ps.count+' Previous Order'+(ps.count!==1?'s':'')
       + (last ? ' • Last '+inr(last.totalValue)+(fmtDateShort(last.piDateISO)?' · '+fmtDateShort(last.piDateISO):'') : '');
     $('ob-dr-prev').innerHTML = ps.list.slice(0,6).map(p => prevRow(p, ref)).join('');
+
+    // 1a · order summary — grouped products (Product → Model • Backing) for a
+    // fast read of the order without scanning every colour/SKU.
+    const osumGroups = orderSummaryGroups(o.lines);
+    $('ob-dr-osum-meta').textContent = osumGroups.length + ' product' + (osumGroups.length!==1?'s':'') + ' · ' + o.totalQty + ' pcs';
+    $('ob-dr-osum').innerHTML = osumGroups.map(g =>
+      '<div class="ob-osum-g"><div class="ob-osum-g-h"><span class="osg-prod">'+esc(g.product)+'</span><span class="osg-tot">'+g.total+'<small> pcs</small></span></div>'
+      + '<div class="ob-osum-subs">' + g.subs.map(s => '<div class="osg-sub"><span>'+esc(s.label)+'</span><b>'+s.qty+'</b></div>').join('') + '</div>'
+      + '</div>').join('');
 
     // 2 · line items — original order: # · Product · Size · Ordered · Dispatched · Pending · Value
     // The ordered quantities are immutable; dispatched/pending come from records.
@@ -24635,10 +24666,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   function closeDrawer(){ $('ob-drawer').hidden = true; drawerRef = null; document.body.style.overflow = ''; updateSelectedRow(false); }
 
   // ---------- sales / dispatch view + load sheet ----------
-  function setDrawerView(v){
-    $('ob-dr-body').setAttribute('data-view', v);
-    document.querySelectorAll('#ob-dr-vtoggle button').forEach(b => b.classList.toggle('on', b.getAttribute('data-v')===v));
-  }
+  // The view follows the active department (no manual toggle).
+  function setDrawerView(v){ $('ob-dr-body').setAttribute('data-view', v); }
   function openLoadSheet(ref){
     const base = baseOrders.find(o => o.ref === ref); if(!base) return;
     const o = eff(base);
@@ -25140,7 +25169,6 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     $('ob-dr-viewall').addEventListener('click', () => { const b = baseOrders.find(o=>o.ref===drawerRef); if(b) filterByParty(b.party); });
     $('ob-pf-viewall').addEventListener('click', () => filterByParty(pfParty));
     // sales / dispatch view toggle
-    $('ob-dr-vtoggle').addEventListener('click', e => { const b=e.target.closest('button[data-v]'); if(b) setDrawerView(b.getAttribute('data-v')); });
     // load sheet
     $('ob-dr-loadsheet').addEventListener('click', () => { if(drawerRef) openLoadSheet(drawerRef); });
     $('ob-ls-print').addEventListener('click', () => window.print());
