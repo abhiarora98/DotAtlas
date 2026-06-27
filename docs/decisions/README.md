@@ -40,3 +40,4 @@ Create `NNNN-short-title.md` (zero-padded, incrementing) with:
 |---|---|---|
 | [0001](./0001-adopt-architecture-first-process.md) | Adopt an architecture-first development process | Accepted |
 | [0002](./0002-two-step-dispatch-reconciliation.md) | Split dispatch reconciliation into Packing Slip + Sales Invoice | Accepted |
+| [0003](./0003-backend-stack-postgres-prisma-nestjs.md) | Backend stack: PostgreSQL + Prisma + NestJS | Accepted |

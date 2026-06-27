@@ -62,6 +62,12 @@
 - **[er-diagram.md](../database/er-diagram.md)** — conceptual + logical data model (entities, relationships, lifecycles).
 - **[product-hierarchy.md](../database/product-hierarchy.md)** — how products, variants and SKUs are modelled.
 
+### Backend (`docs/backend/`) — *technical architecture*
+How the software implements the business (target stack: PostgreSQL + Prisma +
+NestJS). See **[backend/README.md](../backend/README.md)** for: backend overview,
+database design, module boundaries, document lifecycle, state machines, API
+strategy and the event system.
+
 ### Decisions (`docs/decisions/`)
 - Architecture Decision Records (ADRs) — the *why* behind significant choices.
 
