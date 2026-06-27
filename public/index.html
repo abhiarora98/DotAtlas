@@ -1628,7 +1628,7 @@
   .ob-de-sub .de-sub-x:hover { color: var(--rose); }
 
   /* Variance check modal */
-  .ob-variance-overlay { z-index: 1260; }
+  .ap-overlay.ob-variance-overlay { z-index: 1320; }
   .live-dot.warn { background: var(--amber); box-shadow: 0 0 0 4px rgba(255,176,121,0.12); }
   .ob-var-intro { font-size: 12.5px; color: var(--text-2); margin: 0 0 14px; }
   .ob-var-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 4px; }
@@ -1655,6 +1655,70 @@
   .ob-var-banner .vb-sub { display: block; font-family: var(--fm); font-size: 10.5px; color: var(--amber); margin-top: 3px; }
   .ob-var-banner .vb-ack { margin-left: auto; flex-shrink: 0; font-family: var(--fm); font-size: 11px; color: var(--amber); background: var(--surface); border: 1px solid rgba(255,176,121,0.4); padding: 8px 14px; border-radius: 8px; cursor: pointer; }
   .ob-var-banner .vb-ack:hover { background: rgba(255,176,121,0.12); }
+
+  /* manual-entry badge (Foot Mats / Car Sets not on the packing slip) */
+  .ob-de-row .de-manual { font-family: var(--fm); font-size: 8.5px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--amber); background: var(--amber-soft); border-radius: 5px; padding: 2px 5px; margin-left: 7px; vertical-align: middle; }
+  .ob-de-row.is-manual { background: rgba(255,176,121,0.04); }
+
+  /* File-upload control (packing slip / sales invoice) */
+  .ob-up-drop { display: flex; align-items: center; gap: 12px; padding: 16px 16px; border: 1.5px dashed var(--line-3); border-radius: 11px; background: var(--surface-2); cursor: pointer; color: var(--text-2); font-size: 12.5px; transition: all 140ms var(--ease); }
+  .ob-up-drop:hover { border-color: var(--emerald-mute); background: var(--emerald-soft); color: var(--text); }
+  .ob-up-drop .up-ic { font-size: 18px; }
+  .ob-up-drop em { font-style: normal; font-family: var(--fm); font-size: 10px; color: var(--text-4); margin-left: 6px; }
+  .ob-up-done { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--line-2); border-radius: 11px; background: var(--surface-2); }
+  .ob-up-done .up-ic { font-size: 18px; }
+  .ob-up-done .up-meta { display: flex; flex-direction: column; min-width: 0; }
+  .ob-up-done .up-meta b { font-size: 12.5px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ob-up-done .up-meta span { font-family: var(--fm); font-size: 10px; color: var(--text-3); }
+  .ob-up-done .up-meta a { color: var(--blue); }
+  .ob-up-done .up-replace { margin-left: auto; flex-shrink: 0; font-family: var(--fm); font-size: 10.5px; color: var(--text-2); background: var(--surface); border: 1px solid var(--line-2); padding: 7px 12px; border-radius: 8px; cursor: pointer; }
+  .ob-up-done .up-replace:hover { border-color: var(--line-3); color: var(--text); }
+
+  /* Sales-invoice reconciliation grid */
+  .ob-si-editor { display: flex; flex-direction: column; gap: 8px; }
+  .ob-si-row { display: grid; grid-template-columns: minmax(120px,1.4fr) auto 92px 110px 64px; gap: 12px; align-items: center; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); }
+  .ob-si-row .si-desc { min-width: 0; }
+  .ob-si-row .si-desc b { font-size: 12.5px; color: var(--text); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ob-si-row .si-desc span { font-family: var(--fm); font-size: 10px; color: var(--text-3); }
+  .ob-si-row .si-desc .si-q { color: var(--text-4); }
+  .ob-si-row .si-pi, .ob-si-row .si-in { display: flex; flex-direction: column; gap: 3px; }
+  .ob-si-row label { font-family: var(--fm); font-size: 8.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-4); }
+  .ob-si-row .si-pi span { font-family: var(--fm); font-size: 12px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+  .ob-si-row input { width: 100%; text-align: right; font-family: var(--fm); font-variant-numeric: tabular-nums; font-size: 12px; padding: 6px 8px; border: 1px solid var(--line-2); border-radius: 7px; background: var(--surface); color: var(--text); }
+  .ob-si-row .si-var { justify-self: end; font-family: var(--fm); font-size: 11.5px; font-weight: 700; font-variant-numeric: tabular-nums; padding: 3px 8px; border-radius: 999px; }
+  .ob-si-row .si-var.ok { color: var(--emerald); background: var(--emerald-soft); }
+  .ob-si-row .si-var.under { color: var(--rose); background: var(--rose-soft); }
+  .ob-si-row .si-var.over { color: var(--blue); background: var(--blue-soft); }
+  .ob-si-total { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-top: 12px; padding: 12px 14px; border-radius: 11px; border: 1px solid var(--line); background: var(--surface-2); font-size: 12px; color: var(--text-2); }
+  .ob-si-total b { color: var(--text); font-variant-numeric: tabular-nums; margin-left: 5px; }
+  .ob-si-total .si-t-var { margin-left: auto; font-weight: 700; }
+  .ob-si-total.ok .si-t-var { color: var(--emerald); }
+  .ob-si-total.warn { background: var(--amber-soft); border-color: rgba(255,176,121,0.34); }
+  .ob-si-total.warn .si-t-var { color: var(--amber); }
+
+  /* Reconciliation panel (dispatch order view) — two sequential steps */
+  .ob-recon { display: flex; flex-direction: column; gap: 12px; }
+  .ob-dr-recon-sec .ob-coll-meta .rc-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin: 0 4px 0 8px; vertical-align: middle; }
+  .rc-dot.ok { background: var(--emerald); } .rc-dot.wait { background: var(--amber); } .rc-dot.idle { background: var(--line-3); }
+  .rc-step { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); }
+  .rc-step.active { border-color: var(--emerald-mute); background: var(--emerald-soft); }
+  .rc-step.locked { opacity: 0.62; }
+  .rc-num { flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--fm); font-size: 12px; font-weight: 700; color: var(--text-2); background: var(--surface-3); border: 1px solid var(--line-2); }
+  .rc-step.done .rc-num { color: var(--emerald); background: var(--emerald-soft); border-color: var(--emerald-mute); }
+  .rc-step.active .rc-num { color: var(--emerald-2); background: var(--surface); border-color: var(--emerald-mute); }
+  .rc-body { flex: 1; min-width: 0; }
+  .rc-t { font-family: var(--fd); font-size: 13.5px; font-weight: 700; color: var(--text); }
+  .rc-t .rc-purpose { font-family: var(--fm); font-size: 10px; font-weight: 500; letter-spacing: 0.03em; text-transform: uppercase; color: var(--text-4); margin-left: 8px; }
+  .rc-sub { font-size: 12px; color: var(--text-2); margin-top: 5px; }
+  .rc-sub.rc-muted { color: var(--text-4); }
+  .rc-file { font-family: var(--fm); font-size: 10.5px; color: var(--text-3); margin-top: 6px; }
+  .rc-file a { color: var(--blue); margin-left: 4px; }
+  .rc-meta { font-family: var(--fm); font-size: 10px; color: var(--text-4); margin-top: 5px; }
+  .rc-btn { flex-shrink: 0; align-self: center; font-family: var(--fm); font-size: 11.5px; color: var(--text-2); background: var(--surface); border: 1px solid var(--line-2); padding: 9px 15px; border-radius: 9px; cursor: pointer; }
+  .rc-btn:hover { border-color: var(--line-3); color: var(--text); }
+  .rc-btn.prime { color: var(--emerald-2); background: var(--surface); border-color: var(--emerald-mute); font-weight: 600; }
+  .rc-btn.prime:hover { background: var(--emerald-soft); }
+  .rc-lock { flex-shrink: 0; align-self: center; font-size: 14px; opacity: 0.6; }
 
   /* Dispatch-record substitutions */
   .ob-disp-subs { margin-top: 10px; border-top: 1px dashed var(--line); padding-top: 10px; }
@@ -3830,6 +3894,14 @@
             </div></div>
           </div>
 
+          <!-- 2c · reconciliation (dispatch sheet only; once goods have shipped) -->
+          <div class="ob-coll dr-dispatch-only" data-open="1" data-default="1" data-sec="recon" id="ob-dr-recon-sec" hidden>
+            <div class="ob-coll-h"><span class="ob-coll-t">Reconciliation</span><span class="ob-coll-meta" id="ob-dr-recon-meta"></span><span class="ob-chev">▾</span></div>
+            <div class="ob-coll-b"><div class="ob-coll-inner">
+              <div class="ob-recon" id="ob-dr-recon"></div>
+            </div></div>
+          </div>
+
           <!-- 3 · recent orders -->
           <div class="ob-coll dr-sales-only" data-open="0" data-default="0" data-sec="recent">
             <div class="ob-coll-h"><span class="ob-coll-t">Recent orders</span><span class="ob-coll-meta" id="ob-dr-prev-count"></span><span class="ob-chev">▾</span></div>
@@ -4020,7 +4092,6 @@
           <div class="pi-field" id="ob-disp-lines-wrap">
             <label>Loading <span class="ap-muted" id="ob-disp-lines-hint">— enter what's actually being loaded</span></label>
             <div class="ob-disp-editor" id="ob-disp-lines"></div>
-            <div class="ob-disp-varsum" id="ob-disp-varsum" hidden></div>
           </div>
           <div class="pi-field">
             <label for="ob-disp-lr">LR / Docket Number <span class="ap-req">*</span></label>
@@ -4071,14 +4142,82 @@
           <button class="ap-close" id="ob-var-close" aria-label="Close">×</button>
         </div>
         <div class="ap-body">
-          <p class="ob-var-intro">Dispatch is loading a different mix than ordered. Nothing is blocked — the shipment is recorded as-is.</p>
+          <p class="ob-var-intro">The packing slip shows a different mix than ordered. Nothing is blocked — this is recorded as the verified shipment.</p>
           <div class="ob-var-list" id="ob-var-list"></div>
           <div class="ob-var-total" id="ob-var-total"></div>
           <div class="ap-actions">
             <button class="pi-btn" id="ob-var-cancel">Back</button>
-            <button class="pi-btn prime" id="ob-var-continue">Continue dispatch →</button>
+            <button class="pi-btn prime" id="ob-var-continue">Verify packing slip →</button>
           </div>
-          <div class="ap-foot">The Sales Order stays unchanged. This shipment is recorded as-is and Sales is notified to review the variance before the invoice is generated.</div>
+          <div class="ap-foot">The Sales Order stays unchanged. The verified quantities are recorded and Sales is notified to review the variance before the invoice is generated.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 1 · PACKING SLIP RECONCILIATION (Dispatch — quantity verification) -->
+    <div class="ap-overlay ob-dispatch-overlay" id="ob-pslip" hidden>
+      <div class="ap-modal wide" role="dialog" aria-modal="true" aria-labelledby="ob-ps-title">
+        <div class="ap-head">
+          <div>
+            <div class="eb" style="margin-bottom:6px;"><span class="live-dot"></span>Step 1 · Quantity verification · <span id="ob-ps-ref">—</span></div>
+            <h2 id="ob-ps-title">Verify the <span style="color: var(--emerald);">packing slip</span> for <span style="font-style:italic;font-weight:500;" id="ob-ps-party">order</span>.</h2>
+          </div>
+          <button class="ap-close" id="ob-ps-close" aria-label="Close">×</button>
+        </div>
+        <div class="ap-body">
+          <div class="pi-field">
+            <label>Packing slip document</label>
+            <input type="file" id="ob-ps-input" accept=".pdf,image/*" hidden>
+            <div class="ob-up" id="ob-ps-file"></div>
+          </div>
+          <div class="pi-field">
+            <label>Verified quantities <span class="ap-muted">— confirm or correct each colour against the slip; Foot Mats &amp; Car Sets are entered manually</span></label>
+            <div class="ob-disp-editor" id="ob-ps-lines"></div>
+            <div class="ob-disp-varsum" id="ob-ps-varsum" hidden></div>
+          </div>
+          <div class="ap-status" id="ob-ps-status"></div>
+          <div class="ap-actions">
+            <button class="pi-btn" id="ob-ps-cancel">Cancel</button>
+            <button class="pi-btn prime" id="ob-ps-save">Verify packing slip →</button>
+          </div>
+          <div class="ap-foot">The uploaded slip is the source document; quantities are confirmed here. Once the inventory ERP is connected, these figures auto-fill — the workflow stays identical.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2 · SALES INVOICE RECONCILIATION (Accounts — financial verification) -->
+    <div class="ap-overlay ob-dispatch-overlay" id="ob-sinv" hidden>
+      <div class="ap-modal wide" role="dialog" aria-modal="true" aria-labelledby="ob-si-title">
+        <div class="ap-head">
+          <div>
+            <div class="eb" style="margin-bottom:6px;"><span class="live-dot"></span>Step 2 · Financial verification · <span id="ob-si-ref">—</span></div>
+            <h2 id="ob-si-title">Reconcile the <span style="color: var(--blue);">sales invoice</span> for <span style="font-style:italic;font-weight:500;" id="ob-si-party">order</span>.</h2>
+          </div>
+          <button class="ap-close" id="ob-si-close" aria-label="Close">×</button>
+        </div>
+        <div class="ap-body">
+          <div class="ap-row-2">
+            <div class="pi-field">
+              <label>Sales invoice document</label>
+              <input type="file" id="ob-si-input" accept=".pdf,image/*" hidden>
+              <div class="ob-up" id="ob-si-file"></div>
+            </div>
+            <div class="pi-field">
+              <label for="ob-si-no">Invoice number</label>
+              <input class="pi-input mono no-upper" id="ob-si-no" placeholder="e.g. INV-2026-0428" autocomplete="off">
+            </div>
+          </div>
+          <div class="pi-field">
+            <label>Commercial check <span class="ap-muted">— PI ↔ invoice rate &amp; amount per line</span></label>
+            <div class="ob-si-editor" id="ob-si-lines"></div>
+            <div class="ob-si-total" id="ob-si-varsum"></div>
+          </div>
+          <div class="ap-status" id="ob-si-status"></div>
+          <div class="ap-actions">
+            <button class="pi-btn" id="ob-si-cancel">Cancel</button>
+            <button class="pi-btn prime" id="ob-si-save">Verify invoice →</button>
+          </div>
+          <div class="ap-foot">Financial verification only — quantities are confirmed at the packing slip step. Once the accounting system is connected, the invoice syncs automatically.</div>
         </div>
       </div>
     </div>
@@ -23948,7 +24087,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const ov = overlay[o.ref];
     const f = fulfil(o);
     const lastDisp = f.records.length ? f.records[f.records.length-1] : null;
-    const invoiceNo = o.invoiceNo || (ov && ov.dispatch && ov.dispatch.invoiceNo) || '';
+    const invoiceNo = o.invoiceNo || (ov && ((ov.salesInvoice && ov.salesInvoice.invoiceNo) || ov.invoiceNo)) || '';
     const dispAtISO = lastDisp && lastDisp.dispatchAt ? lastDisp.dispatchAt.slice(0,10) : null;
     const estDispatch = dispAtISO ? fmtISO(dispAtISO) : o.estDispatch;
     return Object.assign({}, o, { status: f.status, invoiceNo, estDispatch, _ov: ov, _fulfil: f });
@@ -23974,12 +24113,14 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       ];
     }
 
-    const readyE = byKind.ready, delivE = byKind.delivered;
+    const readyE = byKind.ready, delivE = byKind.delivered, psE = byKind.pslip, siE = byKind.sinv;
     const records = f.records;
     const lastDisp = records.length ? records[records.length-1] : null;
     const readyTs = readyE ? readyE.tsISO : '';
     const dispTs = lastDisp ? lastDisp.dispatchAt : (o.estDispatch || '');
     const delivTs = delivE ? delivE.tsISO : '';
+    const ps = ov && ov.packingSlip, si = ov && ov.salesInvoice;
+    const psDone = !!(ps && ps.verifiedAt), siDone = !!(si && si.verifiedAt);
 
     // Dispatch sub-line: reflect partial vs full progress.
     let dispSub = '';
@@ -23990,21 +24131,23 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 
     const readySub = readyE ? [ (ov.ready&&ov.ready.paymentStatus), (ov.ready&&ov.ready.transporter), (ov.ready&&ov.ready.packingType) ].filter(Boolean).join(' · ') || 'Sales handover complete' : 'Staged · ready to leave the factory';
 
+    const fullyDisp = f.status==='Fully Dispatched' || !!f.delivery || (records.length>0 && f.totalDisp>=f.totalOrdered);
     const stages = [
-      { key:'created',    label:'PI Created',         tsISO:createdTs, sub:o.lineCount+' line items · '+inr(o.totalValue), by:'Master sheet' },
-      { key:'ready',      label:'Ready for Dispatch', tsISO:readyTs, sub:readySub, by: readyE && readyE.by, remarks: readyE && readyE.remarks },
-      { key:'dispatched', label: f.status==='Partially Dispatched'?'Partially Dispatched':'Dispatched', tsISO:dispTs, sub:dispSub, by: lastDisp && lastDisp.by, remarks: lastDisp && lastDisp.remarks },
-      { key:'delivered',  label:'Delivered',          tsISO:delivTs, sub: f.delivery ? ('Delivered'+(f.delivery.date?(' · '+fmtISO(f.delivery.date)):'')) : 'Awaiting delivery confirmation', by: delivE && delivE.by },
+      { key:'created',    label:'PI Created',         tsISO:createdTs, sub:o.lineCount+' line items · '+inr(o.totalValue), by:'Master sheet', done:true },
+      { key:'ready',      label:'Ready for Dispatch', tsISO:readyTs, sub:readySub, by: readyE && readyE.by, remarks: readyE && readyE.remarks, done: !!readyE || records.length>0 || f.legacyFull || !!f.delivery },
+      { key:'dispatched', label: f.status==='Partially Dispatched'?'Partially Dispatched':'Dispatched', tsISO:dispTs, sub:dispSub, by: lastDisp && lastDisp.by, remarks: lastDisp && lastDisp.remarks, done: fullyDisp },
+      { key:'pslip',      label:'Packing slip verified', tsISO: psE?psE.tsISO:'', sub: psDone ? ((ps.variance?'Variance recorded · ':'Quantities match · ')+(ps.verifiedTotal!=null?ps.verifiedTotal+' units':'verified')) : 'Awaiting quantity verification', by: psE && psE.by, done: psDone },
+      { key:'sinv',       label:'Sales invoice verified', tsISO: siE?siE.tsISO:'', sub: siDone ? ((si.totalDelta&&Math.abs(si.totalDelta)>=1?'Amount variance · ':'Commercials match · ')+'Invoice '+inr(si.invTotal||0)) : 'Awaiting financial verification', by: siE && siE.by, done: siDone },
+      { key:'delivered',  label:'Delivered',          tsISO:delivTs, sub: f.delivery ? ('Delivered'+(f.delivery.date?(' · '+fmtISO(f.delivery.date)):'')) : 'Awaiting delivery confirmation', by: delivE && delivE.by, done: !!f.delivery },
     ];
-    // level = highest completed stage (1-based)
-    const dispatchedAny = records.length || f.legacyFull;
-    const level = f.delivery ? 4 : (f.status==='Fully Dispatched') ? 3 : dispatchedAny ? 3 : (f.status==='Ready for Dispatch') ? 2 : 1;
-    // a partial dispatch keeps "Dispatched" as the current (in-progress) stage
-    stages.forEach((s, i) => {
-      const idx = i+1;
-      s.state = idx < level+1 ? 'done' : (idx === level+1 ? 'current' : 'upcoming');
+    // Walk the pipeline: everything done up to the first incomplete step (which
+    // becomes 'current'); a partial dispatch sits as the in-progress step.
+    let currentSet = false;
+    stages.forEach(s => {
+      if (s.done) s.state = 'done';
+      else if (!currentSet){ s.state = 'current'; currentSet = true; }
+      else s.state = 'upcoming';
     });
-    if (f.status==='Partially Dispatched'){ stages[2].state = 'current'; stages[3].state = 'upcoming'; }
     return stages;
   }
 
@@ -24551,8 +24694,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       + '</div></div>'
       + '<div class="ob-os-small">'+meta.join('<span class="sep">•</span>')+'</div>';
 
-    // Dispatch variance banner — surfaced to Sales until reviewed. Triggered by
-    // any colour-mix change (reduced / increased) or substitution, not just subs.
+    // Packing-slip variance banner — surfaced to Sales until reviewed. Raised at
+    // packing-slip verification whenever the verified mix differs from the order.
     const vb = $('ob-dr-varbanner');
     if (o._ov && o._ov.variance && !o._ov.varianceReviewed){
       const vdat = o._ov.varianceData;
@@ -24563,14 +24706,13 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         (vdat.increased||[]).forEach(r => bits.push(esc(r.colour)+' +'+r.delta));
         (vdat.subs||[]).forEach(s => bits.push(esc(s.label)+' +'+s.qty));
         const tot = vdat.totalDelta===0 ? 'total quantity unchanged'
-          : vdat.totalDelta<0 ? ((-vdat.totalDelta)+' pending')
+          : vdat.totalDelta<0 ? ((-vdat.totalDelta)+' short')
           : ('+'+vdat.totalDelta+' over order');
         sub = (bits.join(', ') || 'mix changed') + ' · ' + tot + ' · review before invoice';
       } else {
-        const allSubs = (o._ov.dispatches||[]).flatMap(d => (d.subs||[]).map(s => ({ ...s, n: d.n })));
-        sub = (allSubs.length ? 'Substituted: '+esc(allSubs.map(s=>s.qty+' '+s.label).join(', '))+' · ' : '') + 'review before invoice generation';
+        sub = 'Verified quantities differ from the order · review before invoice generation';
       }
-      vb.innerHTML = '<div class="vb-main"><span class="vb-ic">🟡</span><div><b>Dispatch variance — colour mix changed</b><span class="vb-sub">'+sub+'</span></div></div>'
+      vb.innerHTML = '<div class="vb-main"><span class="vb-ic">🟡</span><div><b>Packing slip variance — verified mix differs</b><span class="vb-sub">'+sub+'</span></div></div>'
         + (state.dept !== 'dispatch' ? '<button class="vb-ack" data-act="ackvar" data-ref="'+esc(o.ref)+'">Reviewed</button>' : '');
       vb.hidden = false;
     } else { vb.hidden = true; vb.innerHTML = ''; }
@@ -24726,6 +24868,51 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       }).join('');
     } else { dsec.hidden = true; }
 
+    // 2c · reconciliation — Packing Slip (qty) then Sales Invoice (₹). Surfaces
+    // once goods have actually shipped (a Fully Dispatched / Delivered order).
+    const rsec = $('ob-dr-recon-sec');
+    const ovr = o._ov || {};
+    const showRecon = f.status === 'Fully Dispatched' || f.status === 'Delivered' || (ovr.packingSlip && ovr.packingSlip.verifiedAt);
+    if (showRecon){
+      rsec.hidden = false;
+      const ps = ovr.packingSlip || {}, si = ovr.salesInvoice || {};
+      const psDone = !!ps.verifiedAt, siDone = !!si.verifiedAt;
+      $('ob-dr-recon-meta').innerHTML = '<span class="rc-dot '+(psDone?'ok':'wait')+'"></span>'+(psDone?'Slip ✓':'Slip ·')+' <span class="rc-dot '+(siDone?'ok':psDone?'wait':'idle')+'"></span>'+(siDone?'Invoice ✓':'Invoice');
+      const psVarTxt = ps.variance ? (() => {
+        const v = ps.variance, bits = [];
+        (v.reduced||[]).forEach(r=>bits.push(esc(r.colour)+' '+r.delta));
+        (v.increased||[]).forEach(r=>bits.push(esc(r.colour)+' +'+r.delta));
+        (v.subs||[]).forEach(s=>bits.push(esc(s.label)+' +'+s.qty));
+        return bits.join(', ') + ' · ' + (v.totalDelta===0?'total unchanged':v.totalDelta<0?((-v.totalDelta)+' short'):('+'+v.totalDelta+' over'));
+      })() : '';
+      const fileLine = (rec, key, ref) => {
+        const href = rec.dataUrl || sessionFiles[ref+'|'+key] || '';
+        return rec.file ? '<div class="rc-file"><span>📎 '+esc(rec.file.name)+'</span>'+(href?' <a href="'+href+'" target="_blank" rel="noopener">View</a>':'')+'</div>' : '';
+      };
+      const step1 = '<div class="rc-step '+(psDone?'done':'active')+'">'
+        + '<div class="rc-num">'+(psDone?'✓':'1')+'</div>'
+        + '<div class="rc-body"><div class="rc-t">Packing slip <span class="rc-purpose">quantity verification</span></div>'
+        + (psDone
+            ? '<div class="rc-sub">'+(ps.variance?'Variance recorded — '+psVarTxt:'Quantities match the order ✓')+'</div>'+fileLine(ps,'pslip',o.ref)
+              + '<div class="rc-meta">'+ps.verifiedTotal+' units verified · '+esc(ps.by||'Dispatch')+'</div>'
+            : '<div class="rc-sub">Upload the slip and confirm the dispatched quantities.</div>')
+        + '</div>'
+        + '<button class="rc-btn'+(psDone?'':' prime')+'" data-act="pslip" data-ref="'+esc(o.ref)+'">'+(psDone?'Review':'Upload slip')+'</button></div>';
+      const siVarTxt = siDone ? (Math.abs(si.totalDelta||0)<1 && !(si.issues&&si.issues.length) ? 'Matches the PI ✓' : ((si.issues?si.issues.length:0)+' line variance · '+( (si.totalDelta>0?'+':'')+inr(si.totalDelta||0))+' on total')) : '';
+      const step2 = '<div class="rc-step '+(siDone?'done':psDone?'active':'locked')+'">'
+        + '<div class="rc-num">'+(siDone?'✓':'2')+'</div>'
+        + '<div class="rc-body"><div class="rc-t">Sales invoice <span class="rc-purpose">financial verification</span></div>'
+        + (siDone
+            ? '<div class="rc-sub">'+siVarTxt+'</div>'+fileLine(si,'sinv',o.ref)
+              + '<div class="rc-meta">'+(si.invoiceNo?'Invoice '+esc(si.invoiceNo)+' · ':'')+'PI '+inr(si.piTotal)+' → '+inr(si.invTotal)+' · '+esc(si.by||'Accounts')+'</div>'
+            : psDone ? '<div class="rc-sub">Upload the invoice and reconcile rates &amp; amounts against the PI.</div>'
+                     : '<div class="rc-sub rc-muted">Unlocks once the packing slip is verified.</div>')
+        + '</div>'
+        + (psDone ? '<button class="rc-btn'+(siDone?'':' prime')+'" data-act="sinv" data-ref="'+esc(o.ref)+'">'+(siDone?'Review':'Upload invoice')+'</button>' : '<span class="rc-lock">🔒</span>')
+        + '</div>';
+      $('ob-dr-recon').innerHTML = step1 + step2;
+    } else { rsec.hidden = true; }
+
     // 1b · dispatch summary — grouped pick view (Product → Model•Backing → colours)
     const remaining = f.totalOrdered - f.totalDisp;
     const pendByOno = {}; f.perLine.forEach(p => pendByOno[p.ono] = p.pending);
@@ -24801,10 +24988,17 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     // foot — contextual primary CTA, split across Sales → Dispatch → Delivery
     const cta = (act, label) => '<button class="ob-act prime ob-cta" data-act="'+act+'" data-ref="'+esc(o.ref)+'">'+esc(label)+' →</button>';
     let foot = '', hint = '';
+    const psDone = !!(o._ov && o._ov.packingSlip && o._ov.packingSlip.verifiedAt);
+    const siDone = !!(o._ov && o._ov.salesInvoice && o._ov.salesInvoice.verifiedAt);
     if (o.status === 'Pending') { foot = cta('ready', 'Mark Ready for Dispatch'); hint = 'Sales: confirm payment & dispatch instructions'; }
     else if (o.status === 'Ready for Dispatch') { foot = cta('dispatch', 'Mark Dispatched'); hint = 'Dispatch: record the shipment'; }
     else if (o.status === 'Partially Dispatched') { foot = cta('dispatch', 'Dispatch Remaining'); hint = (f.totalOrdered-f.totalDisp)+' of '+f.totalOrdered+' units still pending'; }
-    else if (o.status === 'Fully Dispatched') { foot = cta('deliver', 'Mark Delivered'); hint = 'Confirm goods received'; }
+    else if (o.status === 'Fully Dispatched') {
+      // Reconcile before delivery: Packing slip (qty) → Sales invoice (₹) → Delivered.
+      if (!psDone) { foot = cta('pslip', 'Upload Packing Slip'); hint = 'Step 1 · verify the dispatched quantities'; }
+      else if (!siDone) { foot = cta('sinv', 'Upload Sales Invoice'); hint = 'Step 2 · reconcile the invoice against the PI'; }
+      else { foot = cta('deliver', 'Mark Delivered'); hint = 'Reconciliation complete · confirm goods received'; }
+    }
     $('ob-dr-foot').innerHTML = foot ? ('<div class="ob-cta-hint">'+esc(hint)+'</div>'+foot) : '';
 
     $('ob-drawer').hidden = false;
@@ -25103,50 +25297,69 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   // Quantity entry mirrors the Dispatch Summary: grouped Product → Model •
   // Backing • Size, with a Dispatching field beside each colour. The original
   // per-line (ono) mapping is preserved on each input for the backend.
-  function renderDispLines(){
-    const ref = dispatchRef; if(!ref) return;
-    const base = baseOrders.find(o=>o.ref===ref); if(!base) return;
+  // Foot Mats / Car Sets are not listed on our packing slips, so their
+  // quantities must be keyed in by hand during reconciliation.
+  function isManualCat(cat){ const c=(cat||'').toLowerCase(); return c.includes('foot') || c.includes('set'); }
+
+  // Shared colour-wise quantity editor — the SAME component drives both the
+  // dispatch-entry modal and the Packing Slip reconciliation screen. Each row
+  // carries data-ordered / data-already so variance can be reconciled against
+  // the Sales Order from any context. opt: {already(r), value(r), editable,
+  // includeAll, withSubs, label, manualFlag(li), emptyMsg}.
+  function qtyEditorHTML(base, opt){
     const f = fulfil(base);
-    const pendByOno = {}; f.perLine.forEach(p => pendByOno[p.ono] = p.pending);
-    const ordByOno = {}; base.lines.forEach(li => ordByOno[li.ono] = li.qty);
-    const alreadyByOno = {}; f.perLine.forEach(p => alreadyByOno[p.ono] = p.dispatched);
-    const partial = segValue('ob-disp-type') === 'partial';
-    $('ob-disp-lines-hint').textContent = partial ? "— enter what's actually being loaded; Native reconciles against the order" : '— full dispatch ships all remaining units';
-    // group pending lines like the dispatch summary
+    const pendByOno = {}, dispByOno = {};
+    f.perLine.forEach(p => { pendByOno[p.ono] = p.pending; dispByOno[p.ono] = p.dispatched; });
     const groups = [], gidx = {};
     base.lines.forEach(li => {
-      const pend = pendByOno[li.ono] || 0; if (pend <= 0) return;
+      const pend = pendByOno[li.ono] || 0;
+      if (!opt.includeAll && pend <= 0) return;
       const key = [li.category, li.model, li.backing, li.width, li.length].map(x=>x||'').join('|');
       let g = gidx[key];
       if (!g){ g = { product:li.category||'—', model:li.model||'', backing:li.backing||'', width:li.width||'', length:li.length||'', rows:[] }; gidx[key] = g; groups.push(g); }
-      g.rows.push({ ono: li.ono, colour: li.colour||'—', ordered: ordByOno[li.ono]||0, already: alreadyByOno[li.ono]||0, pending: pend });
+      g.rows.push({ ono: li.ono, colour: li.colour||'—', ordered: li.qty, dispatched: dispByOno[li.ono]||0, pending: pend, manual: opt.manualFlag ? opt.manualFlag(li) : false });
     });
-    $('ob-disp-lines').innerHTML = groups.length ? groups.map(g => {
+    if (!groups.length) return '<div class="ob-pack-empty">'+(opt.emptyMsg||'Nothing to show.')+'</div>';
+    return groups.map(g => {
       const spec = dgSpec(g);
       return '<div class="ob-de-grp"><div class="ob-de-grp-h"><span class="de-g-prod">'+esc(g.product)+'</span>'+(spec?'<span class="de-g-spec">'+esc(spec)+'</span>':'')+'</div>'
         + '<div class="ob-de-rows">'
-        + g.rows.map(r =>
-          '<div class="ob-de-row" data-ono="'+r.ono+'" data-ordered="'+r.ordered+'" data-already="'+r.already+'" data-pending="'+r.pending+'">'
-          + '<span class="de-colour">'+esc(r.colour)+'</span>'
-          + '<span class="de-ord">Ordered <b>'+r.ordered+'</b>'+(r.already>0?' · Shipped <b>'+r.already+'</b>':'')+'</span>'
-          + '<span class="de-ship"><label>Loading</label><input class="de-qty" type="number" min="0" value="'+r.pending+'"'+(partial?'':' disabled')+'></span>'
-          + '<span class="de-var ok">✓</span>'
-          + '</div>').join('')
-        + '<div class="ob-de-subs" data-prod="'+esc(g.product)+'" data-spec="'+esc(spec)+'"></div>'
-        + '<button type="button" class="ob-de-addsub">+ Substitute a different SKU</button>'
+        + g.rows.map(r => {
+          const already = opt.already ? opt.already(r) : 0;
+          const val = opt.value(r);
+          const delta = (already + (+val||0)) - r.ordered;
+          const chip = delta===0 ? '<span class="de-var ok">✓</span>' : delta<0 ? '<span class="de-var under">'+delta+'</span>' : '<span class="de-var over">+'+delta+'</span>';
+          return '<div class="ob-de-row'+(r.manual?' is-manual':'')+'" data-ono="'+r.ono+'" data-colour="'+esc(r.colour)+'" data-ordered="'+r.ordered+'" data-already="'+already+'" data-pending="'+r.pending+'">'
+            + '<span class="de-colour">'+esc(r.colour)+(r.manual?'<span class="de-manual" title="Not on the packing slip — enter manually">manual</span>':'')+'</span>'
+            + '<span class="de-ord">Ordered <b>'+r.ordered+'</b>'+(already>0?' · Shipped <b>'+already+'</b>':'')+'</span>'
+            + '<span class="de-ship"><label>'+(opt.label||'Loading')+'</label><input class="de-qty" type="number" min="0" value="'+val+'"'+(opt.editable?'':' disabled')+'></span>'
+            + chip
+            + '</div>';
+        }).join('')
+        + (opt.withSubs ? '<div class="ob-de-subs" data-prod="'+esc(g.product)+'" data-spec="'+esc(spec)+'"></div>'
+          + '<button type="button" class="ob-de-addsub">+ Substitute a different SKU</button>' : '')
         + '</div></div>';
-    }).join('') : '<div class="ob-pack-empty">Nothing pending to dispatch.</div>';
-    updateDispVariance();
+    }).join('');
   }
-  function addSubRow(container){
+  function renderDispLines(){
+    const ref = dispatchRef; if(!ref) return;
+    const base = baseOrders.find(o=>o.ref===ref); if(!base) return;
+    const partial = segValue('ob-disp-type') === 'partial';
+    $('ob-disp-lines-hint').textContent = partial ? "— enter what's actually being loaded" : '— full dispatch ships all remaining units';
+    $('ob-disp-lines').innerHTML = qtyEditorHTML(base, {
+      already: r => r.dispatched, value: r => r.pending, editable: partial,
+      includeAll: false, withSubs: true, label: 'Loading', emptyMsg: 'Nothing pending to dispatch.',
+    });
+  }
+  function addSubRow(container, presetLabel, presetQty){
     const row = document.createElement('div');
     row.className = 'ob-de-sub';
     row.innerHTML = '<span class="de-sub-tag">SUB</span>'
-      + '<input class="de-sub-label no-upper" placeholder="Shipped instead — e.g. CIRRO Black">'
-      + '<span class="de-sub-ship"><label>Qty</label><input class="de-sub-qty" type="number" min="1" placeholder="0"></span>'
+      + '<input class="de-sub-label no-upper" placeholder="Shipped instead — e.g. CIRRO Black" value="'+esc(presetLabel||'')+'">'
+      + '<span class="de-sub-ship"><label>Qty</label><input class="de-sub-qty" type="number" min="1" placeholder="0" value="'+(presetQty?esc(String(presetQty)):'')+'"></span>'
       + '<button type="button" class="de-sub-x" aria-label="Remove">✕</button>';
     container.appendChild(row);
-    row.querySelector('.de-sub-label').focus();
+    if (!presetLabel) row.querySelector('.de-sub-label').focus();
   }
   function openDispatch(ref){
     const base = baseOrders.find(o=>o.ref===ref); if(!base) return;
@@ -25162,80 +25375,60 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     $('ob-dispatch').hidden = false;
     setTimeout(()=>$('ob-disp-lr').focus(), 40);
   }
-  function closeDispatch(){ $('ob-dispatch').hidden = true; dispatchRef = null; varianceOK = false; }
+  function closeDispatch(){ $('ob-dispatch').hidden = true; dispatchRef = null; }
 
-  // Collect substitutions typed into the entry (a label + qty per SUB row).
-  function collectSubs(){
+  // Collect substitutions typed into a scoped editor (label + qty per SUB row).
+  function collectSubs(scopeId){
     const subs = [];
-    $('ob-disp-lines').querySelectorAll('.ob-de-sub').forEach(s => {
+    $(scopeId).querySelectorAll('.ob-de-sub').forEach(s => {
       const label = s.querySelector('.de-sub-label').value.trim();
       const qty = Math.floor(+s.querySelector('.de-sub-qty').value || 0);
       if (label && qty > 0){ const c = s.closest('.ob-de-subs'); subs.push({ label, qty, product: c.getAttribute('data-prod')||'', spec: c.getAttribute('data-spec')||'' }); }
     });
     return subs;
   }
-  // Reconcile what Dispatch is loading against the Sales Order. Quantities are
-  // free — colour mix can change and totals can differ — so this never blocks;
-  // it just classifies the per-colour deltas (reduced / increased / substituted)
-  // and the order-level total so the variance can be surfaced honestly.
-  function dispVarianceData(){
-    const base = baseOrders.find(o=>o.ref===dispatchRef);
-    const f = base ? fulfil(base) : { totalOrdered:0, totalShipped:0 };
-    // Over-ships and substitutions are always surprising and always flagged.
-    // A colour landing UNDER its order is only a variance when it's the other
-    // side of a mix change — i.e. something else over-shipped or substituted to
-    // compensate — or when this is a Full dispatch declaring the order complete.
-    // A plain partial with only shortfalls is just pending, not a variance.
-    const partial = segValue('ob-disp-type') === 'partial';
-    const rows = [...$('ob-disp-lines').querySelectorAll('.ob-de-row')];
+  // Reconcile the quantities entered in a scoped colour-wise editor against the
+  // Sales Order. Free entry — colour mix can change and totals can differ — so
+  // this never blocks; it classifies the per-colour deltas (reduced / increased
+  // / substituted) and the order-level total so variance is surfaced honestly.
+  // Over-ships and substitutions are always flagged; a colour landing UNDER its
+  // order is only a variance when something else compensates (mix change) or
+  // when this is a complete declaration (not a partial).
+  function qtyVarianceData(scopeId, grandOrdered, baseShipped, partial){
+    const rows = [...$(scopeId).querySelectorAll('.ob-de-row')];
     const reducedRaw = [], increased = [];
-    let thisShipment = 0;
+    let entered = 0, sumAlready = 0;
     rows.forEach(rw => {
       const ordered = +rw.getAttribute('data-ordered') || 0;
       const already = +rw.getAttribute('data-already') || 0;
       let q = Math.floor(+rw.querySelector('.de-qty').value || 0); if (q < 0) q = 0;
-      thisShipment += q;
+      entered += q; sumAlready += already;
       const delta = (already + q) - ordered;
-      const colour = rw.querySelector('.de-colour').textContent;
+      const colour = rw.getAttribute('data-colour') || '';
       if (delta < 0) reducedRaw.push({ colour, delta });
       else if (delta > 0) increased.push({ colour, delta });
     });
-    const subs = collectSubs();
+    const subs = collectSubs(scopeId);
     let subTotal = 0; subs.forEach(s => subTotal += s.qty);
-    thisShipment += subTotal;
     const compensated = increased.length > 0 || subs.length > 0;
     const reduced = (!partial || compensated) ? reducedRaw : [];
-    const grandOrdered = f.totalOrdered;
-    const grandShipped = f.totalShipped + thisShipment;
-    return { reduced, increased, subs, subTotal, grandOrdered, grandShipped, thisShipment,
+    const grandShipped = baseShipped + sumAlready + entered + subTotal;
+    return { reduced, increased, subs, subTotal, grandOrdered, grandShipped,
              totalDelta: grandShipped - grandOrdered, hasVar: reduced.length>0 || increased.length>0 || subs.length>0 };
   }
-  function totalVarianceLine(d, longForm){
+  function totalVarianceLine(d, longForm, verb, shortWord){
+    verb = verb || 'dispatching'; shortWord = shortWord || 'pending';
     if (d.totalDelta === 0) return 'Total quantity unchanged ✓';
-    if (d.totalDelta < 0) return 'Ordered '+d.grandOrdered+', dispatching '+d.grandShipped+(longForm?' — '+(-d.totalDelta)+' remain pending':' · '+(-d.totalDelta)+' pending');
-    return 'Ordered '+d.grandOrdered+', dispatching '+d.grandShipped+(longForm?' — +'+d.totalDelta+' over order':' · +'+d.totalDelta+' over');
+    if (d.totalDelta < 0) return 'Ordered '+d.grandOrdered+', '+verb+' '+d.grandShipped+(longForm?' — '+(-d.totalDelta)+' '+shortWord:' · '+(-d.totalDelta)+' '+shortWord);
+    return 'Ordered '+d.grandOrdered+', '+verb+' '+d.grandShipped+(longForm?' — +'+d.totalDelta+' over order':' · +'+d.totalDelta+' over');
   }
-  // Live summary strip under the editor — updates as Dispatch types.
-  function updateDispVariance(){
-    const strip = $('ob-disp-varsum'); if(!strip) return;
-    const d = dispVarianceData();
-    if (!d.hasVar){ strip.hidden = true; strip.innerHTML = ''; return; }
-    const parts = [];
-    if (d.reduced.length) parts.push('<span class="dv-grp dv-red">▼ '+d.reduced.map(r=>esc(r.colour)+' '+r.delta).join(' · ')+'</span>');
-    if (d.increased.length) parts.push('<span class="dv-grp dv-inc">▲ '+d.increased.map(r=>esc(r.colour)+' +'+r.delta).join(' · ')+'</span>');
-    if (d.subs.length) parts.push('<span class="dv-grp dv-sub">⇄ '+d.subs.map(s=>esc(s.label)+' +'+s.qty).join(' · ')+'</span>');
-    strip.innerHTML = '<div class="dv-head"><span class="live-dot warn"></span>Dispatch variance</div>'
-      + '<div class="dv-body">'+parts.join('')+'</div>'
-      + '<div class="dv-tot'+(d.totalDelta===0?' ok':'')+'">'+totalVarianceLine(d, false)+'</div>';
-    strip.hidden = false;
-  }
-  let varianceOK = false;
+  // Dispatch simply records the actual loaded quantities. Variance is no longer
+  // reviewed here — it is reconciled (and Sales is notified) at the Packing Slip
+  // verification step, so quantity reconciliation lives in exactly one place.
   function saveDispatch(){
     const ref = dispatchRef; if(!ref) return;
     const lr = $('ob-disp-lr').value.trim();
     if (!lr){ setApStatus('ob-disp-status','err','LR / Docket number is required.'); $('ob-disp-lr').focus(); return; }
-    // collect loaded quantities (per original line / ono) — raw, uncapped:
-    // Dispatch may load more of a colour than ordered when the mix changes.
     const rows = [...$('ob-disp-lines').querySelectorAll('.ob-de-row')];
     const linesObj = {}; let total = 0;
     rows.forEach(rw => {
@@ -25243,14 +25436,9 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       let q = Math.floor(+rw.querySelector('.de-qty').value || 0); if (q < 0) q = 0;
       if (q > 0) { linesObj[ono] = q; total += q; }
     });
-    const subs = collectSubs();
+    const subs = collectSubs('ob-disp-lines');
     const subTotal = subs.reduce((a,s)=>a+s.qty, 0);
     if (total + subTotal <= 0){ setApStatus('ob-disp-status','err','Enter at least one quantity to dispatch.'); return; }
-    // Non-blocking variance review: if the loaded mix differs from the order,
-    // show the summary once before recording. Never prevents the dispatch.
-    const vd = dispVarianceData();
-    if (vd.hasVar && !varianceOK){ showVariance(); return; }
-    varianceOK = false;
     const dtLocal = $('ob-disp-dt').value || nowLocalDT();
     const dispatchAt = dtLocal.length===16 ? dtLocal+':00' : dtLocal;
     const ov = ensureOv(ref);
@@ -25267,40 +25455,254 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     };
     ov.dispatches.push(rec);
     delete ov.status;
-    // Flag Sales to reconcile whenever the loaded mix differs from the order —
-    // a reduced/increased colour OR a substitution. Snapshot the variance for
-    // the banner so Sales sees exactly what changed.
-    if (vd.hasVar){
-      ov.variance = true; ov.varianceReviewed = false;
-      ov.varianceData = { reduced: vd.reduced, increased: vd.increased,
-        subs: vd.subs.map(s=>({ label:s.label, qty:s.qty })),
-        grandOrdered: vd.grandOrdered, grandShipped: vd.grandShipped, totalDelta: vd.totalDelta };
-    }
     const f = fulfil(baseOrders.find(o=>o.ref===ref));
     const full = f.totalDisp >= f.totalOrdered;
     const shipped = total + subTotal;
-    const kindWord = vd.hasVar ? 'Dispatched with variance' : (full ? 'Full dispatch' : 'Partial dispatch');
-    const histSub = kindWord + ' · ' + shipped + ' units · LR ' + lr + (rec.vehicle?(' · '+rec.vehicle):'');
+    const histSub = (full ? 'Full dispatch' : 'Partial dispatch') + ' · ' + shipped + ' units · LR ' + lr + (rec.vehicle?(' · '+rec.vehicle):'');
     ov.history.push({ kind:'dispatched', label: full?'Dispatched':'Partially Dispatched', tsISO: dispatchAt, by:'Dispatch Team', sub: histSub, remarks: rec.remarks });
     saveOverlay(); closeDispatch(); render(); if (drawerRef === ref) openDrawer(ref);
-    showSuccess((vd.hasVar ? 'Dispatched with variance' : full ? 'Dispatched' : 'Partially dispatched') + '\n' + shipped + ' units · LR ' + lr);
+    showSuccess((full ? 'Dispatched' : 'Partially dispatched') + '\n' + shipped + ' units · LR ' + lr);
   }
 
-  // ---- dispatch variance summary (grouped reduced / increased / substituted) ----
+  // ====================================================================
+  //  STEP 1 · PACKING SLIP RECONCILIATION  (quantity verification)
+  //  The uploaded slip is the source document; the dispatcher confirms or
+  //  corrects the colour-wise quantities that physically left the factory.
+  //  Reuses the SAME colour-wise editor as dispatch entry, pre-filled with the
+  //  dispatched quantities. When the ERP is connected this screen is auto-filled
+  //  instead of typed — the workflow is identical.
+  // ====================================================================
+  let packingRef = null;
+  const sessionFiles = {};   // ref|step -> in-session object URL for viewing
+  function fileMeta(file){ return { name:file.name, size:file.size, type:file.type||'' }; }
+  function readDataURL(file){ return new Promise(res => { const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=()=>res(null); r.readAsDataURL(file); }); }
+  function fmtBytes(n){ if(n==null) return ''; if(n<1024) return n+' B'; if(n<1048576) return (n/1024).toFixed(0)+' KB'; return (n/1048576).toFixed(1)+' MB'; }
+
+  function openPackingSlip(ref){
+    const base = baseOrders.find(o=>o.ref===ref); if(!base) return;
+    packingRef = ref;
+    const ov = overlay[ref] || {}; const ps = ov.packingSlip || {};
+    $('ob-ps-ref').textContent = ref;
+    $('ob-ps-party').textContent = base.party;
+    renderPackingLines();
+    renderPsFile();
+    setApStatus('ob-ps-status','', 'Confirm or correct each colour against the uploaded slip.');
+    $('ob-pslip').hidden = false;
+  }
+  function closePackingSlip(){ $('ob-pslip').hidden = true; packingRef = null; }
+  function renderPackingLines(){
+    const base = baseOrders.find(o=>o.ref===packingRef); if(!base) return;
+    const ov = overlay[packingRef] || {}; const verified = (ov.packingSlip && ov.packingSlip.lines) || null;
+    $('ob-ps-lines').innerHTML = qtyEditorHTML(base, {
+      already: () => 0,
+      // Pre-fill with any previously-verified figure, else the dispatched qty.
+      value: r => verified && verified[r.ono]!=null ? verified[r.ono] : r.dispatched,
+      editable: true, includeAll: true, withSubs: true, label: 'Verified',
+      manualFlag: li => isManualCat(li.category), emptyMsg: 'No line items on this order.',
+    });
+    // carry over the substitutions dispatch already recorded so the slip is whole
+    const f = fulfil(base);
+    const recSubs = (verified ? (ov.packingSlip.subs||[]) : f.records.flatMap(d => d.subs||[]));
+    recSubs.forEach(s => {
+      const conts = [...$('ob-ps-lines').querySelectorAll('.ob-de-subs')];
+      const cont = conts.find(c => c.getAttribute('data-prod')===s.product && c.getAttribute('data-spec')===s.spec) || conts[0];
+      if (cont) addSubRow(cont, s.label, s.qty);
+    });
+    updatePsVariance();
+  }
+  function psVarianceData(){
+    const base = baseOrders.find(o=>o.ref===packingRef);
+    const f = base ? fulfil(base) : { totalOrdered:0 };
+    return qtyVarianceData('ob-ps-lines', f.totalOrdered, 0, false);
+  }
+  function updatePsVariance(){
+    const strip = $('ob-ps-varsum'); if(!strip) return;
+    const d = psVarianceData();
+    if (!d.hasVar){ strip.hidden = true; strip.innerHTML=''; return; }
+    const parts = [];
+    if (d.reduced.length) parts.push('<span class="dv-grp dv-red">▼ '+d.reduced.map(r=>esc(r.colour)+' '+r.delta).join(' · ')+'</span>');
+    if (d.increased.length) parts.push('<span class="dv-grp dv-inc">▲ '+d.increased.map(r=>esc(r.colour)+' +'+r.delta).join(' · ')+'</span>');
+    if (d.subs.length) parts.push('<span class="dv-grp dv-sub">⇄ '+d.subs.map(s=>esc(s.label)+' +'+s.qty).join(' · ')+'</span>');
+    strip.innerHTML = '<div class="dv-head"><span class="live-dot warn"></span>Packing slip variance</div>'
+      + '<div class="dv-body">'+parts.join('')+'</div>'
+      + '<div class="dv-tot'+(d.totalDelta===0?' ok':'')+'">'+totalVarianceLine(d, false, 'slip shows', 'short')+'</div>';
+    strip.hidden = false;
+  }
+  // file upload for the packing slip
+  async function onPsFile(file){
+    if (!file || !packingRef) return;
+    const ov = ensureOv(packingRef); if(!ov.packingSlip) ov.packingSlip = {};
+    ov.packingSlip.file = fileMeta(file);
+    try { sessionFiles[packingRef+'|pslip'] = URL.createObjectURL(file); } catch(e){}
+    const url = await readDataURL(file);
+    if (url){ ov.packingSlip.dataUrl = url; try { localStorage.setItem(OV_KEY, JSON.stringify(overlay)); } catch(e){ delete ov.packingSlip.dataUrl; saveOverlay(); } }
+    else saveOverlay();
+    renderPsFile();
+    setApStatus('ob-ps-status','ok','Slip attached — confirm the quantities below, then verify.');
+  }
+  function renderPsFile(){
+    const ov = overlay[packingRef] || {}; const ps = ov.packingSlip || {};
+    const href = ps.dataUrl || sessionFiles[packingRef+'|pslip'] || '';
+    $('ob-ps-file').innerHTML = ps.file
+      ? '<div class="ob-up-done"><span class="up-ic">📄</span><div class="up-meta"><b>'+esc(ps.file.name)+'</b><span>'+fmtBytes(ps.file.size)+(href?' · <a href="'+href+'" target="_blank" rel="noopener">View</a>':'')+'</span></div><button type="button" class="up-replace" id="ob-ps-replace">Replace</button></div>'
+      : '<label class="ob-up-drop" for="ob-ps-input"><span class="up-ic">⬆</span><span>Upload packing slip <em>PDF / image</em></span></label>';
+  }
+  function verifyPackingSlip(){
+    if (!packingRef) return;
+    const ov = overlay[packingRef] || {};
+    if (!(ov.packingSlip && ov.packingSlip.file)){ setApStatus('ob-ps-status','err','Attach the packing slip document first.'); return; }
+    const d = psVarianceData();
+    if (d.hasVar){ showVariance(); return; }   // show the summary, then commit
+    commitPackingSlip();
+  }
+  function commitPackingSlip(){
+    const ref = packingRef; if(!ref) return;
+    const base = baseOrders.find(o=>o.ref===ref);
+    const d = psVarianceData();
+    // capture the verified colour-wise quantities + substitutions
+    const lines = {}; let verifiedTotal = 0;
+    $('ob-ps-lines').querySelectorAll('.ob-de-row').forEach(rw => {
+      const ono = rw.getAttribute('data-ono');
+      let q = Math.floor(+rw.querySelector('.de-qty').value || 0); if (q < 0) q = 0;
+      lines[ono] = q; verifiedTotal += q;
+    });
+    const subs = collectSubs('ob-ps-lines');
+    const ov = ensureOv(ref);
+    ov.packingSlip = Object.assign(ov.packingSlip||{}, {
+      lines, subs, verifiedTotal: verifiedTotal + d.subTotal,
+      variance: d.hasVar ? { reduced:d.reduced, increased:d.increased, subs:d.subs.map(s=>({label:s.label,qty:s.qty})), grandOrdered:d.grandOrdered, grandShipped:d.grandShipped, totalDelta:d.totalDelta } : null,
+      verifiedAt: nowISO(), by: 'Dispatch Team',
+    });
+    // Notify Sales of any colour-mix / quantity variance found at verification.
+    if (d.hasVar){ ov.variance = true; ov.varianceReviewed = false; ov.varianceData = ov.packingSlip.variance; }
+    else { ov.variance = false; }
+    ov.history.push({ kind:'pslip', label:'Packing slip verified', tsISO: nowISO(), by:'Dispatch Team',
+      sub: (d.hasVar ? 'Quantity variance recorded · ' : 'Quantities match · ') + ov.packingSlip.verifiedTotal + ' units' });
+    saveOverlay(); closeVariance(); closePackingSlip(); render(); if (drawerRef === ref) openDrawer(ref);
+    showSuccess('Packing slip verified'+(d.hasVar?'\nVariance recorded for Sales':'\nQuantities confirmed'));
+  }
+
+  // ---- variance summary modal (shown before the packing slip is verified) ----
   function showVariance(){
-    const d = dispVarianceData();
+    const d = psVarianceData();
     const blocks = [];
     if (d.reduced.length) blocks.push('<div class="ob-var-grp red"><div class="vg-h">▼ Reduced</div>'+d.reduced.map(r=>'<div class="ob-var-item"><span class="vi-c">'+esc(r.colour)+'</span><span class="vi-d">'+r.delta+'</span></div>').join('')+'</div>');
     if (d.increased.length) blocks.push('<div class="ob-var-grp inc"><div class="vg-h">▲ Increased</div>'+d.increased.map(r=>'<div class="ob-var-item"><span class="vi-c">'+esc(r.colour)+'</span><span class="vi-d">+'+r.delta+'</span></div>').join('')+'</div>');
     if (d.subs.length) blocks.push('<div class="ob-var-grp sub"><div class="vg-h">⇄ Substituted</div>'+d.subs.map(s=>'<div class="ob-var-item"><span class="vi-c">'+esc(s.label)+'</span><span class="vi-d">+'+s.qty+'</span></div>').join('')+'</div>');
     $('ob-var-list').innerHTML = blocks.join('') || '<div class="ob-var-item"><span class="vi-c">Quantities differ from the Sales Order.</span></div>';
     const tot = $('ob-var-total');
-    tot.innerHTML = totalVarianceLine(d, true);
+    tot.innerHTML = totalVarianceLine(d, true, 'slip shows', 'short');
     tot.className = 'ob-var-total'+(d.totalDelta===0?' ok':'');
     $('ob-variance').hidden = false;
   }
   function closeVariance(){ $('ob-variance').hidden = true; }
-  function continueVariance(){ varianceOK = true; closeVariance(); saveDispatch(); }
+  function continueVariance(){ closeVariance(); commitPackingSlip(); }
+
+  // ====================================================================
+  //  STEP 2 · SALES INVOICE RECONCILIATION  (financial verification)
+  //  PI ↔ Sales Invoice. Locked until the packing slip is verified. Checks
+  //  rates, taxable value, line amounts and the invoice total. Manual entry now;
+  //  auto-synced from the accounting system later — same screen.
+  // ====================================================================
+  let invoiceRef = null;
+  function lineAmount(li){ return (li.taxable!=null ? +li.taxable : (+li.actualRate||+li.billRate||0) * (+li.qty||0)) || 0; }
+  function lineRate(li){ return (+li.actualRate || +li.billRate || 0); }
+  function openInvoice(ref){
+    const base = baseOrders.find(o=>o.ref===ref); if(!base) return;
+    invoiceRef = ref;
+    const ov = overlay[ref] || {}; const inv = ov.salesInvoice || {};
+    $('ob-si-ref').textContent = ref;
+    $('ob-si-party').textContent = base.party;
+    $('ob-si-no').value = inv.invoiceNo || '';
+    renderInvoiceLines();
+    renderSiFile();
+    setApStatus('ob-si-status','', 'Enter the invoice figures; Native checks them against the PI.');
+    $('ob-sinv').hidden = false;
+  }
+  function closeInvoice(){ $('ob-sinv').hidden = true; invoiceRef = null; }
+  function renderInvoiceLines(){
+    const base = baseOrders.find(o=>o.ref===invoiceRef); if(!base) return;
+    const ov = overlay[invoiceRef] || {}; const saved = (ov.salesInvoice && ov.salesInvoice.lines) || null;
+    $('ob-si-lines').innerHTML = base.lines.map(li => {
+      const d = prodDesc(li); const piRate = lineRate(li); const piAmt = lineAmount(li);
+      const sv = saved && saved[li.ono]; const rate = sv ? sv.rate : piRate; const amt = sv ? sv.amount : piAmt;
+      return '<div class="ob-si-row" data-ono="'+li.ono+'" data-pirate="'+piRate+'" data-piamt="'+piAmt+'">'
+        + '<div class="si-desc"><b>'+esc(d.product)+'</b>'+(d.attrs?'<span>'+esc(d.attrs)+'</span>':'')+'<span class="si-q">'+li.qty+' × </span></div>'
+        + '<div class="si-pi"><label>PI rate</label><span>'+inr(piRate)+'</span></div>'
+        + '<div class="si-in"><label>Inv. rate</label><input class="si-rate" type="number" min="0" step="0.01" value="'+rate+'"></div>'
+        + '<div class="si-in"><label>Inv. amount</label><input class="si-amt" type="number" min="0" step="0.01" value="'+amt+'"></div>'
+        + '<div class="si-var" data-base="'+piAmt+'"></div>'
+        + '</div>';
+    }).join('');
+    updateInvoiceVariance();
+  }
+  function invoiceData(){
+    const base = baseOrders.find(o=>o.ref===invoiceRef);
+    const piTotal = base ? base.lines.reduce((a,li)=>a+lineAmount(li),0) : 0;
+    let invTotal = 0; const lines = {}; const issues = [];
+    $('ob-si-lines').querySelectorAll('.ob-si-row').forEach(rw => {
+      const ono = rw.getAttribute('data-ono');
+      const piAmt = +rw.getAttribute('data-piamt')||0;
+      const rate = +rw.querySelector('.si-rate').value||0;
+      const amt = +rw.querySelector('.si-amt').value||0;
+      lines[ono] = { rate, amount: amt };
+      invTotal += amt;
+      const dl = amt - piAmt;
+      rw._delta = dl;
+      if (amt===0 && piAmt>0) issues.push({ ono, kind:'missing' });
+      else if (Math.abs(dl) >= 1) issues.push({ ono, kind: dl>0?'over':'under', delta: dl });
+    });
+    return { piTotal, invTotal, lines, issues, totalDelta: invTotal - piTotal };
+  }
+  function updateInvoiceVariance(){
+    const d = invoiceData();
+    $('ob-si-lines').querySelectorAll('.ob-si-row').forEach(rw => {
+      const cell = rw.querySelector('.si-var'); const dl = rw._delta || 0;
+      cell.className = 'si-var ' + (Math.abs(dl)<1 ? 'ok' : dl<0 ? 'under' : 'over');
+      cell.textContent = Math.abs(dl)<1 ? '✓' : (dl>0?'+':'') + inr(dl);
+    });
+    const strip = $('ob-si-varsum');
+    const tone = Math.abs(d.totalDelta) < 1 ? 'ok' : 'warn';
+    strip.className = 'ob-si-total '+tone;
+    strip.innerHTML = '<span>PI total <b>'+inr(d.piTotal)+'</b></span><span>Invoice total <b>'+inr(d.invTotal)+'</b></span>'
+      + '<span class="si-t-var">'+(Math.abs(d.totalDelta)<1 ? 'Matches ✓' : (d.totalDelta>0?'+':'')+inr(d.totalDelta)+' variance')+'</span>';
+  }
+  async function onSiFile(file){
+    if (!file || !invoiceRef) return;
+    const ov = ensureOv(invoiceRef); if(!ov.salesInvoice) ov.salesInvoice = {};
+    ov.salesInvoice.file = fileMeta(file);
+    try { sessionFiles[invoiceRef+'|sinv'] = URL.createObjectURL(file); } catch(e){}
+    const url = await readDataURL(file);
+    if (url){ ov.salesInvoice.dataUrl = url; try { localStorage.setItem(OV_KEY, JSON.stringify(overlay)); } catch(e){ delete ov.salesInvoice.dataUrl; saveOverlay(); } }
+    else saveOverlay();
+    renderSiFile();
+    setApStatus('ob-si-status','ok','Invoice attached — confirm the figures, then verify.');
+  }
+  function renderSiFile(){
+    const ov = overlay[invoiceRef] || {}; const si = ov.salesInvoice || {};
+    const href = si.dataUrl || sessionFiles[invoiceRef+'|sinv'] || '';
+    $('ob-si-file').innerHTML = si.file
+      ? '<div class="ob-up-done"><span class="up-ic">🧾</span><div class="up-meta"><b>'+esc(si.file.name)+'</b><span>'+fmtBytes(si.file.size)+(href?' · <a href="'+href+'" target="_blank" rel="noopener">View</a>':'')+'</span></div><button type="button" class="up-replace" id="ob-si-replace">Replace</button></div>'
+      : '<label class="ob-up-drop" for="ob-si-input"><span class="up-ic">⬆</span><span>Upload sales invoice <em>PDF / image</em></span></label>';
+  }
+  function verifyInvoice(){
+    const ref = invoiceRef; if(!ref) return;
+    const ov = overlay[ref] || {};
+    if (!(ov.salesInvoice && ov.salesInvoice.file)){ setApStatus('ob-si-status','err','Attach the sales invoice document first.'); return; }
+    const d = invoiceData();
+    const ovv = ensureOv(ref);
+    ovv.salesInvoice = Object.assign(ovv.salesInvoice||{}, {
+      invoiceNo: $('ob-si-no').value.trim(), lines: d.lines,
+      piTotal: d.piTotal, invTotal: d.invTotal, totalDelta: d.totalDelta,
+      issues: d.issues, verifiedAt: nowISO(), by: 'Accounts',
+    });
+    if (ovv.salesInvoice.invoiceNo) ovv.invoiceNo = ovv.salesInvoice.invoiceNo;
+    const matched = Math.abs(d.totalDelta) < 1 && !d.issues.length;
+    ovv.history.push({ kind:'sinv', label:'Sales invoice verified', tsISO: nowISO(), by:'Accounts',
+      sub: (matched ? 'Matches PI · ' : (d.issues.length+' line variance'+(d.issues.length!==1?'s':'')+' · ')) + 'Invoice total '+inr(d.invTotal) });
+    saveOverlay(); closeInvoice(); render(); if (drawerRef === ref) openDrawer(ref);
+    showSuccess('Sales invoice verified'+(matched?'\nCommercials match the PI':'\nAmount variance recorded'));
+  }
 
   function markDelivered(ref){
     const ov = ensureOv(ref);
@@ -25319,6 +25721,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   function handleAct(act, ref){
     if (act === 'ready') openReady(ref);
     else if (act === 'dispatch') openDispatch(ref);
+    else if (act === 'pslip') openPackingSlip(ref);
+    else if (act === 'sinv') openInvoice(ref);
     else if (act === 'deliver') markDelivered(ref);
     else if (act === 'view') openDrawer(ref);
   }
@@ -25430,6 +25834,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       closeDrawer();
     });
     $('ob-dr-foot').addEventListener('click', e => { const b=e.target.closest('button[data-act]'); if(b) handleAct(b.getAttribute('data-act'), b.getAttribute('data-ref')); });
+    $('ob-dr-recon').addEventListener('click', e => { const b=e.target.closest('button[data-act]'); if(b) handleAct(b.getAttribute('data-act'), b.getAttribute('data-ref')); });
     $('ob-dr-quick').addEventListener('click', e => { const b=e.target.closest('button[data-qa]'); if(b && !b.disabled) quickAction(b.getAttribute('data-qa')); });
     // previous-orders → switch the panel to that order
     $('ob-dr-prev').addEventListener('click', e => { const r=e.target.closest('.ob-prev'); if(r) navTo(r.getAttribute('data-ref')); });
@@ -25523,29 +25928,46 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     $('ob-disp-cancel').addEventListener('click', closeDispatch);
     $('ob-disp-save').addEventListener('click', saveDispatch);
     $('ob-dispatch').addEventListener('click', e => { if (e.target === $('ob-dispatch')) closeDispatch(); });
-    // live-reconcile loaded quantities: per-colour variance chip + summary strip
-    $('ob-disp-lines').addEventListener('input', e => {
-      const inp = e.target.closest('.de-qty');
-      if (inp){
-        const row = inp.closest('.ob-de-row');
-        const ordered = +row.getAttribute('data-ordered') || 0;
-        const already = +row.getAttribute('data-already') || 0;
-        const v = Math.max(0, Math.floor(+inp.value||0));
-        const delta = (already + v) - ordered;
-        const varEl = row.querySelector('.de-var');
-        if (varEl){
-          varEl.className = 'de-var ' + (delta===0 ? 'ok' : delta < 0 ? 'under' : 'over');
-          varEl.textContent = delta===0 ? '✓' : (delta > 0 ? '+'+delta : String(delta));
+    // Live colour-wise editor: per-row variance chip + (optional) summary refresh.
+    // Shared by the dispatch-entry and packing-slip reconciliation editors.
+    function wireEditor(scopeId, onChange){
+      const el = $(scopeId); if(!el) return;
+      el.addEventListener('input', e => {
+        const inp = e.target.closest('.de-qty');
+        if (inp){
+          const row = inp.closest('.ob-de-row');
+          const ordered = +row.getAttribute('data-ordered') || 0;
+          const already = +row.getAttribute('data-already') || 0;
+          const v = Math.max(0, Math.floor(+inp.value||0));
+          const delta = (already + v) - ordered;
+          const varEl = row.querySelector('.de-var');
+          if (varEl){ varEl.className = 'de-var ' + (delta===0?'ok':delta<0?'under':'over'); varEl.textContent = delta===0?'✓':(delta>0?'+'+delta:String(delta)); }
         }
-      }
-      updateDispVariance();
-    });
-    // add / remove substitution rows
-    $('ob-disp-lines').addEventListener('click', e => {
-      const add = e.target.closest('.ob-de-addsub'); if (add){ addSubRow(add.previousElementSibling); return; }
-      const rm = e.target.closest('.de-sub-x'); if (rm){ rm.closest('.ob-de-sub').remove(); updateDispVariance(); }
-    });
-    // variance check modal
+        onChange && onChange();
+      });
+      el.addEventListener('click', e => {
+        const add = e.target.closest('.ob-de-addsub'); if (add){ addSubRow(add.previousElementSibling); onChange && onChange(); return; }
+        const rm = e.target.closest('.de-sub-x'); if (rm){ rm.closest('.ob-de-sub').remove(); onChange && onChange(); }
+      });
+    }
+    wireEditor('ob-disp-lines', null);
+    wireEditor('ob-ps-lines', updatePsVariance);
+    // Packing slip reconciliation (Step 1)
+    $('ob-ps-close').addEventListener('click', closePackingSlip);
+    $('ob-ps-cancel').addEventListener('click', closePackingSlip);
+    $('ob-ps-save').addEventListener('click', verifyPackingSlip);
+    $('ob-pslip').addEventListener('click', e => { if (e.target === $('ob-pslip')) closePackingSlip(); });
+    $('ob-ps-input').addEventListener('change', e => { onPsFile(e.target.files && e.target.files[0]); e.target.value=''; });
+    $('ob-ps-file').addEventListener('click', e => { if (e.target.closest('#ob-ps-replace')) $('ob-ps-input').click(); });
+    // Sales invoice reconciliation (Step 2)
+    $('ob-si-close').addEventListener('click', closeInvoice);
+    $('ob-si-cancel').addEventListener('click', closeInvoice);
+    $('ob-si-save').addEventListener('click', verifyInvoice);
+    $('ob-sinv').addEventListener('click', e => { if (e.target === $('ob-sinv')) closeInvoice(); });
+    $('ob-si-input').addEventListener('change', e => { onSiFile(e.target.files && e.target.files[0]); e.target.value=''; });
+    $('ob-si-file').addEventListener('click', e => { if (e.target.closest('#ob-si-replace')) $('ob-si-input').click(); });
+    $('ob-si-lines').addEventListener('input', e => { if (e.target.closest('.si-rate, .si-amt')) updateInvoiceVariance(); });
+    // variance summary modal (packing slip)
     $('ob-var-close').addEventListener('click', closeVariance);
     $('ob-var-cancel').addEventListener('click', closeVariance);
     $('ob-var-continue').addEventListener('click', continueVariance);
@@ -25565,7 +25987,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       navTo(view[ni].ref);
     }
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape'){ if (!$('ob-variance').hidden) closeVariance(); else if (!$('ob-loadsheet').hidden) closeLoadSheet(); else if (!$('ob-ready').hidden) closeReady(); else if (!$('ob-dispatch').hidden) closeDispatch(); else if (!$('ob-profile').hidden) closeProfile(); else if (!$('ob-drawer').hidden) closeDrawer(); return; }
+      if (e.key === 'Escape'){ if (!$('ob-variance').hidden) closeVariance(); else if (!$('ob-pslip').hidden) closePackingSlip(); else if (!$('ob-sinv').hidden) closeInvoice(); else if (!$('ob-loadsheet').hidden) closeLoadSheet(); else if (!$('ob-ready').hidden) closeReady(); else if (!$('ob-dispatch').hidden) closeDispatch(); else if (!$('ob-profile').hidden) closeProfile(); else if (!$('ob-drawer').hidden) closeDrawer(); return; }
       if (!$('ob-drawer').hidden && (e.key === 'ArrowDown' || e.key === 'ArrowUp')){
         const t = document.activeElement;
         if (t && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
