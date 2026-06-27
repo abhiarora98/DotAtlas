@@ -1,9 +1,17 @@
 # Architecture — Warehouse
 
-> **Last updated:** 2026-06-27
-> **Module owner:** Warehouse
-> **Status:** Forward-looking — partially realised via Dispatch's Load Sheet;
+| | |
+|---|---|
+| **Version** | 0.2 |
+| **Status** | 🟡 In Progress |
+| **Last Updated** | 27 Jun 2026 |
+| **Related ADRs** | ADR-0001 |
+| **Related Modules** | Dispatch · Inventory · Sales Orders |
+
+> **Module owner:** Warehouse · Partially realised today via Dispatch's Load Sheet;
 > a dedicated Warehouse workspace is on the roadmap.
+
+---
 
 ## Purpose
 

@@ -1,8 +1,16 @@
 # Architecture — Sales Orders
 
-> **Last updated:** 2026-06-27
-> **Module owner:** Sales
-> **Status:** Implemented (single-page app + local overlay)
+| | |
+|---|---|
+| **Version** | 1.1 |
+| **Status** | ✅ Implemented |
+| **Last Updated** | 27 Jun 2026 |
+| **Related ADRs** | ADR-0001, ADR-0002 |
+| **Related Modules** | Dispatch · Accounts · CRM |
+
+> **Module owner:** Sales · Persistence: single-page app + browser-local overlay (Phase 1)
+
+---
 
 ## Purpose
 

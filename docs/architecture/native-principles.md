@@ -1,8 +1,17 @@
 # Native — Core Principles
 
-> **Last updated:** 2026-06-27
-> These principles define the philosophy of Native. Every module and feature
-> should be measurable against them. When a design choice is hard, return here.
+| | |
+|---|---|
+| **Version** | 1.0 |
+| **Status** | ✅ Implemented |
+| **Last Updated** | 27 Jun 2026 |
+| **Related ADRs** | ADR-0001 |
+| **Related Modules** | All |
+
+> These principles define the **product philosophy** of Native — how it should
+> feel and behave. For the **engineering invariants** every module's code must
+> obey, see [`business-logic-principles.md`](./business-logic-principles.md).
+> When a design choice is hard, return here.
 
 ---
 

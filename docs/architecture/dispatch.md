@@ -1,8 +1,16 @@
 # Architecture — Dispatch
 
-> **Last updated:** 2026-06-27
-> **Module owner:** Dispatch
-> **Status:** Implemented (single-page app + local overlay)
+| | |
+|---|---|
+| **Version** | 1.1 |
+| **Status** | ✅ Implemented |
+| **Last Updated** | 27 Jun 2026 |
+| **Related ADRs** | ADR-0001, ADR-0002 |
+| **Related Modules** | Sales Orders · Warehouse · Accounts · Inventory |
+
+> **Module owner:** Dispatch · Persistence: single-page app + browser-local overlay (Phase 1)
+
+---
 
 ## Purpose
 
