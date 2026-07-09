@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| **Version** | 1.0 |
-| **Status** | ✅ Implemented (catalogue entity planned) |
-| **Last Updated** | 27 Jun 2026 |
-| **Related ADRs** | ADR-0001 |
-| **Related Modules** | Sales Orders · Dispatch · Warehouse · Inventory · Production · Reporting |
+| **Version** | 1.1 |
+| **Status** | ✅ Implemented (owned by Product Master) |
+| **Last Updated** | 09 Jul 2026 |
+| **Related ADRs** | ADR-0001, ADR-0004 |
+| **Related Modules** | Product Master · Sales Orders · Dispatch · Warehouse · Inventory · Production · Reporting |
 
 > The product hierarchy is one of the most important parts of Native. **Sales,
 > Dispatch, Warehouse, Inventory, Production and Reporting all depend on it.** A
@@ -30,6 +30,27 @@ Product (Category)          e.g. Rolls
 
 A **Variant** is a fully-specified path through all six levels. It is the
 sellable, dispatchable and stockable unit, and it is what receives a **SKU**.
+
+## Category-specific attributes
+
+The hierarchy is **not** one rigid set of fields for every product. Each category
+declares which attributes apply (this is what the [Product Master](../architecture/product-master.md)
+editor is driven by). Derived from the client Product Spec:
+
+| Category | Applicable attributes |
+|---|---|
+| **Loop** | Model · Backing · Width · Length · Colour |
+| **Tefno** | Model · Width · Length · Colour *(no backing)* |
+| **Turf** | Model · Width · Length · Colour |
+| **Wire Mat** | Model · Width · Length · Colour |
+| **Artificial Grass** | **Height** · **Type (SL / DL)** · Width · Length · Colour *(no model/backing)* |
+| **Mono Grass** | Model · Backing · Width · Length · Colour |
+| **Footmat** | Model · Backing · **Size** · Colour *(size instead of width × length)* |
+
+Shared fields apply to every category: SKU, Unit, Weight, SqFt, HSN Code, GST %,
+Default Selling Price, Active/Inactive, Notes (Product Image — future). The
+levels below define each attribute; the table above says *which* levels a given
+category uses.
 
 ## Levels defined
 

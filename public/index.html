@@ -3224,6 +3224,59 @@
     border-color: var(--line-2);
     box-shadow: 0 1px 0 var(--line-2);
   }
+
+  /* ===== Master data · nav + Product Master ===== */
+  .nav-item.nav-soon { opacity: 0.5; cursor: default; }
+  .nav-item.nav-soon:hover { background: transparent; transform: none; color: var(--text-2); }
+  .nav-item .badge.soon { color: var(--text-3); background: var(--surface-3); letter-spacing: 0.04em; }
+  .ap-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  @media (max-width: 640px){ .ap-row-3 { grid-template-columns: 1fr; } }
+
+  .pm-bar { display: flex; align-items: center; gap: 10px; margin: 18px 0 12px; flex-wrap: wrap; }
+  .pm-search { position: relative; flex: 1; min-width: 220px; }
+  .pm-search-ic { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-4); font-size: 14px; }
+  .pm-search input { width: 100%; padding: 11px 12px 11px 34px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--surface-2); color: var(--text); font-size: 13px; }
+  .pm-search input:focus { outline: none; border-color: var(--emerald-mute); }
+  .pm-sel { padding: 10px 12px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--surface-2); color: var(--text-2); font-size: 12.5px; font-family: var(--fm); cursor: pointer; }
+  .pm-bar-spacer { flex: 1; }
+  .pm-btn { display: inline-flex; align-items: center; gap: 7px; font-family: var(--fm); font-size: 12px; color: var(--text-2); background: var(--surface); border: 1px solid var(--line-2); padding: 10px 15px; border-radius: 10px; cursor: pointer; }
+  .pm-btn:hover:not(:disabled) { border-color: var(--line-3); color: var(--text); }
+  .pm-btn:disabled { opacity: 0.55; cursor: default; }
+  .pm-btn.prime { color: var(--emerald-2); border-color: var(--emerald-mute); background: var(--emerald-soft); font-weight: 600; }
+  .pm-btn.prime:hover { background: var(--emerald-soft); border-color: var(--emerald); }
+  .pm-btn.sm { padding: 7px 12px; font-size: 11px; }
+  .pm-btn.ghost { background: transparent; }
+
+  .pm-bulk { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding: 9px 14px; border-radius: 10px; background: var(--emerald-soft); border: 1px solid var(--emerald-mute); font-family: var(--fm); font-size: 12px; color: var(--emerald-2); }
+  .pm-bulk[hidden]{ display: none; }
+  .pm-bulk span { margin-right: auto; }
+
+  .pm-table-wrap { border: 1px solid var(--line); border-radius: 13px; overflow: hidden; background: var(--surface-2); }
+  .pm-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .pm-table thead th { text-align: left; padding: 12px 14px; font-family: var(--fm); font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-4); background: var(--surface-3); border-bottom: 1px solid var(--line); white-space: nowrap; }
+  .pm-table th.r, .pm-table td.r { text-align: right; }
+  .pm-table th.pm-c-chk, .pm-table td.pm-c-chk { width: 34px; text-align: center; }
+  .pm-table tbody td { padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  .pm-table tbody tr { cursor: pointer; transition: background 120ms var(--ease); }
+  .pm-table tbody tr:hover { background: var(--surface-3); }
+  .pm-table tbody tr:last-child td { border-bottom: 0; }
+  .pm-sku { font-family: var(--fm); font-size: 11.5px; color: var(--text-2); }
+  .pm-cat { font-family: var(--fm); font-size: 10px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--text-3); background: var(--surface-3); border: 1px solid var(--line-2); padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
+  .pm-prod { color: var(--text); }
+  .pm-prod b { font-weight: 600; }
+  .pm-prod span { color: var(--text-3); font-family: var(--fm); font-size: 10.5px; }
+  .pm-colour { color: var(--text-2); }
+  .pm-num { font-family: var(--fm); font-variant-numeric: tabular-nums; color: var(--text-2); }
+  .pm-st { font-family: var(--fm); font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; }
+  .pm-st.on { color: var(--emerald); background: var(--emerald-soft); }
+  .pm-st.off { color: var(--text-3); background: var(--surface-3); }
+  .pm-empty { padding: 40px; text-align: center; color: var(--text-4); font-size: 13px; }
+  .pm-pager { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 16px 0; font-family: var(--fm); font-size: 12px; color: var(--text-3); }
+  .pm-pager button { padding: 7px 13px; border: 1px solid var(--line-2); border-radius: 8px; background: var(--surface-2); color: var(--text-2); cursor: pointer; }
+  .pm-pager button:disabled { opacity: 0.4; cursor: default; }
+  .pm-sku-row { display: flex; gap: 10px; align-items: center; }
+  .pm-sku-row input { flex: 1; }
+  .pm-attr-note { grid-column: 1 / -1; font-family: var(--fm); font-size: 10.5px; color: var(--text-4); margin-top: -4px; }
 </style>
 </head>
 <body>
@@ -3285,6 +3338,23 @@
     </div>
     <div class="nav-item" data-page="parties">
       <span class="glyph">○</span><span>Parties</span>
+    </div>
+
+    <div class="rail-section">Master data</div>
+    <div class="nav-item" data-page="parties">
+      <span class="glyph">○</span><span>Party Master</span>
+    </div>
+    <div class="nav-item" data-page="products">
+      <span class="glyph">◨</span><span>Product Master</span>
+    </div>
+    <div class="nav-item nav-soon" title="Coming soon">
+      <span class="glyph">₹</span><span>Price Lists</span><span class="badge soon">SOON</span>
+    </div>
+    <div class="nav-item nav-soon" title="Coming soon">
+      <span class="glyph">→</span><span>Transporters</span><span class="badge soon">SOON</span>
+    </div>
+    <div class="nav-item nav-soon" title="Coming soon">
+      <span class="glyph">○</span><span>Employees</span><span class="badge soon">SOON</span>
     </div>
 
     <div class="rail-section">Sense</div>
@@ -4285,6 +4355,102 @@
         </div>
       </div>
     </section>
+
+    <!-- PRODUCT MASTER (Master Data) -->
+    <section class="page" data-page="products" hidden>
+      <div class="hero-h">
+        <div><div class="eb"><span class="live-dot"></span>Master data · Product Master · single source of truth</div>
+          <h1>Every product in <span class="em">Native</span>, defined <span class="accent">once</span>.</h1></div>
+        <div class="when" id="pm-when">PRODUCTS · <b>—</b><br/>ACTIVE · <b>—</b><br/>CATEGORIES · <b>—</b></div>
+      </div>
+
+      <div class="kpis" id="pm-kpis"></div>
+
+      <div class="pm-bar">
+        <div class="pm-search">
+          <span class="pm-search-ic">⌕</span>
+          <input id="pm-search" placeholder="Search SKU, model, colour, category…" autocomplete="off">
+        </div>
+        <select class="pm-sel" id="pm-f-cat"><option value="">All categories</option></select>
+        <select class="pm-sel" id="pm-f-model"><option value="">All models</option></select>
+        <select class="pm-sel" id="pm-f-status">
+          <option value="">All status</option><option value="active">Active</option><option value="inactive">Inactive</option>
+        </select>
+        <div class="pm-bar-spacer"></div>
+        <button class="pm-btn" id="pm-export" title="Coming soon" disabled>Import / Export <span class="badge soon">SOON</span></button>
+        <button class="pm-btn prime" id="pm-add">+ Add Product</button>
+      </div>
+
+      <div class="pm-bulk" id="pm-bulk" hidden>
+        <span id="pm-bulk-count">0 selected</span>
+        <button class="pm-btn sm" data-bulk="activate">Activate</button>
+        <button class="pm-btn sm" data-bulk="deactivate">Deactivate</button>
+        <button class="pm-btn sm ghost" data-bulk="clear">Clear</button>
+      </div>
+
+      <div class="pm-table-wrap">
+        <table class="pm-table">
+          <thead><tr>
+            <th class="pm-c-chk"><input type="checkbox" id="pm-all"></th>
+            <th>SKU</th><th>Category</th><th>Product</th><th>Colour</th>
+            <th class="r">Unit</th><th class="r">Sell ₹</th><th class="r">Status</th>
+          </tr></thead>
+          <tbody id="pm-rows"></tbody>
+        </table>
+        <div class="pm-empty" id="pm-empty" hidden>No products match these filters.</div>
+      </div>
+      <div class="pm-pager" id="pm-pager"></div>
+    </section>
+
+    <!-- PRODUCT EDITOR / DETAILS -->
+    <div class="ap-overlay ob-dispatch-overlay" id="pm-editor" hidden>
+      <div class="ap-modal wide" role="dialog" aria-modal="true" aria-labelledby="pm-ed-title">
+        <div class="ap-head">
+          <div>
+            <div class="eb" style="margin-bottom:6px;"><span class="live-dot"></span><span id="pm-ed-eb">Product Master</span></div>
+            <h2 id="pm-ed-title">Add a <span style="color: var(--emerald);">product</span>.</h2>
+          </div>
+          <button class="ap-close" id="pm-ed-close" aria-label="Close">×</button>
+        </div>
+        <div class="ap-body">
+          <div class="pi-field">
+            <label>Category <span class="ap-req">*</span></label>
+            <select class="pi-input" id="pm-ed-cat"></select>
+          </div>
+          <div class="ap-row-2" id="pm-ed-attrs"></div>
+          <div class="ap-row-2">
+            <div class="pi-field"><label>Colour</label><input class="pi-input no-upper" id="pm-ed-colour" list="pm-colours" placeholder="e.g. P.GREEN"></div>
+            <div class="pi-field"><label>Unit</label>
+              <select class="pi-input" id="pm-ed-unit"><option>Roll</option><option>Piece</option><option>Set</option><option>Sqm</option><option>Box</option></select>
+            </div>
+          </div>
+          <div class="ap-row-3">
+            <div class="pi-field"><label>Weight (kg)</label><input class="pi-input mono" id="pm-ed-weight" inputmode="decimal" placeholder="optional"></div>
+            <div class="pi-field"><label>Square Feet</label><input class="pi-input mono" id="pm-ed-sqft" inputmode="decimal" placeholder="optional"></div>
+            <div class="pi-field"><label>Default Selling Price ₹</label><input class="pi-input mono" id="pm-ed-price" inputmode="decimal" placeholder="0"></div>
+          </div>
+          <div class="ap-row-3">
+            <div class="pi-field"><label>HSN Code</label><input class="pi-input mono no-upper" id="pm-ed-hsn" placeholder="e.g. 5703"></div>
+            <div class="pi-field"><label>GST %</label><input class="pi-input mono" id="pm-ed-gst" inputmode="decimal" placeholder="12"></div>
+            <div class="pi-field"><label>Status</label>
+              <div class="ob-seg" id="pm-ed-active"><button type="button" data-val="active" class="on">Active</button><button type="button" data-val="inactive">Inactive</button></div>
+            </div>
+          </div>
+          <div class="pi-field">
+            <label>SKU <span class="ap-muted">— auto-generated, editable</span></label>
+            <div class="pm-sku-row"><input class="pi-input mono no-upper" id="pm-ed-sku" placeholder="auto"><button type="button" class="pm-btn sm" id="pm-ed-regen">↻ Regenerate</button></div>
+          </div>
+          <div class="pi-field"><label>Product Notes</label><textarea class="pi-input no-upper" id="pm-ed-notes" rows="2" placeholder="optional"></textarea></div>
+          <div class="ap-status" id="pm-ed-status"></div>
+          <div class="ap-actions">
+            <button class="pi-btn" id="pm-ed-cancel">Cancel</button>
+            <button class="pi-btn prime" id="pm-ed-save">Save product →</button>
+          </div>
+          <div class="ap-foot">Product Master is the single source of truth — Sales, Inventory, Dispatch, Warehouse and Production all consume these products by SKU.</div>
+        </div>
+      </div>
+    </div>
+    <datalist id="pm-colours"></datalist>
 
     <!-- INVENTORY PAGE -->
     <section class="page" data-page="inventory" hidden>
@@ -20281,12 +20447,14 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   const pageTitleMap = {
     today:'Today', orders:'Sales Orders', parties:'Parties', inventory:'Inventory',
     dispatch:'Dispatch', 'create-pi':'Create PI', 'pi-history':'PI History',
+    products:'Product Master',
     cash:'Cash & finance', receivables:'Receivables',
     intel:'Intelligence', reports:'Reports', workflows:'Workflows', settings:'Settings'
   };
   const sectionMap = {
     today:'Operate', orders:'Operate', parties:'Operate', inventory:'Operate', dispatch:'Operate',
     'create-pi':'Operate', 'pi-history':'Operate',
+    products:'Master data',
     cash:'Sense', receivables:'Sense', intel:'Sense', reports:'Sense',
     workflows:'Studio', settings:'Studio'
   };
@@ -20318,6 +20486,9 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     window.scrollTo({top:0, behavior:'instant'});
     if (p === 'pi-history' && typeof window.atlasLoadHistory === 'function') {
       window.atlasLoadHistory();
+    }
+    if (p === 'products' && typeof window.atlasLoadProducts === 'function') {
+      window.atlasLoadProducts();
     }
     if (orderDept) {
       if (typeof window.atlasSetDept === 'function') window.atlasSetDept(orderDept);
@@ -26005,6 +26176,278 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     });
     if (location.hash === '#dispatch') { state.dept = 'dispatch'; window.atlasLoadOrders(); }
     else if (location.hash === '#orders') window.atlasLoadOrders();
+  });
+})();
+</script>
+
+<!-- ============ PRODUCT MASTER (Master Data) ============ -->
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const inr = n => '₹' + Number(n||0).toLocaleString('en-IN', {maximumFractionDigits:0});
+
+  // Category → applicable attributes (drives the editor). Mirrors
+  // docs/database/product-hierarchy.md + ADR-0004.
+  const SCHEMA = {
+    'LOOP':['model','backing','width','length'],
+    'TEFNO':['model','width','length'],
+    'TURF':['model','width','length'],
+    'WIRE MAT':['model','width','length'],
+    'ARTIFICIAL GRASS':['height','type','width','length'],
+    'MONO GRASS':['model','backing','width','length'],
+    'FOOTMAT':['model','backing','size'],
+  };
+  const ATTR_LABEL = {model:'Model',backing:'Backing',height:'Height',type:'Type (SL/DL)',width:'Width',length:'Length',size:'Size'};
+  const CATCODE = {'LOOP':'LP','TEFNO':'TF','TURF':'TR','WIRE MAT':'WM','ARTIFICIAL GRASS':'AG','MONO GRASS':'MG','FOOTMAT':'FM'};
+
+  // ---- SKU generation (same scheme as the seed generator) ----
+  const tokw = s => String(s||'').toUpperCase().replace(/[^A-Z0-9]+/g,' ').trim();
+  const codeOf = (s,n=3) => { const w = tokw(s).split(' ').filter(Boolean); return w.length>1 ? w.map(x=>x[0]).join('').slice(0,4) : (w[0]||'').slice(0,n); };
+  const digits = s => String(s||'').replace(/[^0-9]/g,'') || '0';
+  const lenNum = s => { const m = String(s||'').match(/\d+/); return m?m[0]:''; };
+  const sizeCode = s => tokw(s).replace(/ /g,'').replace('CM','C');
+  function genSku(p, exclude){
+    const cat = p.category; const cc = CATCODE[cat] || codeOf(cat,2);
+    const mc = cat==='ARTIFICIAL GRASS' ? (digits(p.height)+'MM'+(p.type||'')) : codeOf(p.model,4);
+    const bc = p.backing ? codeOf(p.backing,3) : '';
+    const zc = cat==='FOOTMAT' ? sizeCode(p.size) : (digits(p.width)+'X'+lenNum(p.length));
+    const colc = codeOf(p.colour,3);
+    let sku = [cc,mc,bc,zc,colc].filter(Boolean).join('-').toUpperCase();
+    const taken = new Set(all().filter(x=>x.id!==exclude).map(x=>x.sku));
+    let s = sku, i = 2; while(taken.has(s)){ s = sku+'-'+i; i++; }
+    return s;
+  }
+
+  // ---- data (seed + local overlay) ----
+  const OV_KEY = 'atlas-products-overlay';
+  let seed = [], loaded = false;
+  let ov = { over:{}, add:[] };
+  try { ov = Object.assign({over:{},add:[]}, JSON.parse(localStorage.getItem(OV_KEY)||'{}')); } catch(e){}
+  const saveOv = () => { try { localStorage.setItem(OV_KEY, JSON.stringify(ov)); } catch(e){} };
+  function all(){ return seed.map(p => Object.assign({}, p, ov.over[p.id]||{})).concat(ov.add.map(p=>Object.assign({},p))); }
+  function byId(id){ return all().find(p=>p.id===id); }
+
+  // ---- ui state ----
+  const state = { q:'', cat:'', model:'', status:'', page:1, size:20, sel:new Set() };
+
+  window.atlasLoadProducts = async function(){
+    if (loaded){ render(); return; }
+    try {
+      const res = await fetch('data/products.json');
+      const j = await res.json();
+      seed = j.products || [];
+    } catch(e){ seed = []; }
+    loaded = true;
+    // category filter options
+    const catSel = $('pm-f-cat');
+    Object.keys(SCHEMA).forEach(c => { const o=document.createElement('option'); o.value=c; o.textContent=c; catSel.appendChild(o); });
+    render();
+  };
+
+  function distinct(field, cat){
+    const set = new Set();
+    all().forEach(p => { if (cat && p.category!==cat) return; if (p[field]) set.add(p[field]); });
+    return [...set].sort();
+  }
+  function filtered(){
+    const q = state.q.toLowerCase();
+    return all().filter(p => {
+      if (state.cat && p.category!==state.cat) return false;
+      if (state.model && (p.model||'')!==state.model) return false;
+      if (state.status==='active' && !p.active) return false;
+      if (state.status==='inactive' && p.active) return false;
+      if (q){ const blob = [p.sku,p.category,p.model,p.colour,p.backing,p.height,p.type,p.width,p.length,p.size].filter(Boolean).join(' ').toLowerCase(); if (!blob.includes(q)) return false; }
+      return true;
+    });
+  }
+  const attrText = p => SCHEMA[p.category] ? SCHEMA[p.category].filter(a=>a!=='colour' && p[a]).map(a=>p[a]).join(' · ') : '';
+
+  function render(){
+    const list = all();
+    // KPIs
+    const active = list.filter(p=>p.active).length;
+    const cats = new Set(list.map(p=>p.category)).size;
+    $('pm-when').innerHTML = 'PRODUCTS · <b>'+list.length+'</b><br/>ACTIVE · <b>'+active+'</b><br/>CATEGORIES · <b>'+cats+'</b>';
+    const perCat = {}; list.forEach(p=>perCat[p.category]=(perCat[p.category]||0)+1);
+    const topCat = Object.entries(perCat).sort((a,b)=>b[1]-a[1])[0];
+    const kpi = (lbl,val,sub) => '<div class="kpi"><div class="lbl"><span>'+lbl+'</span><span class="ind"></span></div><div class="v">'+val+'</div><div class="d"><span class="arr">•</span>'+esc(sub)+'</div></div>';
+    $('pm-kpis').innerHTML =
+        kpi('Total products', list.length, ov.add.length?('+'+ov.add.length+' added'):'from Product Spec')
+      + kpi('Active', active, Math.round(active/(list.length||1)*100)+'% of catalogue')
+      + kpi('Categories', cats, topCat?(topCat[0]+' largest'):'—')
+      + kpi('Recently added', ov.add.length, ov.add.length?('last: '+esc((ov.add[ov.add.length-1]||{}).sku||'')):'none this session');
+    // model filter options (respect category)
+    const mSel = $('pm-f-model'); const cur = state.model;
+    const models = distinct('model', state.cat);
+    mSel.innerHTML = '<option value="">All models</option>' + models.map(m=>'<option'+(m===cur?' selected':'')+'>'+esc(m)+'</option>').join('');
+    // colour datalist for editor
+    const cols = distinct('colour', '');
+    $('pm-colours').innerHTML = cols.map(c=>'<option value="'+esc(c)+'">').join('');
+
+    // table
+    const rows = filtered();
+    const pages = Math.max(1, Math.ceil(rows.length/state.size));
+    if (state.page > pages) state.page = pages;
+    const slice = rows.slice((state.page-1)*state.size, state.page*state.size);
+    $('pm-empty').hidden = rows.length>0;
+    $('pm-rows').innerHTML = slice.map(p =>
+      '<tr data-id="'+esc(p.id)+'">'
+      + '<td class="pm-c-chk"><input type="checkbox" class="pm-row-chk" data-id="'+esc(p.id)+'"'+(state.sel.has(p.id)?' checked':'')+'></td>'
+      + '<td><span class="pm-sku">'+esc(p.sku)+'</span></td>'
+      + '<td><span class="pm-cat">'+esc(p.category)+'</span></td>'
+      + '<td class="pm-prod"><b>'+esc(p.model||p.height||'—')+'</b>'+(attrText(p)?' <span>'+esc(SCHEMA[p.category].filter(a=>p[a]&&a!=='model'&&a!=='height').map(a=>p[a]).join(' · '))+'</span>':'')+'</td>'
+      + '<td class="pm-colour">'+esc(p.colour||'—')+'</td>'
+      + '<td class="r pm-num">'+esc(p.unit||'—')+'</td>'
+      + '<td class="r pm-num">'+(p.sellingPrice?inr(p.sellingPrice):'—')+'</td>'
+      + '<td class="r"><span class="pm-st '+(p.active?'on':'off')+'">'+(p.active?'Active':'Inactive')+'</span></td>'
+      + '</tr>').join('');
+    // pager
+    $('pm-pager').innerHTML = rows.length ? (
+        '<button id="pm-prev"'+(state.page<=1?' disabled':'')+'>← Prev</button>'
+      + '<span>'+((state.page-1)*state.size+1)+'–'+Math.min(state.page*state.size,rows.length)+' of '+rows.length+'</span>'
+      + '<button id="pm-next"'+(state.page>=pages?' disabled':'')+'>Next →</button>' ) : '';
+    if ($('pm-prev')) $('pm-prev').onclick = ()=>{ state.page--; render(); };
+    if ($('pm-next')) $('pm-next').onclick = ()=>{ state.page++; render(); };
+    // bulk bar
+    $('pm-bulk').hidden = state.sel.size===0;
+    $('pm-bulk-count').textContent = state.sel.size+' selected';
+    const allChecked = slice.length>0 && slice.every(p=>state.sel.has(p.id));
+    $('pm-all').checked = allChecked;
+  }
+
+  // ---- editor ----
+  let editingId = null, skuDirty = false;
+  function attrFieldsHtml(cat, vals){
+    const attrs = SCHEMA[cat] || [];
+    return attrs.map(a => {
+      if (a==='type') return '<div class="pi-field"><label>'+ATTR_LABEL[a]+'</label><select class="pi-input" data-attr="type"><option value="">—</option><option'+(vals.type==='SL'?' selected':'')+'>SL</option><option'+(vals.type==='DL'?' selected':'')+'>DL</option></select></div>';
+      const list = 'pm-opt-'+a;
+      return '<div class="pi-field"><label>'+ATTR_LABEL[a]+'</label><input class="pi-input no-upper" data-attr="'+a+'" list="'+list+'" value="'+esc(vals[a]||'')+'" placeholder="'+esc(ATTR_LABEL[a])+'"><datalist id="'+list+'">'
+        + distinct(a, cat).map(v=>'<option value="'+esc(v)+'">').join('') + '</datalist></div>';
+    }).join('') + '<div class="pm-attr-note">Fields shown are specific to '+esc(cat)+'.</div>';
+  }
+  function collectEditor(){
+    const cat = $('pm-ed-cat').value;
+    const p = { category:cat };
+    $('pm-ed-attrs').querySelectorAll('[data-attr]').forEach(el => { const v=el.value.trim(); if (v) p[el.getAttribute('data-attr')] = v; });
+    p.colour = $('pm-ed-colour').value.trim();
+    p.unit = $('pm-ed-unit').value;
+    p.weight = $('pm-ed-weight').value ? +$('pm-ed-weight').value : null;
+    p.sqft = $('pm-ed-sqft').value ? +$('pm-ed-sqft').value : null;
+    p.sellingPrice = $('pm-ed-price').value ? +$('pm-ed-price').value : null;
+    p.hsn = $('pm-ed-hsn').value.trim();
+    p.gst = $('pm-ed-gst').value ? +$('pm-ed-gst').value : null;
+    p.active = ($('pm-ed-active').querySelector('button.on')||{}).getAttribute ? $('pm-ed-active').querySelector('button.on').getAttribute('data-val')==='active' : true;
+    p.notes = $('pm-ed-notes').value.trim();
+    return p;
+  }
+  function refreshAttrs(){
+    const cat = $('pm-ed-cat').value;
+    const vals = {}; $('pm-ed-attrs').querySelectorAll('[data-attr]').forEach(el=>vals[el.getAttribute('data-attr')]=el.value);
+    $('pm-ed-attrs').innerHTML = attrFieldsHtml(cat, vals);
+    // default unit + hsn per category if adding
+    if (!editingId){
+      $('pm-ed-unit').value = cat==='FOOTMAT' ? 'Piece' : 'Roll';
+      if (!$('pm-ed-hsn').value) $('pm-ed-hsn').value = cat==='FOOTMAT' ? '5705' : '5703';
+      if (!$('pm-ed-gst').value) $('pm-ed-gst').value = '12';
+    }
+    maybeSku();
+  }
+  function maybeSku(){ if (skuDirty) return; const p = collectEditor(); if (p.category && (p.model||p.height) && p.colour) $('pm-ed-sku').value = genSku(p, editingId); }
+  function segSet(id,val){ $(id).querySelectorAll('button').forEach(b=>b.classList.toggle('on', b.getAttribute('data-val')===val)); }
+
+  function openEditor(id){
+    editingId = id||null; skuDirty = false;
+    const catSel = $('pm-ed-cat');
+    if (!catSel.options.length) Object.keys(SCHEMA).forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; catSel.appendChild(o); });
+    const p = id ? byId(id) : { category:'LOOP', active:true, unit:'Roll' };
+    $('pm-ed-eb').textContent = id ? ('Product Master · '+p.sku) : 'Product Master · new';
+    $('pm-ed-title').innerHTML = id ? 'Edit <span style="color: var(--emerald);">'+esc(p.model||p.height||p.category)+'</span>.' : 'Add a <span style="color: var(--emerald);">product</span>.';
+    catSel.value = p.category;
+    $('pm-ed-attrs').innerHTML = attrFieldsHtml(p.category, p);
+    $('pm-ed-colour').value = p.colour||''; $('pm-ed-unit').value = p.unit||'Roll';
+    $('pm-ed-weight').value = p.weight!=null?p.weight:''; $('pm-ed-sqft').value = p.sqft!=null?p.sqft:'';
+    $('pm-ed-price').value = p.sellingPrice!=null?p.sellingPrice:''; $('pm-ed-hsn').value = p.hsn||''; $('pm-ed-gst').value = p.gst!=null?p.gst:'';
+    segSet('pm-ed-active', (p.active===false)?'inactive':'active');
+    $('pm-ed-sku').value = p.sku||''; $('pm-ed-notes').value = p.notes||'';
+    if (!id){ $('pm-ed-hsn').value='5703'; $('pm-ed-gst').value='12'; maybeSku(); }
+    document.getElementById('pm-ed-status').className='ap-status'; document.getElementById('pm-ed-status').textContent='';
+    $('pm-editor').hidden = false;
+  }
+  function closeEditor(){ $('pm-editor').hidden = true; editingId = null; }
+
+  function saveEditor(){
+    const p = collectEditor();
+    if (!p.category){ setStatus('Category is required.'); return; }
+    if (!(p.model || p.height)){ setStatus('Enter a '+(p.category==='ARTIFICIAL GRASS'?'height':'model')+'.'); return; }
+    if (!p.colour){ setStatus('Colour is required.'); return; }
+    let sku = $('pm-ed-sku').value.trim() || genSku(p, editingId);
+    // uniqueness
+    const clash = all().find(x=>x.sku===sku && x.id!==editingId);
+    if (clash){ setStatus('SKU '+sku+' already exists.'); return; }
+    p.sku = sku;
+    if (editingId){
+      const isSeed = seed.some(s=>s.id===editingId);
+      if (isSeed){ ov.over[editingId] = Object.assign({}, ov.over[editingId], p); }
+      else { const i = ov.add.findIndex(x=>x.id===editingId); if (i>=0) ov.add[i] = Object.assign({}, ov.add[i], p); }
+    } else {
+      const num = 1 + all().reduce((m,x)=>{ const n=+String(x.id).replace(/\D/g,''); return n>m?n:m; }, 0);
+      p.id = 'PU'+String(num).padStart(4,'0');
+      ov.add.push(p);
+    }
+    saveOv(); closeEditor(); render();
+    toast(editingId?'Product updated':'Product added');
+  }
+  function setStatus(m){ const s=$('pm-ed-status'); s.className='ap-status err'; s.textContent=m; }
+  function toast(m){ /* lightweight */ const s=$('pm-ed-status'); }
+
+  function setActiveBulk(active){
+    state.sel.forEach(id => {
+      if (seed.some(s=>s.id===id)) ov.over[id] = Object.assign({}, ov.over[id], {active});
+      else { const i = ov.add.findIndex(x=>x.id===id); if (i>=0) ov.add[i].active = active; }
+    });
+    saveOv(); render();
+  }
+
+  // ---- wire ----
+  document.addEventListener('DOMContentLoaded', () => {
+    $('pm-search').addEventListener('input', e => { state.q = e.target.value; state.page=1; render(); });
+    $('pm-f-cat').addEventListener('change', e => { state.cat = e.target.value; state.model=''; state.page=1; render(); });
+    $('pm-f-model').addEventListener('change', e => { state.model = e.target.value; state.page=1; render(); });
+    $('pm-f-status').addEventListener('change', e => { state.status = e.target.value; state.page=1; render(); });
+    $('pm-add').addEventListener('click', () => openEditor(null));
+    $('pm-rows').addEventListener('click', e => {
+      const chk = e.target.closest('.pm-row-chk');
+      if (chk){ const id=chk.getAttribute('data-id'); if (chk.checked) state.sel.add(id); else state.sel.delete(id); render(); return; }
+      const tr = e.target.closest('tr[data-id]'); if (tr) openEditor(tr.getAttribute('data-id'));
+    });
+    $('pm-all').addEventListener('change', e => {
+      const rows = filtered().slice((state.page-1)*state.size, state.page*state.size);
+      if (e.target.checked) rows.forEach(p=>state.sel.add(p.id)); else rows.forEach(p=>state.sel.delete(p.id));
+      render();
+    });
+    $('pm-bulk').addEventListener('click', e => {
+      const b = e.target.closest('[data-bulk]'); if(!b) return;
+      const act = b.getAttribute('data-bulk');
+      if (act==='clear'){ state.sel.clear(); render(); }
+      else if (act==='activate'){ setActiveBulk(true); state.sel.clear(); render(); }
+      else if (act==='deactivate'){ setActiveBulk(false); state.sel.clear(); render(); }
+    });
+    // editor
+    $('pm-ed-close').addEventListener('click', closeEditor);
+    $('pm-ed-cancel').addEventListener('click', closeEditor);
+    $('pm-editor').addEventListener('click', e => { if (e.target===$('pm-editor')) closeEditor(); });
+    $('pm-ed-cat').addEventListener('change', refreshAttrs);
+    $('pm-ed-attrs').addEventListener('input', maybeSku);
+    $('pm-ed-colour').addEventListener('input', maybeSku);
+    $('pm-ed-sku').addEventListener('input', () => { skuDirty = true; });
+    $('pm-ed-regen').addEventListener('click', () => { skuDirty=false; const p=collectEditor(); $('pm-ed-sku').value = genSku(p, editingId); });
+    $('pm-ed-active').addEventListener('click', e => { const b=e.target.closest('button[data-val]'); if(b) segSet('pm-ed-active', b.getAttribute('data-val')); });
+    $('pm-ed-save').addEventListener('click', saveEditor);
+    document.addEventListener('keydown', e => { if (e.key==='Escape' && !$('pm-editor').hidden) closeEditor(); });
+    // auto-load if landing directly on the page
+    if (location.hash==='#products') window.atlasLoadProducts();
   });
 })();
 </script>
