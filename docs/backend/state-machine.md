@@ -160,6 +160,33 @@ stateDiagram-v2
 
 ---
 
+## Product (Product Master)  *(ADR-0005)*
+
+```mermaid
+stateDiagram-v2
+    [*] --> Draft
+    Draft --> Active: activate (SKU locks)
+    Active --> Discontinued: discontinue
+    Discontinued --> Active: re-activate
+    Active --> Archived: archive
+    Discontinued --> Archived: archive
+    Draft --> Archived: archive (abandon)
+    Archived --> Active: restore
+```
+
+| From | To | Trigger | Performed by |
+|---|---|---|---|
+| — | Draft | Product created | Catalogue/Admin |
+| Draft | Active | Activated; **SKU locks** | Catalogue/Admin |
+| Active | Discontinued | No longer offered | Catalogue/Admin |
+| Discontinued | Active | Re-offered | Catalogue/Admin |
+| Active / Discontinued / Draft | Archived | Hidden from normal views | Catalogue/Admin |
+| Archived | Active | Restored | Catalogue/Admin |
+
+SKU is editable only while `Draft`; it locks on first use (Sales Order / Inventory
+/ Production) — proxied today by the `Draft → Active` transition. Products are never
+hard-deleted while referenced by history.
+
 ## Warehouse Pick/Pack Task  *(planned)*
 
 ```mermaid

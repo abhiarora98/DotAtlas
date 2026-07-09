@@ -3277,6 +3277,114 @@
   .pm-sku-row { display: flex; gap: 10px; align-items: center; }
   .pm-sku-row input { flex: 1; }
   .pm-attr-note { grid-column: 1 / -1; font-family: var(--fm); font-size: 10.5px; color: var(--text-4); margin-top: -4px; }
+
+  /* ===== Product Master V2 ===== */
+  .pm-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 18px 0 4px; }
+  @media (min-width: 1100px){ .pm-stats { grid-template-columns: repeat(9, 1fr); } }
+  .pm-stat { padding: 13px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); }
+  .pm-stat .lbl { font-family: var(--fm); font-size: 9.5px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--text-4); }
+  .pm-stat .v { font-family: var(--fd); font-size: 22px; font-weight: 700; color: var(--text); margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .pm-stat.warn .v { color: var(--amber); } .pm-stat.warn { border-color: rgba(255,176,121,0.3); }
+  .pm-stat.good .v { color: var(--emerald); }
+  .pm-stat .sub { font-family: var(--fm); font-size: 9.5px; color: var(--text-4); margin-top: 2px; }
+  .pm-stat.click { cursor: pointer; transition: border-color 120ms var(--ease); }
+  .pm-stat.click:hover { border-color: var(--line-3); }
+
+  .pm-more { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; flex-wrap: wrap; padding: 12px 14px; border: 1px solid var(--line); border-radius: 11px; background: var(--surface-2); }
+  .pm-more[hidden]{ display: none; }
+  .pm-chips { display: flex; gap: 8px; margin-left: auto; }
+  .pm-chip { font-family: var(--fm); font-size: 11px; color: var(--text-3); background: var(--surface); border: 1px solid var(--line-2); padding: 7px 12px; border-radius: 999px; cursor: pointer; }
+  .pm-chip.on { color: var(--amber); background: var(--amber-soft); border-color: rgba(255,176,121,0.4); }
+  .pm-sel.sm { padding: 7px 10px; font-size: 11px; }
+
+  .pm-table-wide td, .pm-table-wide th { padding-left: 10px; padding-right: 10px; }
+  .pm-c-img { width: 40px; } .pm-c-act { width: 34px; }
+  .pm-thumb { width: 30px; height: 30px; border-radius: 7px; object-fit: cover; background: var(--surface-3); display: flex; align-items: center; justify-content: center; color: var(--text-4); font-size: 13px; border: 1px solid var(--line-2); }
+  .pm-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; }
+  .pm-name { color: var(--text); font-weight: 600; max-width: 240px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pm-updated { font-family: var(--fm); font-size: 10.5px; color: var(--text-4); }
+  .pm-st.draft { color: var(--amber); background: var(--amber-soft); }
+  .pm-st.active { color: var(--emerald); background: var(--emerald-soft); }
+  .pm-st.discontinued { color: var(--text-3); background: var(--surface-3); }
+  .pm-st.archived { color: var(--rose); background: var(--rose-soft); }
+  .pm-kebab { background: transparent; border: 0; color: var(--text-3); cursor: pointer; font-size: 16px; padding: 2px 6px; border-radius: 6px; }
+  .pm-kebab:hover { background: var(--surface-3); color: var(--text); }
+  .pm-menu { position: absolute; z-index: 30; background: var(--surface); border: 1px solid var(--line-2); border-radius: 10px; box-shadow: 0 16px 40px -12px rgba(0,0,0,0.5); padding: 5px; min-width: 150px; }
+  .pm-menu button { display: block; width: 100%; text-align: left; padding: 8px 11px; font-size: 12px; color: var(--text-2); background: transparent; border: 0; border-radius: 7px; cursor: pointer; }
+  .pm-menu button:hover { background: var(--surface-3); color: var(--text); }
+  .pm-menu button.danger { color: var(--rose); }
+
+  /* Detail modal */
+  #pm-detail .pm-detail-shell { position: relative; z-index: 1; width: min(1080px, 96vw); height: min(88vh, 880px); margin: 6vh auto; background: var(--surface); border: 1px solid var(--line-2); border-radius: 18px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 40px 120px -30px rgba(0,0,0,0.7); }
+  .pm-detail-head { display: flex; align-items: center; gap: 14px; padding: 18px 22px; border-bottom: 1px solid var(--line); flex-shrink: 0; }
+  .pm-dh-img { width: 46px; height: 46px; border-radius: 11px; background: var(--surface-3); border: 1px solid var(--line-2); display: flex; align-items: center; justify-content: center; color: var(--text-4); font-size: 20px; flex-shrink: 0; overflow: hidden; }
+  .pm-dh-img img { width: 100%; height: 100%; object-fit: cover; }
+  .pm-dh-main { min-width: 0; flex: 1; }
+  .pm-dh-top { display: flex; align-items: center; gap: 12px; }
+  .pm-dh-top h2 { font-size: 18px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pm-dh-sub { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
+  .pm-dh-fam { font-family: var(--fm); font-size: 10.5px; color: var(--text-4); }
+  .pm-dh-actions { display: flex; gap: 8px; flex-shrink: 0; }
+  .pm-detail-body { display: flex; flex: 1; min-height: 0; }
+  .pm-tabrail { width: 180px; flex-shrink: 0; border-right: 1px solid var(--line); padding: 10px; overflow-y: auto; background: var(--surface-2); }
+  .pm-tab { display: block; width: 100%; text-align: left; padding: 9px 12px; font-size: 12.5px; color: var(--text-3); background: transparent; border: 0; border-radius: 8px; cursor: pointer; margin-bottom: 2px; }
+  .pm-tab:hover { background: var(--surface-3); color: var(--text-2); }
+  .pm-tab.on { background: var(--emerald-soft); color: var(--emerald-2); font-weight: 600; }
+  .pm-tabcontent { flex: 1; overflow-y: auto; padding: 22px 26px; }
+  .pm-detail-foot { display: flex; align-items: center; gap: 14px; padding: 14px 22px; border-top: 1px solid var(--line); flex-shrink: 0; }
+  .pm-detail-foot .ap-status { margin: 0; flex: 1; }
+  .pm-df-actions { display: flex; gap: 10px; }
+
+  /* Detail form bits */
+  .pm-sec-h { font-family: var(--fm); font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-4); margin: 0 0 12px; }
+  .pm-sec-h:not(:first-child){ margin-top: 26px; }
+  .pm-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .pm-grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  @media (max-width: 720px){ .pm-grid2, .pm-grid3 { grid-template-columns: 1fr; } }
+  .pm-locked-note { font-family: var(--fm); font-size: 10px; color: var(--emerald); }
+  .pm-placeholder { text-align: center; padding: 40px 20px; color: var(--text-4); }
+  .pm-placeholder .pi { font-size: 26px; margin-bottom: 10px; }
+  .pm-ph-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap: 12px; margin-top: 16px; }
+  .pm-ph-card { padding: 14px; border: 1px dashed var(--line-2); border-radius: 11px; background: var(--surface-2); text-align: left; }
+  .pm-ph-card .l { font-family: var(--fm); font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.03em; color: var(--text-4); }
+  .pm-ph-card .v { font-size: 18px; font-weight: 700; color: var(--text-3); margin-top: 5px; }
+
+  /* Images tab */
+  .pm-drop { border: 1.5px dashed var(--line-3); border-radius: 12px; padding: 22px; text-align: center; color: var(--text-3); cursor: pointer; font-size: 12.5px; transition: all 130ms var(--ease); }
+  .pm-drop:hover, .pm-drop.drag { border-color: var(--emerald-mute); background: var(--emerald-soft); color: var(--text); }
+  .pm-imgs { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap: 12px; margin-top: 14px; }
+  .pm-img-card { border: 1px solid var(--line-2); border-radius: 11px; overflow: hidden; background: var(--surface-2); }
+  .pm-img-card.primary { border-color: var(--emerald); }
+  .pm-img-thumb { width: 100%; height: 110px; object-fit: cover; background: var(--surface-3); display: block; }
+  .pm-img-meta { padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
+  .pm-img-meta select { font-size: 11px; padding: 5px 7px; border: 1px solid var(--line-2); border-radius: 6px; background: var(--surface); color: var(--text-2); }
+  .pm-img-acts { display: flex; gap: 6px; }
+  .pm-img-acts button { flex: 1; font-family: var(--fm); font-size: 10px; padding: 5px; border: 1px solid var(--line-2); border-radius: 6px; background: var(--surface); color: var(--text-3); cursor: pointer; }
+  .pm-img-acts button:hover { color: var(--text); }
+  .pm-img-acts button.on { color: var(--emerald); border-color: var(--emerald-mute); }
+
+  /* Documents / BOM / relationships */
+  .pm-doclist, .pm-bomlist, .pm-rellist { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+  .pm-doc, .pm-bomrow { display: grid; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface-2); }
+  .pm-doc { grid-template-columns: 1fr 150px 30px; }
+  .pm-bomrow { grid-template-columns: 1.6fr 70px 80px 70px 30px; }
+  .pm-doc b { font-size: 12px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pm-doc select, .pm-bomrow input, .pm-bomrow select { font-size: 11.5px; padding: 6px 8px; border: 1px solid var(--line-2); border-radius: 6px; background: var(--surface); color: var(--text); }
+  .pm-x { border: 0; background: transparent; color: var(--text-3); cursor: pointer; font-size: 14px; } .pm-x:hover { color: var(--rose); }
+  .pm-add-row { margin-top: 10px; font-family: var(--fm); font-size: 11.5px; color: var(--blue); background: transparent; border: 1px dashed var(--line-2); border-radius: 8px; padding: 9px 14px; cursor: pointer; width: 100%; }
+  .pm-add-row:hover { background: var(--blue-soft); }
+  .pm-relgrp { margin-bottom: 18px; }
+  .pm-relchips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 8px; }
+  .pm-relchip { display: inline-flex; align-items: center; gap: 7px; font-family: var(--fm); font-size: 11px; color: var(--text-2); background: var(--surface-2); border: 1px solid var(--line-2); padding: 5px 10px; border-radius: 999px; }
+  .pm-relchip button { border: 0; background: transparent; color: var(--text-4); cursor: pointer; }
+  .pm-relchip button:hover { color: var(--rose); }
+  .pm-relsearch { position: relative; }
+  .pm-relresults { position: absolute; z-index: 20; top: 100%; left: 0; right: 0; background: var(--surface); border: 1px solid var(--line-2); border-radius: 9px; margin-top: 4px; max-height: 200px; overflow-y: auto; box-shadow: 0 16px 40px -12px rgba(0,0,0,0.5); }
+  .pm-relresults button { display: block; width: 100%; text-align: left; padding: 8px 11px; font-size: 12px; color: var(--text-2); background: transparent; border: 0; cursor: pointer; }
+  .pm-relresults button:hover { background: var(--surface-3); }
+  .pm-audit { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .pm-audit .a-l { font-family: var(--fm); font-size: 9.5px; text-transform: uppercase; color: var(--text-4); }
+  .pm-audit .a-v { font-size: 13px; color: var(--text); margin-top: 3px; }
 </style>
 </head>
 <body>
@@ -4356,44 +4464,61 @@
       </div>
     </section>
 
-    <!-- PRODUCT MASTER (Master Data) -->
+    <!-- PRODUCT MASTER (Master Data) · V2 -->
     <section class="page" data-page="products" hidden>
       <div class="hero-h">
         <div><div class="eb"><span class="live-dot"></span>Master data · Product Master · single source of truth</div>
           <h1>Every product in <span class="em">Native</span>, defined <span class="accent">once</span>.</h1></div>
-        <div class="when" id="pm-when">PRODUCTS · <b>—</b><br/>ACTIVE · <b>—</b><br/>CATEGORIES · <b>—</b></div>
+        <div class="when" id="pm-when">PRODUCTS · <b>—</b><br/>ACTIVE · <b>—</b><br/>FAMILIES · <b>—</b></div>
       </div>
 
-      <div class="kpis" id="pm-kpis"></div>
+      <div class="pm-stats" id="pm-kpis"></div>
 
       <div class="pm-bar">
         <div class="pm-search">
           <span class="pm-search-ic">⌕</span>
-          <input id="pm-search" placeholder="Search SKU, model, colour, category…" autocomplete="off">
+          <input id="pm-search" placeholder="Search SKU, name, model, colour…" autocomplete="off">
         </div>
         <select class="pm-sel" id="pm-f-cat"><option value="">All categories</option></select>
+        <select class="pm-sel" id="pm-f-family"><option value="">All families</option></select>
         <select class="pm-sel" id="pm-f-model"><option value="">All models</option></select>
         <select class="pm-sel" id="pm-f-status">
-          <option value="">All status</option><option value="active">Active</option><option value="inactive">Inactive</option>
+          <option value="">All status</option><option>Draft</option><option>Active</option><option>Discontinued</option><option>Archived</option>
         </select>
         <div class="pm-bar-spacer"></div>
-        <button class="pm-btn" id="pm-export" title="Coming soon" disabled>Import / Export <span class="badge soon">SOON</span></button>
+        <button class="pm-btn" id="pm-more-btn">Filters ▾</button>
+        <button class="pm-btn" id="pm-export">Export</button>
         <button class="pm-btn prime" id="pm-add">+ Add Product</button>
+      </div>
+
+      <div class="pm-more" id="pm-more" hidden>
+        <select class="pm-sel" id="pm-f-width"><option value="">Any width</option></select>
+        <select class="pm-sel" id="pm-f-length"><option value="">Any length</option></select>
+        <select class="pm-sel" id="pm-f-colour"><option value="">Any colour</option></select>
+        <div class="pm-chips">
+          <button class="pm-chip" data-miss="image">Missing image</button>
+          <button class="pm-chip" data-miss="bom">Missing BOM</button>
+          <button class="pm-chip" data-miss="price">Missing price</button>
+        </div>
       </div>
 
       <div class="pm-bulk" id="pm-bulk" hidden>
         <span id="pm-bulk-count">0 selected</span>
-        <button class="pm-btn sm" data-bulk="activate">Activate</button>
-        <button class="pm-btn sm" data-bulk="deactivate">Deactivate</button>
+        <select class="pm-sel sm" id="pm-bulk-status">
+          <option value="">Set status…</option><option>Draft</option><option>Active</option><option>Discontinued</option><option>Archived</option>
+        </select>
+        <button class="pm-btn sm" data-bulk="export">Export selected</button>
         <button class="pm-btn sm ghost" data-bulk="clear">Clear</button>
       </div>
 
       <div class="pm-table-wrap">
-        <table class="pm-table">
+        <table class="pm-table pm-table-wide">
           <thead><tr>
             <th class="pm-c-chk"><input type="checkbox" id="pm-all"></th>
-            <th>SKU</th><th>Category</th><th>Product</th><th>Colour</th>
-            <th class="r">Unit</th><th class="r">Sell ₹</th><th class="r">Status</th>
+            <th class="pm-c-img"></th>
+            <th>SKU</th><th>Product Name</th><th>Category</th><th>Model</th><th>Variant</th>
+            <th>Status</th><th class="r">Price</th><th class="r">Weight</th><th>Unit</th><th>Updated</th>
+            <th class="pm-c-act"></th>
           </tr></thead>
           <tbody id="pm-rows"></tbody>
         </table>
@@ -4402,54 +4527,50 @@
       <div class="pm-pager" id="pm-pager"></div>
     </section>
 
-    <!-- PRODUCT EDITOR / DETAILS -->
-    <div class="ap-overlay ob-dispatch-overlay" id="pm-editor" hidden>
-      <div class="ap-modal wide" role="dialog" aria-modal="true" aria-labelledby="pm-ed-title">
-        <div class="ap-head">
-          <div>
-            <div class="eb" style="margin-bottom:6px;"><span class="live-dot"></span><span id="pm-ed-eb">Product Master</span></div>
-            <h2 id="pm-ed-title">Add a <span style="color: var(--emerald);">product</span>.</h2>
+    <!-- PRODUCT DETAILS (tabbed) -->
+    <div class="ap-overlay ob-dispatch-overlay" id="pm-detail" hidden>
+      <div class="pm-detail-shell" role="dialog" aria-modal="true" aria-labelledby="pm-d-name">
+        <div class="pm-detail-head">
+          <div class="pm-dh-img" id="pm-d-img">◨</div>
+          <div class="pm-dh-main">
+            <div class="pm-dh-top">
+              <h2 id="pm-d-name">Product</h2>
+              <span class="pm-st" id="pm-d-status">Draft</span>
+            </div>
+            <div class="pm-dh-sub"><span class="pm-sku" id="pm-d-sku">—</span><span id="pm-d-family" class="pm-dh-fam"></span></div>
           </div>
-          <button class="ap-close" id="pm-ed-close" aria-label="Close">×</button>
+          <div class="pm-dh-actions" id="pm-d-actions"></div>
+          <button class="ap-close" id="pm-d-close" aria-label="Close">×</button>
         </div>
-        <div class="ap-body">
-          <div class="pi-field">
-            <label>Category <span class="ap-req">*</span></label>
-            <select class="pi-input" id="pm-ed-cat"></select>
+        <div class="pm-detail-body">
+          <div class="pm-tabrail" id="pm-tabrail">
+            <button class="pm-tab on" data-tab="general">General</button>
+            <button class="pm-tab" data-tab="specs">Specifications</button>
+            <button class="pm-tab" data-tab="pricing">Pricing</button>
+            <button class="pm-tab" data-tab="images">Images</button>
+            <button class="pm-tab" data-tab="documents">Documents</button>
+            <button class="pm-tab" data-tab="bom">BOM</button>
+            <button class="pm-tab" data-tab="manufacturing">Manufacturing</button>
+            <button class="pm-tab" data-tab="relationships">Relationships</button>
+            <button class="pm-tab" data-tab="inventory">Inventory</button>
+            <button class="pm-tab" data-tab="sales">Sales History</button>
+            <button class="pm-tab" data-tab="purchase">Purchase History</button>
+            <button class="pm-tab" data-tab="audit">Audit Log</button>
+            <button class="pm-tab" data-tab="analytics">Analytics</button>
           </div>
-          <div class="ap-row-2" id="pm-ed-attrs"></div>
-          <div class="ap-row-2">
-            <div class="pi-field"><label>Colour</label><input class="pi-input no-upper" id="pm-ed-colour" list="pm-colours" placeholder="e.g. P.GREEN"></div>
-            <div class="pi-field"><label>Unit</label>
-              <select class="pi-input" id="pm-ed-unit"><option>Roll</option><option>Piece</option><option>Set</option><option>Sqm</option><option>Box</option></select>
-            </div>
+          <div class="pm-tabcontent" id="pm-tabcontent"></div>
+        </div>
+        <div class="pm-detail-foot">
+          <div class="ap-status" id="pm-d-msg"></div>
+          <div class="pm-df-actions">
+            <button class="pi-btn" id="pm-d-cancel">Close</button>
+            <button class="pi-btn prime" id="pm-d-save">Save product →</button>
           </div>
-          <div class="ap-row-3">
-            <div class="pi-field"><label>Weight (kg)</label><input class="pi-input mono" id="pm-ed-weight" inputmode="decimal" placeholder="optional"></div>
-            <div class="pi-field"><label>Square Feet</label><input class="pi-input mono" id="pm-ed-sqft" inputmode="decimal" placeholder="optional"></div>
-            <div class="pi-field"><label>Default Selling Price ₹</label><input class="pi-input mono" id="pm-ed-price" inputmode="decimal" placeholder="0"></div>
-          </div>
-          <div class="ap-row-3">
-            <div class="pi-field"><label>HSN Code</label><input class="pi-input mono no-upper" id="pm-ed-hsn" placeholder="e.g. 5703"></div>
-            <div class="pi-field"><label>GST %</label><input class="pi-input mono" id="pm-ed-gst" inputmode="decimal" placeholder="12"></div>
-            <div class="pi-field"><label>Status</label>
-              <div class="ob-seg" id="pm-ed-active"><button type="button" data-val="active" class="on">Active</button><button type="button" data-val="inactive">Inactive</button></div>
-            </div>
-          </div>
-          <div class="pi-field">
-            <label>SKU <span class="ap-muted">— auto-generated, editable</span></label>
-            <div class="pm-sku-row"><input class="pi-input mono no-upper" id="pm-ed-sku" placeholder="auto"><button type="button" class="pm-btn sm" id="pm-ed-regen">↻ Regenerate</button></div>
-          </div>
-          <div class="pi-field"><label>Product Notes</label><textarea class="pi-input no-upper" id="pm-ed-notes" rows="2" placeholder="optional"></textarea></div>
-          <div class="ap-status" id="pm-ed-status"></div>
-          <div class="ap-actions">
-            <button class="pi-btn" id="pm-ed-cancel">Cancel</button>
-            <button class="pi-btn prime" id="pm-ed-save">Save product →</button>
-          </div>
-          <div class="ap-foot">Product Master is the single source of truth — Sales, Inventory, Dispatch, Warehouse and Production all consume these products by SKU.</div>
         </div>
       </div>
     </div>
+    <input type="file" id="pm-img-input" accept="image/*" multiple hidden>
+    <input type="file" id="pm-doc-input" accept=".pdf,image/*" hidden>
     <datalist id="pm-colours"></datalist>
 
     <!-- INVENTORY PAGE -->
@@ -26180,275 +26301,461 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 })();
 </script>
 
-<!-- ============ PRODUCT MASTER (Master Data) ============ -->
+<!-- ============ PRODUCT MASTER V2 (Master Data) ============ -->
 <script>
 (function(){
   const $ = id => document.getElementById(id);
   const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const inr = n => '₹' + Number(n||0).toLocaleString('en-IN', {maximumFractionDigits:0});
 
-  // Category → applicable attributes (drives the editor). Mirrors
-  // docs/database/product-hierarchy.md + ADR-0004.
   const SCHEMA = {
-    'LOOP':['model','backing','width','length'],
-    'TEFNO':['model','width','length'],
-    'TURF':['model','width','length'],
-    'WIRE MAT':['model','width','length'],
-    'ARTIFICIAL GRASS':['height','type','width','length'],
-    'MONO GRASS':['model','backing','width','length'],
+    'LOOP':['model','backing','width','length'], 'TEFNO':['model','width','length'],
+    'TURF':['model','width','length'], 'WIRE MAT':['model','width','length'],
+    'ARTIFICIAL GRASS':['height','type','width','length'], 'MONO GRASS':['model','backing','width','length'],
     'FOOTMAT':['model','backing','size'],
   };
-  const ATTR_LABEL = {model:'Model',backing:'Backing',height:'Height',type:'Type (SL/DL)',width:'Width',length:'Length',size:'Size'};
+  const ATTR_LABEL = {model:'Model',backing:'Backing',height:'Height',type:'Type (SL/DL)',width:'Width',length:'Length',size:'Size',colour:'Colour'};
   const CATCODE = {'LOOP':'LP','TEFNO':'TF','TURF':'TR','WIRE MAT':'WM','ARTIFICIAL GRASS':'AG','MONO GRASS':'MG','FOOTMAT':'FM'};
+  const CAT_GST = {'ARTIFICIAL GRASS':5}; // default 5% grass, 18% others
+  const CAT_HSN = {'FOOTMAT':'5705'};     // default 5705 footmat, 5703 others
+  const STATUSES = ['Draft','Active','Discontinued','Archived'];
+  const famAttr = cat => cat==='ARTIFICIAL GRASS' ? 'height' : 'model';
+  const specAttrs = cat => (SCHEMA[cat]||[]).filter(a => a!==famAttr(cat));
 
-  // ---- SKU generation (same scheme as the seed generator) ----
+  // SKU generation
   const tokw = s => String(s||'').toUpperCase().replace(/[^A-Z0-9]+/g,' ').trim();
   const codeOf = (s,n=3) => { const w = tokw(s).split(' ').filter(Boolean); return w.length>1 ? w.map(x=>x[0]).join('').slice(0,4) : (w[0]||'').slice(0,n); };
   const digits = s => String(s||'').replace(/[^0-9]/g,'') || '0';
   const lenNum = s => { const m = String(s||'').match(/\d+/); return m?m[0]:''; };
-  const sizeCode = s => tokw(s).replace(/ /g,'').replace('CM','C');
-  function genSku(p, exclude){
-    const cat = p.category; const cc = CATCODE[cat] || codeOf(cat,2);
+  const sizeCodeF = s => tokw(s).replace(/ /g,'').replace('CM','C');
+  function genSku(p){
+    const cat=p.category, cc=CATCODE[cat]||codeOf(cat,2);
     const mc = cat==='ARTIFICIAL GRASS' ? (digits(p.height)+'MM'+(p.type||'')) : codeOf(p.model,4);
     const bc = p.backing ? codeOf(p.backing,3) : '';
-    const zc = cat==='FOOTMAT' ? sizeCode(p.size) : (digits(p.width)+'X'+lenNum(p.length));
+    const zc = cat==='FOOTMAT' ? sizeCodeF(p.size) : (digits(p.width)+'X'+lenNum(p.length));
     const colc = codeOf(p.colour,3);
-    let sku = [cc,mc,bc,zc,colc].filter(Boolean).join('-').toUpperCase();
-    const taken = new Set(all().filter(x=>x.id!==exclude).map(x=>x.sku));
-    let s = sku, i = 2; while(taken.has(s)){ s = sku+'-'+i; i++; }
-    return s;
+    let base = [cc,mc,bc,zc,colc].filter(Boolean).join('-').toUpperCase();
+    const taken = new Set(all().filter(x=>x.id!==p.id).map(x=>x.sku));
+    let s=base,i=2; while(taken.has(s)){ s=base+'-'+i; i++; } return s;
   }
+  const groupKey = p => [p.category, p.model||p.height, p.backing, p.type, p.width, p.length, p.size].map(x=>x||'').join('|');
+  function suggestName(p){ const dim = p.category==='FOOTMAT'? p.size : (p.width && (p.width+'×'+lenNum(p.length)+'m')); return [p.model||p.height, p.backing, p.type, dim, p.colour].filter(Boolean).join(' '); }
 
-  // ---- data (seed + local overlay) ----
+  // ---- data (seed + overlay) ----
   const OV_KEY = 'atlas-products-overlay';
-  let seed = [], loaded = false;
-  let ov = { over:{}, add:[] };
-  try { ov = Object.assign({over:{},add:[]}, JSON.parse(localStorage.getItem(OV_KEY)||'{}')); } catch(e){}
-  const saveOv = () => { try { localStorage.setItem(OV_KEY, JSON.stringify(ov)); } catch(e){} };
+  let seed = [], seedPG = {}, loaded = false;
+  let ov = { over:{}, add:[], priceGroups:{} };
+  try { ov = Object.assign({over:{},add:[],priceGroups:{}}, JSON.parse(localStorage.getItem(OV_KEY)||'{}')); } catch(e){}
+  if (!ov.priceGroups) ov.priceGroups = {};
+  const saveOv = () => { try { localStorage.setItem(OV_KEY, JSON.stringify(ov)); return true; } catch(e){ return false; } };
   function all(){ return seed.map(p => Object.assign({}, p, ov.over[p.id]||{})).concat(ov.add.map(p=>Object.assign({},p))); }
   function byId(id){ return all().find(p=>p.id===id); }
+  function pgVal(g){ return (ov.priceGroups[g] || seedPG[g] || {}); }
+  function priceOf(p){ if (p.sellingPrice!=null) return p.sellingPrice; const v=pgVal(p.priceGroup||groupKey(p)); return v.sellingPrice!=null?v.sellingPrice:null; }
+  const imagesOf = p => p.images||[];
+  const primaryImg = p => { const im=imagesOf(p); return (im.find(x=>x.primary)||im[0]||null); };
+  const missImage = p => imagesOf(p).length===0;
+  const missBom = p => !(p.bom && Array.isArray(p.bom.materials) && p.bom.materials.length);
+  const missPrice = p => priceOf(p)==null;
 
-  // ---- ui state ----
-  const state = { q:'', cat:'', model:'', status:'', page:1, size:20, sel:new Set() };
+  const state = { q:'', cat:'', family:'', model:'', status:'', width:'', length:'', colour:'', miss:{}, page:1, size:20, sel:new Set() };
 
   window.atlasLoadProducts = async function(){
     if (loaded){ render(); return; }
-    try {
-      const res = await fetch('data/products.json');
-      const j = await res.json();
-      seed = j.products || [];
-    } catch(e){ seed = []; }
+    try { const res = await fetch('data/products.json'); const j = await res.json(); seed = j.products||[]; seedPG = j.priceGroups||{}; }
+    catch(e){ seed=[]; seedPG={}; }
     loaded = true;
-    // category filter options
-    const catSel = $('pm-f-cat');
-    Object.keys(SCHEMA).forEach(c => { const o=document.createElement('option'); o.value=c; o.textContent=c; catSel.appendChild(o); });
+    fillSelect('pm-f-cat', Object.keys(SCHEMA), 'All categories');
     render();
   };
-
-  function distinct(field, cat){
-    const set = new Set();
-    all().forEach(p => { if (cat && p.category!==cat) return; if (p[field]) set.add(p[field]); });
-    return [...set].sort();
+  function fillSelect(id, opts, allLabel, cur){
+    const sel=$(id); const v=cur!=null?cur:sel.value;
+    sel.innerHTML = '<option value="">'+allLabel+'</option>' + opts.map(o=>'<option'+(o===v?' selected':'')+'>'+esc(o)+'</option>').join('');
   }
+  function distinct(field, filterCat){ const s=new Set(); all().forEach(p=>{ if(filterCat && p.category!==filterCat) return; if(p[field]) s.add(p[field]); }); return [...s].sort(); }
+
   function filtered(){
-    const q = state.q.toLowerCase();
-    return all().filter(p => {
+    const q=state.q.toLowerCase();
+    return all().filter(p=>{
       if (state.cat && p.category!==state.cat) return false;
+      if (state.family && p.family!==state.family) return false;
       if (state.model && (p.model||'')!==state.model) return false;
-      if (state.status==='active' && !p.active) return false;
-      if (state.status==='inactive' && p.active) return false;
-      if (q){ const blob = [p.sku,p.category,p.model,p.colour,p.backing,p.height,p.type,p.width,p.length,p.size].filter(Boolean).join(' ').toLowerCase(); if (!blob.includes(q)) return false; }
+      if (state.status && (p.status||'Active')!==state.status) return false;
+      if (state.width && (p.width||'')!==state.width) return false;
+      if (state.length && (p.length||'')!==state.length) return false;
+      if (state.colour && (p.colour||'')!==state.colour) return false;
+      if (state.miss.image && !missImage(p)) return false;
+      if (state.miss.bom && !missBom(p)) return false;
+      if (state.miss.price && !missPrice(p)) return false;
+      if (q){ const blob=[p.sku,p.name,p.category,p.model,p.height,p.colour,p.backing,p.family].filter(Boolean).join(' ').toLowerCase(); if(!blob.includes(q)) return false; }
       return true;
     });
   }
-  const attrText = p => SCHEMA[p.category] ? SCHEMA[p.category].filter(a=>a!=='colour' && p[a]).map(a=>p[a]).join(' · ') : '';
+  const variantOf = p => specAttrs(p.category).map(a=>p[a]).filter(Boolean).concat(p.colour?[p.colour]:[]).join(' · ');
 
   function render(){
     const list = all();
-    // KPIs
-    const active = list.filter(p=>p.active).length;
-    const cats = new Set(list.map(p=>p.category)).size;
-    $('pm-when').innerHTML = 'PRODUCTS · <b>'+list.length+'</b><br/>ACTIVE · <b>'+active+'</b><br/>CATEGORIES · <b>'+cats+'</b>';
-    const perCat = {}; list.forEach(p=>perCat[p.category]=(perCat[p.category]||0)+1);
-    const topCat = Object.entries(perCat).sort((a,b)=>b[1]-a[1])[0];
-    const kpi = (lbl,val,sub) => '<div class="kpi"><div class="lbl"><span>'+lbl+'</span><span class="ind"></span></div><div class="v">'+val+'</div><div class="d"><span class="arr">•</span>'+esc(sub)+'</div></div>';
+    const by = st => list.filter(p=>(p.status||'Active')===st).length;
+    const fams = new Set(list.map(p=>p.family)).size;
+    $('pm-when').innerHTML = 'PRODUCTS · <b>'+list.length+'</b><br/>ACTIVE · <b>'+by('Active')+'</b><br/>FAMILIES · <b>'+fams+'</b>';
+    const stat=(l,v,cls,sub,miss)=>'<div class="pm-stat'+(cls?' '+cls:'')+(miss?' click':'')+'"'+(miss?' data-miss="'+miss+'"':'')+'><div class="lbl">'+l+'</div><div class="v">'+v+'</div>'+(sub?'<div class="sub">'+esc(sub)+'</div>':'')+'</div>';
     $('pm-kpis').innerHTML =
-        kpi('Total products', list.length, ov.add.length?('+'+ov.add.length+' added'):'from Product Spec')
-      + kpi('Active', active, Math.round(active/(list.length||1)*100)+'% of catalogue')
-      + kpi('Categories', cats, topCat?(topCat[0]+' largest'):'—')
-      + kpi('Recently added', ov.add.length, ov.add.length?('last: '+esc((ov.add[ov.add.length-1]||{}).sku||'')):'none this session');
-    // model filter options (respect category)
-    const mSel = $('pm-f-model'); const cur = state.model;
-    const models = distinct('model', state.cat);
-    mSel.innerHTML = '<option value="">All models</option>' + models.map(m=>'<option'+(m===cur?' selected':'')+'>'+esc(m)+'</option>').join('');
-    // colour datalist for editor
-    const cols = distinct('colour', '');
-    $('pm-colours').innerHTML = cols.map(c=>'<option value="'+esc(c)+'">').join('');
-
+        stat('Total', list.length)
+      + stat('Active', by('Active'),'good')
+      + stat('Draft', by('Draft'), by('Draft')?'':'')
+      + stat('Discontinued', by('Discontinued'))
+      + stat('Categories', new Set(list.map(p=>p.category)).size)
+      + stat('Recently added', ov.add.length)
+      + stat('Missing images', list.filter(missImage).length, list.filter(missImage).length?'warn':'good','click to filter','image')
+      + stat('Missing BOM', list.filter(missBom).length, list.filter(missBom).length?'warn':'good','click to filter','bom')
+      + stat('Missing pricing', list.filter(missPrice).length, list.filter(missPrice).length?'warn':'good','click to filter','price');
+    // filter options
+    fillSelect('pm-f-family', [...new Set(all().filter(p=>!state.cat||p.category===state.cat).map(p=>p.family))].sort(), 'All families', state.family);
+    fillSelect('pm-f-model', distinct('model', state.cat), 'All models', state.model);
+    fillSelect('pm-f-width', distinct('width', state.cat), 'Any width', state.width);
+    fillSelect('pm-f-length', distinct('length', state.cat), 'Any length', state.length);
+    fillSelect('pm-f-colour', distinct('colour', state.cat), 'Any colour', state.colour);
+    document.querySelectorAll('#pm-more .pm-chip').forEach(c=>c.classList.toggle('on', !!state.miss[c.getAttribute('data-miss')]));
     // table
-    const rows = filtered();
-    const pages = Math.max(1, Math.ceil(rows.length/state.size));
-    if (state.page > pages) state.page = pages;
-    const slice = rows.slice((state.page-1)*state.size, state.page*state.size);
+    const rows=filtered(); const pages=Math.max(1,Math.ceil(rows.length/state.size));
+    if(state.page>pages) state.page=pages;
+    const slice=rows.slice((state.page-1)*state.size, state.page*state.size);
     $('pm-empty').hidden = rows.length>0;
-    $('pm-rows').innerHTML = slice.map(p =>
-      '<tr data-id="'+esc(p.id)+'">'
-      + '<td class="pm-c-chk"><input type="checkbox" class="pm-row-chk" data-id="'+esc(p.id)+'"'+(state.sel.has(p.id)?' checked':'')+'></td>'
-      + '<td><span class="pm-sku">'+esc(p.sku)+'</span></td>'
-      + '<td><span class="pm-cat">'+esc(p.category)+'</span></td>'
-      + '<td class="pm-prod"><b>'+esc(p.model||p.height||'—')+'</b>'+(attrText(p)?' <span>'+esc(SCHEMA[p.category].filter(a=>p[a]&&a!=='model'&&a!=='height').map(a=>p[a]).join(' · '))+'</span>':'')+'</td>'
-      + '<td class="pm-colour">'+esc(p.colour||'—')+'</td>'
-      + '<td class="r pm-num">'+esc(p.unit||'—')+'</td>'
-      + '<td class="r pm-num">'+(p.sellingPrice?inr(p.sellingPrice):'—')+'</td>'
-      + '<td class="r"><span class="pm-st '+(p.active?'on':'off')+'">'+(p.active?'Active':'Inactive')+'</span></td>'
-      + '</tr>').join('');
-    // pager
-    $('pm-pager').innerHTML = rows.length ? (
-        '<button id="pm-prev"'+(state.page<=1?' disabled':'')+'>← Prev</button>'
-      + '<span>'+((state.page-1)*state.size+1)+'–'+Math.min(state.page*state.size,rows.length)+' of '+rows.length+'</span>'
-      + '<button id="pm-next"'+(state.page>=pages?' disabled':'')+'>Next →</button>' ) : '';
-    if ($('pm-prev')) $('pm-prev').onclick = ()=>{ state.page--; render(); };
-    if ($('pm-next')) $('pm-next').onclick = ()=>{ state.page++; render(); };
-    // bulk bar
+    $('pm-rows').innerHTML = slice.map(p=>{
+      const img=primaryImg(p); const st=(p.status||'Active');
+      return '<tr data-id="'+esc(p.id)+'">'
+        + '<td class="pm-c-chk"><input type="checkbox" class="pm-row-chk" data-id="'+esc(p.id)+'"'+(state.sel.has(p.id)?' checked':'')+'></td>'
+        + '<td class="pm-c-img"><span class="pm-thumb">'+(img?'<img src="'+esc(img.url)+'">':'◨')+'</span></td>'
+        + '<td><span class="pm-sku">'+esc(p.sku)+'</span></td>'
+        + '<td><div class="pm-name">'+esc(p.name||suggestName(p))+'</div></td>'
+        + '<td><span class="pm-cat">'+esc(p.category)+'</span></td>'
+        + '<td class="pm-colour">'+esc(p.model||p.height||'—')+'</td>'
+        + '<td class="pm-colour">'+esc(variantOf(p)||'—')+'</td>'
+        + '<td><span class="pm-st '+st.toLowerCase()+'">'+st+'</span></td>'
+        + '<td class="r pm-num">'+(priceOf(p)!=null?inr(priceOf(p)):'—')+'</td>'
+        + '<td class="r pm-num">'+(p.weight!=null?p.weight:'—')+'</td>'
+        + '<td class="pm-colour">'+esc(p.unit||'—')+'</td>'
+        + '<td class="pm-updated">'+esc(p.updatedOn||'—')+'</td>'
+        + '<td class="pm-c-act"><button class="pm-kebab" data-kebab="'+esc(p.id)+'">⋯</button></td>'
+        + '</tr>';
+    }).join('');
+    $('pm-pager').innerHTML = rows.length ? ('<button id="pm-prev"'+(state.page<=1?' disabled':'')+'>← Prev</button><span>'+((state.page-1)*state.size+1)+'–'+Math.min(state.page*state.size,rows.length)+' of '+rows.length+'</span><button id="pm-next"'+(state.page>=pages?' disabled':'')+'>Next →</button>') : '';
+    if($('pm-prev')) $('pm-prev').onclick=()=>{state.page--;render();};
+    if($('pm-next')) $('pm-next').onclick=()=>{state.page++;render();};
     $('pm-bulk').hidden = state.sel.size===0;
     $('pm-bulk-count').textContent = state.sel.size+' selected';
-    const allChecked = slice.length>0 && slice.every(p=>state.sel.has(p.id));
-    $('pm-all').checked = allChecked;
+    $('pm-all').checked = slice.length>0 && slice.every(p=>state.sel.has(p.id));
   }
 
-  // ---- editor ----
-  let editingId = null, skuDirty = false;
-  function attrFieldsHtml(cat, vals){
-    const attrs = SCHEMA[cat] || [];
-    return attrs.map(a => {
-      if (a==='type') return '<div class="pi-field"><label>'+ATTR_LABEL[a]+'</label><select class="pi-input" data-attr="type"><option value="">—</option><option'+(vals.type==='SL'?' selected':'')+'>SL</option><option'+(vals.type==='DL'?' selected':'')+'>DL</option></select></div>';
-      const list = 'pm-opt-'+a;
-      return '<div class="pi-field"><label>'+ATTR_LABEL[a]+'</label><input class="pi-input no-upper" data-attr="'+a+'" list="'+list+'" value="'+esc(vals[a]||'')+'" placeholder="'+esc(ATTR_LABEL[a])+'"><datalist id="'+list+'">'
-        + distinct(a, cat).map(v=>'<option value="'+esc(v)+'">').join('') + '</datalist></div>';
-    }).join('') + '<div class="pm-attr-note">Fields shown are specific to '+esc(cat)+'.</div>';
+  // ================= DETAIL (tabbed) =================
+  let draft=null, draftNew=false, nameDirty=false, skuDirty=false, groupPrice=null, activeTab='general';
+  const IMG_TYPES=['Primary','Catalogue','Technical Drawing','Installation'];
+  const DOC_TYPES=['Product Catalogue','Technical Data Sheet','Installation Guide','QC Sheet'];
+  const REL_GROUPS=[['compatible','Compatible Products'],['accessories','Accessories'],['replacement','Replacement Products'],['upgradedBy','Upgraded Version'],['discontinuedBy','Discontinued By']];
+
+  function openDetail(id){
+    if (id){ draft = JSON.parse(JSON.stringify(byId(id))); draftNew=false; }
+    else { draft = { id:null, category:'LOOP', status:'Draft', unit:'Roll', gst:18, hsn:'5703', colour:'', images:[], documents:[], bom:{materials:[]}, manufacturing:{}, relationships:{} }; draftNew=true; }
+    draft.images=draft.images||[]; draft.documents=draft.documents||[]; draft.bom=draft.bom||{materials:[]}; draft.bom.materials=draft.bom.materials||[]; draft.manufacturing=draft.manufacturing||{}; draft.relationships=draft.relationships||{};
+    nameDirty=!draftNew; skuDirty=!draftNew; groupPrice = priceOf(draft);
+    activeTab='general';
+    recompute();
+    renderHeader(); selectTab('general');
+    $('pm-d-msg').className='ap-status'; $('pm-d-msg').textContent='';
+    $('pm-detail').hidden=false;
   }
-  function collectEditor(){
-    const cat = $('pm-ed-cat').value;
-    const p = { category:cat };
-    $('pm-ed-attrs').querySelectorAll('[data-attr]').forEach(el => { const v=el.value.trim(); if (v) p[el.getAttribute('data-attr')] = v; });
-    p.colour = $('pm-ed-colour').value.trim();
-    p.unit = $('pm-ed-unit').value;
-    p.weight = $('pm-ed-weight').value ? +$('pm-ed-weight').value : null;
-    p.sqft = $('pm-ed-sqft').value ? +$('pm-ed-sqft').value : null;
-    p.sellingPrice = $('pm-ed-price').value ? +$('pm-ed-price').value : null;
-    p.hsn = $('pm-ed-hsn').value.trim();
-    p.gst = $('pm-ed-gst').value ? +$('pm-ed-gst').value : null;
-    p.active = ($('pm-ed-active').querySelector('button.on')||{}).getAttribute ? $('pm-ed-active').querySelector('button.on').getAttribute('data-val')==='active' : true;
-    p.notes = $('pm-ed-notes').value.trim();
-    return p;
+  function closeDetail(){ $('pm-detail').hidden=true; draft=null; }
+  function recompute(){
+    draft.family = draft.category + ' · ' + (draft.model||draft.height||'');
+    draft.priceGroup = groupKey(draft);
+    if (!nameDirty) draft.name = suggestName(draft);
+    if (draftNew && !skuDirty && (draft.model||draft.height) && draft.colour) draft.sku = genSku(draft);
   }
-  function refreshAttrs(){
-    const cat = $('pm-ed-cat').value;
-    const vals = {}; $('pm-ed-attrs').querySelectorAll('[data-attr]').forEach(el=>vals[el.getAttribute('data-attr')]=el.value);
-    $('pm-ed-attrs').innerHTML = attrFieldsHtml(cat, vals);
-    // default unit + hsn per category if adding
-    if (!editingId){
-      $('pm-ed-unit').value = cat==='FOOTMAT' ? 'Piece' : 'Roll';
-      if (!$('pm-ed-hsn').value) $('pm-ed-hsn').value = cat==='FOOTMAT' ? '5705' : '5703';
-      if (!$('pm-ed-gst').value) $('pm-ed-gst').value = '12';
+  function renderHeader(){
+    const img=primaryImg(draft);
+    $('pm-d-img').innerHTML = img?'<img src="'+esc(img.url)+'">':'◨';
+    $('pm-d-name').textContent = draft.name || suggestName(draft) || 'New product';
+    const st=draft.status||'Draft';
+    $('pm-d-status').textContent=st; $('pm-d-status').className='pm-st '+st.toLowerCase();
+    $('pm-d-sku').textContent = draft.sku || '—';
+    $('pm-d-family').textContent = draft.family||'';
+    // status actions
+    const btn=(a,l)=>'<button class="pm-btn sm" data-status-act="'+a+'">'+l+'</button>';
+    let acts='';
+    if (!draftNew){
+      if (st==='Draft') acts+=btn('Active','Activate');
+      if (st==='Active') acts+=btn('Discontinued','Discontinue');
+      if (st==='Discontinued') acts+=btn('Active','Re-activate');
+      if (st!=='Archived') acts+=btn('Archived','Archive'); else acts+=btn('Active','Restore');
+      acts+='<button class="pm-btn sm" data-dup="1">Duplicate</button>';
     }
-    maybeSku();
+    $('pm-d-actions').innerHTML=acts;
   }
-  function maybeSku(){ if (skuDirty) return; const p = collectEditor(); if (p.category && (p.model||p.height) && p.colour) $('pm-ed-sku').value = genSku(p, editingId); }
-  function segSet(id,val){ $(id).querySelectorAll('button').forEach(b=>b.classList.toggle('on', b.getAttribute('data-val')===val)); }
+  function selectTab(name){ activeTab=name; document.querySelectorAll('#pm-tabrail .pm-tab').forEach(t=>t.classList.toggle('on', t.getAttribute('data-tab')===name)); $('pm-tabcontent').innerHTML = buildTab(name); }
 
-  function openEditor(id){
-    editingId = id||null; skuDirty = false;
-    const catSel = $('pm-ed-cat');
-    if (!catSel.options.length) Object.keys(SCHEMA).forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; catSel.appendChild(o); });
-    const p = id ? byId(id) : { category:'LOOP', active:true, unit:'Roll' };
-    $('pm-ed-eb').textContent = id ? ('Product Master · '+p.sku) : 'Product Master · new';
-    $('pm-ed-title').innerHTML = id ? 'Edit <span style="color: var(--emerald);">'+esc(p.model||p.height||p.category)+'</span>.' : 'Add a <span style="color: var(--emerald);">product</span>.';
-    catSel.value = p.category;
-    $('pm-ed-attrs').innerHTML = attrFieldsHtml(p.category, p);
-    $('pm-ed-colour').value = p.colour||''; $('pm-ed-unit').value = p.unit||'Roll';
-    $('pm-ed-weight').value = p.weight!=null?p.weight:''; $('pm-ed-sqft').value = p.sqft!=null?p.sqft:'';
-    $('pm-ed-price').value = p.sellingPrice!=null?p.sellingPrice:''; $('pm-ed-hsn').value = p.hsn||''; $('pm-ed-gst').value = p.gst!=null?p.gst:'';
-    segSet('pm-ed-active', (p.active===false)?'inactive':'active');
-    $('pm-ed-sku').value = p.sku||''; $('pm-ed-notes').value = p.notes||'';
-    if (!id){ $('pm-ed-hsn').value='5703'; $('pm-ed-gst').value='12'; maybeSku(); }
-    document.getElementById('pm-ed-status').className='ap-status'; document.getElementById('pm-ed-status').textContent='';
-    $('pm-editor').hidden = false;
+  const field=(label,f,val,opts)=>{ opts=opts||{}; const t=opts.type||'text'; const dis=opts.disabled?' disabled':''; const list=opts.list?' list="'+opts.list+'"':''; return '<div class="pi-field"><label>'+label+(opts.req?' <span class="ap-req">*</span>':'')+(opts.note?' <span class="ap-muted">'+opts.note+'</span>':'')+'</label><input class="pi-input '+(opts.mono?'mono ':'')+'no-upper" data-field="'+f+'"'+list+' value="'+esc(val==null?'':val)+'"'+dis+(t==='number'?' inputmode="decimal"':'')+(opts.ph?' placeholder="'+esc(opts.ph)+'"':'')+'></div>'; };
+  const selField=(label,f,val,opts,extra)=>'<div class="pi-field"><label>'+label+'</label><select class="pi-input" data-field="'+f+'"'+(extra||'')+'>'+opts.map(o=>'<option'+((val||'')===o?' selected':'')+'>'+esc(o)+'</option>').join('')+'</select></div>';
+  const dl = (id,vals)=>'<datalist id="'+id+'">'+vals.map(v=>'<option value="'+esc(v)+'">').join('')+'</datalist>';
+
+  function buildTab(name){
+    const p=draft;
+    if (name==='general'){
+      const fa=famAttr(p.category);
+      return '<div class="pm-sec-h">General</div>'
+        + '<div class="pm-grid2">'
+        + selField('Category', 'category', p.category, Object.keys(SCHEMA))
+        + field(ATTR_LABEL[fa], fa, p[fa], {list:'pm-dl-fam', req:true}) + dl('pm-dl-fam', distinct(fa, p.category))
+        + '</div>'
+        + '<div class="pm-grid2">'
+        + field('Product Name', 'name', p.name, {ph:'auto from attributes'})
+        + '<div class="pi-field"><label>Product Family</label><input class="pi-input" value="'+esc(p.family||'')+'" disabled></div>'
+        + '</div>'
+        + '<div class="pm-grid2">'
+        + '<div class="pi-field"><label>SKU '+(p.skuLocked?'<span class="pm-locked-note">🔒 locked — used in ERP</span>':'<span class="ap-muted">— auto, editable until first use</span>')+'</label><input class="pi-input mono no-upper" data-field="sku" value="'+esc(p.sku||'')+'"'+(p.skuLocked?' disabled':'')+'></div>'
+        + selField('Status', 'status', p.status||'Draft', STATUSES)
+        + '</div>';
+    }
+    if (name==='specs'){
+      const rows = specAttrs(p.category).map(a=>{
+        if (a==='type') return selField(ATTR_LABEL[a],'type',p.type||'',['','SL','DL']);
+        return field(ATTR_LABEL[a], a, p[a], {list:'pm-dl-'+a}) + dl('pm-dl-'+a, distinct(a,p.category));
+      }).join('');
+      return '<div class="pm-sec-h">Specifications · '+esc(p.category)+'</div>'
+        + '<div class="pm-grid3">'+rows
+        + field('Colour','colour',p.colour,{list:'pm-dl-colour'}) + dl('pm-dl-colour', distinct('colour',p.category))
+        + '</div>'
+        + '<div class="pm-sec-h">Measures</div><div class="pm-grid3">'
+        + selField('Unit','unit',p.unit||'Roll',['Roll','Piece','Set','Sqm','Box'])
+        + field('Weight (kg)','weight',p.weight,{type:'number',mono:true})
+        + field('Square Feet','sqft',p.sqft,{type:'number',mono:true})
+        + '</div>';
+    }
+    if (name==='pricing'){
+      const grpCount = all().filter(x=>(x.priceGroup||groupKey(x))===p.priceGroup).length;
+      return '<div class="pm-sec-h">Pricing</div>'
+        + '<div class="pm-grid2">'
+        + '<div class="pi-field"><label>Default Selling Price ₹ <span class="ap-muted">— shared by '+grpCount+' variant'+(grpCount!==1?'s':'')+' in this base</span></label><input class="pi-input mono" data-groupprice="1" inputmode="decimal" value="'+(groupPrice==null?'':groupPrice)+'"></div>'
+        + '<div class="pi-field"><label>Default Cost ₹ <span class="badge soon">SOON</span></label><input class="pi-input mono" disabled placeholder="managed later"></div>'
+        + '</div>'
+        + '<div class="pm-grid2">'
+        + field('HSN Code','hsn',p.hsn,{mono:true})
+        + field('GST %','gst',p.gst,{type:'number',mono:true,note:'grass 5% · others 18%'})
+        + '</div>'
+        + '<div class="pm-sec-h">Note</div><div class="pm-placeholder" style="text-align:left;padding:14px 0;">Tiered pricing — Dealer, Distributor, Customer-specific, Quantity-break, Export — is managed in the future <b>Price List</b> module, not Product Master (ADR-0006). Product Master holds only the default price + cost.</div>';
+    }
+    if (name==='images'){
+      return '<div class="pm-sec-h">Images</div>'
+        + '<div class="pm-drop" id="pm-imgdrop">⬆ Drag &amp; drop or click to add images <span class="ap-muted">— Primary · Catalogue · Technical Drawing · Installation</span></div>'
+        + '<div class="pm-imgs" id="pm-imglist">' + (p.images||[]).map((im,i)=>
+            '<div class="pm-img-card'+(im.primary?' primary':'')+'" data-img="'+i+'"><img class="pm-img-thumb" src="'+esc(im.url)+'"><div class="pm-img-meta">'
+            + '<select data-imgtype="'+i+'">'+IMG_TYPES.map(t=>'<option'+((im.type||'Catalogue')===t?' selected':'')+'>'+t+'</option>').join('')+'</select>'
+            + '<div class="pm-img-acts"><button data-imgprimary="'+i+'" class="'+(im.primary?'on':'')+'">★ Primary</button><button data-imgup="'+i+'">↑</button><button data-imgdown="'+i+'">↓</button><button data-imgdel="'+i+'">✕</button></div>'
+            + '</div></div>').join('') + '</div>'
+        + ((p.images||[]).length?'':'<div class="pm-placeholder"><div class="pi">🖼</div>No images yet · <span class="ap-muted">360° view — future</span></div>');
+    }
+    if (name==='documents'){
+      return '<div class="pm-sec-h">Documents</div>'
+        + '<button class="pm-add-row" id="pm-docadd">+ Attach document (Catalogue PDF · TDS · Installation · QC Sheet)</button>'
+        + '<div class="pm-doclist">' + (p.documents||[]).map((d,i)=>
+            '<div class="pm-doc"><b>📄 '+esc(d.name)+'</b><select data-doctype="'+i+'">'+DOC_TYPES.map(t=>'<option'+((d.type||DOC_TYPES[0])===t?' selected':'')+'>'+t+'</option>').join('')+'</select><button class="pm-x" data-docdel="'+i+'">✕</button></div>').join('') + '</div>'
+        + ((p.documents||[]).length?'':'<div class="pm-placeholder"><div class="pi">📁</div>No documents attached</div>');
+    }
+    if (name==='bom'){
+      const m=p.bom.materials||[];
+      return '<div class="pm-sec-h">Bill of Materials <span class="ap-muted">— structure only; production logic comes later</span></div>'
+        + '<div class="pm-bomlist">'+ (m.length?('<div class="pm-bomrow" style="background:transparent;border:0;color:var(--text-4);font-family:var(--fm);font-size:10px;text-transform:uppercase;"><span>Raw material</span><span>Qty</span><span>Unit</span><span>Scrap %</span><span></span></div>'):'')
+        + m.map((row,i)=>'<div class="pm-bomrow"><input data-bom="material" data-i="'+i+'" value="'+esc(row.material||'')+'" placeholder="e.g. PP Yarn"><input data-bom="qty" data-i="'+i+'" value="'+esc(row.qty||'')+'" inputmode="decimal"><input data-bom="unit" data-i="'+i+'" value="'+esc(row.unit||'')+'" placeholder="kg"><input data-bom="scrap" data-i="'+i+'" value="'+esc(row.scrap||'')+'" inputmode="decimal"><button class="pm-x" data-bomdel="'+i+'">✕</button></div>').join('')
+        + '</div>'
+        + '<button class="pm-add-row" id="pm-bomadd">+ Add raw material</button>'
+        + '<div class="pm-sec-h">Production</div><div class="pm-grid2">'
+        + field('Production Line','_bomline',p.bom.productionLine,{})
+        + field('Machine','_bommachine',p.bom.machine,{})
+        + field('Cycle Time','_bomcycle',p.bom.cycleTime,{ph:'e.g. 8 min/roll'})
+        + field('Packing Material','_bompacking',p.bom.packing,{})
+        + '</div>';
+    }
+    if (name==='manufacturing'){
+      const m=p.manufacturing;
+      return '<div class="pm-sec-h">Manufacturing &amp; stock defaults <span class="ap-muted">— consumed by Production / Inventory later</span></div>'
+        + '<div class="pm-grid2">'
+        + field('Production Line','_mfline',m.line,{}) + field('Machine','_mfmachine',m.machine,{})
+        + field('QC Template','_mfqc',m.qcTemplate,{}) + field('Packing Type','_mfpacking',m.packingType,{})
+        + field('Default Warehouse','_mfwh',m.warehouse,{})
+        + '</div><div class="pm-sec-h">Stock levels</div><div class="pm-grid3">'
+        + field('Reorder Level','_mfreorder',m.reorder,{type:'number',mono:true})
+        + field('Minimum Stock','_mfmin',m.minStock,{type:'number',mono:true})
+        + field('Maximum Stock','_mfmax',m.maxStock,{type:'number',mono:true})
+        + '</div>';
+    }
+    if (name==='relationships'){
+      return '<div class="pm-sec-h">Product Relationships</div>' + REL_GROUPS.map(([k,label])=>{
+        const ids=(p.relationships[k]||[]);
+        return '<div class="pm-relgrp" data-relgrp="'+k+'"><label style="font-family:var(--fm);font-size:11.5px;color:var(--text-2);">'+label+'</label>'
+          + '<div class="pm-relsearch"><input class="pi-input no-upper" data-relsearch="'+k+'" placeholder="Search products by name or SKU…"><div class="pm-relresults" data-relresults="'+k+'" hidden></div></div>'
+          + '<div class="pm-relchips">'+ids.map(id=>{ const rp=byId(id); return '<span class="pm-relchip">'+esc(rp?rp.name||rp.sku:id)+'<button data-relremove="'+k+'" data-id="'+esc(id)+'">✕</button></span>'; }).join('')+'</div></div>';
+      }).join('');
+    }
+    if (name==='audit'){
+      return '<div class="pm-sec-h">Audit</div><div class="pm-audit">'
+        + '<div><div class="a-l">Created by</div><div class="a-v">'+esc(p.createdBy||'—')+'</div></div>'
+        + '<div><div class="a-l">Created on</div><div class="a-v">'+esc(p.createdOn||'—')+'</div></div>'
+        + '<div><div class="a-l">Updated by</div><div class="a-v">'+esc(p.updatedBy||'—')+'</div></div>'
+        + '<div><div class="a-l">Updated on</div><div class="a-v">'+esc(p.updatedOn||'—')+'</div></div>'
+        + '</div><div class="pm-placeholder" style="text-align:left;">Full change history — every field change with who/when — is future.</div>';
+    }
+    // placeholder tabs
+    const PH={ inventory:['Current stock','Reserved','Available','Warehouses','Below reorder','On order'],
+      sales:['Sales qty 30d','Sales qty 90d','Sales qty 365d','Revenue','Orders in progress','Top customer'],
+      purchase:['Last purchased','Avg cost','Suppliers','Open POs','Qty purchased 90d','Lead time'],
+      analytics:['Sales 30/90/365','Revenue','Gross margin','Current stock','Orders in progress','Production frequency','Top customers','Last manufactured','Last sold','Last raw purchase','Profitability'] };
+    const cards=(PH[name]||[]).map(l=>'<div class="pm-ph-card"><div class="l">'+l+'</div><div class="v">—</div></div>').join('');
+    const cap=name.charAt(0).toUpperCase()+name.slice(1);
+    return '<div class="pm-sec-h">'+cap+'</div><div class="pm-placeholder" style="text-align:left;">This tab becomes live once the '+(name==='analytics'?'reporting engine':cap+' module')+' is built. Every product will then be its own dashboard.</div><div class="pm-ph-cards">'+cards+'</div>';
   }
-  function closeEditor(){ $('pm-editor').hidden = true; editingId = null; }
 
-  function saveEditor(){
-    const p = collectEditor();
-    if (!p.category){ setStatus('Category is required.'); return; }
-    if (!(p.model || p.height)){ setStatus('Enter a '+(p.category==='ARTIFICIAL GRASS'?'height':'model')+'.'); return; }
-    if (!p.colour){ setStatus('Colour is required.'); return; }
-    let sku = $('pm-ed-sku').value.trim() || genSku(p, editingId);
-    // uniqueness
-    const clash = all().find(x=>x.sku===sku && x.id!==editingId);
-    if (clash){ setStatus('SKU '+sku+' already exists.'); return; }
-    p.sku = sku;
-    if (editingId){
-      const isSeed = seed.some(s=>s.id===editingId);
-      if (isSeed){ ov.over[editingId] = Object.assign({}, ov.over[editingId], p); }
-      else { const i = ov.add.findIndex(x=>x.id===editingId); if (i>=0) ov.add[i] = Object.assign({}, ov.add[i], p); }
+  // ---- draft mutation ----
+  function readFile(file){ return new Promise(res=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=()=>res(null); r.readAsDataURL(file); }); }
+  async function addImages(files){ for(const f of files){ const url=await readFile(f); if(url){ draft.images.push({url, type:'Catalogue', primary: draft.images.length===0}); } } selectTab('images'); renderHeader(); }
+  async function addDoc(file){ const url=await readFile(file); if(url){ draft.documents.push({name:file.name, type:DOC_TYPES[0], url}); selectTab('documents'); } }
+
+  function onContentInput(e){
+    const el=e.target;
+    const gp=el.getAttribute('data-groupprice'); if(gp){ groupPrice = el.value===''?null:+el.value; return; }
+    const f=el.getAttribute('data-field');
+    if(f){
+      let v=el.value;
+      if(['weight','sqft','gst','reorder','minStock','maxStock'].includes(f)) v = v===''?null:+v;
+      if(f==='name') nameDirty=true;
+      if(f==='sku'){ skuDirty=true; draft.sku=v; return; }
+      draft[f]=v;
+      if(f==='category'){ // reset category-driven defaults
+        draft.gst = CAT_GST[v]!=null?CAT_GST[v]:18; draft.hsn = CAT_HSN[v]||'5703'; draft.unit = v==='FOOTMAT'?'Piece':'Roll';
+        recompute(); renderHeader(); selectTab('general'); return;
+      }
+      if(['model','height','backing','type','width','length','size','colour'].includes(f)){ recompute(); renderHeader(); }
+      return;
+    }
+    // BOM cell
+    const bomf=el.getAttribute('data-bom'); if(bomf){ const i=+el.getAttribute('data-i'); draft.bom.materials[i][bomf]=el.value; return; }
+    // relationship search
+    const rs=el.getAttribute('data-relsearch'); if(rs){ relSearch(rs, el.value); return; }
+  }
+  function onContentChange(e){
+    const el=e.target;
+    const it=el.getAttribute('data-imgtype'); if(it!=null){ const i=+it; draft.images[i].type=el.value; if(el.value==='Primary'){ draft.images.forEach((x,j)=>x.primary=j===i); selectTab('images'); renderHeader(); } return; }
+    const dt=el.getAttribute('data-doctype'); if(dt!=null){ draft.documents[+dt].type=el.value; return; }
+    const f=el.getAttribute('data-field');
+    if(f==='status'){ draft.status=el.value; renderHeader(); return; }
+    if(f==='unit'||f==='type'){ draft[f]=el.value; recompute(); renderHeader(); }
+    // bom production selects handled via data-field _bom*
+    const bp={_bomline:'productionLine',_bommachine:'machine',_bomcycle:'cycleTime',_bompacking:'packing'};
+    // (these are inputs; handled in onContentInput via data-field starting with _)
+  }
+  // handle the _-prefixed fields (bom/manufacturing) generically on input
+  function onUnderscore(e){
+    const f=e.target.getAttribute('data-field'); if(!f||f[0]!=='_') return;
+    const map={_bomline:['bom','productionLine'],_bommachine:['bom','machine'],_bomcycle:['bom','cycleTime'],_bompacking:['bom','packing'],
+      _mfline:['manufacturing','line'],_mfmachine:['manufacturing','machine'],_mfqc:['manufacturing','qcTemplate'],_mfpacking:['manufacturing','packingType'],_mfwh:['manufacturing','warehouse'],_mfreorder:['manufacturing','reorder'],_mfmin:['manufacturing','minStock'],_mfmax:['manufacturing','maxStock']};
+    const t=map[f]; if(!t) return; let v=e.target.value; if(f.startsWith('_mfr')||f==='_mfmin'||f==='_mfmax') v=v===''?null:+v; draft[t[0]][t[1]]=v;
+  }
+  function onContentClick(e){
+    const t=e.target;
+    let i;
+    if((i=t.getAttribute('data-imgprimary'))!=null){ i=+i; draft.images.forEach((x,j)=>x.primary=j===i); draft.images[i].type='Primary'; selectTab('images'); renderHeader(); return; }
+    if((i=t.getAttribute('data-imgdel'))!=null){ draft.images.splice(+i,1); if(draft.images.length&&!draft.images.some(x=>x.primary)) draft.images[0].primary=true; selectTab('images'); renderHeader(); return; }
+    if((i=t.getAttribute('data-imgup'))!=null){ i=+i; if(i>0){ const a=draft.images; [a[i-1],a[i]]=[a[i],a[i-1]]; selectTab('images'); } return; }
+    if((i=t.getAttribute('data-imgdown'))!=null){ i=+i; const a=draft.images; if(i<a.length-1){ [a[i+1],a[i]]=[a[i],a[i+1]]; selectTab('images'); } return; }
+    if((i=t.getAttribute('data-docdel'))!=null){ draft.documents.splice(+i,1); selectTab('documents'); return; }
+    if((i=t.getAttribute('data-bomdel'))!=null){ draft.bom.materials.splice(+i,1); selectTab('bom'); return; }
+    if(t.id==='pm-bomadd'){ draft.bom.materials.push({material:'',qty:'',unit:'',scrap:''}); selectTab('bom'); return; }
+    if(t.id==='pm-imgdrop'){ $('pm-img-input').click(); return; }
+    if(t.id==='pm-docadd'){ $('pm-doc-input').click(); return; }
+    const rr=t.getAttribute('data-reladd'); if(rr){ const k=t.getAttribute('data-relgrpk'); addRel(k, t.getAttribute('data-id')); return; }
+    const rm=t.getAttribute('data-relremove'); if(rm){ const arr=draft.relationships[rm]||[]; draft.relationships[rm]=arr.filter(x=>x!==t.getAttribute('data-id')); selectTab('relationships'); return; }
+  }
+  function relSearch(k, q){ const box=document.querySelector('[data-relresults="'+k+'"]'); if(!box) return; q=q.trim().toLowerCase(); if(!q){ box.hidden=true; return; } const res=all().filter(p=>p.id!==draft.id && ((p.name||'').toLowerCase().includes(q)||(p.sku||'').toLowerCase().includes(q))).slice(0,8); box.innerHTML=res.map(p=>'<button data-reladd="1" data-relgrpk="'+k+'" data-id="'+esc(p.id)+'">'+esc(p.name||p.sku)+' <span style="color:var(--text-4)">· '+esc(p.sku)+'</span></button>').join('')||'<button disabled>No matches</button>'; box.hidden=false; }
+  function addRel(k,id){ draft.relationships[k]=draft.relationships[k]||[]; if(!draft.relationships[k].includes(id)) draft.relationships[k].push(id); selectTab('relationships'); }
+
+  function setMsg(m,ok){ const s=$('pm-d-msg'); s.className='ap-status'+(ok?' ok':' err'); s.textContent=m; }
+  function saveDetail(){
+    recompute();
+    if(!(draft.model||draft.height)){ setMsg('Enter a '+(draft.category==='ARTIFICIAL GRASS'?'height':'model')+'.'); selectTab('general'); return; }
+    if(!draft.colour){ setMsg('Colour is required (Specifications).'); selectTab('specs'); return; }
+    let sku=(draft.sku||'').trim()||genSku(draft);
+    if(all().some(x=>x.sku===sku && x.id!==draft.id)){ setMsg('SKU '+sku+' already exists.'); selectTab('general'); return; }
+    draft.sku=sku;
+    // lock SKU once it leaves Draft (proxy for "used in ERP")
+    if(draft.status && draft.status!=='Draft') draft.skuLocked=true;
+    // audit
+    const today=new Date().toISOString().slice(0,10);
+    draft.updatedBy='Catalogue'; draft.updatedOn=today;
+    // price group
+    if(groupPrice!=null){ ov.priceGroups[draft.priceGroup]={ sellingPrice: groupPrice }; }
+    delete draft.sellingPrice;
+    if(draft.id){
+      if(seed.some(s=>s.id===draft.id)) ov.over[draft.id]=Object.assign({}, ov.over[draft.id], draft);
+      else { const i=ov.add.findIndex(x=>x.id===draft.id); if(i>=0) ov.add[i]=draft; }
     } else {
-      const num = 1 + all().reduce((m,x)=>{ const n=+String(x.id).replace(/\D/g,''); return n>m?n:m; }, 0);
-      p.id = 'PU'+String(num).padStart(4,'0');
-      ov.add.push(p);
+      const num=1+all().reduce((m,x)=>{const n=+String(x.id).replace(/\D/g,'');return n>m?n:m;},0);
+      draft.id='PU'+String(num).padStart(4,'0'); draft.createdBy='Catalogue'; draft.createdOn=today;
+      ov.add.push(draft);
     }
-    saveOv(); closeEditor(); render();
-    toast(editingId?'Product updated':'Product added');
+    saveOv(); closeDetail(); render();
   }
-  function setStatus(m){ const s=$('pm-ed-status'); s.className='ap-status err'; s.textContent=m; }
-  function toast(m){ /* lightweight */ const s=$('pm-ed-status'); }
-
-  function setActiveBulk(active){
-    state.sel.forEach(id => {
-      if (seed.some(s=>s.id===id)) ov.over[id] = Object.assign({}, ov.over[id], {active});
-      else { const i = ov.add.findIndex(x=>x.id===id); if (i>=0) ov.add[i].active = active; }
-    });
-    saveOv(); render();
-  }
+  function changeStatus(id, st){ const p=byId(id); if(!p) return; const patch={status:st, updatedBy:'Catalogue', updatedOn:new Date().toISOString().slice(0,10)}; if(st!=='Draft') patch.skuLocked=true; if(seed.some(s=>s.id===id)) ov.over[id]=Object.assign({},ov.over[id],patch); else { const i=ov.add.findIndex(x=>x.id===id); if(i>=0) Object.assign(ov.add[i],patch); } saveOv(); if(draft&&draft.id===id){ Object.assign(draft,patch); renderHeader(); selectTab(activeTab); } render(); }
+  function duplicateProduct(id){ const src=byId(id); if(!src) return; const copy=JSON.parse(JSON.stringify(src)); copy.id=null; copy.status='Draft'; copy.skuLocked=false; copy.colour=(copy.colour||'')+' COPY'; copy.name=''; openDetail(null); draft=Object.assign(draft, copy); nameDirty=false; skuDirty=false; recompute(); renderHeader(); selectTab('general'); }
+  function exportProducts(rows){ const data=rows.map(p=>Object.assign({},p,{sellingPrice:priceOf(p)})); const blob='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(data,null,1)); const a=document.createElement('a'); a.href=blob; a.download='products-export.json'; a.click(); }
 
   // ---- wire ----
-  document.addEventListener('DOMContentLoaded', () => {
-    $('pm-search').addEventListener('input', e => { state.q = e.target.value; state.page=1; render(); });
-    $('pm-f-cat').addEventListener('change', e => { state.cat = e.target.value; state.model=''; state.page=1; render(); });
-    $('pm-f-model').addEventListener('change', e => { state.model = e.target.value; state.page=1; render(); });
-    $('pm-f-status').addEventListener('change', e => { state.status = e.target.value; state.page=1; render(); });
-    $('pm-add').addEventListener('click', () => openEditor(null));
-    $('pm-rows').addEventListener('click', e => {
-      const chk = e.target.closest('.pm-row-chk');
-      if (chk){ const id=chk.getAttribute('data-id'); if (chk.checked) state.sel.add(id); else state.sel.delete(id); render(); return; }
-      const tr = e.target.closest('tr[data-id]'); if (tr) openEditor(tr.getAttribute('data-id'));
+  document.addEventListener('DOMContentLoaded', ()=>{
+    $('pm-search').addEventListener('input', e=>{ state.q=e.target.value; state.page=1; render(); });
+    const fsel=(id,key,resetChild)=>$(id).addEventListener('change', e=>{ state[key]=e.target.value; if(resetChild) state[resetChild]=''; state.page=1; render(); });
+    $('pm-f-cat').addEventListener('change', e=>{ state.cat=e.target.value; state.family=''; state.model=''; state.width=''; state.length=''; state.colour=''; state.page=1; render(); });
+    fsel('pm-f-family','family'); fsel('pm-f-model','model'); fsel('pm-f-status','status');
+    fsel('pm-f-width','width'); fsel('pm-f-length','length'); fsel('pm-f-colour','colour');
+    $('pm-more-btn').addEventListener('click', ()=>{ const m=$('pm-more'); m.hidden=!m.hidden; });
+    $('pm-more').addEventListener('click', e=>{ const c=e.target.closest('.pm-chip'); if(c){ const k=c.getAttribute('data-miss'); state.miss[k]=!state.miss[k]; state.page=1; render(); } });
+    $('pm-kpis').addEventListener('click', e=>{ const s=e.target.closest('[data-miss]'); if(s){ const k=s.getAttribute('data-miss'); state.miss={}; state.miss[k]=true; $('pm-more').hidden=false; state.page=1; render(); } });
+    $('pm-add').addEventListener('click', ()=>openDetail(null));
+    $('pm-export').addEventListener('click', ()=>exportProducts(filtered()));
+    $('pm-rows').addEventListener('click', e=>{
+      const chk=e.target.closest('.pm-row-chk'); if(chk){ const id=chk.getAttribute('data-id'); chk.checked?state.sel.add(id):state.sel.delete(id); render(); return; }
+      const kb=e.target.closest('[data-kebab]'); if(kb){ openMenu(kb, kb.getAttribute('data-kebab')); return; }
+      const tr=e.target.closest('tr[data-id]'); if(tr) openDetail(tr.getAttribute('data-id'));
     });
-    $('pm-all').addEventListener('change', e => {
-      const rows = filtered().slice((state.page-1)*state.size, state.page*state.size);
-      if (e.target.checked) rows.forEach(p=>state.sel.add(p.id)); else rows.forEach(p=>state.sel.delete(p.id));
-      render();
-    });
-    $('pm-bulk').addEventListener('click', e => {
-      const b = e.target.closest('[data-bulk]'); if(!b) return;
-      const act = b.getAttribute('data-bulk');
-      if (act==='clear'){ state.sel.clear(); render(); }
-      else if (act==='activate'){ setActiveBulk(true); state.sel.clear(); render(); }
-      else if (act==='deactivate'){ setActiveBulk(false); state.sel.clear(); render(); }
-    });
-    // editor
-    $('pm-ed-close').addEventListener('click', closeEditor);
-    $('pm-ed-cancel').addEventListener('click', closeEditor);
-    $('pm-editor').addEventListener('click', e => { if (e.target===$('pm-editor')) closeEditor(); });
-    $('pm-ed-cat').addEventListener('change', refreshAttrs);
-    $('pm-ed-attrs').addEventListener('input', maybeSku);
-    $('pm-ed-colour').addEventListener('input', maybeSku);
-    $('pm-ed-sku').addEventListener('input', () => { skuDirty = true; });
-    $('pm-ed-regen').addEventListener('click', () => { skuDirty=false; const p=collectEditor(); $('pm-ed-sku').value = genSku(p, editingId); });
-    $('pm-ed-active').addEventListener('click', e => { const b=e.target.closest('button[data-val]'); if(b) segSet('pm-ed-active', b.getAttribute('data-val')); });
-    $('pm-ed-save').addEventListener('click', saveEditor);
-    document.addEventListener('keydown', e => { if (e.key==='Escape' && !$('pm-editor').hidden) closeEditor(); });
-    // auto-load if landing directly on the page
-    if (location.hash==='#products') window.atlasLoadProducts();
+    $('pm-all').addEventListener('change', e=>{ const rows=filtered().slice((state.page-1)*state.size,state.page*state.size); rows.forEach(p=>e.target.checked?state.sel.add(p.id):state.sel.delete(p.id)); render(); });
+    $('pm-bulk').addEventListener('click', e=>{ const b=e.target.closest('[data-bulk]'); if(!b) return; const a=b.getAttribute('data-bulk'); if(a==='clear'){state.sel.clear();render();} else if(a==='export'){ exportProducts(all().filter(p=>state.sel.has(p.id))); } });
+    $('pm-bulk-status').addEventListener('change', e=>{ const st=e.target.value; if(!st) return; state.sel.forEach(id=>changeStatus(id,st)); state.sel.clear(); e.target.value=''; render(); });
+    // detail
+    $('pm-d-close').addEventListener('click', closeDetail);
+    $('pm-d-cancel').addEventListener('click', closeDetail);
+    $('pm-detail').addEventListener('click', e=>{ if(e.target===$('pm-detail')) closeDetail(); });
+    $('pm-d-save').addEventListener('click', saveDetail);
+    $('pm-tabrail').addEventListener('click', e=>{ const t=e.target.closest('.pm-tab'); if(t) selectTab(t.getAttribute('data-tab')); });
+    $('pm-tabcontent').addEventListener('input', e=>{ onContentInput(e); onUnderscore(e); });
+    $('pm-tabcontent').addEventListener('change', onContentChange);
+    $('pm-tabcontent').addEventListener('click', onContentClick);
+    $('pm-d-actions').addEventListener('click', e=>{ const s=e.target.closest('[data-status-act]'); if(s){ changeStatus(draft.id, s.getAttribute('data-status-act')); return; } if(e.target.closest('[data-dup]')){ const id=draft.id; duplicateProduct(id); } });
+    $('pm-img-input').addEventListener('change', e=>{ if(e.target.files.length) addImages([...e.target.files]); e.target.value=''; });
+    $('pm-doc-input').addEventListener('change', e=>{ if(e.target.files[0]) addDoc(e.target.files[0]); e.target.value=''; });
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ if(!$('pm-detail').hidden){ closeDetail(); } document.querySelectorAll('.pm-menu').forEach(m=>m.remove()); } });
+    document.addEventListener('click', e=>{ if(!e.target.closest('.pm-menu')&&!e.target.closest('[data-kebab]')) document.querySelectorAll('.pm-menu').forEach(m=>m.remove()); });
+    if(location.hash==='#products') window.atlasLoadProducts();
   });
+
+  function openMenu(anchor, id){
+    document.querySelectorAll('.pm-menu').forEach(m=>m.remove());
+    const p=byId(id); const st=p.status||'Active';
+    const menu=document.createElement('div'); menu.className='pm-menu';
+    const items=[['Edit',()=>openDetail(id)],['Duplicate',()=>duplicateProduct(id)]];
+    if(st!=='Active') items.push(['Activate',()=>changeStatus(id,'Active')]);
+    if(st==='Active') items.push(['Discontinue',()=>changeStatus(id,'Discontinued')]);
+    if(st!=='Archived') items.push(['Archive',()=>changeStatus(id,'Archived'),'danger']); else items.push(['Restore',()=>changeStatus(id,'Active')]);
+    menu.innerHTML=items.map((it,i)=>'<button class="'+(it[2]||'')+'" data-mi="'+i+'">'+it[0]+'</button>').join('');
+    const r=anchor.getBoundingClientRect(); menu.style.top=(r.bottom+4)+'px'; menu.style.left=(r.left-120)+'px';
+    document.body.appendChild(menu);
+    menu.addEventListener('click', e=>{ const b=e.target.closest('[data-mi]'); if(b){ items[+b.getAttribute('data-mi')][1](); menu.remove(); } });
+  }
 })();
 </script>
 

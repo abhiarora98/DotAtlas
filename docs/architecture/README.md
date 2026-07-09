@@ -18,7 +18,7 @@
 
 | Module | Status | Version | Completion | Depends on | Next milestone |
 |---|---|---|---|---|---|
-| [Product Master](./product-master.md) | ✅ Implemented | 1.0 | ~70% | — (foundational) | Wire into Create Sales Order |
+| [Product Master](./product-master.md) | ✅ Implemented | 2.0 | ~80% | — (foundational) | Wire into Create Sales Order |
 | [Sales Orders](./sales-orders.md) | ✅ Implemented | 1.1 | ~85% | **Product Master**, Parties | Consume Product Master dropdowns |
 | [Dispatch](./dispatch.md) | ✅ Implemented | 1.1 | ~80% | Sales Orders, Warehouse | ERP-fed packing slip (Phase 2) |
 | [Warehouse](./warehouse.md) | 🟡 In Progress | 0.2 | ~25% | Dispatch, Inventory | Dedicated pick/pack workspace (Warehouse Mode) |

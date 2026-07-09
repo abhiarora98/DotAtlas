@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Version** | 1.1 |
+| **Version** | 1.2 |
 | **Status** | ✅ Implemented (owned by Product Master) |
 | **Last Updated** | 09 Jul 2026 |
-| **Related ADRs** | ADR-0001, ADR-0004 |
+| **Related ADRs** | ADR-0001, ADR-0004, ADR-0005 |
 | **Related Modules** | Product Master · Sales Orders · Dispatch · Warehouse · Inventory · Production · Reporting |
 
 > The product hierarchy is one of the most important parts of Native. **Sales,
@@ -30,6 +30,27 @@ Product (Category)          e.g. Rolls
 
 A **Variant** is a fully-specified path through all six levels. It is the
 sellable, dispatchable and stockable unit, and it is what receives a **SKU**.
+
+## Product Families
+
+Products are grouped into **families** rather than treated as isolated SKUs
+(ADR-0005). A family is the shared design; its variants are the sellable
+permutations:
+
+```
+Category            Loop
+  └── Family        Loop · Cirro          (= Category + Model)
+        └── Variants
+              4ft × 12m · Grey
+              4ft × 12m · Red
+              2ft × 12m · Grey
+```
+
+- **Family key** = Category + Model (or Category + Height for Artificial Grass).
+- **Variant** = the distinguishing Backing/Type/Width/Length/Size/Colour, each
+  identified by a SKU.
+- Families are a first-class axis for catalogue management, filtering and
+  reporting; a Variant/SKU always belongs to exactly one family.
 
 ## Category-specific attributes
 

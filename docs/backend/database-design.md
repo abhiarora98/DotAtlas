@@ -5,7 +5,7 @@
 | **Version** | 0.1 |
 | **Status** | 📝 Draft |
 | **Last Updated** | 27 Jun 2026 |
-| **Related ADRs** | ADR-0001, ADR-0002, ADR-0003 |
+| **Related ADRs** | ADR-0001, ADR-0002, ADR-0003, ADR-0005 |
 | **Related Modules** | All |
 
 > Logical database design — **no SQL**. For each entity: why it exists, its
@@ -45,23 +45,75 @@
 - **PK.** `id`. **Unique.** `name`.
 - **FK.** —. **Owner.** Platform.
 
-### ProductVariant  *(catalogue leaf)*
-- **Why.** The atomic sellable/stockable unit (Product · Model · Backing · Colour ·
-  Width · Length) identified by a stable **SKU**. Everything operational keys on a
-  variant. See [`../database/product-hierarchy.md`](../database/product-hierarchy.md).
-- **PK.** `id`. **Unique.** `sku`.
-- **FK.** `productId` → Product (family); optional `modelId`, `backingId`,
-  `colourId` if attributes are normalised into lookup tables (Phase 2). Phase 1
-  may store attributes as fields.
-- **Owner.** Products/Catalogue.
+### ProductFamily
+- **Why.** Groups variants of one design (Category + Model, e.g. `Loop · Cirro`)
+  so the catalogue is managed by family rather than thousands of isolated SKUs
+  (ADR-0005). Carries family-level defaults (category, model/height).
+- **PK.** `id`. **Unique.** `(category, model)`.
+- **FK.** —. **Owner.** Product Master.
 
-### Product (family) and attribute lookups *(Model, Backing, Colour)*
-- **Why.** The catalogue hierarchy that constrains valid variants and carries
-  per-category unit rules. Today products are attribute-implied; these tables make
-  combinations validatable.
-- **PK.** `id` each. **Unique.** `name` (scoped).
-- **FK.** attribute tables reference Product where the relationship is scoped.
-- **Owner.** Products/Catalogue.
+### ProductVariant (Product)  *(catalogue leaf)*
+- **Why.** The atomic sellable/stockable unit identified by a stable **SKU**, with
+  a lifecycle (`Draft → Active → Discontinued → Archived`). Everything operational
+  keys on it. See [`../database/product-hierarchy.md`](../database/product-hierarchy.md).
+- **PK.** `id`. **Unique.** `sku`.
+- **Fields.** `status`, `skuLocked` (SKU immutable once used), `name`, unit/weight/
+  sqft, commercial (sellingPrice, hsn, gst, freight; purchasePrice, landedCost
+  future), category-specific attributes (backing/height/type/width/length/size/
+  colour), audit (`createdBy/On`, `updatedBy/On`).
+- **FK.** `familyId` → ProductFamily; optional `modelId`, `backingId`, `colourId`
+  if attributes are normalised into lookup tables (Phase 2).
+- **Owner.** Product Master.
+
+### ProductImage
+- **Why.** A product may have several typed images (Primary, Catalogue, Technical
+  Drawing, Installation), ordered, one primary. Binary in object storage; row holds
+  metadata + key.
+- **PK.** `id`. **FK.** `productId` → ProductVariant; `attachmentId` → Attachment.
+  Fields: `type`, `isPrimary`, `sortOrder`. **Owner.** Product Master.
+
+### ProductDocument
+- **Why.** Typed attachments — Product Catalogue PDF, Technical Data Sheet,
+  Installation Guide, QC Sheet.
+- **PK.** `id`. **FK.** `productId` → ProductVariant; `attachmentId` → Attachment.
+  Field: `type`. **Owner.** Product Master.
+
+### ProductBom (+ BomLine)  *(structure only — no production logic yet)*
+- **Why.** Captures how a product is made so Production/Costing can consume it later:
+  raw materials, quantity, unit, scrap %, plus production line, machine, cycle time,
+  packing material.
+- **PK.** `id`. **FK.** `productId` → ProductVariant. `BomLine`: `bomId` → ProductBom,
+  `rawMaterialId` → ProductVariant/Material, qty, unit, scrapPct. **Owner.** Product
+  Master (Production reads later).
+
+### PriceGroup  *(ADR-0006)*
+- **Why.** Holds the **Default Selling Price once per colour-independent base**
+  (`Category|Model/Height|Backing|Type|Width|Length|Size`) so variants inherit it
+  and identical prices are never duplicated across colours. Product Master stores
+  only the *default* price here; tiered pricing is a separate **Price List** module
+  (Dealer/Distributor/Customer/Qty-break/Export).
+- **PK.** `id`. **Unique.** the base key. Fields: `sellingPrice`, `cost` (future).
+- **FK.** ProductVariant references `priceGroupId`. **Owner.** Product Master
+  (Price Lists layer on top later).
+
+### ProductManufacturing
+- **Why.** Manufacturing/stock defaults future modules consume: production line,
+  machine, QC template, packing type, default warehouse, reorder level, min/max
+  stock.
+- **PK.** `id`. **FK.** `productId` → ProductVariant (1‑to‑1). **Owner.** Product
+  Master (Inventory/Production read later).
+
+### ProductRelationship
+- **Why.** Relates products: compatible, accessories, replacement, upgraded-by,
+  discontinued-by — powering cross-sell, substitution and lifecycle chains.
+- **PK.** `id`. **Unique.** `(productId, relatedProductId, type)`.
+- **FK.** `productId` / `relatedProductId` → ProductVariant. **Owner.** Product Master.
+
+### Product attribute lookups *(Model, Backing, Colour — Phase 2)*
+- **Why.** Normalised catalogue values that constrain valid variants and carry
+  per-category unit rules. Today attributes are stored as fields; lookups make
+  combinations validatable later.
+- **PK.** `id` each. **Unique.** `name` (scoped). **Owner.** Product Master.
 
 ---
 
