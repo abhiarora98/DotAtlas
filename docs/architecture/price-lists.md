@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Version** | 1.0 |
+| **Version** | 1.1 |
 | **Status** | ✅ Implemented (standalone; Sales Order integration next) |
 | **Last Updated** | 10 Jul 2026 |
-| **Related ADRs** | ADR-0001, ADR-0006, ADR-0007 |
+| **Related ADRs** | ADR-0001, ADR-0006, ADR-0007, ADR-0008 |
 | **Related Modules** | Product Master · Parties · Sales Orders |
 
 > Price Lists own the **commercial rate that varies by customer or market** —
@@ -80,11 +80,18 @@ custom lists.
 Totals are **computed, never stored** (ADR-0007) so a Sq.Ft. change re-prices
 everything automatically.
 
-### Price resolution
+### Price resolution *(only at document creation — ADR-0008)*
+Product Master never resolves an effective price; **documents** (Sales Orders,
+Quotations, Proforma Invoices) do, via the shared resolver in this module:
 ```
-effective rate = priceList.overrides[group]  ??  ProductMaster.default rate[group]
+effective rate =
+   1. Party's assigned Price List override[group]     (if any)
+   2. System Default Price List override[group]        (is_default)
+   3. Product Master base rate[group]                  (fallback)
 effective price = effective rate × (Sq.Ft. for rolls | 1 for pieces)
 ```
+Exposed as `atlasResolveRate(group, partyListId)` / `atlasResolvedPrice(product,
+partyListId)`. Product Master contains no reference to price lists.
 
 ## Module surfaces
 

@@ -26530,12 +26530,12 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   // Unit-rate pricing (ADR-0007): the price group stores a RATE (₹/sqft for rolls,
   // ₹/piece for footmats). The per-roll/piece total is COMPUTED, never stored.
   const unitOf = p => (pgVal(p.priceGroup||groupKey(p)).unit) || (p.category==='FOOTMAT'?'piece':'sqft');
+  // Product Master exposes the BASE RATE only and is completely independent of
+  // Price Lists — it never resolves an effective price via any list. Price
+  // resolution happens at document creation (party list → default list → base),
+  // owned by the pricing layer (ADR-0008).
   const pmBaseRate = g => { const v=pgVal(g); return v.rate!=null?v.rate:null; };
-  // Effective rate resolves through the company DEFAULT price list (is_default) —
-  // its override wins over the Product Master base (single resolver, ADR-0007).
-  let defOv = {};
-  function refreshDefOv(){ try { const pl=JSON.parse(localStorage.getItem('atlas-pricelists')||'{}'); const d=Object.values(pl.lists||{}).find(l=>l.isDefault); defOv=(d&&d.overrides)||{}; } catch(e){ defOv={}; } }
-  function rateOf(p){ const g=p.priceGroup||groupKey(p); return defOv[g]!=null ? defOv[g] : pmBaseRate(g); }
+  function rateOf(p){ return pmBaseRate(p.priceGroup||groupKey(p)); }
   function priceOf(p){ const r=rateOf(p); if(r==null) return null; return unitOf(p)==='sqft' ? Math.round(r*(+p.sqft||0)) : r; }
   const imagesOf = p => p.images||[];
   const primaryImg = p => { const im=imagesOf(p); return (im.find(x=>x.primary)||im[0]||null); };
@@ -26621,7 +26621,6 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   }
 
   function render(){
-    refreshDefOv();
     const list = all();
     const by = st => list.filter(p=>(p.status||'Active')===st).length;
     const fams = new Set(list.map(p=>p.family)).size;
@@ -27064,6 +27063,24 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   }
   const lists = () => Object.values(store.lists);
   function setDefault(id){ Object.values(store.lists).forEach(l=>l.isDefault=(l.id===id)); saveStore(); }
+
+  // ---- shared price resolver (used ONLY at document creation — ADR-0008) ----
+  // Resolution order: party's assigned list → system default list → PM base rate.
+  // Product Master never calls this; documents (Sales Orders / Quotations / PIs) do.
+  window.atlasResolveRate = function(groupKey, partyListId){
+    const ls = store.lists || {};
+    if (partyListId && ls[partyListId] && ls[partyListId].overrides && ls[partyListId].overrides[groupKey]!=null) return ls[partyListId].overrides[groupKey];
+    const def = Object.values(ls).find(l=>l.isDefault);
+    if (def && def.overrides && def.overrides[groupKey]!=null) return def.overrides[groupKey];
+    return defRate(groupKey); // Product Master base rate
+  };
+  window.atlasResolvedPrice = function(product, partyListId){
+    if (!product || !product.priceGroup) return null;
+    const rate = window.atlasResolveRate(product.priceGroup, partyListId);
+    if (rate==null) return null;
+    const unit = product.category==='FOOTMAT' ? 'piece' : 'sqft';
+    return unit==='sqft' ? Math.round(rate*(+product.sqft||0)) : rate;
+  };
 
   window.atlasLoadPriceLists = async function(){
     if(!loaded){

@@ -5,7 +5,7 @@
 | **Version** | 2.1 |
 | **Status** | ✅ Implemented (standalone; SO integration next phase) |
 | **Last Updated** | 10 Jul 2026 |
-| **Related ADRs** | ADR-0001, ADR-0004, ADR-0005, ADR-0006 |
+| **Related ADRs** | ADR-0001, ADR-0004, ADR-0005, ADR-0006, ADR-0008 |
 | **Related Modules** | Sales Orders · Inventory · Dispatch · Warehouse · Production · Purchase · Price Lists · CRM |
 
 > Product Master is the **single source of truth for every product in Native** — a
@@ -146,13 +146,17 @@ dashboard**.
 **Identity & lifecycle:** `id`, `sku`, `skuLocked`, `status`, `name`, `family`,
 `category`.
 **Specifications:** category-specific attributes + `unit`, `weight`, `sqft`.
-**Commercial:** `priceGroup` (→ **default rate** stored **once per
-colour-independent base**, inherited by variants — no duplicated pricing).
-The rate is per **unit** — ₹/Sq.Ft. for rolls, ₹/Piece for footmats/car sets;
-per-roll/piece totals are **computed** (rate × Sq.Ft.), never stored (ADR-0007).
-`hsn`, `gst` (defaults: Artificial Grass **5%**, others **18%**) (+ Default Cost
-future). Customer/market rates live in **Price Lists** ([price-lists.md](./price-lists.md)),
-not here.
+**Commercial:** `priceGroup` (→ **base rate** stored **once per colour-independent
+base**, inherited by variants — no duplicated pricing). The rate is per **unit** —
+₹/Sq.Ft. for rolls, ₹/Piece for footmats/car sets; per-roll/piece totals are
+**computed** (rate × Sq.Ft.), never stored (ADR-0007). `hsn`, `gst` (defaults:
+Artificial Grass **5%**, others **18%**) (+ Default Cost future).
+
+> **Product Master is independent of Price Lists (ADR-0008).** It exposes the
+> **base rate only** and never resolves or displays an *effective* price via any
+> price list (including the System Default). Customer/market rates live in
+> **Price Lists** ([price-lists.md](./price-lists.md)); price resolution happens
+> only at **document creation** (party list → default list → base rate).
 **Rich containers:** `images[]` (`{url,type,primary,order}`), `documents[]`
 (`{name,type,url}`), `bom` (`{materials[],productionLine,machine,cycleTime,packing}`),
 `manufacturing` (`{line,machine,qcTemplate,packingType,warehouse,reorder,minStock,maxStock}`),

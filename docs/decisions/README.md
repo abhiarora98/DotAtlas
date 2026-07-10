@@ -45,3 +45,4 @@ Create `NNNN-short-title.md` (zero-padded, incrementing) with:
 | [0005](./0005-product-master-v2-families-tabs-lifecycle.md) | Product Master V2: families, tabs, lifecycle & SKU locking | Accepted |
 | [0006](./0006-pricing-architecture-price-groups.md) | Pricing architecture: price groups + a future Price List module | Accepted |
 | [0007](./0007-price-lists-and-unit-rate-pricing.md) | Price Lists module + unit-rate pricing (compute totals) | Accepted |
+| [0008](./0008-product-master-independent-of-price-lists.md) | Product Master independent of Price Lists; resolve only at document creation | Accepted |
