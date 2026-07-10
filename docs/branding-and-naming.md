@@ -27,18 +27,39 @@ Never shorten the product to "Atlas".
 
 ## Reference table
 
-| Where | Convention |
+| Item | Convention |
 |---|---|
 | **Company** | dotatlas |
 | **Product** | Native |
 | **Repository** | Native |
-| **Internal namespace** (shared utilities/services) | `native` — e.g. `nativeResolveRate()`, `nativeResolvedPrice()`, `nativePriceResolver` |
-| **Database prefix** (if ever used) | `native_` |
-| **Browser-local storage keys** | `native-*` (e.g. `native-products-overlay`, `native-pricelists`) |
-| **UI title** | Native |
-| **UI wordmark** | Native |
+| **App Title** | Native (browser `<title>`: `Native \| Built by dotatlas`) |
+| **Sidebar Logo / wordmark** | Native |
 | **Footer** | Built by dotatlas |
+| **JS Namespace** (shared utilities/services) | `native` — e.g. `nativeResolveRate()`, `nativeResolvedPrice()`, `nativePriceResolver` |
+| **Local Storage** | `native-*` (e.g. `native-products-overlay`, `native-pricelists`) |
+| **Database** | `native_*` (table/column prefix, if ever used) |
+| **API** | `/api/v1/native/...` (or simply `/api/v1/...`) |
 | **Documentation** | Refer to the application as **Native** |
+
+## Naming rules
+
+**Use "Native" for:**
+
+- UI
+- Documentation
+- Product references
+- Marketing
+- User-facing messages
+
+**Use "dotatlas" for:**
+
+- Company references
+- Copyright
+- Website
+- About page
+- Legal documents
+
+**Never use "Atlas" by itself as the product name.**
 
 ## Code conventions
 
