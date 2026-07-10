@@ -123,6 +123,11 @@ The physical dimensions. Together they form the **Size**.
 - **Length** examples: *15m, 12m, 10m, 25m, 9m, 24m* (rolls); *58cm, 60cm, 75cm,
   90cm, 24in* (mats); *5pc, 3pc* (sets).
 
+> **Width display alias.** Widths are **stored in metres** (the backend value —
+> e.g. `0.61`, `1.22`) but **displayed to the team in feet** where a standard
+> mapping exists: `0.61 → 2ft`, `1.22 → 4ft`. The stored value never changes; only
+> the label the user sees does. Extend the alias map as more feet sizes are used.
+
 > **Note:** for **Car Sets**, width/length encode the **piece count** of the set
 > (e.g. `5pc × 5pc` = a 5-piece set), not a linear measurement. For **Foot Mats**,
 > size is the cut dimension (e.g. `38cm × 60cm`).

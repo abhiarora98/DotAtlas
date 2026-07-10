@@ -26412,7 +26412,11 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     let s=base,i=2; while(taken.has(s)){ s=base+'-'+i; i++; } return s;
   }
   const groupKey = p => [p.category, p.model||p.height, p.backing, p.type, p.width, p.length, p.size].map(x=>x||'').join('|');
-  function suggestName(p){ const dim = p.category==='FOOTMAT'? p.size : (p.width && (p.width+'×'+lenNum(p.length)+'m')); return [p.model||p.height, p.backing, p.type, dim, p.colour].filter(Boolean).join(' '); }
+  // Widths are stored in metres but shown to the team in feet where a standard
+  // mapping exists (0.61→2ft, 1.22→4ft). Stored value is untouched.
+  const WIDTH_FT = {'0.61':'2ft','1.22':'4ft'};
+  const widthLabel = w => (w==null||w==='') ? '' : (WIDTH_FT[String(w)] || String(w));
+  function suggestName(p){ const dim = p.category==='FOOTMAT'? p.size : (p.width && (widthLabel(p.width)+'×'+lenNum(p.length)+'m')); return [p.model||p.height, p.backing, p.type, dim, p.colour].filter(Boolean).join(' '); }
 
   // ---- data (seed + overlay) ----
   const OV_KEY = 'atlas-products-overlay';
@@ -26432,7 +26436,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   const missPrice = p => priceOf(p)==null;
   const missDocs = p => !(p.documents && p.documents.length);
   const hasSpecs = p => specAttrs(p.category).every(a=>p[a]) && p.weight!=null && p.sqft!=null;
-  const sizeOf = p => p.category==='FOOTMAT' ? p.size : (p.width ? (p.width+'×'+lenNum(p.length)+'m') : '');
+  const sizeOf = p => p.category==='FOOTMAT' ? p.size : (p.width ? (widthLabel(p.width)+'×'+lenNum(p.length)+'m') : '');
 
   // Stock snapshot — placeholder until Inventory lands. Deterministic per product
   // (stable hash) so the demo looks realistic; wired to real stock later.
@@ -26458,9 +26462,9 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     fillSelect('pm-f-cat', Object.keys(SCHEMA), 'All categories');
     render();
   };
-  function fillSelect(id, opts, allLabel, cur){
+  function fillSelect(id, opts, allLabel, cur, labelFn){
     const sel=$(id); const v=cur!=null?cur:sel.value;
-    sel.innerHTML = '<option value="">'+allLabel+'</option>' + opts.map(o=>'<option'+(o===v?' selected':'')+'>'+esc(o)+'</option>').join('');
+    sel.innerHTML = '<option value="">'+allLabel+'</option>' + opts.map(o=>'<option value="'+esc(o)+'"'+(o===v?' selected':'')+'>'+esc(labelFn?labelFn(o):o)+'</option>').join('');
   }
   function distinct(field, filterCat){ const s=new Set(); all().forEach(p=>{ if(filterCat && p.category!==filterCat) return; if(p[field]) s.add(p[field]); }); return [...s].sort(); }
 
@@ -26482,12 +26486,12 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       if (state.miss['recent-add'] && !ov.add.some(a=>a.id===p.id)) return false;
       // Universal search — matches any attribute: colour, model, width (4ft),
       // backing (Spike), SKU, HSN, product name, family, etc.
-      if (q){ const blob=[p.sku,p.name,p.category,p.model,p.height,p.type,p.colour,p.backing,p.family,p.width,p.length,p.size,p.hsn,p.unit].filter(Boolean).join(' ').toLowerCase(); if(!blob.includes(q)) return false; }
+      if (q){ const blob=[p.sku,p.name,p.category,p.model,p.height,p.type,p.colour,p.backing,p.family,p.width,widthLabel(p.width),p.length,p.size,p.hsn,p.unit].filter(Boolean).join(' ').toLowerCase(); if(!blob.includes(q)) return false; }
       return true;
     });
   }
   // Compact variant label: backing · size · colour (width×length collapsed).
-  const variantOf = p => { const dim = p.category==='FOOTMAT' ? p.size : (p.width && (p.width+'×'+lenNum(p.length)+'m')); return [p.backing, p.type, dim, p.colour].filter(Boolean).join(' · '); };
+  const variantOf = p => { const dim = p.category==='FOOTMAT' ? p.size : (p.width && (widthLabel(p.width)+'×'+lenNum(p.length)+'m')); return [p.backing, p.type, dim, p.colour].filter(Boolean).join(' · '); };
   const actIcon = (id,act,ic,title) => '<button class="pm-act" data-act="'+act+'" data-id="'+esc(id)+'" title="'+title+'" aria-label="'+title+'">'+ic+'</button>';
 
   // Landing-page attention panels — recently added/updated, low stock, gaps.
@@ -26527,7 +26531,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     // filter options
     fillSelect('pm-f-family', [...new Set(all().filter(p=>!state.cat||p.category===state.cat).map(p=>p.family))].sort(), 'All families', state.family);
     fillSelect('pm-f-model', distinct('model', state.cat), 'All models', state.model);
-    fillSelect('pm-f-width', distinct('width', state.cat), 'Any width', state.width);
+    fillSelect('pm-f-width', distinct('width', state.cat), 'Any width', state.width, widthLabel);
     fillSelect('pm-f-length', distinct('length', state.cat), 'Any length', state.length);
     fillSelect('pm-f-colour', distinct('colour', state.cat), 'Any colour', state.colour);
     document.querySelectorAll('#pm-more .pm-chip').forEach(c=>c.classList.toggle('on', !!state.miss[c.getAttribute('data-miss')]));
@@ -26639,7 +26643,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     if (name==='specs'){
       const rows = specAttrs(p.category).map(a=>{
         if (a==='type') return selField(ATTR_LABEL[a],'type',p.type||'',['','SL','DL']);
-        return field(ATTR_LABEL[a], a, p[a], {list:'pm-dl-'+a}) + dl('pm-dl-'+a, distinct(a,p.category));
+        const note = (a==='width' && WIDTH_FT[String(p[a])]) ? '— shown as '+WIDTH_FT[String(p[a])] : (a==='width' ? '— metres' : '');
+        return field(ATTR_LABEL[a], a, p[a], {list:'pm-dl-'+a, note}) + dl('pm-dl-'+a, distinct(a,p.category));
       }).join('');
       return '<div class="pm-sec-h">Specifications · '+esc(p.category)+'</div>'
         + '<div class="pm-grid3">'+rows
