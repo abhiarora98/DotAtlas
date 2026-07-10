@@ -146,10 +146,13 @@ dashboard**.
 **Identity & lifecycle:** `id`, `sku`, `skuLocked`, `status`, `name`, `family`,
 `category`.
 **Specifications:** category-specific attributes + `unit`, `weight`, `sqft`.
-**Commercial:** `priceGroup` (→ Default Selling Price stored **once per
-colour-independent base**, inherited by variants — no duplicated pricing),
+**Commercial:** `priceGroup` (→ **default rate** stored **once per
+colour-independent base**, inherited by variants — no duplicated pricing).
+The rate is per **unit** — ₹/Sq.Ft. for rolls, ₹/Piece for footmats/car sets;
+per-roll/piece totals are **computed** (rate × Sq.Ft.), never stored (ADR-0007).
 `hsn`, `gst` (defaults: Artificial Grass **5%**, others **18%**) (+ Default Cost
-future). Freight/Landed and tiered pricing are **not** here — see ADR-0006.
+future). Customer/market rates live in **Price Lists** ([price-lists.md](./price-lists.md)),
+not here.
 **Rich containers:** `images[]` (`{url,type,primary,order}`), `documents[]`
 (`{name,type,url}`), `bom` (`{materials[],productionLine,machine,cycleTime,packing}`),
 `manufacturing` (`{line,machine,qcTemplate,packingType,warehouse,reorder,minStock,maxStock}`),

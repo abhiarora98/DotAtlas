@@ -29,7 +29,8 @@
 - **Why.** The customer/supplier we trade with; anchor for orders, billing and
   receivables. Without it there is no counterparty for any document.
 - **PK.** `id`. **Unique.** `code` (party code).
-- **FK.** — (root).
+- **FK.** `priceListId` → PriceList (assigned pricing; drives Sales Order rates,
+  ADR-0007).
 - **Owner.** Sales / CRM.
 
 ### User
@@ -86,15 +87,32 @@
   `rawMaterialId` → ProductVariant/Material, qty, unit, scrapPct. **Owner.** Product
   Master (Production reads later).
 
-### PriceGroup  *(ADR-0006)*
-- **Why.** Holds the **Default Selling Price once per colour-independent base**
+### PriceGroup  *(ADR-0006, ADR-0007)*
+- **Why.** Holds the **default rate once per colour-independent base**
   (`Category|Model/Height|Backing|Type|Width|Length|Size`) so variants inherit it
-  and identical prices are never duplicated across colours. Product Master stores
-  only the *default* price here; tiered pricing is a separate **Price List** module
-  (Dealer/Distributor/Customer/Qty-break/Export).
-- **PK.** `id`. **Unique.** the base key. Fields: `sellingPrice`, `cost` (future).
+  and identical prices are never duplicated across colours. The rate is per **unit**
+  — ₹/Sq.Ft. for rolls, ₹/Piece for footmats/car sets; per-roll/piece totals are
+  **computed** (rate × Sq.Ft.), never stored (ADR-0007).
+- **PK.** `id`. **Unique.** the base key. Fields: `rate`, `unit` (`sqft`|`piece`),
+  `cost` (future).
 - **FK.** ProductVariant references `priceGroupId`. **Owner.** Product Master
-  (Price Lists layer on top later).
+  (the default); Price Lists override on top.
+
+### PriceList  *(ADR-0007)*
+- **Why.** A named set of selling-rate overrides for a customer segment/market
+  (Default, Dealer, Distributor, Institutional, Export, Government, + custom). The
+  commercial layer that varies by customer — distinct from product identity/tax.
+- **PK.** `id`. **Unique.** `name`. Fields: `description`, `status`, `system`,
+  audit, `currency`/`effectiveDate` (future).
+- **FK.** — (assigned parties via `Party.priceListId`). **Owner.** Price Lists.
+
+### PriceListItem  *(override)*
+- **Why.** One **rate override** in a list for a price group — stored *only* where
+  it differs from the default (override-only; no catalogue duplication). Effective
+  rate = `PriceListItem.rate ?? PriceGroup.rate`; effective price computed from it.
+- **PK.** `id`. **Unique.** `(priceListId, priceGroupId)`. Field: `rate`.
+- **FK.** `priceListId` → PriceList; `priceGroupId` → PriceGroup. **Owner.** Price
+  Lists.
 
 ### ProductManufacturing
 - **Why.** Manufacturing/stock defaults future modules consume: production line,

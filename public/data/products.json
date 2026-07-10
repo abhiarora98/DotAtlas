@@ -78,331 +78,440 @@
  },
  "priceGroups": {
   "LOOP|ALTO|DIAMOND||0.61|15 MTR.|": {
-   "sellingPrice": 2672
+   "rate": 23,
+   "unit": "sqft"
   },
   "LOOP|ALTO|DIAMOND||1.22|15 MTR.|": {
-   "sellingPrice": 5344
+   "rate": 23,
+   "unit": "sqft"
   },
   "LOOP|ALTO|SPIKE||0.61|12 MTR.|": {
-   "sellingPrice": 2416
+   "rate": 26,
+   "unit": "sqft"
   },
   "LOOP|ALTO|SPIKE||1.22|12 MTR.|": {
-   "sellingPrice": 4833
+   "rate": 26,
+   "unit": "sqft"
   },
   "LOOP|NIMBO|DIAMOND||0.61|12 MTR.|": {
-   "sellingPrice": 2602
+   "rate": 28,
+   "unit": "sqft"
   },
   "LOOP|NIMBO|DIAMOND||1.22|12 MTR.|": {
-   "sellingPrice": 5204
+   "rate": 28,
+   "unit": "sqft"
   },
   "LOOP|NIMBO|SPIKE||0.61|12 MTR.|": {
-   "sellingPrice": 2602
+   "rate": 28,
+   "unit": "sqft"
   },
   "LOOP|NIMBO|SPIKE||1.22|12 MTR.|": {
-   "sellingPrice": 5204
+   "rate": 28,
+   "unit": "sqft"
   },
   "LOOP|CIRRO|SPIKE||0.61|12 MTR.|": {
-   "sellingPrice": 2974
+   "rate": 32,
+   "unit": "sqft"
   },
   "LOOP|CIRRO|SPIKE||1.22|12 MTR.|": {
-   "sellingPrice": 5948
+   "rate": 32,
+   "unit": "sqft"
   },
   "LOOP|STRATO|SPIKE||0.61|10 MTR.|": {
-   "sellingPrice": 3098
+   "rate": 40,
+   "unit": "sqft"
   },
   "LOOP|STRATO|SPIKE||1.22|10 MTR.|": {
-   "sellingPrice": 6195
+   "rate": 40,
+   "unit": "sqft"
   },
   "TEFNO|TEFNO - 400|||0.61|15 MTR.|": {
-   "sellingPrice": 2904
+   "rate": 25,
+   "unit": "sqft"
   },
   "TEFNO|TEFNO - 400|||1.22|15 MTR.|": {
-   "sellingPrice": 5809
+   "rate": 25,
+   "unit": "sqft"
   },
   "TEFNO|TEFNO - 600|||0.61|15 MTR.|": {
-   "sellingPrice": 3601
+   "rate": 31,
+   "unit": "sqft"
   },
   "TEFNO|TEFNO - 600|||1.22|15 MTR.|": {
-   "sellingPrice": 7203
+   "rate": 31,
+   "unit": "sqft"
   },
   "TEFNO|TEFNO - 900|||0.61|10 MTR.|": {
-   "sellingPrice": 5034
+   "rate": 65,
+   "unit": "sqft"
   },
   "TEFNO|TEFNO - 900|||1.22|10 MTR.|": {
-   "sellingPrice": 10068
+   "rate": 65,
+   "unit": "sqft"
   },
   "TURF|KAPPA|||0.6|15 MTR.|": {
-   "sellingPrice": 2743
+   "rate": 24,
+   "unit": "sqft"
   },
   "TURF|KAPPA|||0.9|15 MTR.|": {
-   "sellingPrice": 4114
+   "rate": 24,
+   "unit": "sqft"
   },
   "TURF|KAPPA|||1|15 MTR.|": {
-   "sellingPrice": 4573
+   "rate": 24,
+   "unit": "sqft"
   },
   "TURF|KAPPA|||1.2|15 MTR.|": {
-   "sellingPrice": 5485
+   "rate": 24,
+   "unit": "sqft"
   },
   "WIRE MAT|TUFFTED-WIRE|||0.61|15 MTR.|": {
-   "sellingPrice": 2971
+   "rate": 26,
+   "unit": "sqft"
   },
   "WIRE MAT|TUFFTED-WIRE|||1.22|15 MTR.|": {
-   "sellingPrice": 5942
+   "rate": 26,
+   "unit": "sqft"
   },
   "ARTIFICIAL GRASS|20 MM||SL|0.6|25 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "ARTIFICIAL GRASS|20 MM||SL|0.9|25 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "ARTIFICIAL GRASS|20 MM||SL|1|25 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "ARTIFICIAL GRASS|20 MM||SL|1.2|25 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "ARTIFICIAL GRASS|20 MM||SL|2|25 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "ARTIFICIAL GRASS|20 MM||DL|0.6|25 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "ARTIFICIAL GRASS|20 MM||DL|0.9|25 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "ARTIFICIAL GRASS|20 MM||DL|1|25 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "ARTIFICIAL GRASS|20 MM||DL|1.2|25 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "ARTIFICIAL GRASS|20 MM||DL|2|25 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "ARTIFICIAL GRASS|25 MM||SL|0.6|25 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "ARTIFICIAL GRASS|25 MM||SL|0.9|25 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "ARTIFICIAL GRASS|25 MM||SL|1|25 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "ARTIFICIAL GRASS|25 MM||SL|1.2|25 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "ARTIFICIAL GRASS|25 MM||SL|2|25 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "ARTIFICIAL GRASS|35 MM|||0.6|25 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "ARTIFICIAL GRASS|35 MM|||0.9|25 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "ARTIFICIAL GRASS|35 MM|||1|25 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "ARTIFICIAL GRASS|35 MM|||1.2|25 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "ARTIFICIAL GRASS|35 MM|||2|25 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "ARTIFICIAL GRASS|40 MM|||0.6|25 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "ARTIFICIAL GRASS|40 MM|||0.9|25 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "ARTIFICIAL GRASS|40 MM|||1|25 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "ARTIFICIAL GRASS|40 MM|||1.2|25 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "ARTIFICIAL GRASS|40 MM|||2|25 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "ARTIFICIAL GRASS|50 MM|||0.6|25 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "ARTIFICIAL GRASS|50 MM|||0.9|25 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "ARTIFICIAL GRASS|50 MM|||1|25 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "ARTIFICIAL GRASS|50 MM|||1.2|25 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "ARTIFICIAL GRASS|50 MM|||2|25 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "MONO GRASS|MONO|DIAMOND||0.61|12 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "MONO GRASS|MONO|DIAMOND||1.22|12 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "MONO GRASS|MONO|DIAMOND||0.61|24 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "MONO GRASS|MONO|DIAMOND||1.22|24 MTR.|": {
-   "sellingPrice": null
+   "rate": null,
+   "unit": "sqft"
   },
   "FOOTMAT|WELCOME|DIAMOND||||30 x 45 CM": {
-   "sellingPrice": 57
+   "rate": 57,
+   "unit": "piece"
   },
   "FOOTMAT|WELCOME|DIAMOND||||38 x 58 CM": {
-   "sellingPrice": 90
+   "rate": 90,
+   "unit": "piece"
   },
   "FOOTMAT|WELCOME|DIAMOND||||45 x 75 CM": {
-   "sellingPrice": 128
+   "rate": 128,
+   "unit": "piece"
   },
   "FOOTMAT|WELCOME|DIAMOND||||60 x 90 CM": {
-   "sellingPrice": 200
+   "rate": 200,
+   "unit": "piece"
   },
   "FOOTMAT|ALTO|DIAMOND||||12 x 18\"": {
-   "sellingPrice": 55
+   "rate": 55,
+   "unit": "piece"
   },
   "FOOTMAT|ALTO|DIAMOND||||14 x 24\"": {
-   "sellingPrice": 80
+   "rate": 80,
+   "unit": "piece"
   },
   "FOOTMAT|ALTO|DIAMOND||||16 x 24\"": {
-   "sellingPrice": 90
+   "rate": 90,
+   "unit": "piece"
   },
   "FOOTMAT|ALTO|DIAMOND||||18 x 30\"": {
-   "sellingPrice": 122
+   "rate": 122,
+   "unit": "piece"
   },
   "FOOTMAT|ALTO|DIAMOND||||24 x 36\"": {
-   "sellingPrice": 192
+   "rate": 192,
+   "unit": "piece"
   },
   "FOOTMAT|ALTO|SPIKE||||12 x 18\"": {
-   "sellingPrice": 58
+   "rate": 58,
+   "unit": "piece"
   },
   "FOOTMAT|ALTO|SPIKE||||14 x 24\"": {
-   "sellingPrice": 85
+   "rate": 85,
+   "unit": "piece"
   },
   "FOOTMAT|ALTO|SPIKE||||16 x 24\"": {
-   "sellingPrice": 95
+   "rate": 95,
+   "unit": "piece"
   },
   "FOOTMAT|ALTO|SPIKE||||18 x 30\"": {
-   "sellingPrice": 132
+   "rate": 132,
+   "unit": "piece"
   },
   "FOOTMAT|ALTO|SPIKE||||24 x 36\"": {
-   "sellingPrice": 205
+   "rate": 205,
+   "unit": "piece"
   },
   "FOOTMAT|NIMBO|DIAMOND||||12 x 18\"": {
-   "sellingPrice": 62
+   "rate": 62,
+   "unit": "piece"
   },
   "FOOTMAT|NIMBO|DIAMOND||||14 x 24\"": {
-   "sellingPrice": 90
+   "rate": 90,
+   "unit": "piece"
   },
   "FOOTMAT|NIMBO|DIAMOND||||16 x 24\"": {
-   "sellingPrice": 102
+   "rate": 102,
+   "unit": "piece"
   },
   "FOOTMAT|NIMBO|DIAMOND||||18 x 30\"": {
-   "sellingPrice": 139
+   "rate": 139,
+   "unit": "piece"
   },
   "FOOTMAT|NIMBO|DIAMOND||||24 x 36\"": {
-   "sellingPrice": 220
+   "rate": 220,
+   "unit": "piece"
   },
   "FOOTMAT|NIMBO|SPIKE||||12 x 18\"": {
-   "sellingPrice": 62
+   "rate": 62,
+   "unit": "piece"
   },
   "FOOTMAT|NIMBO|SPIKE||||14 x 24\"": {
-   "sellingPrice": 90
+   "rate": 90,
+   "unit": "piece"
   },
   "FOOTMAT|NIMBO|SPIKE||||16 x 24\"": {
-   "sellingPrice": 102
+   "rate": 102,
+   "unit": "piece"
   },
   "FOOTMAT|NIMBO|SPIKE||||18 x 30\"": {
-   "sellingPrice": 139
+   "rate": 139,
+   "unit": "piece"
   },
   "FOOTMAT|NIMBO|SPIKE||||24 x 36\"": {
-   "sellingPrice": 220
+   "rate": 220,
+   "unit": "piece"
   },
   "FOOTMAT|CIRRO|SPIKE||||12 x 18\"": {
-   "sellingPrice": 69
+   "rate": 69,
+   "unit": "piece"
   },
   "FOOTMAT|CIRRO|SPIKE||||14 x 24\"": {
-   "sellingPrice": 101
+   "rate": 101,
+   "unit": "piece"
   },
   "FOOTMAT|CIRRO|SPIKE||||16 x 24\"": {
-   "sellingPrice": 114
+   "rate": 114,
+   "unit": "piece"
   },
   "FOOTMAT|CIRRO|SPIKE||||18 x 30\"": {
-   "sellingPrice": 158
+   "rate": 158,
+   "unit": "piece"
   },
   "FOOTMAT|CIRRO|SPIKE||||24 x 36\"": {
-   "sellingPrice": 250
+   "rate": 250,
+   "unit": "piece"
   },
   "FOOTMAT|STRATO|SPIKE||||12 x 18\"": {
-   "sellingPrice": 85
+   "rate": 85,
+   "unit": "piece"
   },
   "FOOTMAT|STRATO|SPIKE||||14 x 24\"": {
-   "sellingPrice": 128
+   "rate": 128,
+   "unit": "piece"
   },
   "FOOTMAT|STRATO|SPIKE||||16 x 24\"": {
-   "sellingPrice": 144
+   "rate": 144,
+   "unit": "piece"
   },
   "FOOTMAT|STRATO|SPIKE||||18 x 30\"": {
-   "sellingPrice": 199
+   "rate": 199,
+   "unit": "piece"
   },
   "FOOTMAT|STRATO|SPIKE||||24 x 36\"": {
-   "sellingPrice": 313
+   "rate": 313,
+   "unit": "piece"
   },
   "FOOTMAT|TEFNO-400|SPIKE||||30 x 45 CM": {
-   "sellingPrice": 57
+   "rate": 57,
+   "unit": "piece"
   },
   "FOOTMAT|TEFNO-400|SPIKE||||38 x 58 CM": {
-   "sellingPrice": 92
+   "rate": 92,
+   "unit": "piece"
   },
   "FOOTMAT|TEFNO-400|SPIKE||||45 x 75 CM": {
-   "sellingPrice": 125
+   "rate": 125,
+   "unit": "piece"
   },
   "FOOTMAT|TEFNO-400|SPIKE||||60 x 90 CM": {
-   "sellingPrice": 199
+   "rate": 199,
+   "unit": "piece"
   },
   "FOOTMAT|TEFNO-600|SPIKE||||30 x 45 CM": {
-   "sellingPrice": 67
+   "rate": 67,
+   "unit": "piece"
   },
   "FOOTMAT|TEFNO-600|SPIKE||||38 x 58 CM": {
-   "sellingPrice": 110
+   "rate": 110,
+   "unit": "piece"
   },
   "FOOTMAT|TEFNO-600|SPIKE||||45 x 75 CM": {
-   "sellingPrice": 152
+   "rate": 152,
+   "unit": "piece"
   },
   "FOOTMAT|TEFNO-600|SPIKE||||60 x 90 CM": {
-   "sellingPrice": 242
+   "rate": 242,
+   "unit": "piece"
   },
   "FOOTMAT|TEFNO-900|SPIKE||||30 x 45 CM": {
-   "sellingPrice": 130
+   "rate": 130,
+   "unit": "piece"
   },
   "FOOTMAT|TEFNO-900|SPIKE||||38 x 58 CM": {
-   "sellingPrice": 220
+   "rate": 220,
+   "unit": "piece"
   },
   "FOOTMAT|TEFNO-900|SPIKE||||45 x 75 CM": {
-   "sellingPrice": 307
+   "rate": 307,
+   "unit": "piece"
   },
   "FOOTMAT|TEFNO-900|SPIKE||||60 x 90 CM": {
-   "sellingPrice": 480
+   "rate": 480,
+   "unit": "piece"
   },
   "FOOTMAT|PRINTED|DIAMOND||||12 x 18\"": {
-   "sellingPrice": 71
+   "rate": 71,
+   "unit": "piece"
   },
   "FOOTMAT|PRINTED|DIAMOND||||14 x 24\"": {
-   "sellingPrice": 94
+   "rate": 94,
+   "unit": "piece"
   },
   "FOOTMAT|PRINTED|DIAMOND||||16 x 24\"": {
-   "sellingPrice": 103
+   "rate": 103,
+   "unit": "piece"
   },
   "FOOTMAT|PRINTED|DIAMOND||||18 x 30\"": {
-   "sellingPrice": 134
+   "rate": 134,
+   "unit": "piece"
   },
   "FOOTMAT|PRINTED|DIAMOND||||24 x 36\"": {
-   "sellingPrice": 197
+   "rate": 197,
+   "unit": "piece"
   }
  },
  "products": [

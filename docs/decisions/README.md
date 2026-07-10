@@ -44,3 +44,4 @@ Create `NNNN-short-title.md` (zero-padded, incrementing) with:
 | [0004](./0004-product-master-core-domain-module.md) | Product Master as a core domain module (Master Data) | Accepted |
 | [0005](./0005-product-master-v2-families-tabs-lifecycle.md) | Product Master V2: families, tabs, lifecycle & SKU locking | Accepted |
 | [0006](./0006-pricing-architecture-price-groups.md) | Pricing architecture: price groups + a future Price List module | Accepted |
+| [0007](./0007-price-lists-and-unit-rate-pricing.md) | Price Lists module + unit-rate pricing (compute totals) | Accepted |

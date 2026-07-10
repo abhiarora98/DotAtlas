@@ -24,7 +24,8 @@
 | **Dispatch** | Dispatch records + items, Packing Slip + items, Transporter | Sales Order + items (read-only), Party, Product Variant, Warehouse pick/pack confirmations |
 | **Warehouse** | Pick/Pack tasks + confirmed picked/packed quantities, Load Sheet generation | Sales Order + items, Dispatch (what to ship), Inventory stock (when available) |
 | **Accounts** | Invoice + items, Payment, Payment Allocation | Sales Order + items, Packing Slip (verified quantities → what to bill), Party receivables |
-| **Products / Catalogue** | Product, Model/Backing/Colour, Product Variant, SKU | — |
+| **Products / Catalogue** | Product, Model/Backing/Colour, Product Variant, SKU, HSN, GST, **default rate** | — |
+| **Price Lists** | Price lists + **rate overrides** (₹/sqft or ₹/piece), party↔list assignment | Product Variant, PriceGroup default rate, Sq.Ft. (to compute totals), Party |
 | **Inventory** *(planned)* | Stock-on-hand, stock movements, reservations | Product Variant, Dispatch (depletion), Warehouse (picks) |
 | **CRM** *(planned)* | Party profile, communications, customer intelligence | Sales Orders, Invoices, Payments (for history/insight) |
 | **Platform** | User, Role, Attachment, Audit, Outbox/Events, Notifications | All (cross-cutting services) |

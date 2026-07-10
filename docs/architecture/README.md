@@ -18,7 +18,8 @@
 
 | Module | Status | Version | Completion | Depends on | Next milestone |
 |---|---|---|---|---|---|
-| [Product Master](./product-master.md) | ✅ Implemented | 2.0 | ~80% | — (foundational) | Wire into Create Sales Order |
+| [Product Master](./product-master.md) | ✅ Implemented | 2.1 | ~80% | — (foundational) | Wire into Create Sales Order |
+| [Price Lists](./price-lists.md) | ✅ Implemented | 1.0 | ~55% | Product Master, Parties | Sales Order price resolution |
 | [Sales Orders](./sales-orders.md) | ✅ Implemented | 1.1 | ~85% | **Product Master**, Parties | Consume Product Master dropdowns |
 | [Dispatch](./dispatch.md) | ✅ Implemented | 1.1 | ~80% | Sales Orders, Warehouse | ERP-fed packing slip (Phase 2) |
 | [Warehouse](./warehouse.md) | 🟡 In Progress | 0.2 | ~25% | Dispatch, Inventory | Dedicated pick/pack workspace (Warehouse Mode) |
@@ -57,7 +58,7 @@
 ### Architecture (`docs/architecture/`)
 - **[native-principles.md](./native-principles.md)** — product philosophy (how Native should feel/behave).
 - **[business-logic-principles.md](./business-logic-principles.md)** — engineering invariants every module's code must obey.
-- **[product-master.md](./product-master.md)** · **[sales-orders.md](./sales-orders.md)** · **[dispatch.md](./dispatch.md)** · **[warehouse.md](./warehouse.md)** — module architecture documents.
+- **[product-master.md](./product-master.md)** · **[price-lists.md](./price-lists.md)** · **[sales-orders.md](./sales-orders.md)** · **[dispatch.md](./dispatch.md)** · **[warehouse.md](./warehouse.md)** — module architecture documents.
 
 ### Database (`docs/database/`)
 - **[er-diagram.md](../database/er-diagram.md)** — conceptual + logical data model (entities, relationships, lifecycles).

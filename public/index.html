@@ -3445,6 +3445,33 @@
   .pm-tl-b { display: flex; flex-direction: column; gap: 2px; }
   .pm-tl-b b { font-size: 12.5px; color: var(--text); } .pm-tl.pending .pm-tl-b b { color: var(--text-3); }
   .pm-tl-b span { font-family: var(--fm); font-size: 10.5px; color: var(--text-4); }
+
+  /* ===== Price Lists ===== */
+  .pl-lists { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin: 14px 0; }
+  .pl-card { border: 1px solid var(--line); border-radius: 14px; background: var(--surface-2); padding: 16px 18px; cursor: pointer; transition: border-color 120ms var(--ease), transform 120ms var(--ease); }
+  .pl-card:hover { border-color: var(--line-3); transform: translateY(-2px); }
+  .pl-card-h { display: flex; align-items: center; gap: 10px; }
+  .pl-card-h h4 { font-family: var(--fd); font-size: 15px; font-weight: 700; color: var(--text); }
+  .pl-card-sys { font-family: var(--fm); font-size: 8.5px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-4); background: var(--surface-3); border-radius: 5px; padding: 2px 6px; }
+  .pl-card-desc { font-size: 12px; color: var(--text-3); margin: 8px 0 12px; min-height: 30px; }
+  .pl-card-stats { display: flex; gap: 18px; font-family: var(--fm); font-size: 11px; color: var(--text-3); }
+  .pl-card-stats b { display: block; font-size: 16px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+  .pl-card-foot { display: flex; align-items: center; gap: 8px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); font-family: var(--fm); font-size: 10px; color: var(--text-4); }
+
+  .pl-ed-bar { display: flex; align-items: center; gap: 10px; padding: 12px 22px; border-bottom: 1px solid var(--line); flex-shrink: 0; flex-wrap: wrap; }
+  .pl-ed-body { flex: 1; overflow-y: auto; padding: 16px 22px 22px; }
+  .pl-meta { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-bottom: 14px; font-family: var(--fm); font-size: 11px; color: var(--text-3); }
+  .pl-meta b { color: var(--text); }
+  .pl-rate-in { width: 92px; text-align: right; font-family: var(--fm); font-variant-numeric: tabular-nums; font-size: 12px; padding: 6px 8px; border: 1px solid var(--line-2); border-radius: 7px; background: var(--surface); color: var(--text); }
+  .pl-rate-in.set { border-color: var(--emerald-mute); color: var(--emerald); background: var(--emerald-soft); }
+  .pl-rate-in:disabled { opacity: 0.5; }
+  .pl-diff { font-family: var(--fm); font-variant-numeric: tabular-nums; font-size: 11.5px; }
+  .pl-diff.up { color: var(--blue); } .pl-diff.down { color: var(--rose); } .pl-diff.same { color: var(--text-4); }
+  .pl-def { color: var(--text-3); font-family: var(--fm); font-variant-numeric: tabular-nums; }
+  .pl-computed { color: var(--text); font-weight: 600; font-family: var(--fm); font-variant-numeric: tabular-nums; }
+  .pl-parties { margin-top: 24px; }
+  .pl-relsearch input { max-width: 320px; }
+  #pl-party-chips:empty::after { content: 'No parties assigned yet.'; font-family: var(--fm); font-size: 11px; color: var(--text-4); }
 </style>
 </head>
 <body>
@@ -3515,8 +3542,8 @@
     <div class="nav-item" data-page="products">
       <span class="glyph">◨</span><span>Product Master</span>
     </div>
-    <div class="nav-item nav-soon" title="Coming soon">
-      <span class="glyph">₹</span><span>Price Lists</span><span class="badge soon">SOON</span>
+    <div class="nav-item" data-page="price-lists">
+      <span class="glyph">₹</span><span>Price Lists</span>
     </div>
     <div class="nav-item nav-soon" title="Coming soon">
       <span class="glyph">→</span><span>Transporters</span><span class="badge soon">SOON</span>
@@ -4645,6 +4672,71 @@
     <input type="file" id="pm-img-input" accept="image/*" multiple hidden>
     <input type="file" id="pm-doc-input" accept=".pdf,image/*" hidden>
     <datalist id="pm-colours"></datalist>
+
+    <!-- PRICE LISTS (Master Data) -->
+    <section class="page" data-page="price-lists" hidden>
+      <div class="hero-h">
+        <div><div class="eb"><span class="live-dot"></span>Master data · Price Lists · commercial rates only</div>
+          <h1>One rate, <span class="em">many</span> markets — <span class="accent">computed</span>, never duplicated.</h1></div>
+        <div class="when" id="pl-when">LISTS · <b>—</b><br/>ACTIVE · <b>—</b><br/>OVERRIDES · <b>—</b></div>
+      </div>
+      <div class="pm-stats" id="pl-kpis"></div>
+      <div class="pm-cat-head"><h3>Price lists</h3><button class="pm-btn prime" id="pl-add" style="margin-left:auto;">+ New Price List</button></div>
+      <div class="pl-lists" id="pl-lists"></div>
+    </section>
+
+    <!-- PRICE LIST EDITOR (pricing screen) -->
+    <div class="ap-overlay ob-dispatch-overlay" id="pl-editor" hidden>
+      <div class="pm-detail-shell" role="dialog" aria-modal="true" aria-labelledby="pl-ed-name">
+        <div class="pm-detail-head">
+          <div class="pm-dh-img" id="pl-ed-ic">₹</div>
+          <div class="pm-dh-main">
+            <div class="pm-dh-top"><h2 id="pl-ed-name">Price list</h2><span class="pm-st" id="pl-ed-status">Active</span></div>
+            <div class="pm-dh-sub"><span id="pl-ed-desc" class="pm-dh-fam"></span></div>
+          </div>
+          <div class="pm-dh-actions" id="pl-ed-actions"></div>
+          <button class="ap-close" id="pl-ed-close" aria-label="Close">×</button>
+        </div>
+        <div class="pl-ed-bar">
+          <div class="pm-search"><span class="pm-search-ic">⌕</span><input id="pl-search" placeholder="Search product, model, SKU…" autocomplete="off"></div>
+          <select class="pm-sel" id="pl-f-cat"><option value="">All categories</option></select>
+          <select class="pm-sel" id="pl-f-over"><option value="">All rows</option><option value="over">Overridden only</option><option value="default">Default only</option></select>
+          <div class="pm-bar-spacer"></div>
+          <button class="pm-btn" id="pl-bulk">Bulk update</button>
+          <button class="pm-btn" id="pl-export">Export</button>
+        </div>
+        <div class="pl-ed-body">
+          <div class="pl-meta" id="pl-meta"></div>
+          <div class="pm-table-wrap" style="max-height:calc(88vh - 320px);">
+            <table class="pm-table pm-table-wide">
+              <thead><tr>
+                <th class="pm-c-name">Product</th>
+                <th>Unit</th>
+                <th class="r">Sq.Ft.</th>
+                <th class="r">Default rate</th>
+                <th class="r">Override rate</th>
+                <th class="r">Computed price</th>
+                <th class="r">Diff</th>
+                <th class="r">GST</th>
+                <th>Updated</th>
+              </tr></thead>
+              <tbody id="pl-rows"></tbody>
+            </table>
+            <div class="pm-empty" id="pl-empty" hidden>No products match.</div>
+          </div>
+          <div class="pm-pager" id="pl-pager"></div>
+          <div class="pl-parties">
+            <div class="pm-sec-h">Assigned parties <span class="ap-muted">— these parties price at this list (Sales Order integration next)</span></div>
+            <div class="pl-relsearch"><input class="pi-input no-upper" id="pl-party-input" placeholder="Add a party by name…"></div>
+            <div class="pm-relchips" id="pl-party-chips"></div>
+          </div>
+        </div>
+        <div class="pm-detail-foot">
+          <div class="ap-status" id="pl-ed-msg"></div>
+          <div class="pm-df-actions"><button class="pi-btn" id="pl-ed-cancel">Close</button><button class="pi-btn prime" id="pl-ed-save">Save price list →</button></div>
+        </div>
+      </div>
+    </div>
 
     <!-- INVENTORY PAGE -->
     <section class="page" data-page="inventory" hidden>
@@ -20641,14 +20733,14 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   const pageTitleMap = {
     today:'Today', orders:'Sales Orders', parties:'Parties', inventory:'Inventory',
     dispatch:'Dispatch', 'create-pi':'Create PI', 'pi-history':'PI History',
-    products:'Product Master',
+    products:'Product Master', 'price-lists':'Price Lists',
     cash:'Cash & finance', receivables:'Receivables',
     intel:'Intelligence', reports:'Reports', workflows:'Workflows', settings:'Settings'
   };
   const sectionMap = {
     today:'Operate', orders:'Operate', parties:'Operate', inventory:'Operate', dispatch:'Operate',
     'create-pi':'Operate', 'pi-history':'Operate',
-    products:'Master data',
+    products:'Master data', 'price-lists':'Master data',
     cash:'Sense', receivables:'Sense', intel:'Sense', reports:'Sense',
     workflows:'Studio', settings:'Studio'
   };
@@ -20683,6 +20775,9 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     }
     if (p === 'products' && typeof window.atlasLoadProducts === 'function') {
       window.atlasLoadProducts();
+    }
+    if (p === 'price-lists' && typeof window.atlasLoadPriceLists === 'function') {
+      window.atlasLoadPriceLists();
     }
     if (orderDept) {
       if (typeof window.atlasSetDept === 'function') window.atlasSetDept(orderDept);
@@ -26428,7 +26523,11 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   function all(){ return seed.map(p => Object.assign({}, p, ov.over[p.id]||{})).concat(ov.add.map(p=>Object.assign({},p))); }
   function byId(id){ return all().find(p=>p.id===id); }
   function pgVal(g){ return (ov.priceGroups[g] || seedPG[g] || {}); }
-  function priceOf(p){ if (p.sellingPrice!=null) return p.sellingPrice; const v=pgVal(p.priceGroup||groupKey(p)); return v.sellingPrice!=null?v.sellingPrice:null; }
+  // Unit-rate pricing (ADR-0007): the price group stores a RATE (₹/sqft for rolls,
+  // ₹/piece for footmats). The per-roll/piece total is COMPUTED, never stored.
+  const unitOf = p => (pgVal(p.priceGroup||groupKey(p)).unit) || (p.category==='FOOTMAT'?'piece':'sqft');
+  function rateOf(p){ const v=pgVal(p.priceGroup||groupKey(p)); return v.rate!=null?v.rate:null; }
+  function priceOf(p){ const r=rateOf(p); if(r==null) return null; return unitOf(p)==='sqft' ? Math.round(r*(+p.sqft||0)) : r; }
   const imagesOf = p => p.images||[];
   const primaryImg = p => { const im=imagesOf(p); return (im.find(x=>x.primary)||im[0]||null); };
   const missImage = p => imagesOf(p).length===0;
@@ -26582,7 +26681,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     if (id){ draft = JSON.parse(JSON.stringify(byId(id))); draftNew=false; }
     else { draft = { id:null, category:'LOOP', status:'Draft', unit:'Roll', gst:18, hsn:'5703', colour:'', images:[], documents:[], bom:{materials:[]}, manufacturing:{}, relationships:{} }; draftNew=true; }
     draft.images=draft.images||[]; draft.documents=draft.documents||[]; draft.bom=draft.bom||{materials:[]}; draft.bom.materials=draft.bom.materials||[]; draft.manufacturing=draft.manufacturing||{}; draft.relationships=draft.relationships||{};
-    nameDirty=!draftNew; skuDirty=!draftNew; groupPrice = priceOf(draft);
+    nameDirty=!draftNew; skuDirty=!draftNew; groupPrice = rateOf(draft);
     activeTab = tab||'general';
     recompute();
     renderHeader(); selectTab(activeTab);
@@ -26658,10 +26757,16 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     }
     if (name==='pricing'){
       const grpCount = all().filter(x=>(x.priceGroup||groupKey(x))===p.priceGroup).length;
-      return '<div class="pm-sec-h">Pricing</div>'
+      const um = unitOf(p); const perLabel = um==='sqft' ? '₹ / Sq.Ft.' : '₹ / Piece';
+      const computed = groupPrice==null ? '—' : (um==='sqft' ? inr(Math.round(groupPrice*(+p.sqft||0)))+' / roll' : inr(groupPrice)+' / piece');
+      return '<div class="pm-sec-h">Pricing <span class="ap-muted">— rate only; totals are computed (ADR-0007)</span></div>'
         + '<div class="pm-grid2">'
-        + '<div class="pi-field"><label>Default Selling Price ₹ <span class="ap-muted">— shared by '+grpCount+' variant'+(grpCount!==1?'s':'')+' in this base</span></label><input class="pi-input mono" data-groupprice="1" inputmode="decimal" value="'+(groupPrice==null?'':groupPrice)+'"></div>'
-        + '<div class="pi-field"><label>Default Cost ₹ <span class="badge soon">SOON</span></label><input class="pi-input mono" disabled placeholder="managed later"></div>'
+        + '<div class="pi-field"><label>Default rate <b>'+perLabel+'</b> <span class="ap-muted">— shared by '+grpCount+' variant'+(grpCount!==1?'s':'')+'</span></label><input class="pi-input mono" data-groupprice="1" inputmode="decimal" value="'+(groupPrice==null?'':groupPrice)+'"></div>'
+        + '<div class="pi-field"><label>Computed price <span class="ap-muted">— rate'+(um==='sqft'?' × '+(p.sqft!=null?p.sqft+' sqft':'sqft'):'')+'</span></label><input class="pi-input mono" value="'+esc(computed)+'" disabled></div>'
+        + '</div>'
+        + '<div class="pm-grid2">'
+        + '<div class="pi-field"><label>Default Cost <span class="badge soon">SOON</span></label><input class="pi-input mono" disabled placeholder="managed later"></div>'
+        + '<div class="pi-field"><label>Customer / market rates</label><input class="pi-input" value="Managed in Price Lists →" disabled></div>'
         + '</div>'
         + '<div class="pm-grid2">'
         + field('HSN Code','hsn',p.hsn,{mono:true})
@@ -26833,7 +26938,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const today=new Date().toISOString().slice(0,10);
     draft.updatedBy='Catalogue'; draft.updatedOn=today;
     // price group
-    if(groupPrice!=null){ ov.priceGroups[draft.priceGroup]={ sellingPrice: groupPrice }; }
+    if(groupPrice!=null){ ov.priceGroups[draft.priceGroup]={ rate: groupPrice, unit: unitOf(draft) }; }
     delete draft.sellingPrice;
     if(draft.id){
       if(seed.some(s=>s.id===draft.id)) ov.over[draft.id]=Object.assign({}, ov.over[draft.id], draft);
@@ -26905,6 +27010,208 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     document.body.appendChild(menu);
     menu.addEventListener('click', e=>{ const b=e.target.closest('[data-mi]'); if(b){ items[+b.getAttribute('data-mi')][1](); menu.remove(); } });
   }
+})();
+</script>
+
+
+<!-- ============ PRICE LISTS (Master Data) ============ -->
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const inr = n => '₹' + Number(n||0).toLocaleString('en-IN', {maximumFractionDigits:0});
+  const today = () => new Date().toISOString().slice(0,10);
+  const lenNum = s => { const m=String(s||'').match(/\d+/); return m?m[0]:''; };
+  const WIDTH_FT = {'0.61':'2ft','1.22':'4ft'};
+  const widthLabel = w => (w==null||w==='')?'':(WIDTH_FT[String(w)]||String(w));
+
+  // ---- product data (read-only from Product Master) ----
+  let seedPG = {}, loaded = false, groups = [];
+  const PROD_OV = 'atlas-products-overlay';
+  function prodOv(){ try { return JSON.parse(localStorage.getItem(PROD_OV)||'{}'); } catch(e){ return {}; } }
+  function defRate(key){ const ov=prodOv(); const g=(ov.priceGroups&&ov.priceGroups[key])||seedPG[key]||{}; return g.rate!=null?g.rate:null; }
+  function unitOf(key){ const ov=prodOv(); const g=(ov.priceGroups&&ov.priceGroups[key])||seedPG[key]||{}; return g.unit||'sqft'; }
+
+  // ---- price lists overlay ----
+  const PL_KEY = 'atlas-pricelists';
+  let store = { lists:{} };
+  try { store = Object.assign({lists:{}}, JSON.parse(localStorage.getItem(PL_KEY)||'{}')); } catch(e){}
+  if(!store.lists) store.lists = {};
+  const saveStore = () => { try { localStorage.setItem(PL_KEY, JSON.stringify(store)); } catch(e){} };
+  const SEED = [
+    ['default','Default','Product Master default rate — every product inherits this. No overrides.',true,true],
+    ['dealer','Dealer','Rates for dealers / trade partners.',true,false],
+    ['distributor','Distributor','Bulk distributor rates.',true,false],
+    ['institutional','Institutional','Institutional & project rates.',true,false],
+    ['export','Export','Export pricing.',true,false],
+    ['government','Government','Government / tender rates.',true,false],
+  ];
+  function ensureSeed(){
+    SEED.forEach(([id,name,desc,system,readonly])=>{ if(!store.lists[id]) store.lists[id]={ id,name,description:desc,status:'Active',system,readonly,overrides:{},parties:[],createdBy:'System',createdOn:today(),updatedBy:'System',updatedOn:today() }; });
+    saveStore();
+  }
+  const lists = () => Object.values(store.lists);
+
+  window.atlasLoadPriceLists = async function(){
+    if(!loaded){
+      try { const res=await fetch('data/products.json'); const j=await res.json(); seedPG=j.priceGroups||{};
+        const gm={}; (j.products||[]).forEach(p=>{ const k=p.priceGroup; if(!gm[k]) gm[k]={key:k,rep:p,variants:0}; gm[k].variants++; });
+        groups = Object.values(gm).map(g=>{ const p=g.rep; const size=p.category==='FOOTMAT'?p.size:(p.width?(widthLabel(p.width)+'×'+lenNum(p.length)+'m'):''); return {
+          key:g.key, category:p.category, gst:p.gst, sqft:p.sqft, unit:(p.category==='FOOTMAT'?'piece':'sqft'), variants:g.variants,
+          label:[p.model||p.height, p.backing, p.type, size].filter(Boolean).join(' '), search:[p.model,p.height,p.backing,p.type,p.colour,p.sku,size].filter(Boolean).join(' ').toLowerCase()
+        }; });
+      } catch(e){ groups=[]; }
+      loaded = true;
+    }
+    ensureSeed(); render();
+  };
+
+  function overriddenGroupKeys(){ const s=new Set(); lists().forEach(l=>{ if(l.id==='default') return; Object.keys(l.overrides||{}).forEach(k=>s.add(k)); }); return s; }
+  function render(){
+    const L=lists();
+    const partiesAssigned = new Set(); L.forEach(l=>(l.parties||[]).forEach(p=>partiesAssigned.add(p)));
+    const ovKeys=overriddenGroupKeys(); let customProducts=0; groups.forEach(g=>{ if(ovKeys.has(g.key)) customProducts+=g.variants; });
+    const recent = L.slice().sort((a,b)=>String(b.updatedOn).localeCompare(String(a.updatedOn)))[0];
+    $('pl-when').innerHTML = 'LISTS · <b>'+L.length+'</b><br/>ACTIVE · <b>'+L.filter(l=>l.status==='Active').length+'</b><br/>OVERRIDES · <b>'+ovKeys.size+'</b>';
+    const stat=(l,v,cls,sub)=>'<div class="pm-stat'+(cls?' '+cls:'')+'"><div class="lbl">'+l+'</div><div class="v">'+v+'</div>'+(sub?'<div class="sub">'+esc(sub)+'</div>':'')+'</div>';
+    $('pl-kpis').innerHTML =
+        stat('Total price lists', L.length)
+      + stat('Active', L.filter(l=>l.status==='Active').length,'good')
+      + stat('Parties assigned', partiesAssigned.size, partiesAssigned.size?'':'assign in a list')
+      + stat('Products with custom prices', customProducts, customProducts?'good':'warn')
+      + stat('Recently updated', recent?esc(recent.name):'—', '', recent?recent.updatedOn:'');
+    $('pl-lists').innerHTML = L.map(l=>{
+      const nov=Object.keys(l.overrides||{}).length;
+      return '<div class="pl-card" data-list="'+esc(l.id)+'"><div class="pl-card-h"><h4>'+esc(l.name)+'</h4>'+(l.system?'<span class="pl-card-sys">System</span>':'')+'<span class="pm-st '+(l.status||'Active').toLowerCase()+'" style="margin-left:auto;">'+(l.status||'Active')+'</span></div>'
+        + '<div class="pl-card-desc">'+esc(l.description||'')+'</div>'
+        + '<div class="pl-card-stats"><span><b>'+(l.id==='default'?'—':nov)+'</b>Overrides</span><span><b>'+((l.parties||[]).length)+'</b>Parties</span></div>'
+        + '<div class="pl-card-foot">Updated '+esc(l.updatedOn||'—')+' · '+esc(l.updatedBy||'—')+'</div></div>';
+    }).join('');
+  }
+
+  // ================= EDITOR (pricing screen) =================
+  let cur=null, draftOver={}, draftParties=[], plState={q:'',cat:'',over:'',page:1,size:25};
+  function openList(id){
+    cur = store.lists[id]; if(!cur) return;
+    draftOver = Object.assign({}, cur.overrides||{}); draftParties = (cur.parties||[]).slice();
+    plState={q:'',cat:'',over:'',page:1,size:25};
+    $('pl-ed-name').textContent = cur.name;
+    $('pl-ed-desc').textContent = cur.description||'';
+    $('pl-ed-status').textContent = cur.status||'Active'; $('pl-ed-status').className='pm-st '+(cur.status||'Active').toLowerCase();
+    $('pl-ed-ic').textContent = cur.readonly?'★':'₹';
+    $('pl-ed-actions').innerHTML = cur.system?'':'<button class="pm-btn sm" data-pl-del="1">Delete list</button>';
+    $('pl-ed-save').style.display = cur.readonly?'none':'';
+    $('pl-bulk').disabled = !!cur.readonly;
+    if(!$('pl-f-cat').options.length || $('pl-f-cat').options.length===1){ const cats=[...new Set(groups.map(g=>g.category))]; $('pl-f-cat').innerHTML='<option value="">All categories</option>'+cats.map(c=>'<option>'+esc(c)+'</option>').join(''); }
+    $('pl-f-cat').value=''; $('pl-search').value=''; $('pl-f-over').value='';
+    renderMeta(); renderRows(); renderParties();
+    $('pl-ed-msg').className='ap-status'; $('pl-ed-msg').textContent='';
+    $('pl-editor').hidden=false;
+  }
+  function closeList(){ $('pl-editor').hidden=true; cur=null; }
+  function renderMeta(){
+    const nov=Object.keys(draftOver).length;
+    $('pl-meta').innerHTML = 'Base <b>Product Master default rate</b> · Overrides <b>'+(cur.id==='default'?'—':nov)+'</b> · Created by <b>'+esc(cur.createdBy||'—')+'</b> · '
+      + (cur.readonly?'<b style="color:var(--emerald)">Read-only — mirrors Product Master</b>':'Effective rate = <b>override ?? default</b>, price computed from Sq.Ft.');
+  }
+  function plFiltered(){
+    const q=plState.q.toLowerCase();
+    return groups.filter(g=>{
+      if(plState.cat && g.category!==plState.cat) return false;
+      const has = draftOver[g.key]!=null;
+      if(plState.over==='over' && !has) return false;
+      if(plState.over==='default' && has) return false;
+      if(q && !g.search.includes(q) && !g.label.toLowerCase().includes(q)) return false;
+      return true;
+    });
+  }
+  function computed(rate, g){ if(rate==null) return null; return g.unit==='sqft' ? Math.round(rate*(+g.sqft||0)) : rate; }
+  function renderRows(){
+    const rows=plFiltered(); const pages=Math.max(1,Math.ceil(rows.length/plState.size));
+    if(plState.page>pages) plState.page=pages;
+    const slice=rows.slice((plState.page-1)*plState.size, plState.page*plState.size);
+    $('pl-empty').hidden = rows.length>0;
+    const ro = cur.readonly;
+    $('pl-rows').innerHTML = slice.map(g=>{
+      const def=defRate(g.key); const ov=draftOver[g.key]; const eff = ov!=null?ov:def;
+      const comp=computed(eff,g); const perU = g.unit==='sqft'?'/sqft':'/pc';
+      const diff = (ov!=null&&def!=null) ? (ov-def) : null;
+      const diffCls = diff==null?'same':diff>0?'up':diff<0?'down':'same';
+      return '<tr data-key="'+esc(g.key)+'">'
+        + '<td class="pm-c-name"><div class="pm-name">'+esc(g.label)+'</div><div class="pm-sku">'+esc(g.category)+' · '+g.variants+' colour'+(g.variants!==1?'s':'')+'</div></td>'
+        + '<td class="pm-meta">'+(g.unit==='sqft'?'Sq.Ft.':'Piece')+'</td>'
+        + '<td class="r pm-mono">'+(g.unit==='sqft'?(g.sqft!=null?g.sqft:'—'):'—')+'</td>'
+        + '<td class="r pl-def">'+(def!=null?inr(def)+perU:'—')+'</td>'
+        + '<td class="r"><input class="pl-rate-in'+(ov!=null?' set':'')+'" data-rate="'+esc(g.key)+'" inputmode="decimal" value="'+(ov!=null?ov:'')+'" placeholder="'+(def!=null?def:'')+'"'+(ro?' disabled':'')+'></td>'
+        + '<td class="r pl-computed" data-comp="'+esc(g.key)+'">'+(comp!=null?inr(comp)+(g.unit==='sqft'?'/roll':'/pc'):'—')+'</td>'
+        + '<td class="r"><span class="pl-diff '+diffCls+'" data-diff="'+esc(g.key)+'">'+(diff==null?'—':(diff>0?'+':'')+inr(diff)+perU)+'</span></td>'
+        + '<td class="r pm-meta">'+(g.gst!=null?g.gst+'%':'—')+'</td>'
+        + '<td class="pm-updated">'+esc(cur.updatedOn||'—')+'</td>'
+        + '</tr>';
+    }).join('');
+    $('pl-pager').innerHTML = rows.length ? ('<button id="pl-prev"'+(plState.page<=1?' disabled':'')+'>← Prev</button><span>'+((plState.page-1)*plState.size+1)+'–'+Math.min(plState.page*plState.size,rows.length)+' of '+rows.length+'</span><button id="pl-next"'+(plState.page>=pages?' disabled':'')+'>Next →</button>') : '';
+    if($('pl-prev')) $('pl-prev').onclick=()=>{plState.page--;renderRows();};
+    if($('pl-next')) $('pl-next').onclick=()=>{plState.page++;renderRows();};
+  }
+  function renderParties(){
+    $('pl-party-chips').innerHTML = draftParties.map(p=>'<span class="pm-relchip">'+esc(p)+'<button data-party-del="'+esc(p)+'">✕</button></span>').join('');
+  }
+  function setRate(key, val){
+    const g=groups.find(x=>x.key===key); if(!g) return;
+    let v = val===''?null:Math.round(+val*100)/100; if(v!=null && (isNaN(v)||v<0)) v=null;
+    if(v==null) delete draftOver[key]; else draftOver[key]=v;
+    // live update the row's computed + diff + input state
+    const def=defRate(key); const eff=v!=null?v:def; const comp=computed(eff,g);
+    const compEl=document.querySelector('[data-comp="'+CSS.escape(key)+'"]'); if(compEl) compEl.textContent = comp!=null?inr(comp)+(g.unit==='sqft'?'/roll':'/pc'):'—';
+    const diff=(v!=null&&def!=null)?(v-def):null; const de=document.querySelector('[data-diff="'+CSS.escape(key)+'"]');
+    if(de){ de.className='pl-diff '+(diff==null?'same':diff>0?'up':'down'); de.textContent=diff==null?'—':(diff>0?'+':'')+inr(diff)+(g.unit==='sqft'?'/sqft':'/pc'); }
+    const inp=document.querySelector('[data-rate="'+CSS.escape(key)+'"]'); if(inp) inp.classList.toggle('set', v!=null);
+    renderMeta();
+  }
+  function saveList(){
+    if(cur.readonly){ closeList(); return; }
+    cur.overrides = Object.assign({}, draftOver);
+    cur.parties = draftParties.slice();
+    cur.updatedBy='Pricing'; cur.updatedOn=today();
+    saveStore(); closeList(); render();
+  }
+  function bulkUpdate(){
+    if(cur.readonly) return;
+    const pct = window.prompt('Bulk set override for the '+plFiltered().length+' filtered rows.\nEnter a % vs default (e.g. -5 for 5% off, 10 for +10%).\nLeave blank and OK to CLEAR overrides on these rows.');
+    if(pct===null) return;
+    const rows=plFiltered();
+    if(pct.trim()===''){ rows.forEach(g=>delete draftOver[g.key]); }
+    else { const f=1+(+pct)/100; if(isNaN(f)) return; rows.forEach(g=>{ const d=defRate(g.key); if(d!=null) draftOver[g.key]=Math.round(d*f*100)/100; }); }
+    renderRows(); renderMeta();
+  }
+  function newList(){
+    const name=window.prompt('New price list name:'); if(!name) return;
+    const id='pl'+Date.now();
+    store.lists[id]={ id,name:name.trim(),description:'',status:'Active',system:false,readonly:false,overrides:{},parties:[],createdBy:'Pricing',createdOn:today(),updatedBy:'Pricing',updatedOn:today() };
+    saveStore(); render(); openList(id);
+  }
+  function exportList(){ const rows=plFiltered().map(g=>{ const def=defRate(g.key); const ov=draftOver[g.key]; const eff=ov!=null?ov:def; return {product:g.label, category:g.category, unit:g.unit, sqft:g.sqft, defaultRate:def, overrideRate:ov??null, effectiveRate:eff, computed:computed(eff,g), gst:g.gst}; });
+    const blob='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify({priceList:cur.name, rows},null,1)); const a=document.createElement('a'); a.href=blob; a.download='pricelist-'+cur.id+'.json'; a.click(); }
+
+  document.addEventListener('DOMContentLoaded', ()=>{
+    $('pl-add').addEventListener('click', newList);
+    $('pl-lists').addEventListener('click', e=>{ const c=e.target.closest('[data-list]'); if(c) openList(c.getAttribute('data-list')); });
+    $('pl-ed-close').addEventListener('click', closeList);
+    $('pl-ed-cancel').addEventListener('click', closeList);
+    $('pl-editor').addEventListener('click', e=>{ if(e.target===$('pl-editor')) closeList(); });
+    $('pl-ed-save').addEventListener('click', saveList);
+    $('pl-ed-actions').addEventListener('click', e=>{ if(e.target.closest('[data-pl-del]')){ if(window.confirm('Delete this price list?')){ delete store.lists[cur.id]; saveStore(); closeList(); render(); } } });
+    $('pl-search').addEventListener('input', e=>{ plState.q=e.target.value; plState.page=1; renderRows(); });
+    $('pl-f-cat').addEventListener('change', e=>{ plState.cat=e.target.value; plState.page=1; renderRows(); });
+    $('pl-f-over').addEventListener('change', e=>{ plState.over=e.target.value; plState.page=1; renderRows(); });
+    $('pl-bulk').addEventListener('click', bulkUpdate);
+    $('pl-export').addEventListener('click', exportList);
+    $('pl-rows').addEventListener('input', e=>{ const inp=e.target.closest('[data-rate]'); if(inp) setRate(inp.getAttribute('data-rate'), inp.value); });
+    $('pl-party-input').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); const v=e.target.value.trim(); if(v && !draftParties.includes(v)){ draftParties.push(v); renderParties(); } e.target.value=''; } });
+    $('pl-party-chips').addEventListener('click', e=>{ const b=e.target.closest('[data-party-del]'); if(b){ draftParties=draftParties.filter(p=>p!==b.getAttribute('data-party-del')); renderParties(); } });
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape' && !$('pl-editor').hidden) closeList(); });
+    if(location.hash==='#price-lists') window.atlasLoadPriceLists();
+  });
 })();
 </script>
 
