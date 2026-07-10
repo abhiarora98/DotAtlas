@@ -3392,6 +3392,59 @@
   .pm-audit { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .pm-audit .a-l { font-family: var(--fm); font-size: 9.5px; text-transform: uppercase; color: var(--text-4); }
   .pm-audit .a-v { font-size: 13px; color: var(--text); margin-top: 3px; }
+
+  /* ===== Product Master · landing panels + list enrichments ===== */
+  .pm-panels { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; margin: 14px 0 6px; }
+  .pm-panel { border: 1px solid var(--line); border-radius: 13px; background: var(--surface-2); overflow: hidden; }
+  .pm-panel-h { display: flex; align-items: center; gap: 8px; padding: 11px 14px; border-bottom: 1px solid var(--line); font-family: var(--fd); font-size: 12.5px; font-weight: 700; color: var(--text); }
+  .pm-panel-ic { font-size: 13px; }
+  .pm-panel-n { font-family: var(--fm); font-size: 11px; font-weight: 700; color: var(--text-3); background: var(--surface-3); border-radius: 999px; padding: 2px 8px; }
+  .pm-panel-all { margin-left: auto; font-family: var(--fm); font-size: 10.5px; color: var(--blue); background: transparent; border: 0; cursor: pointer; }
+  .pm-panel-all:hover { text-decoration: underline; }
+  .pm-panel-b { padding: 8px; display: flex; flex-direction: column; gap: 2px; }
+  .pm-panel-empty { padding: 14px; text-align: center; font-size: 12px; color: var(--text-4); }
+  .pm-pchip { display: flex; align-items: center; gap: 9px; padding: 7px 8px; border-radius: 9px; background: transparent; border: 0; cursor: pointer; text-align: left; width: 100%; }
+  .pm-pchip:hover { background: var(--surface-3); }
+  .pm-thumb.sm { width: 26px; height: 26px; font-size: 12px; flex-shrink: 0; }
+  .pm-pchip-t { min-width: 0; display: flex; flex-direction: column; }
+  .pm-pchip-t b { font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 190px; }
+  .pm-pchip-t span { font-family: var(--fm); font-size: 10px; color: var(--text-4); }
+
+  .pm-cat-head { display: flex; align-items: baseline; gap: 10px; margin: 20px 0 6px; }
+  .pm-cat-head h3 { font-family: var(--fd); font-size: 15px; font-weight: 700; color: var(--text); }
+  .pm-cat-head #pm-cat-count { font-family: var(--fm); font-size: 11px; color: var(--text-4); }
+
+  /* new table cells */
+  .pm-c-bk, .pm-c-col { width: 120px; } .pm-c-sz { width: 96px; }
+  .pm-c-stk { width: 76px; } .pm-c-cmp { width: 108px; } .pm-c-act { width: 176px; }
+  .pm-thumb .pm-ph-ic { font-size: 13px; filter: grayscale(1) opacity(0.55); }
+  .pm-mono { font-family: var(--fm); font-size: 11.5px; color: var(--text-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .pm-stock { display: inline-flex; align-items: center; gap: 6px; font-family: var(--fm); font-size: 11px; color: var(--text-2); }
+  .pm-stock .pm-dot { width: 7px; height: 7px; border-radius: 50%; }
+  .pm-stock.in .pm-dot { background: var(--emerald); } .pm-stock.in { color: var(--emerald); }
+  .pm-stock.low .pm-dot { background: var(--amber); } .pm-stock.low { color: var(--amber); }
+  .pm-stock.out .pm-dot { background: var(--rose); } .pm-stock.out { color: var(--rose); }
+  .pm-cmp { display: inline-flex; align-items: center; gap: 7px; font-family: var(--fm); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .pm-cmp-bar { width: 46px; height: 5px; border-radius: 999px; background: var(--surface-3); overflow: hidden; }
+  .pm-cmp-bar span { display: block; height: 100%; border-radius: 999px; }
+  .pm-cmp.good { color: var(--emerald); } .pm-cmp.good .pm-cmp-bar span { background: var(--emerald); }
+  .pm-cmp.mid { color: var(--amber); } .pm-cmp.mid .pm-cmp-bar span { background: var(--amber); }
+  .pm-cmp.low { color: var(--rose); } .pm-cmp.low .pm-cmp-bar span { background: var(--rose); }
+  .pm-acts { display: flex; gap: 2px; opacity: 0; transition: opacity 120ms var(--ease); }
+  .pm-table tbody tr:hover .pm-acts { opacity: 1; }
+  .pm-act { border: 0; background: transparent; cursor: pointer; font-size: 13px; line-height: 1; padding: 5px 6px; border-radius: 7px; filter: grayscale(0.3); }
+  .pm-act:hover { background: var(--surface); filter: none; transform: translateY(-1px); }
+
+  /* relationship auto chips + timeline */
+  .pm-relchip.auto { cursor: pointer; } .pm-relchip.auto:hover { border-color: var(--emerald-mute); color: var(--text); }
+  .pm-timeline { position: relative; padding-left: 6px; }
+  .pm-tl { position: relative; display: flex; gap: 12px; padding: 0 0 16px 18px; border-left: 1.5px solid var(--line-2); }
+  .pm-tl:last-child { border-left-color: transparent; padding-bottom: 0; }
+  .pm-tl-dot { position: absolute; left: -6px; top: 2px; width: 10px; height: 10px; border-radius: 50%; background: var(--surface-3); border: 2px solid var(--line-3); }
+  .pm-tl.done .pm-tl-dot { background: var(--emerald); border-color: var(--emerald); }
+  .pm-tl-b { display: flex; flex-direction: column; gap: 2px; }
+  .pm-tl-b b { font-size: 12.5px; color: var(--text); } .pm-tl.pending .pm-tl-b b { color: var(--text-3); }
+  .pm-tl-b span { font-family: var(--fm); font-size: 10.5px; color: var(--text-4); }
 </style>
 </head>
 <body>
@@ -4481,6 +4534,12 @@
 
       <div class="pm-stats" id="pm-kpis"></div>
 
+      <div class="pm-panels" id="pm-panels"></div>
+
+      <div class="pm-cat-head">
+        <h3>Catalogue <span id="pm-cat-count"></span></h3>
+      </div>
+
       <div class="pm-bar">
         <div class="pm-search">
           <span class="pm-search-ic">⌕</span>
@@ -4526,12 +4585,13 @@
             <th class="pm-c-name">Product</th>
             <th class="pm-c-cat">Category</th>
             <th class="pm-c-model">Model</th>
-            <th class="pm-c-var">Variant</th>
+            <th class="pm-c-bk">Backing</th>
+            <th class="pm-c-sz">Size</th>
+            <th class="pm-c-col">Colour</th>
+            <th class="pm-c-stk">Stock</th>
+            <th class="pm-c-cmp">Complete</th>
             <th class="pm-c-status">Status</th>
-            <th class="pm-c-wt r">Weight</th>
-            <th class="pm-c-unit">Unit</th>
-            <th class="pm-c-upd">Updated</th>
-            <th class="pm-c-act"></th>
+            <th class="pm-c-act">Actions</th>
           </tr></thead>
           <tbody id="pm-rows"></tbody>
         </table>
@@ -26370,6 +26430,23 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   const missImage = p => imagesOf(p).length===0;
   const missBom = p => !(p.bom && Array.isArray(p.bom.materials) && p.bom.materials.length);
   const missPrice = p => priceOf(p)==null;
+  const missDocs = p => !(p.documents && p.documents.length);
+  const hasSpecs = p => specAttrs(p.category).every(a=>p[a]) && p.weight!=null && p.sqft!=null;
+  const sizeOf = p => p.category==='FOOTMAT' ? p.size : (p.width ? (p.width+'×'+lenNum(p.length)+'m') : '');
+
+  // Stock snapshot — placeholder until Inventory lands. Deterministic per product
+  // (stable hash) so the demo looks realistic; wired to real stock later.
+  function hashId(s){ let h=0; s=String(s); for(let i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))>>>0; } return h; }
+  function stockOf(p){ const m=hashId(p.id)%20; if(m===0) return {level:'out',short:'Out',label:'Out of stock (placeholder)',qty:0}; if(m<=3) return {level:'low',short:'Low',label:'Low stock (placeholder)',qty:m*3}; return {level:'in',short:'In',label:'In stock (placeholder)',qty:40+m}; }
+
+  // Completeness — share of {image, price, BOM, documents, specs} present.
+  function completenessOf(p){
+    const checks=[['Image',!missImage(p)],['Price',!missPrice(p)],['BOM',!missBom(p)],['Docs',!missDocs(p)],['Specs',hasSpecs(p)]];
+    const done=checks.filter(c=>c[1]).length; const pct=Math.round(done/checks.length*100);
+    const missing=checks.filter(c=>!c[1]).map(c=>c[0]);
+    return { pct, missing, tone: pct>=80?'good':pct>=50?'mid':'low' };
+  }
+  const needsReview = p => (p.status||'Active')==='Draft' || completenessOf(p).pct < 60;
 
   const state = { q:'', cat:'', family:'', model:'', status:'', width:'', length:'', colour:'', miss:{}, page:1, size:20, sel:new Set() };
 
@@ -26400,12 +26477,36 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       if (state.miss.image && !missImage(p)) return false;
       if (state.miss.bom && !missBom(p)) return false;
       if (state.miss.price && !missPrice(p)) return false;
-      if (q){ const blob=[p.sku,p.name,p.category,p.model,p.height,p.colour,p.backing,p.family].filter(Boolean).join(' ').toLowerCase(); if(!blob.includes(q)) return false; }
+      if (state.miss['low-stock'] && stockOf(p).level==='in') return false;
+      if (state.miss.review && !needsReview(p)) return false;
+      if (state.miss['recent-add'] && !ov.add.some(a=>a.id===p.id)) return false;
+      // Universal search — matches any attribute: colour, model, width (4ft),
+      // backing (Spike), SKU, HSN, product name, family, etc.
+      if (q){ const blob=[p.sku,p.name,p.category,p.model,p.height,p.type,p.colour,p.backing,p.family,p.width,p.length,p.size,p.hsn,p.unit].filter(Boolean).join(' ').toLowerCase(); if(!blob.includes(q)) return false; }
       return true;
     });
   }
   // Compact variant label: backing · size · colour (width×length collapsed).
   const variantOf = p => { const dim = p.category==='FOOTMAT' ? p.size : (p.width && (p.width+'×'+lenNum(p.length)+'m')); return [p.backing, p.type, dim, p.colour].filter(Boolean).join(' · '); };
+  const actIcon = (id,act,ic,title) => '<button class="pm-act" data-act="'+act+'" data-id="'+esc(id)+'" title="'+title+'" aria-label="'+title+'">'+ic+'</button>';
+
+  // Landing-page attention panels — recently added/updated, low stock, gaps.
+  function renderPanels(){
+    const list=all();
+    const recent = arr => arr.slice(0,4);
+    const byUpd = list.filter(p=>p.updatedOn).slice().sort((a,b)=>String(b.updatedOn).localeCompare(String(a.updatedOn)));
+    const lowStock = list.filter(p=>{const s=stockOf(p);return s.level!=='in';});
+    const review = list.filter(needsReview);
+    const chip = p => '<button class="pm-pchip" data-open="'+esc(p.id)+'"><span class="pm-thumb sm">'+(primaryImg(p)?'<img src="'+esc(primaryImg(p).url)+'">':'📷')+'</span><span class="pm-pchip-t"><b>'+esc(p.name||suggestName(p))+'</b><span>'+esc(p.sku)+'</span></span></button>';
+    const panel = (icon,title,items,filterAttr) => '<div class="pm-panel"><div class="pm-panel-h"><span class="pm-panel-ic">'+icon+'</span>'+title+'<span class="pm-panel-n">'+items.length+'</span>'+(filterAttr?'<button class="pm-panel-all" data-panel="'+filterAttr+'">View all →</button>':'')+'</div><div class="pm-panel-b">'+(items.length?recent(items).map(chip).join(''):'<div class="pm-panel-empty">Nothing here 🎉</div>')+'</div></div>';
+    $('pm-panels').innerHTML =
+        panel('🆕','Recently added', ov.add.slice().reverse(), ov.add.length?'recent-add':'')
+      + panel('✎','Recently updated', byUpd, '')
+      + panel('📉','Low stock', lowStock, 'low-stock')
+      + panel('📷','Missing images', list.filter(missImage), 'image')
+      + panel('📦','Missing BOM', list.filter(missBom), 'bom')
+      + panel('⚑','Needing review', review, 'review');
+  }
 
   function render(){
     const list = all();
@@ -26430,25 +26531,33 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     fillSelect('pm-f-length', distinct('length', state.cat), 'Any length', state.length);
     fillSelect('pm-f-colour', distinct('colour', state.cat), 'Any colour', state.colour);
     document.querySelectorAll('#pm-more .pm-chip').forEach(c=>c.classList.toggle('on', !!state.miss[c.getAttribute('data-miss')]));
+    renderPanels();
     // table
     const rows=filtered(); const pages=Math.max(1,Math.ceil(rows.length/state.size));
     if(state.page>pages) state.page=pages;
     const slice=rows.slice((state.page-1)*state.size, state.page*state.size);
+    const anyFilter = state.q||state.cat||state.family||state.model||state.status||state.width||state.length||state.colour||Object.keys(state.miss).some(k=>state.miss[k]);
+    $('pm-cat-count').textContent = anyFilter ? (rows.length+' of '+all().length) : all().length+' products';
     $('pm-empty').hidden = rows.length>0;
     $('pm-rows').innerHTML = slice.map(p=>{
       const img=primaryImg(p); const st=(p.status||'Active');
+      const sk=stockOf(p); const cm=completenessOf(p); const backing=p.backing||p.type||'—'; const sz=sizeOf(p)||'—';
       return '<tr data-id="'+esc(p.id)+'">'
         + '<td class="pm-c-chk"><input type="checkbox" class="pm-row-chk" data-id="'+esc(p.id)+'"'+(state.sel.has(p.id)?' checked':'')+'></td>'
-        + '<td class="pm-c-img"><span class="pm-thumb">'+(img?'<img src="'+esc(img.url)+'">':'◨')+'</span></td>'
+        + '<td class="pm-c-img"><span class="pm-thumb">'+(img?'<img src="'+esc(img.url)+'">':'<span class="pm-ph-ic">📷</span>')+'</span></td>'
         + '<td class="pm-c-name"><div class="pm-name">'+esc(p.name||suggestName(p))+'</div><div class="pm-sku">'+esc(p.sku)+'</div></td>'
         + '<td class="pm-c-cat"><span class="pm-cat">'+esc(p.category)+'</span></td>'
         + '<td class="pm-c-model"><span class="pm-badge">'+esc(p.model||p.height||'—')+'</span></td>'
-        + '<td class="pm-c-var"><span class="pm-var">'+esc(variantOf(p)||'—')+'</span></td>'
+        + '<td class="pm-c-bk pm-meta">'+esc(backing)+'</td>'
+        + '<td class="pm-c-sz pm-mono">'+esc(sz)+'</td>'
+        + '<td class="pm-c-col pm-meta">'+esc(p.colour||'—')+'</td>'
+        + '<td class="pm-c-stk"><span class="pm-stock '+sk.level+'" title="'+esc(sk.label)+'"><span class="pm-dot"></span>'+esc(sk.short)+'</span></td>'
+        + '<td class="pm-c-cmp"><span class="pm-cmp '+cm.tone+'" title="'+esc(cm.missing.length?('Missing: '+cm.missing.join(', ')):'Complete')+'"><span class="pm-cmp-bar"><span style="width:'+cm.pct+'%"></span></span>'+cm.pct+'%</span></td>'
         + '<td class="pm-c-status"><span class="pm-st '+st.toLowerCase()+'">'+st+'</span></td>'
-        + '<td class="pm-c-wt r pm-num">'+(p.weight!=null?p.weight:'<span class="pm-dash">—</span>')+'</td>'
-        + '<td class="pm-c-unit pm-meta">'+esc(p.unit||'—')+'</td>'
-        + '<td class="pm-c-upd pm-updated">'+esc(p.updatedOn||'—')+'</td>'
-        + '<td class="pm-c-act"><button class="pm-kebab" data-kebab="'+esc(p.id)+'">⋯</button></td>'
+        + '<td class="pm-c-act"><div class="pm-acts">'
+          + actIcon(p.id,'edit','✏️','Edit') + actIcon(p.id,'dup','⧉','Duplicate') + actIcon(p.id,'images','📷','Images')
+          + actIcon(p.id,'documents','📄','Documents') + actIcon(p.id,'bom','📦','BOM') + actIcon(p.id,'analytics','📊','Analytics')
+          + '</div></td>'
         + '</tr>';
     }).join('');
     $('pm-pager').innerHTML = rows.length ? ('<button id="pm-prev"'+(state.page<=1?' disabled':'')+'>← Prev</button><span>'+((state.page-1)*state.size+1)+'–'+Math.min(state.page*state.size,rows.length)+' of '+rows.length+'</span><button id="pm-next"'+(state.page>=pages?' disabled':'')+'>Next →</button>') : '';
@@ -26465,14 +26574,14 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   const DOC_TYPES=['Product Catalogue','Technical Data Sheet','Installation Guide','QC Sheet'];
   const REL_GROUPS=[['compatible','Compatible Products'],['accessories','Accessories'],['replacement','Replacement Products'],['upgradedBy','Upgraded Version'],['discontinuedBy','Discontinued By']];
 
-  function openDetail(id){
+  function openDetail(id, tab){
     if (id){ draft = JSON.parse(JSON.stringify(byId(id))); draftNew=false; }
     else { draft = { id:null, category:'LOOP', status:'Draft', unit:'Roll', gst:18, hsn:'5703', colour:'', images:[], documents:[], bom:{materials:[]}, manufacturing:{}, relationships:{} }; draftNew=true; }
     draft.images=draft.images||[]; draft.documents=draft.documents||[]; draft.bom=draft.bom||{materials:[]}; draft.bom.materials=draft.bom.materials||[]; draft.manufacturing=draft.manufacturing||{}; draft.relationships=draft.relationships||{};
     nameDirty=!draftNew; skuDirty=!draftNew; groupPrice = priceOf(draft);
-    activeTab='general';
+    activeTab = tab||'general';
     recompute();
-    renderHeader(); selectTab('general');
+    renderHeader(); selectTab(activeTab);
     $('pm-d-msg').className='ap-status'; $('pm-d-msg').textContent='';
     $('pm-detail').hidden=false;
   }
@@ -26600,7 +26709,15 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         + '</div>';
     }
     if (name==='relationships'){
-      return '<div class="pm-sec-h">Product Relationships</div>' + REL_GROUPS.map(([k,label])=>{
+      // Auto-derived relations from the catalogue.
+      const others = all().filter(x=>x.id!==p.id && x.id);
+      const sameModel = others.filter(x=>x.family===p.family).slice(0,12);
+      const altColours = others.filter(x=>(x.priceGroup||groupKey(x))===(p.priceGroup||groupKey(p))).slice(0,12);
+      const autoRow=(title,list)=> '<div class="pm-relgrp"><label style="font-family:var(--fm);font-size:11.5px;color:var(--text-2);">'+title+' <span class="ap-muted">— auto</span></label>'
+        + '<div class="pm-relchips">'+(list.length?list.map(x=>'<span class="pm-relchip auto" data-open="'+esc(x.id)+'">'+esc(x.colour||x.name||x.sku)+'</span>').join(''):'<span class="ap-muted" style="font-size:11px;">None</span>')+'</div></div>';
+      return '<div class="pm-sec-h">Related products <span class="ap-muted">— derived from the catalogue</span></div>'
+        + autoRow('Same Model', sameModel) + autoRow('Alternative Colours', altColours)
+        + '<div class="pm-sec-h">Manual relationships</div>' + REL_GROUPS.map(([k,label])=>{
         const ids=(p.relationships[k]||[]);
         return '<div class="pm-relgrp" data-relgrp="'+k+'"><label style="font-family:var(--fm);font-size:11.5px;color:var(--text-2);">'+label+'</label>'
           + '<div class="pm-relsearch"><input class="pi-input no-upper" data-relsearch="'+k+'" placeholder="Search products by name or SKU…"><div class="pm-relresults" data-relresults="'+k+'" hidden></div></div>'
@@ -26608,11 +26725,19 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       }).join('');
     }
     if (name==='audit'){
+      const tl=[ ['Created', (p.createdOn||'—')+' · '+(p.createdBy||'—'), true],
+        ['Price set', missPrice(p)?'—':inr(priceOf(p)), !missPrice(p)],
+        ['Image added', missImage(p)?'—':(imagesOf(p).length+' image(s)'), !missImage(p)],
+        ['BOM updated', missBom(p)?'—':(p.bom.materials.length+' material(s)'), !missBom(p)],
+        ['Used in Sales Order', 'when SO integration lands', false],
+        ['Last sold', 'when sales data lands', false] ];
       return '<div class="pm-sec-h">Audit</div><div class="pm-audit">'
         + '<div><div class="a-l">Created by</div><div class="a-v">'+esc(p.createdBy||'—')+'</div></div>'
         + '<div><div class="a-l">Created on</div><div class="a-v">'+esc(p.createdOn||'—')+'</div></div>'
         + '<div><div class="a-l">Updated by</div><div class="a-v">'+esc(p.updatedBy||'—')+'</div></div>'
         + '<div><div class="a-l">Updated on</div><div class="a-v">'+esc(p.updatedOn||'—')+'</div></div>'
+        + '</div><div class="pm-sec-h">Product timeline</div><div class="pm-timeline">'
+        + tl.map(t=>'<div class="pm-tl'+(t[2]?' done':' pending')+'"><span class="pm-tl-dot"></span><div class="pm-tl-b"><b>'+esc(t[0])+'</b><span>'+esc(t[1])+'</span></div></div>').join('')
         + '</div><div class="pm-placeholder" style="text-align:left;">Full change history — every field change with who/when — is future.</div>';
     }
     // placeholder tabs
@@ -26673,6 +26798,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   function onContentClick(e){
     const t=e.target;
     let i;
+    const op=t.closest('[data-open]'); if(op){ openDetail(op.getAttribute('data-open'),'relationships'); return; }
     if((i=t.getAttribute('data-imgprimary'))!=null){ i=+i; draft.images.forEach((x,j)=>x.primary=j===i); draft.images[i].type='Primary'; selectTab('images'); renderHeader(); return; }
     if((i=t.getAttribute('data-imgdel'))!=null){ draft.images.splice(+i,1); if(draft.images.length&&!draft.images.some(x=>x.primary)) draft.images[0].primary=true; selectTab('images'); renderHeader(); return; }
     if((i=t.getAttribute('data-imgup'))!=null){ i=+i; if(i>0){ const a=draft.images; [a[i-1],a[i]]=[a[i],a[i-1]]; selectTab('images'); } return; }
@@ -26730,10 +26856,16 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     $('pm-kpis').addEventListener('click', e=>{ const s=e.target.closest('[data-miss]'); if(s){ const k=s.getAttribute('data-miss'); state.miss={}; state.miss[k]=true; $('pm-more').hidden=false; state.page=1; render(); } });
     $('pm-add').addEventListener('click', ()=>openDetail(null));
     $('pm-export').addEventListener('click', ()=>exportProducts(filtered()));
+    const ACT_TAB={edit:'general',images:'images',documents:'documents',bom:'bom',analytics:'analytics'};
     $('pm-rows').addEventListener('click', e=>{
       const chk=e.target.closest('.pm-row-chk'); if(chk){ const id=chk.getAttribute('data-id'); chk.checked?state.sel.add(id):state.sel.delete(id); render(); return; }
-      const kb=e.target.closest('[data-kebab]'); if(kb){ openMenu(kb, kb.getAttribute('data-kebab')); return; }
+      const act=e.target.closest('.pm-act'); if(act){ e.stopPropagation(); const id=act.getAttribute('data-id'), a=act.getAttribute('data-act'); if(a==='dup') duplicateProduct(id); else openDetail(id, ACT_TAB[a]||'general'); return; }
       const tr=e.target.closest('tr[data-id]'); if(tr) openDetail(tr.getAttribute('data-id'));
+    });
+    // landing panels — open a product chip, or apply a panel filter + scroll
+    $('pm-panels').addEventListener('click', e=>{
+      const op=e.target.closest('[data-open]'); if(op){ openDetail(op.getAttribute('data-open')); return; }
+      const pa=e.target.closest('[data-panel]'); if(pa){ const k=pa.getAttribute('data-panel'); state.cat=''; state.family=''; state.model=''; state.status=''; state.miss={}; if(k==='recent-add') state.miss['recent-add']=true; else if(k==='low-stock') state.miss['low-stock']=true; else if(k==='review') state.miss.review=true; else state.miss[k]=true; state.page=1; render(); $('pm-more').hidden=false; document.querySelector('.pm-cat-head').scrollIntoView({behavior:'smooth',block:'start'}); }
     });
     $('pm-all').addEventListener('change', e=>{ const rows=filtered().slice((state.page-1)*state.size,state.page*state.size); rows.forEach(p=>e.target.checked?state.sel.add(p.id):state.sel.delete(p.id)); render(); });
     $('pm-bulk').addEventListener('click', e=>{ const b=e.target.closest('[data-bulk]'); if(!b) return; const a=b.getAttribute('data-bulk'); if(a==='clear'){state.sel.clear();render();} else if(a==='export'){ exportProducts(all().filter(p=>state.sel.has(p.id))); } });

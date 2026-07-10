@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| **Version** | 2.0 |
+| **Version** | 2.1 |
 | **Status** | ✅ Implemented (standalone; SO integration next phase) |
-| **Last Updated** | 09 Jul 2026 |
+| **Last Updated** | 10 Jul 2026 |
 | **Related ADRs** | ADR-0001, ADR-0004, ADR-0005, ADR-0006 |
 | **Related Modules** | Sales Orders · Inventory · Dispatch · Warehouse · Production · Purchase · Price Lists · CRM |
 
@@ -77,17 +77,30 @@ Transitions and performers are documented in
 
 ## Module surfaces
 
-### 1 · Dashboard — catalogue completeness
-Total Products · Active · Draft · Discontinued · Categories · Recently Added ·
-**Missing Images** · **Missing BOM** · **Missing Pricing**. Gives users visibility
-into how complete the catalogue is.
+### 1 · Dashboard (landing) — the module opens on a dashboard, not a raw table
+Product Master is a **module landing page**: KPIs, then attention panels, then the
+catalogue.
+- **KPIs:** Total · Active · Draft · Discontinued · Categories · Recently Added ·
+  **Missing Images** · **Missing BOM** · **Missing Pricing** (each click-to-filter).
+- **Attention panels** (each lists a few items and filters the catalogue on click):
+  **Recently Added · Recently Updated · Low Stock · Missing Images · Missing BOM ·
+  Needing Review** (Draft / low completeness).
+- **Catalogue** table below.
 
-### 2 · Product List
-**Columns:** Image · SKU · Product Name · Category · Model · Variant · Status ·
-Default Price · Weight · Unit · Last Updated.
+### 2 · Product List (catalogue)
+**Columns:** Thumbnail · Product Name (with SKU beneath) · Category · Model ·
+**Backing · Size · Colour** (attributes split for scanning) · **Stock** (snapshot
+indicator 🟢/🟡/🔴) · **Completeness %** · Status · quick-action icons.
+**Completeness** = share of {image, price, BOM, documents, specs} present; surfaces
+which products need attention. **Stock** is a placeholder snapshot today, wired to
+Inventory later.
+**Quick actions (per row icons):** Edit · Duplicate · Images · Documents · BOM ·
+Analytics — each opens the detail on that tab.
 **Filters:** Category · Model · Product Family · Width · Length · Colour · Status ·
 Missing Image · Missing BOM · Missing Price.
-**Actions:** Edit · Duplicate · Archive · Activate · Export · Bulk Update ·
+**Universal search** finds a product by *anything* — colour, model, width (e.g.
+`4ft`), backing (`Spike`), SKU, HSN, product name, family.
+**Bulk / catalogue actions:** Bulk status update · Export · Archive/Activate ·
 Print Product Labels *(future)*.
 
 ### 3 · Product Details (tabbed)
@@ -102,11 +115,11 @@ A tabbed layout so future features slot in without redesign:
 | **Documents** | Product Catalogue PDF · Technical Data Sheet · Installation Guide · QC Sheet |
 | **BOM** | Raw Materials · Qty · Unit · Scrap % · Production Line · Machine · Cycle Time · Packing Material *(structure only — no production logic)* |
 | **Manufacturing** | Production Line · Machine · QC Template · Packing Type · Default Warehouse · Reorder Level · Min Stock · Max Stock |
-| **Relationships** | Compatible · Accessories · Replacement · Upgraded Version · Discontinued By |
+| **Relationships** | Manual: Compatible · Accessories · Replacement · Upgraded Version · Discontinued By. **Auto-derived:** Same Model · Alternative Colours (computed from the catalogue) |
 | **Inventory** | Placeholder — filled when Inventory lands |
 | **Sales History** | Placeholder — filled when Sales/Reporting lands |
 | **Purchase History** | Placeholder — filled when Purchase lands |
-| **Audit Log** | Created By/On, Updated By/On · *full change history — future* |
+| **Audit Log** | Created By/On, Updated By/On + a **product timeline** (Created → Price changed → Image added → BOM updated → Used in SO → Last sold — placeholder milestones today) · *full change history — future* |
 | **Analytics** | Read-only placeholder cards → per-product dashboard (below) |
 
 ### Category-specific attributes (Specifications)
