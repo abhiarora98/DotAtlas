@@ -3251,23 +3251,33 @@
   .pm-bulk[hidden]{ display: none; }
   .pm-bulk span { margin-right: auto; }
 
-  .pm-table-wrap { border: 1px solid var(--line); border-radius: 13px; overflow: hidden; background: var(--surface-2); }
-  .pm-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-  .pm-table thead th { text-align: left; padding: 12px 14px; font-family: var(--fm); font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-4); background: var(--surface-3); border-bottom: 1px solid var(--line); white-space: nowrap; }
+  /* Modern catalogue table — scan hundreds of rows without fatigue */
+  .pm-table-wrap { border: 1px solid var(--line); border-radius: 14px; overflow: auto; background: var(--surface-2); max-height: calc(100vh - 300px); }
+  .pm-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+  .pm-table thead th { position: sticky; top: 0; z-index: 3; text-align: left; padding: 11px 18px; font-family: var(--fm); font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-4); background: var(--surface-3); border-bottom: 1px solid var(--line-2); white-space: nowrap; }
   .pm-table th.r, .pm-table td.r { text-align: right; }
-  .pm-table th.pm-c-chk, .pm-table td.pm-c-chk { width: 34px; text-align: center; }
-  .pm-table tbody td { padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; }
-  .pm-table tbody tr { cursor: pointer; transition: background 120ms var(--ease); }
-  .pm-table tbody tr:hover { background: var(--surface-3); }
+  .pm-table th.pm-c-chk, .pm-table td.pm-c-chk { width: 40px; text-align: center; padding-left: 16px; padding-right: 0; }
+  .pm-table tbody td { padding: 13px 18px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  .pm-table tbody tr { cursor: pointer; transition: background 110ms var(--ease); }
+  .pm-table tbody tr:nth-child(even) { background: color-mix(in srgb, var(--surface-3) 45%, transparent); }
+  .pm-table tbody tr:hover { background: var(--surface-3); box-shadow: inset 3px 0 0 var(--emerald); }
   .pm-table tbody tr:last-child td { border-bottom: 0; }
-  .pm-sku { font-family: var(--fm); font-size: 11.5px; color: var(--text-2); }
-  .pm-cat { font-family: var(--fm); font-size: 10px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--text-3); background: var(--surface-3); border: 1px solid var(--line-2); padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
-  .pm-prod { color: var(--text); }
-  .pm-prod b { font-weight: 600; }
-  .pm-prod span { color: var(--text-3); font-family: var(--fm); font-size: 10.5px; }
-  .pm-colour { color: var(--text-2); }
+  /* column sizing */
+  .pm-c-img { width: 46px; } .pm-c-act { width: 40px; }
+  .pm-c-name { width: 30%; min-width: 230px; }
+  .pm-c-var { width: 210px; max-width: 230px; }
+  .pm-c-cat, .pm-c-model, .pm-c-status, .pm-c-unit { white-space: nowrap; }
+  .pm-c-wt { width: 74px; } .pm-c-unit { width: 64px; } .pm-c-upd { width: 92px; }
+  /* cell content */
+  .pm-name { color: var(--text); font-weight: 600; font-size: 13px; line-height: 1.25; max-width: 320px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pm-c-name .pm-sku { font-family: var(--fm); font-size: 10.5px; color: var(--text-4); margin-top: 3px; letter-spacing: 0.01em; }
+  .pm-cat { font-family: var(--fm); font-size: 9.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-3); background: color-mix(in srgb, var(--surface) 70%, transparent); border: 1px solid var(--line-2); padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
+  .pm-badge { font-family: var(--fm); font-size: 11px; color: var(--text-2); background: var(--surface); border: 1px solid var(--line-2); padding: 3px 9px; border-radius: 6px; white-space: nowrap; }
+  .pm-var { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: var(--text-3); font-size: 12px; line-height: 1.35; }
+  .pm-meta { color: var(--text-3); font-family: var(--fm); font-size: 12px; }
   .pm-num { font-family: var(--fm); font-variant-numeric: tabular-nums; color: var(--text-2); }
-  .pm-st { font-family: var(--fm); font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; }
+  .pm-dash { color: var(--text-4); }
+  .pm-st { display: inline-block; font-family: var(--fm); font-size: 9.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; }
   .pm-st.on { color: var(--emerald); background: var(--emerald-soft); }
   .pm-st.off { color: var(--text-3); background: var(--surface-3); }
   .pm-empty { padding: 40px; text-align: center; color: var(--text-4); font-size: 13px; }
@@ -3297,12 +3307,9 @@
   .pm-chip.on { color: var(--amber); background: var(--amber-soft); border-color: rgba(255,176,121,0.4); }
   .pm-sel.sm { padding: 7px 10px; font-size: 11px; }
 
-  .pm-table-wide td, .pm-table-wide th { padding-left: 10px; padding-right: 10px; }
-  .pm-c-img { width: 40px; } .pm-c-act { width: 34px; }
-  .pm-thumb { width: 30px; height: 30px; border-radius: 7px; object-fit: cover; background: var(--surface-3); display: flex; align-items: center; justify-content: center; color: var(--text-4); font-size: 13px; border: 1px solid var(--line-2); }
-  .pm-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; }
-  .pm-name { color: var(--text); font-weight: 600; max-width: 240px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .pm-updated { font-family: var(--fm); font-size: 10.5px; color: var(--text-4); }
+  .pm-thumb { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; background: var(--surface-3); display: flex; align-items: center; justify-content: center; color: var(--text-4); font-size: 14px; border: 1px solid var(--line-2); }
+  .pm-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 7px; }
+  .pm-updated { font-family: var(--fm); font-size: 11px; color: var(--text-4); white-space: nowrap; }
   .pm-st.draft { color: var(--amber); background: var(--amber-soft); }
   .pm-st.active { color: var(--emerald); background: var(--emerald-soft); }
   .pm-st.discontinued { color: var(--text-3); background: var(--surface-3); }
@@ -4516,8 +4523,14 @@
           <thead><tr>
             <th class="pm-c-chk"><input type="checkbox" id="pm-all"></th>
             <th class="pm-c-img"></th>
-            <th>SKU</th><th>Product Name</th><th>Category</th><th>Model</th><th>Variant</th>
-            <th>Status</th><th class="r">Price</th><th class="r">Weight</th><th>Unit</th><th>Updated</th>
+            <th class="pm-c-name">Product</th>
+            <th class="pm-c-cat">Category</th>
+            <th class="pm-c-model">Model</th>
+            <th class="pm-c-var">Variant</th>
+            <th class="pm-c-status">Status</th>
+            <th class="pm-c-wt r">Weight</th>
+            <th class="pm-c-unit">Unit</th>
+            <th class="pm-c-upd">Updated</th>
             <th class="pm-c-act"></th>
           </tr></thead>
           <tbody id="pm-rows"></tbody>
@@ -26391,7 +26404,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       return true;
     });
   }
-  const variantOf = p => specAttrs(p.category).map(a=>p[a]).filter(Boolean).concat(p.colour?[p.colour]:[]).join(' · ');
+  // Compact variant label: backing · size · colour (width×length collapsed).
+  const variantOf = p => { const dim = p.category==='FOOTMAT' ? p.size : (p.width && (p.width+'×'+lenNum(p.length)+'m')); return [p.backing, p.type, dim, p.colour].filter(Boolean).join(' · '); };
 
   function render(){
     const list = all();
@@ -26426,16 +26440,14 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       return '<tr data-id="'+esc(p.id)+'">'
         + '<td class="pm-c-chk"><input type="checkbox" class="pm-row-chk" data-id="'+esc(p.id)+'"'+(state.sel.has(p.id)?' checked':'')+'></td>'
         + '<td class="pm-c-img"><span class="pm-thumb">'+(img?'<img src="'+esc(img.url)+'">':'◨')+'</span></td>'
-        + '<td><span class="pm-sku">'+esc(p.sku)+'</span></td>'
-        + '<td><div class="pm-name">'+esc(p.name||suggestName(p))+'</div></td>'
-        + '<td><span class="pm-cat">'+esc(p.category)+'</span></td>'
-        + '<td class="pm-colour">'+esc(p.model||p.height||'—')+'</td>'
-        + '<td class="pm-colour">'+esc(variantOf(p)||'—')+'</td>'
-        + '<td><span class="pm-st '+st.toLowerCase()+'">'+st+'</span></td>'
-        + '<td class="r pm-num">'+(priceOf(p)!=null?inr(priceOf(p)):'—')+'</td>'
-        + '<td class="r pm-num">'+(p.weight!=null?p.weight:'—')+'</td>'
-        + '<td class="pm-colour">'+esc(p.unit||'—')+'</td>'
-        + '<td class="pm-updated">'+esc(p.updatedOn||'—')+'</td>'
+        + '<td class="pm-c-name"><div class="pm-name">'+esc(p.name||suggestName(p))+'</div><div class="pm-sku">'+esc(p.sku)+'</div></td>'
+        + '<td class="pm-c-cat"><span class="pm-cat">'+esc(p.category)+'</span></td>'
+        + '<td class="pm-c-model"><span class="pm-badge">'+esc(p.model||p.height||'—')+'</span></td>'
+        + '<td class="pm-c-var"><span class="pm-var">'+esc(variantOf(p)||'—')+'</span></td>'
+        + '<td class="pm-c-status"><span class="pm-st '+st.toLowerCase()+'">'+st+'</span></td>'
+        + '<td class="pm-c-wt r pm-num">'+(p.weight!=null?p.weight:'<span class="pm-dash">—</span>')+'</td>'
+        + '<td class="pm-c-unit pm-meta">'+esc(p.unit||'—')+'</td>'
+        + '<td class="pm-c-upd pm-updated">'+esc(p.updatedOn||'—')+'</td>'
         + '<td class="pm-c-act"><button class="pm-kebab" data-kebab="'+esc(p.id)+'">⋯</button></td>'
         + '</tr>';
     }).join('');
