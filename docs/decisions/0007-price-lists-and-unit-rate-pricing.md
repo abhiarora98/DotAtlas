@@ -62,7 +62,7 @@ pricing, region pricing, multi-currency, approval workflows.
 - `products.json` price groups become `{ rate, unit }` (rate from the spec's
   *Price Per Sqft* for rolls / *Price* for footmats); the stored per-roll value is
   removed. Product Master's Pricing tab shows the rate + a computed per-roll price.
-- New `atlas-pricelists` overlay: `{ lists: { id → { …meta, overrides: { group →
+- New `native-pricelists` overlay: `{ lists: { id → { …meta, overrides: { group →
   rate }, parties: [] } } }`.
 - The backend gains **PriceList** and **PriceListItem** (override) entities and a
   `Party.priceListId`; totals remain computed. See

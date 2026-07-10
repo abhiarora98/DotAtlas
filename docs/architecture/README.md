@@ -9,7 +9,7 @@
 | **Related Modules** | All |
 
 > This is the **entry point for understanding Native** — the manufacturing ERP
-> for DotAtlas. It tracks every module's status at a glance and links to the
+> for dotatlas. It tracks every module's status at a glance and links to the
 > documents that are the source of truth for how the product works.
 
 ---

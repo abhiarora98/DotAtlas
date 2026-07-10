@@ -39,7 +39,7 @@ module, and correct the GST defaults.
 - `products.json` gains a top-level `priceGroups` map and each product a
   `priceGroup` key; per-variant `sellingPrice`/`freight`/`landed` are removed.
 - The effective selling price is resolved as `override ?? priceGroups[group]`; the
-  local overlay stores group-level edits (`atlas-products-overlay.priceGroups`),
+  local overlay stores group-level edits (`native-products-overlay.priceGroups`),
   so editing a base price updates all its variants at once.
 - The backend model adds a **PriceGroup** concept and reserves **Price List** as a
   separate module owning tiered pricing (see `docs/backend/database-design.md`,

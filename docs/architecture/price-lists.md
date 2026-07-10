@@ -90,7 +90,7 @@ effective rate =
    3. Product Master base rate[group]                  (fallback)
 effective price = effective rate × (Sq.Ft. for rolls | 1 for pieces)
 ```
-Exposed as `atlasResolveRate(group, partyListId)` / `atlasResolvedPrice(product,
+Exposed as `nativeResolveRate(group, partyListId)` / `nativeResolvedPrice(product,
 partyListId)`. Product Master contains no reference to price lists.
 
 ## Module surfaces

@@ -164,7 +164,7 @@ Artificial Grass **5%**, others **18%**) (+ Default Cost future).
 **Audit:** `createdBy`, `createdOn`, `updatedBy`, `updatedOn`.
 
 Seed: `public/data/products.json` (532 products, 7 categories). Edits/additions
-persist to a browser-local overlay (`atlas-products-overlay`) over the static seed;
+persist to a browser-local overlay (`native-products-overlay`) over the static seed;
 rich containers default empty and are stored only when set — the same pattern as
 orders, until the backend Product Master lands.
 

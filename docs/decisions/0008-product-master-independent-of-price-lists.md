@@ -40,8 +40,8 @@ product; Price Lists should decide what it sells for.
 
 - Product Master's `rateOf`/`priceOf` use the base rate only; the
   default-price-list lookup is removed from the catalogue module.
-- A shared resolver (`atlasResolveRate(group, partyListId)` /
-  `atlasResolvedPrice(product, partyListId)`) is exposed by the Price Lists module
+- A shared resolver (`nativeResolveRate(group, partyListId)` /
+  `nativeResolvedPrice(product, partyListId)`) is exposed by the Price Lists module
   for document creation; today it has no consumer (Sales Orders not built) but is
   the single entry point when they are.
 - Cleaner boundary for the upcoming Sales Order rebuild: `Party → assigned Price
