@@ -103,7 +103,8 @@
   (Default, Dealer, Distributor, Institutional, Export, Government, + custom). The
   commercial layer that varies by customer — distinct from product identity/tax.
 - **PK.** `id`. **Unique.** `name`. Fields: `description`, `status`, `system`,
-  audit, `currency`/`effectiveDate` (future).
+  **`isDefault`** (exactly one list true — the company-wide default resolved by
+  all pricing logic), audit, `currency`/`effectiveDate` (future).
 - **FK.** — (assigned parties via `Party.priceListId`). **Owner.** Price Lists.
 
 ### PriceListItem  *(override)*

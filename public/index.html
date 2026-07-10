@@ -3453,6 +3453,9 @@
   .pl-card-h { display: flex; align-items: center; gap: 10px; }
   .pl-card-h h4 { font-family: var(--fd); font-size: 15px; font-weight: 700; color: var(--text); }
   .pl-card-sys { font-family: var(--fm); font-size: 8.5px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-4); background: var(--surface-3); border-radius: 5px; padding: 2px 6px; }
+  .pl-card.is-default { border-color: var(--emerald-mute); }
+  .pl-default-badge { font-family: var(--fm); font-size: 9px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; color: var(--emerald); background: var(--emerald-soft); border-radius: 5px; padding: 2px 7px; white-space: nowrap; }
+  #pl-ed-name .pl-default-badge { font-size: 10px; margin-left: 8px; vertical-align: middle; }
   .pl-card-desc { font-size: 12px; color: var(--text-3); margin: 8px 0 12px; min-height: 30px; }
   .pl-card-stats { display: flex; gap: 18px; font-family: var(--fm); font-size: 11px; color: var(--text-3); }
   .pl-card-stats b { display: block; font-size: 16px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
@@ -4711,13 +4714,14 @@
             <table class="pm-table pm-table-wide">
               <thead><tr>
                 <th class="pm-c-name">Product</th>
+                <th>HSN</th>
                 <th>Unit</th>
                 <th class="r">Sq.Ft.</th>
+                <th class="r">GST %</th>
                 <th class="r">Default rate</th>
                 <th class="r">Override rate</th>
                 <th class="r">Computed price</th>
                 <th class="r">Diff</th>
-                <th class="r">GST</th>
                 <th>Updated</th>
               </tr></thead>
               <tbody id="pl-rows"></tbody>
@@ -26526,7 +26530,12 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   // Unit-rate pricing (ADR-0007): the price group stores a RATE (₹/sqft for rolls,
   // ₹/piece for footmats). The per-roll/piece total is COMPUTED, never stored.
   const unitOf = p => (pgVal(p.priceGroup||groupKey(p)).unit) || (p.category==='FOOTMAT'?'piece':'sqft');
-  function rateOf(p){ const v=pgVal(p.priceGroup||groupKey(p)); return v.rate!=null?v.rate:null; }
+  const pmBaseRate = g => { const v=pgVal(g); return v.rate!=null?v.rate:null; };
+  // Effective rate resolves through the company DEFAULT price list (is_default) —
+  // its override wins over the Product Master base (single resolver, ADR-0007).
+  let defOv = {};
+  function refreshDefOv(){ try { const pl=JSON.parse(localStorage.getItem('atlas-pricelists')||'{}'); const d=Object.values(pl.lists||{}).find(l=>l.isDefault); defOv=(d&&d.overrides)||{}; } catch(e){ defOv={}; } }
+  function rateOf(p){ const g=p.priceGroup||groupKey(p); return defOv[g]!=null ? defOv[g] : pmBaseRate(g); }
   function priceOf(p){ const r=rateOf(p); if(r==null) return null; return unitOf(p)==='sqft' ? Math.round(r*(+p.sqft||0)) : r; }
   const imagesOf = p => p.images||[];
   const primaryImg = p => { const im=imagesOf(p); return (im.find(x=>x.primary)||im[0]||null); };
@@ -26612,6 +26621,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   }
 
   function render(){
+    refreshDefOv();
     const list = all();
     const by = st => list.filter(p=>(p.status||'Active')===st).length;
     const fams = new Set(list.map(p=>p.family)).size;
@@ -26681,7 +26691,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     if (id){ draft = JSON.parse(JSON.stringify(byId(id))); draftNew=false; }
     else { draft = { id:null, category:'LOOP', status:'Draft', unit:'Roll', gst:18, hsn:'5703', colour:'', images:[], documents:[], bom:{materials:[]}, manufacturing:{}, relationships:{} }; draftNew=true; }
     draft.images=draft.images||[]; draft.documents=draft.documents||[]; draft.bom=draft.bom||{materials:[]}; draft.bom.materials=draft.bom.materials||[]; draft.manufacturing=draft.manufacturing||{}; draft.relationships=draft.relationships||{};
-    nameDirty=!draftNew; skuDirty=!draftNew; groupPrice = rateOf(draft);
+    nameDirty=!draftNew; skuDirty=!draftNew; groupPrice = pmBaseRate(draft.priceGroup||groupKey(draft));
     activeTab = tab||'general';
     recompute();
     renderHeader(); selectTab(activeTab);
@@ -27047,17 +27057,20 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     ['government','Government','Government / tender rates.',true,false],
   ];
   function ensureSeed(){
-    SEED.forEach(([id,name,desc,system,readonly])=>{ if(!store.lists[id]) store.lists[id]={ id,name,description:desc,status:'Active',system,readonly,overrides:{},parties:[],createdBy:'System',createdOn:today(),updatedBy:'System',updatedOn:today() }; });
+    SEED.forEach(([id,name,desc,system,readonly])=>{ if(!store.lists[id]) store.lists[id]={ id,name,description:desc,status:'Active',system,readonly,isDefault:(id==='default'),overrides:{},parties:[],createdBy:'System',createdOn:today(),updatedBy:'System',updatedOn:today() }; });
+    // Exactly one company-wide default (is_default) must exist.
+    if(!Object.values(store.lists).some(l=>l.isDefault)){ const d=store.lists['default']||Object.values(store.lists)[0]; if(d) d.isDefault=true; }
     saveStore();
   }
   const lists = () => Object.values(store.lists);
+  function setDefault(id){ Object.values(store.lists).forEach(l=>l.isDefault=(l.id===id)); saveStore(); }
 
   window.atlasLoadPriceLists = async function(){
     if(!loaded){
       try { const res=await fetch('data/products.json'); const j=await res.json(); seedPG=j.priceGroups||{};
         const gm={}; (j.products||[]).forEach(p=>{ const k=p.priceGroup; if(!gm[k]) gm[k]={key:k,rep:p,variants:0}; gm[k].variants++; });
         groups = Object.values(gm).map(g=>{ const p=g.rep; const size=p.category==='FOOTMAT'?p.size:(p.width?(widthLabel(p.width)+'×'+lenNum(p.length)+'m'):''); return {
-          key:g.key, category:p.category, gst:p.gst, sqft:p.sqft, unit:(p.category==='FOOTMAT'?'piece':'sqft'), variants:g.variants,
+          key:g.key, category:p.category, gst:p.gst, hsn:p.hsn, sqft:p.sqft, unit:(p.category==='FOOTMAT'?'piece':'sqft'), variants:g.variants,
           label:[p.model||p.height, p.backing, p.type, size].filter(Boolean).join(' '), search:[p.model,p.height,p.backing,p.type,p.colour,p.sku,size].filter(Boolean).join(' ').toLowerCase()
         }; });
       } catch(e){ groups=[]; }
@@ -27082,7 +27095,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       + stat('Recently updated', recent?esc(recent.name):'—', '', recent?recent.updatedOn:'');
     $('pl-lists').innerHTML = L.map(l=>{
       const nov=Object.keys(l.overrides||{}).length;
-      return '<div class="pl-card" data-list="'+esc(l.id)+'"><div class="pl-card-h"><h4>'+esc(l.name)+'</h4>'+(l.system?'<span class="pl-card-sys">System</span>':'')+'<span class="pm-st '+(l.status||'Active').toLowerCase()+'" style="margin-left:auto;">'+(l.status||'Active')+'</span></div>'
+      return '<div class="pl-card'+(l.isDefault?' is-default':'')+'" data-list="'+esc(l.id)+'"><div class="pl-card-h"><h4>'+esc(l.name)+'</h4>'+(l.isDefault?'<span class="pl-default-badge">⭐ Default</span>':'')+(l.system?'<span class="pl-card-sys">System</span>':'')+'<span class="pm-st '+(l.status||'Active').toLowerCase()+'" style="margin-left:auto;">'+(l.status||'Active')+'</span></div>'
         + '<div class="pl-card-desc">'+esc(l.description||'')+'</div>'
         + '<div class="pl-card-stats"><span><b>'+(l.id==='default'?'—':nov)+'</b>Overrides</span><span><b>'+((l.parties||[]).length)+'</b>Parties</span></div>'
         + '<div class="pl-card-foot">Updated '+esc(l.updatedOn||'—')+' · '+esc(l.updatedBy||'—')+'</div></div>';
@@ -27095,11 +27108,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     cur = store.lists[id]; if(!cur) return;
     draftOver = Object.assign({}, cur.overrides||{}); draftParties = (cur.parties||[]).slice();
     plState={q:'',cat:'',over:'',page:1,size:25};
-    $('pl-ed-name').textContent = cur.name;
-    $('pl-ed-desc').textContent = cur.description||'';
-    $('pl-ed-status').textContent = cur.status||'Active'; $('pl-ed-status').className='pm-st '+(cur.status||'Active').toLowerCase();
-    $('pl-ed-ic').textContent = cur.readonly?'★':'₹';
-    $('pl-ed-actions').innerHTML = cur.system?'':'<button class="pm-btn sm" data-pl-del="1">Delete list</button>';
+    renderEdHead();
     $('pl-ed-save').style.display = cur.readonly?'none':'';
     $('pl-bulk').disabled = !!cur.readonly;
     if(!$('pl-f-cat').options.length || $('pl-f-cat').options.length===1){ const cats=[...new Set(groups.map(g=>g.category))]; $('pl-f-cat').innerHTML='<option value="">All categories</option>'+cats.map(c=>'<option>'+esc(c)+'</option>').join(''); }
@@ -27107,6 +27116,14 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     renderMeta(); renderRows(); renderParties();
     $('pl-ed-msg').className='ap-status'; $('pl-ed-msg').textContent='';
     $('pl-editor').hidden=false;
+  }
+  function renderEdHead(){
+    $('pl-ed-name').innerHTML = esc(cur.name)+(cur.isDefault?' <span class="pl-default-badge">⭐ Default</span>':'');
+    $('pl-ed-desc').textContent = cur.description||'';
+    $('pl-ed-status').textContent = cur.status||'Active'; $('pl-ed-status').className='pm-st '+(cur.status||'Active').toLowerCase();
+    $('pl-ed-ic').textContent = cur.readonly?'★':'₹';
+    $('pl-ed-actions').innerHTML = '<button class="pm-btn sm" data-pl-default="1"'+(cur.isDefault?' disabled':'')+'>'+(cur.isDefault?'⭐ Default list':'Set as Default')+'</button>'
+      + (cur.system?'':'<button class="pm-btn sm" data-pl-del="1">Delete list</button>');
   }
   function closeList(){ $('pl-editor').hidden=true; cur=null; }
   function renderMeta(){
@@ -27139,13 +27156,14 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       const diffCls = diff==null?'same':diff>0?'up':diff<0?'down':'same';
       return '<tr data-key="'+esc(g.key)+'">'
         + '<td class="pm-c-name"><div class="pm-name">'+esc(g.label)+'</div><div class="pm-sku">'+esc(g.category)+' · '+g.variants+' colour'+(g.variants!==1?'s':'')+'</div></td>'
+        + '<td class="pm-mono">'+esc(g.hsn||'—')+'</td>'
         + '<td class="pm-meta">'+(g.unit==='sqft'?'Sq.Ft.':'Piece')+'</td>'
         + '<td class="r pm-mono">'+(g.unit==='sqft'?(g.sqft!=null?g.sqft:'—'):'—')+'</td>'
+        + '<td class="r pm-meta">'+(g.gst!=null?g.gst+'%':'—')+'</td>'
         + '<td class="r pl-def">'+(def!=null?inr(def)+perU:'—')+'</td>'
         + '<td class="r"><input class="pl-rate-in'+(ov!=null?' set':'')+'" data-rate="'+esc(g.key)+'" inputmode="decimal" value="'+(ov!=null?ov:'')+'" placeholder="'+(def!=null?def:'')+'"'+(ro?' disabled':'')+'></td>'
         + '<td class="r pl-computed" data-comp="'+esc(g.key)+'">'+(comp!=null?inr(comp)+(g.unit==='sqft'?'/roll':'/pc'):'—')+'</td>'
         + '<td class="r"><span class="pl-diff '+diffCls+'" data-diff="'+esc(g.key)+'">'+(diff==null?'—':(diff>0?'+':'')+inr(diff)+perU)+'</span></td>'
-        + '<td class="r pm-meta">'+(g.gst!=null?g.gst+'%':'—')+'</td>'
         + '<td class="pm-updated">'+esc(cur.updatedOn||'—')+'</td>'
         + '</tr>';
     }).join('');
@@ -27200,7 +27218,10 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     $('pl-ed-cancel').addEventListener('click', closeList);
     $('pl-editor').addEventListener('click', e=>{ if(e.target===$('pl-editor')) closeList(); });
     $('pl-ed-save').addEventListener('click', saveList);
-    $('pl-ed-actions').addEventListener('click', e=>{ if(e.target.closest('[data-pl-del]')){ if(window.confirm('Delete this price list?')){ delete store.lists[cur.id]; saveStore(); closeList(); render(); } } });
+    $('pl-ed-actions').addEventListener('click', e=>{
+      if(e.target.closest('[data-pl-default]')){ if(cur.isDefault) return; setDefault(cur.id); renderEdHead(); render(); const s=$('pl-ed-msg'); s.className='ap-status ok'; s.textContent='Default price list changed successfully.'; return; }
+      if(e.target.closest('[data-pl-del]')){ if(window.confirm('Delete this price list?')){ delete store.lists[cur.id]; saveStore(); closeList(); render(); } }
+    });
     $('pl-search').addEventListener('input', e=>{ plState.q=e.target.value; plState.page=1; renderRows(); });
     $('pl-f-cat').addEventListener('change', e=>{ plState.cat=e.target.value; plState.page=1; renderRows(); });
     $('pl-f-over').addEventListener('change', e=>{ plState.over=e.target.value; plState.page=1; renderRows(); });

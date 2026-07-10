@@ -47,9 +47,20 @@ Party ──► Sales Order  (resolves rate automatically — next milestone)
 ## Documents / data model
 
 **Price List:** `id`, `name`, `description`, `status`, `system` (seeded vs
-custom), `createdBy`, `createdOn`, `updatedBy`, `updatedOn`, `currency` *(future)*,
-`effectiveDate` *(future)*, `overrides` (map: **price group → rate**), `parties`
-(assigned party references).
+custom), **`isDefault`** (the single company-wide default), `createdBy`,
+`createdOn`, `updatedBy`, `updatedOn`, `currency` *(future)*, `effectiveDate`
+*(future)*, `overrides` (map: **price group → rate**), `parties` (assigned party
+references).
+
+### Company default price list (`isDefault`)
+Exactly **one** list carries `isDefault = true` (seeded on **Default**). A
+**⭐ Default** badge marks it; a **Set as Default** action (list header) promotes
+another list — clearing the previous flag, setting the new one, and confirming
+*"Default price list changed successfully."* (disabled when already default).
+**All pricing resolves the default via `isDefault`** (not a hardcoded/first
+record) — Product Master, and future Sales Orders, Quotations, Proforma Invoices
+and any pricing calculation. Effective default rate = `defaultList.overrides[g] ??
+Product Master base rate[g]`.
 
 **Override-only.** A list stores *only* the rates that differ from the default.
 Products without an override inherit the Product Master default rate — no list
@@ -86,10 +97,13 @@ Cards/rows for each list (name, description, status, #overrides, #parties,
 updated) + **New Price List**.
 
 ### Product Pricing screen (per list)
-Columns: **Product · Unit · Sq.Ft. · Default rate · Override rate · Computed price
-· Difference · GST · Last Updated** — with **Search**, **Filters** and **Bulk
-Update**; Import / Export *(future)*. Rows are price groups (a base covers its
-colour variants). The Default list is read-only (it *is* the default).
+Columns: **Product · HSN · Unit · Sq.Ft. · GST % · Default rate · Override rate ·
+Computed price · Difference · Updated** — with **Search**, **Filters** and **Bulk
+Update**; Import / Export *(future)*. **HSN and GST are read-only, mirrored from
+Product Master** (they update automatically when changed there and are never
+editable here), so tax is visible during price verification, export and order
+creation. Rows are price groups (a base covers its colour variants). The
+seeded **Default** list is read-only (it *is* the base).
 
 ## Statuses
 
