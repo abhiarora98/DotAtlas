@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Version** | 1.2 |
+| **Version** | 1.3 |
 | **Status** | ✅ Implemented (owned by Product Master) |
-| **Last Updated** | 09 Jul 2026 |
-| **Related ADRs** | ADR-0001, ADR-0004, ADR-0005 |
+| **Last Updated** | 10 Jul 2026 |
+| **Related ADRs** | ADR-0001, ADR-0004, ADR-0005, ADR-0009 |
 | **Related Modules** | Product Master · Sales Orders · Dispatch · Warehouse · Inventory · Production · Reporting |
 
 > The product hierarchy is one of the most important parts of Native. **Sales,
@@ -14,6 +14,16 @@
 > concatenated name — so that grouping, variance, stock and reporting stay
 > precise. This document defines each level, the *Variant* and *SKU* concepts,
 > the relationships between them, and worked examples using our actual products.
+
+> **Parent product → colour variant (ADR-0009).** A "Variant" below is realised
+> as a **colour variant under a parent product**: the parent holds the
+> colour-independent identity (Category · Model/Height · Backing/Type · Width ·
+> Length / Size, plus Sq.Ft., weight, HSN, GST and base rate), and each colour is
+> a child **variant** with its own SKU (`parent-COLOUR`), stock, production and
+> availability, inheriting the parent's price unless overridden. Sales / Purchase
+> / Production Orders reference the **variant** SKU. **HSN/GST (updated spec):**
+> Artificial Grass & Mono Grass → **57033100 / 5 %**; all others → **39189090 /
+> 18 %**.
 
 ---
 

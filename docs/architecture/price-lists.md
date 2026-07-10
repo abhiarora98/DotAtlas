@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Version** | 1.2 |
+| **Version** | 1.3 |
 | **Status** | ✅ Implemented (standalone; Sales Order integration next) |
 | **Last Updated** | 10 Jul 2026 |
-| **Related ADRs** | ADR-0001, ADR-0006, ADR-0007, ADR-0008 |
+| **Related ADRs** | ADR-0001, ADR-0006, ADR-0007, ADR-0008, ADR-0009 |
 | **Related Modules** | Product Master · Parties · Sales Orders |
 
 > Price Lists own the **commercial rate that varies by customer or market** —
@@ -68,9 +68,12 @@ duplicates the catalogue. Overrides are keyed by **price group** (the colour-
 independent base), consistent with Product Master (ADR-0006).
 
 ### Seeded lists
-**Default** (mirrors Product Master; no overrides) · **Dealer** · **Distributor**
-· **Institutional** · **Export** · **Government**. Users can create unlimited
-custom lists.
+**Default** (mirrors Product Master; no overrides) · **Bulk** · **Dealer** ·
+**Distributor** · **Institutional** · **Export** · **Government**. Users can
+create unlimited custom lists. The **Bulk** list is **seeded from the updated
+master spec's Bulk column** (`priceListSeeds.bulk.overrides` in
+`products.json`, keyed by price group) on first run — an override-only list of
+bulk/wholesale rates that a user can then maintain (ADR-0009).
 
 ### Pricing unit & computation
 - **Rolls** → rate is **₹/Sq.Ft.**; `price = rate × Sq.Ft.` (Sq.Ft. from Product

@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Version** | 0.1 |
+| **Version** | 0.2 |
 | **Status** | 📝 Draft |
-| **Last Updated** | 27 Jun 2026 |
-| **Related ADRs** | ADR-0001, ADR-0002, ADR-0003, ADR-0005 |
+| **Last Updated** | 10 Jul 2026 |
+| **Related ADRs** | ADR-0001, ADR-0002, ADR-0003, ADR-0005, ADR-0006, ADR-0007, ADR-0008, ADR-0009 |
 | **Related Modules** | All |
 
 > Logical database design — **no SQL**. For each entity: why it exists, its
@@ -53,49 +53,62 @@
 - **PK.** `id`. **Unique.** `(category, model)`.
 - **FK.** —. **Owner.** Product Master.
 
-### ProductVariant (Product)  *(catalogue leaf)*
-- **Why.** The atomic sellable/stockable unit identified by a stable **SKU**, with
-  a lifecycle (`Draft → Active → Discontinued → Archived`). Everything operational
-  keys on it. See [`../database/product-hierarchy.md`](../database/product-hierarchy.md).
+### Product  *(parent — colour-independent, ADR-0009)*
+- **Why.** The colour-independent catalogue record holding everything common: the
+  identity, dimensions, Sq.Ft., weight, HSN, GST, specifications and **base rate**.
+  Its **SKU is colour-independent** (e.g. `LP-ALTO-DIA-061X15`). Lifecycle
+  `Draft → Active → Discontinued → Archived`. Images, documents, BOM,
+  manufacturing and relationships attach **here** (shared by all colours).
 - **PK.** `id`. **Unique.** `sku`.
-- **Fields.** `status`, `skuLocked` (SKU immutable once used), `name`, unit/weight/
-  sqft, commercial (sellingPrice, hsn, gst, freight; purchasePrice, landedCost
-  future), category-specific attributes (backing/height/type/width/length/size/
-  colour), audit (`createdBy/On`, `updatedBy/On`).
-- **FK.** `familyId` → ProductFamily; optional `modelId`, `backingId`, `colourId`
-  if attributes are normalised into lookup tables (Phase 2).
+- **Fields.** `status`, `skuLocked`, `name`, unit/weight/sqft, `hsn`, `gst`
+  (updated spec — Artificial Grass & Mono Grass 57033100 / 5 %; others 39189090 /
+  18 %), category-specific attributes (backing/height/type/width/length/size),
+  `priceGroupId`, audit.
+- **FK.** `familyId` → ProductFamily; `priceGroupId` → PriceGroup.
+- **Owner.** Product Master.
+
+### ProductVariant  *(colour child — the sellable/stockable leaf, ADR-0009)*
+- **Why.** One per **colour** under a parent Product. Because **stock and
+  production are managed by colour**, the variant is the atomic sellable/stockable
+  unit that Sales / Purchase / Production Orders, Dispatch and Inventory reference.
+  It inherits the parent's specs and price unless overridden.
+- **PK.** `id`. **Unique.** `sku` (`parentSku-COLOUR`, e.g. `…-BEI`).
+- **Fields.** `colour`, `status`, `rateOverride` (nullable — else inherit parent
+  base rate), `stock`, `availability` (stock/production placeholders until
+  Inventory & Production land).
+- **FK.** `productId` → Product.
 - **Owner.** Product Master.
 
 ### ProductImage
 - **Why.** A product may have several typed images (Primary, Catalogue, Technical
   Drawing, Installation), ordered, one primary. Binary in object storage; row holds
   metadata + key.
-- **PK.** `id`. **FK.** `productId` → ProductVariant; `attachmentId` → Attachment.
+- **PK.** `id`. **FK.** `productId` → Product (parent); `attachmentId` → Attachment.
   Fields: `type`, `isPrimary`, `sortOrder`. **Owner.** Product Master.
 
 ### ProductDocument
 - **Why.** Typed attachments — Product Catalogue PDF, Technical Data Sheet,
   Installation Guide, QC Sheet.
-- **PK.** `id`. **FK.** `productId` → ProductVariant; `attachmentId` → Attachment.
+- **PK.** `id`. **FK.** `productId` → Product (parent); `attachmentId` → Attachment.
   Field: `type`. **Owner.** Product Master.
 
 ### ProductBom (+ BomLine)  *(structure only — no production logic yet)*
 - **Why.** Captures how a product is made so Production/Costing can consume it later:
   raw materials, quantity, unit, scrap %, plus production line, machine, cycle time,
   packing material.
-- **PK.** `id`. **FK.** `productId` → ProductVariant. `BomLine`: `bomId` → ProductBom,
-  `rawMaterialId` → ProductVariant/Material, qty, unit, scrapPct. **Owner.** Product
+- **PK.** `id`. **FK.** `productId` → Product (parent). `BomLine`: `bomId` → ProductBom,
+  `rawMaterialId` → Product/Material, qty, unit, scrapPct. **Owner.** Product
   Master (Production reads later).
 
 ### PriceGroup  *(ADR-0006, ADR-0007)*
-- **Why.** Holds the **default rate once per colour-independent base**
-  (`Category|Model/Height|Backing|Type|Width|Length|Size`) so variants inherit it
-  and identical prices are never duplicated across colours. The rate is per **unit**
-  — ₹/Sq.Ft. for rolls, ₹/Piece for footmats/car sets; per-roll/piece totals are
-  **computed** (rate × Sq.Ft.), never stored (ADR-0007).
+- **Why.** Holds the **base rate once per parent Product**
+  (`Category|Model/Height|Backing|Type|Width|Length|Size`) so every colour variant
+  inherits it and identical prices are never duplicated across colours. The rate is
+  per **unit** — ₹/Sq.Ft. for rolls, ₹/Piece for footmats/car sets; per-roll/piece
+  totals are **computed** (rate × Sq.Ft.), never stored (ADR-0007).
 - **PK.** `id`. **Unique.** the base key. Fields: `rate`, `unit` (`sqft`|`piece`),
   `cost` (future).
-- **FK.** ProductVariant references `priceGroupId`. **Owner.** Product Master
+- **FK.** Product references `priceGroupId`. **Owner.** Product Master
   (the default); Price Lists override on top.
 
 ### PriceList  *(ADR-0007)*
@@ -119,14 +132,14 @@
 - **Why.** Manufacturing/stock defaults future modules consume: production line,
   machine, QC template, packing type, default warehouse, reorder level, min/max
   stock.
-- **PK.** `id`. **FK.** `productId` → ProductVariant (1‑to‑1). **Owner.** Product
+- **PK.** `id`. **FK.** `productId` → Product (parent, 1‑to‑1). **Owner.** Product
   Master (Inventory/Production read later).
 
 ### ProductRelationship
 - **Why.** Relates products: compatible, accessories, replacement, upgraded-by,
   discontinued-by — powering cross-sell, substitution and lifecycle chains.
 - **PK.** `id`. **Unique.** `(productId, relatedProductId, type)`.
-- **FK.** `productId` / `relatedProductId` → ProductVariant. **Owner.** Product Master.
+- **FK.** `productId` / `relatedProductId` → Product (parent). **Owner.** Product Master.
 
 ### Product attribute lookups *(Model, Backing, Colour — Phase 2)*
 - **Why.** Normalised catalogue values that constrain valid variants and carry

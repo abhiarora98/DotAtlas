@@ -3465,6 +3465,22 @@
   .pl-ed-body { flex: 1; overflow-y: auto; padding: 16px 22px 22px; }
   .pl-meta { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-bottom: 14px; font-family: var(--fm); font-size: 11px; color: var(--text-3); }
   .pl-meta b { color: var(--text); }
+  /* Product Master — colour variants (parent → variant, ADR-0009) */
+  .pm-cdot { display:inline-block; width:9px; height:9px; border-radius:50%; vertical-align:middle; margin-right:2px; box-shadow:0 0 0 1px var(--line-2) inset; }
+  .pm-colcount { display:inline-flex; align-items:center; gap:2px; white-space:nowrap; }
+  .pm-hint { margin:12px 0 4px; padding:10px 12px; border:1px solid var(--line); border-radius:9px; background:var(--surface-2); color:var(--text-3); font-size:11.5px; line-height:1.5; }
+  .pm-hint b { color:var(--text-2); }
+  .pm-vhead, .pm-vrow { display:grid; grid-template-columns:16px minmax(120px,1.4fr) minmax(120px,1.3fr) 60px 96px minmax(150px,1.3fr) 28px; gap:10px; align-items:center; }
+  .pm-vhead { padding:4px 6px; font-family:var(--fm); font-size:9.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--text-4); }
+  .pm-vlist { display:flex; flex-direction:column; gap:6px; margin:4px 0 12px; }
+  .pm-vrow { padding:6px; border:1px solid var(--line); border-radius:9px; background:var(--surface-2); }
+  .pm-vswatch { width:14px; height:14px; border-radius:50%; box-shadow:0 0 0 1px var(--line-2) inset; }
+  .pm-vin { padding:6px 8px; font-size:12px; }
+  .pm-vsku { font-size:11px; color:var(--text-3); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .pm-vstock, .pm-vavail { font-family:var(--fm); font-size:11px; color:var(--text-3); }
+  .pm-vprice { display:flex; flex-direction:column; gap:3px; }
+  .pm-vcomp { font-family:var(--fm); font-size:10px; color:var(--text-4); }
+  .pm-vcomp.custom { color:var(--emerald); }
   /* Price List — pricing workspace row: Base Rate = muted read-only, Selling Rate = primary editable field */
   .pl-sell-h { color: var(--text-2); }
   .pl-base { color: var(--text-4); font-family: var(--fm); font-variant-numeric: tabular-nums; font-size: 12px; white-space: nowrap; }
@@ -4641,7 +4657,7 @@
             <th class="pm-c-model">Model</th>
             <th class="pm-c-bk">Backing</th>
             <th class="pm-c-sz">Size</th>
-            <th class="pm-c-col">Colour</th>
+            <th class="pm-c-col">Colours</th>
             <th class="pm-c-stk">Stock</th>
             <th class="pm-c-cmp">Complete</th>
             <th class="pm-c-status">Status</th>
@@ -4673,6 +4689,7 @@
           <div class="pm-tabrail" id="pm-tabrail">
             <button class="pm-tab on" data-tab="general">General</button>
             <button class="pm-tab" data-tab="specs">Specifications</button>
+            <button class="pm-tab" data-tab="variants">Variants</button>
             <button class="pm-tab" data-tab="pricing">Pricing</button>
             <button class="pm-tab" data-tab="images">Images</button>
             <button class="pm-tab" data-tab="documents">Documents</button>
@@ -26511,8 +26528,9 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   };
   const ATTR_LABEL = {model:'Model',backing:'Backing',height:'Height',type:'Type (SL/DL)',width:'Width',length:'Length',size:'Size',colour:'Colour'};
   const CATCODE = {'LOOP':'LP','TEFNO':'TF','TURF':'TR','WIRE MAT':'WM','ARTIFICIAL GRASS':'AG','MONO GRASS':'MG','FOOTMAT':'FM'};
-  const CAT_GST = {'ARTIFICIAL GRASS':5}; // default 5% grass, 18% others
-  const CAT_HSN = {'FOOTMAT':'5705'};     // default 5705 footmat, 5703 others
+  // HSN/GST (updated spec): Artificial Grass & Mono Grass → 57033100 / 5%; all others → 39189090 / 18%.
+  const CAT_GST = {'ARTIFICIAL GRASS':5,'MONO GRASS':5};
+  const CAT_HSN = {'ARTIFICIAL GRASS':'57033100','MONO GRASS':'57033100'};
   const STATUSES = ['Draft','Active','Discontinued','Archived'];
   const famAttr = cat => cat==='ARTIFICIAL GRASS' ? 'height' : 'model';
   const specAttrs = cat => (SCHEMA[cat]||[]).filter(a => a!==famAttr(cat));
@@ -26523,25 +26541,38 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   const digits = s => String(s||'').replace(/[^0-9]/g,'') || '0';
   const lenNum = s => { const m = String(s||'').match(/\d+/); return m?m[0]:''; };
   const sizeCodeF = s => tokw(s).replace(/ /g,'').replace('CM','C');
+  // Parent SKU — colour-independent (colour lives on the variant, ADR-0009).
   function genSku(p){
     const cat=p.category, cc=CATCODE[cat]||codeOf(cat,2);
     const mc = cat==='ARTIFICIAL GRASS' ? (digits(p.height)+'MM'+(p.type||'')) : codeOf(p.model,4);
     const bc = p.backing ? codeOf(p.backing,3) : '';
     const zc = cat==='FOOTMAT' ? sizeCodeF(p.size) : (digits(p.width)+'X'+lenNum(p.length));
-    const colc = codeOf(p.colour,3);
-    let base = [cc,mc,bc,zc,colc].filter(Boolean).join('-').toUpperCase();
-    const taken = new Set(all().filter(x=>x.id!==p.id).map(x=>x.sku));
+    let base = [cc,mc,bc,zc].filter(Boolean).join('-').toUpperCase();
+    const taken = allSkus(p.id);
     let s=base,i=2; while(taken.has(s)){ s=base+'-'+i; i++; } return s;
   }
+  // Variant SKU = parent SKU + colour code. Sales/Purchase/Production reference this.
+  function genVariantSku(p, colour, taken){
+    const vc = /assorted|mixed/i.test(colour) ? 'AST' : codeOf(colour,3);
+    let base = ((p.sku||genSku(p))+'-'+vc).toUpperCase();
+    let s=base,i=2; while(taken.has(s)){ s=base+'-'+i; i++; } return s;
+  }
+  // every SKU in use (parents + variants), excluding one product id.
+  function allSkus(exceptId){ const s=new Set(); all().forEach(x=>{ if(x.id===exceptId) return; if(x.sku) s.add(x.sku); (x.variants||[]).forEach(v=>{ if(v.sku) s.add(v.sku); }); }); return s; }
+  // Swatch colour for a variant name (best-effort; falls back to a stable hash hue).
+  const COLOUR_HEX={black:'#222',white:'#eee',grey:'#8a8f98',gray:'#8a8f98',beige:'#d9c8a8',brown:'#7b5330',red:'#d1495b',blue:'#3d6fd6',green:'#3f9b5a','p.green':'#2f7d46',pgreen:'#2f7d46',maroon:'#7b2d3a',tan:'#c9a97e',coffee:'#6f4e37',yellow:'#e6c34a',orange:'#e08a3c'};
+  function colourHex(name){ const n=String(name||'').toLowerCase(); const first=n.split(/[-\s(]/)[0]; if(COLOUR_HEX[first]) return COLOUR_HEX[first]; for(const k in COLOUR_HEX){ if(n.includes(k)) return COLOUR_HEX[k]; } let h=0; for(let i=0;i<n.length;i++) h=(h*31+n.charCodeAt(i))>>>0; return 'hsl('+(h%360)+',35%,55%)'; }
+  function distinctColours(cat){ const s=new Set(); all().forEach(p=>{ if(cat&&p.category!==cat) return; (p.variants||[]).forEach(v=>{ if(v.colour) s.add(v.colour); }); }); return [...s].sort(); }
+  const coloursSummary = p => { const vs=p.variants||[]; if(!vs.length) return '—'; if(vs.length===1) return vs[0].colour||'—'; return vs.length+' colours'; };
   const groupKey = p => [p.category, p.model||p.height, p.backing, p.type, p.width, p.length, p.size].map(x=>x||'').join('|');
   // Widths are stored in metres but shown to the team in feet where a standard
   // mapping exists (0.61→2ft, 1.22→4ft). Stored value is untouched.
   const WIDTH_FT = {'0.61':'2ft','1.22':'4ft'};
   const widthLabel = w => (w==null||w==='') ? '' : (WIDTH_FT[String(w)] || String(w));
-  function suggestName(p){ const dim = p.category==='FOOTMAT'? p.size : (p.width && (widthLabel(p.width)+'×'+lenNum(p.length)+'m')); return [p.model||p.height, p.backing, p.type, dim, p.colour].filter(Boolean).join(' '); }
+  function suggestName(p){ const dim = p.category==='FOOTMAT'? p.size : (p.width && (widthLabel(p.width)+'×'+lenNum(p.length)+'m')); return [p.model||p.height, p.backing, p.type, dim].filter(Boolean).join(' '); }
 
   // ---- data (seed + overlay) ----
-  const OV_KEY = 'native-products-overlay';
+  const OV_KEY = 'native-products-overlay-v3'; // schema v3 (parent/variant) — fresh key so pre-v3 per-colour edits don't merge onto the new parents
   let seed = [], seedPG = {}, loaded = false;
   let ov = { over:{}, add:[], priceGroups:{} };
   try { ov = Object.assign({over:{},add:[],priceGroups:{}}, JSON.parse(localStorage.getItem(OV_KEY)||'{}')); } catch(e){}
@@ -26608,7 +26639,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       if (state.status && (p.status||'Active')!==state.status) return false;
       if (state.width && (p.width||'')!==state.width) return false;
       if (state.length && (p.length||'')!==state.length) return false;
-      if (state.colour && (p.colour||'')!==state.colour) return false;
+      if (state.colour && !(p.variants||[]).some(v=>v.colour===state.colour)) return false;
       if (state.miss.image && !missImage(p)) return false;
       if (state.miss.bom && !missBom(p)) return false;
       if (state.miss.price && !missPrice(p)) return false;
@@ -26617,12 +26648,12 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       if (state.miss['recent-add'] && !ov.add.some(a=>a.id===p.id)) return false;
       // Universal search — matches any attribute: colour, model, width (4ft),
       // backing (Spike), SKU, HSN, product name, family, etc.
-      if (q){ const blob=[p.sku,p.name,p.category,p.model,p.height,p.type,p.colour,p.backing,p.family,p.width,widthLabel(p.width),p.length,p.size,p.hsn,p.unit].filter(Boolean).join(' ').toLowerCase(); if(!blob.includes(q)) return false; }
+      if (q){ const blob=[p.sku,p.name,p.category,p.model,p.height,p.type,p.backing,p.family,p.width,widthLabel(p.width),p.length,p.size,p.hsn,p.unit,(p.variants||[]).map(v=>v.colour+' '+v.sku).join(' ')].filter(Boolean).join(' ').toLowerCase(); if(!blob.includes(q)) return false; }
       return true;
     });
   }
-  // Compact variant label: backing · size · colour (width×length collapsed).
-  const variantOf = p => { const dim = p.category==='FOOTMAT' ? p.size : (p.width && (widthLabel(p.width)+'×'+lenNum(p.length)+'m')); return [p.backing, p.type, dim, p.colour].filter(Boolean).join(' · '); };
+  // Compact label: backing · size (width×length collapsed). Colour is a variant.
+  const variantOf = p => { const dim = p.category==='FOOTMAT' ? p.size : (p.width && (widthLabel(p.width)+'×'+lenNum(p.length)+'m')); return [p.backing, p.type, dim].filter(Boolean).join(' · '); };
   const actIcon = (id,act,ic,title) => '<button class="pm-act" data-act="'+act+'" data-id="'+esc(id)+'" title="'+title+'" aria-label="'+title+'">'+ic+'</button>';
 
   // Landing-page attention panels — recently added/updated, low stock, gaps.
@@ -26664,7 +26695,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     fillSelect('pm-f-model', distinct('model', state.cat), 'All models', state.model);
     fillSelect('pm-f-width', distinct('width', state.cat), 'Any width', state.width, widthLabel);
     fillSelect('pm-f-length', distinct('length', state.cat), 'Any length', state.length);
-    fillSelect('pm-f-colour', distinct('colour', state.cat), 'Any colour', state.colour);
+    fillSelect('pm-f-colour', distinctColours(state.cat), 'Any colour', state.colour);
     document.querySelectorAll('#pm-more .pm-chip').forEach(c=>c.classList.toggle('on', !!state.miss[c.getAttribute('data-miss')]));
     renderPanels();
     // table
@@ -26685,7 +26716,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         + '<td class="pm-c-model"><span class="pm-badge">'+esc(p.model||p.height||'—')+'</span></td>'
         + '<td class="pm-c-bk pm-meta">'+esc(backing)+'</td>'
         + '<td class="pm-c-sz pm-mono">'+esc(sz)+'</td>'
-        + '<td class="pm-c-col pm-meta">'+esc(p.colour||'—')+'</td>'
+        + '<td class="pm-c-col pm-meta"><span class="pm-colcount" title="'+esc((p.variants||[]).map(v=>v.colour).join(', '))+'">'+((p.variants||[]).slice(0,4).map(v=>'<span class="pm-cdot" style="background:'+colourHex(v.colour)+'"></span>').join(''))+' '+esc(coloursSummary(p))+'</span></td>'
         + '<td class="pm-c-stk"><span class="pm-stock '+sk.level+'" title="'+esc(sk.label)+'"><span class="pm-dot"></span>'+esc(sk.short)+'</span></td>'
         + '<td class="pm-c-cmp"><span class="pm-cmp '+cm.tone+'" title="'+esc(cm.missing.length?('Missing: '+cm.missing.join(', ')):'Complete')+'"><span class="pm-cmp-bar"><span style="width:'+cm.pct+'%"></span></span>'+cm.pct+'%</span></td>'
         + '<td class="pm-c-status"><span class="pm-st '+st.toLowerCase()+'">'+st+'</span></td>'
@@ -26711,8 +26742,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
 
   function openDetail(id, tab){
     if (id){ draft = JSON.parse(JSON.stringify(byId(id))); draftNew=false; }
-    else { draft = { id:null, category:'LOOP', status:'Draft', unit:'Roll', gst:18, hsn:'5703', colour:'', images:[], documents:[], bom:{materials:[]}, manufacturing:{}, relationships:{} }; draftNew=true; }
-    draft.images=draft.images||[]; draft.documents=draft.documents||[]; draft.bom=draft.bom||{materials:[]}; draft.bom.materials=draft.bom.materials||[]; draft.manufacturing=draft.manufacturing||{}; draft.relationships=draft.relationships||{};
+    else { draft = { id:null, category:'LOOP', status:'Draft', unit:'Roll', gst:18, hsn:'39189090', variants:[], images:[], documents:[], bom:{materials:[]}, manufacturing:{}, relationships:{} }; draftNew=true; }
+    draft.variants=draft.variants||[]; draft.images=draft.images||[]; draft.documents=draft.documents||[]; draft.bom=draft.bom||{materials:[]}; draft.bom.materials=draft.bom.materials||[]; draft.manufacturing=draft.manufacturing||{}; draft.relationships=draft.relationships||{};
     nameDirty=!draftNew; skuDirty=!draftNew; groupPrice = pmBaseRate(draft.priceGroup||groupKey(draft));
     activeTab = tab||'general';
     recompute();
@@ -26725,7 +26756,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     draft.family = draft.category + ' · ' + (draft.model||draft.height||'');
     draft.priceGroup = groupKey(draft);
     if (!nameDirty) draft.name = suggestName(draft);
-    if (draftNew && !skuDirty && (draft.model||draft.height) && draft.colour) draft.sku = genSku(draft);
+    if (draftNew && !skuDirty && (draft.model||draft.height)) draft.sku = genSku(draft);
   }
   function renderHeader(){
     const img=primaryImg(draft);
@@ -26777,23 +26808,47 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         const note = (a==='width' && WIDTH_FT[String(p[a])]) ? '— shown as '+WIDTH_FT[String(p[a])] : (a==='width' ? '— metres' : '');
         return field(ATTR_LABEL[a], a, p[a], {list:'pm-dl-'+a, note}) + dl('pm-dl-'+a, distinct(a,p.category));
       }).join('');
-      return '<div class="pm-sec-h">Specifications · '+esc(p.category)+'</div>'
+      return '<div class="pm-sec-h">Specifications · '+esc(p.category)+' <span class="ap-muted">— shared by all colour variants</span></div>'
         + '<div class="pm-grid3">'+rows
-        + field('Colour','colour',p.colour,{list:'pm-dl-colour'}) + dl('pm-dl-colour', distinct('colour',p.category))
         + '</div>'
+        + '<div class="pm-hint">Colour is managed per variant in the <b>Variants</b> tab — each colour keeps its own stock, production &amp; availability (ADR-0009).</div>'
         + '<div class="pm-sec-h">Measures</div><div class="pm-grid3">'
         + selField('Unit','unit',p.unit||'Roll',['Roll','Piece','Set','Sqm','Box'])
         + field('Weight (kg)','weight',p.weight,{type:'number',mono:true})
         + field('Square Feet','sqft',p.sqft,{type:'number',mono:true})
         + '</div>';
     }
+    if (name==='variants'){
+      const base = pmBaseRate(p.priceGroup||groupKey(p)); const um = unitOf(p);
+      const vs = p.variants||[];
+      const rowsHtml = vs.map((v,idx)=>{
+        const eff = v.rateOverride!=null ? v.rateOverride : base;
+        const comp = eff==null ? '—' : (um==='sqft' ? inr(Math.round(eff*(+p.sqft||0)))+'/roll' : inr(eff)+'/pc');
+        const custom = v.rateOverride!=null;
+        return '<div class="pm-vrow" data-vidx="'+idx+'">'
+          + '<span class="pm-vswatch" style="background:'+colourHex(v.colour)+'"></span>'
+          + '<input class="pi-input no-upper pm-vin" data-vfield="colour" data-vidx="'+idx+'" value="'+esc(v.colour||'')+'" placeholder="colour">'
+          + '<span class="pm-vsku mono">'+esc(v.sku||'— on save')+'</span>'
+          + '<span class="pm-vstock" title="Placeholder until Inventory lands">'+(v.stock==null?'—':v.stock)+'</span>'
+          + '<span class="pm-vavail">'+esc(v.availability||'—')+'</span>'
+          + '<div class="pm-vprice"><input class="pi-input mono pm-vin" data-vfield="rateOverride" data-vidx="'+idx+'" inputmode="decimal" value="'+(v.rateOverride==null?'':v.rateOverride)+'" placeholder="'+(base==null?'—':base)+'">'
+            + '<span class="pm-vcomp'+(custom?' custom':'')+'">'+comp+' · '+(custom?'override':'inherited')+'</span></div>'
+          + '<button class="pm-x" data-vdel="'+idx+'" title="Remove variant">✕</button>'
+          + '</div>';
+      }).join('');
+      return '<div class="pm-sec-h">Colour variants <span class="ap-muted">— each variant keeps its own stock, production &amp; availability; price inherits the parent base rate unless overridden (ADR-0009)</span></div>'
+        + '<div class="pm-vhead"><span></span><span>Colour</span><span>Variant SKU</span><span>Stock</span><span>Availability</span><span>Selling rate '+(um==='sqft'?'₹/sqft':'₹/pc')+'</span><span></span></div>'
+        + '<div class="pm-vlist">'+(rowsHtml||'<div class="pm-placeholder" style="text-align:left;">No colour variants yet — add one below.</div>')+'</div>'
+        + '<button class="pm-add-row" id="pm-vadd">+ Add colour variant</button>'
+        + '<div class="pm-hint">Sales, Purchase and Production Orders reference the <b>variant SKU</b>. Stock, production planning and availability become live when Inventory &amp; Production land; pricing is inherited from the parent base rate (leave the rate blank) unless a variant needs an explicit override.</div>';
+    }
     if (name==='pricing'){
-      const grpCount = all().filter(x=>(x.priceGroup||groupKey(x))===p.priceGroup).length;
+      const nv = (p.variants||[]).length;
       const um = unitOf(p); const perLabel = um==='sqft' ? '₹ / Sq.Ft.' : '₹ / Piece';
       const computed = groupPrice==null ? '—' : (um==='sqft' ? inr(Math.round(groupPrice*(+p.sqft||0)))+' / roll' : inr(groupPrice)+' / piece');
-      return '<div class="pm-sec-h">Pricing <span class="ap-muted">— rate only; totals are computed (ADR-0007)</span></div>'
+      return '<div class="pm-sec-h">Pricing <span class="ap-muted">— base rate only; totals are computed (ADR-0007)</span></div>'
         + '<div class="pm-grid2">'
-        + '<div class="pi-field"><label>Default rate <b>'+perLabel+'</b> <span class="ap-muted">— shared by '+grpCount+' variant'+(grpCount!==1?'s':'')+'</span></label><input class="pi-input mono" data-groupprice="1" inputmode="decimal" value="'+(groupPrice==null?'':groupPrice)+'"></div>'
+        + '<div class="pi-field"><label>Base rate <b>'+perLabel+'</b> <span class="ap-muted">— inherited by '+nv+' colour variant'+(nv!==1?'s':'')+' (override per variant in Variants)</span></label><input class="pi-input mono" data-groupprice="1" inputmode="decimal" value="'+(groupPrice==null?'':groupPrice)+'"></div>'
         + '<div class="pi-field"><label>Computed price <span class="ap-muted">— rate'+(um==='sqft'?' × '+(p.sqft!=null?p.sqft+' sqft':'sqft'):'')+'</span></label><input class="pi-input mono" value="'+esc(computed)+'" disabled></div>'
         + '</div>'
         + '<div class="pm-grid2">'
@@ -26802,7 +26857,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
         + '</div>'
         + '<div class="pm-grid2">'
         + field('HSN Code','hsn',p.hsn,{mono:true})
-        + field('GST %','gst',p.gst,{type:'number',mono:true,note:'grass 5% · others 18%'})
+        + field('GST %','gst',p.gst,{type:'number',mono:true,note:'grass & mono grass 5% · others 18%'})
         + '</div>'
         + '<div class="pm-sec-h">Note</div><div class="pm-placeholder" style="text-align:left;padding:14px 0;">Tiered pricing — Dealer, Distributor, Customer-specific, Quantity-break, Export — is managed in the future <b>Price List</b> module, not Product Master (ADR-0006). Product Master holds only the default price + cost.</div>';
     }
@@ -26854,11 +26909,12 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       // Auto-derived relations from the catalogue.
       const others = all().filter(x=>x.id!==p.id && x.id);
       const sameModel = others.filter(x=>x.family===p.family).slice(0,12);
-      const altColours = others.filter(x=>(x.priceGroup||groupKey(x))===(p.priceGroup||groupKey(p))).slice(0,12);
       const autoRow=(title,list)=> '<div class="pm-relgrp"><label style="font-family:var(--fm);font-size:11.5px;color:var(--text-2);">'+title+' <span class="ap-muted">— auto</span></label>'
-        + '<div class="pm-relchips">'+(list.length?list.map(x=>'<span class="pm-relchip auto" data-open="'+esc(x.id)+'">'+esc(x.colour||x.name||x.sku)+'</span>').join(''):'<span class="ap-muted" style="font-size:11px;">None</span>')+'</div></div>';
+        + '<div class="pm-relchips">'+(list.length?list.map(x=>'<span class="pm-relchip auto" data-open="'+esc(x.id)+'">'+esc(x.name||x.sku)+'</span>').join(''):'<span class="ap-muted" style="font-size:11px;">None</span>')+'</div></div>';
+      const colourRow = '<div class="pm-relgrp"><label style="font-family:var(--fm);font-size:11.5px;color:var(--text-2);">Colour variants <span class="ap-muted">— this product · see Variants tab</span></label>'
+        + '<div class="pm-relchips">'+((p.variants||[]).length?(p.variants||[]).map(v=>'<span class="pm-relchip auto"><span class="pm-cdot" style="background:'+colourHex(v.colour)+'"></span>'+esc(v.colour)+'</span>').join(''):'<span class="ap-muted" style="font-size:11px;">None</span>')+'</div></div>';
       return '<div class="pm-sec-h">Related products <span class="ap-muted">— derived from the catalogue</span></div>'
-        + autoRow('Same Model', sameModel) + autoRow('Alternative Colours', altColours)
+        + autoRow('Same Family', sameModel) + colourRow
         + '<div class="pm-sec-h">Manual relationships</div>' + REL_GROUPS.map(([k,label])=>{
         const ids=(p.relationships[k]||[]);
         return '<div class="pm-relgrp" data-relgrp="'+k+'"><label style="font-family:var(--fm);font-size:11.5px;color:var(--text-2);">'+label+'</label>'
@@ -26900,6 +26956,15 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   function onContentInput(e){
     const el=e.target;
     const gp=el.getAttribute('data-groupprice'); if(gp){ groupPrice = el.value===''?null:+el.value; return; }
+    // variant cell (colour / per-variant rate override)
+    const vf=el.getAttribute('data-vfield');
+    if(vf){ const vi=+el.getAttribute('data-vidx'); const v=draft.variants[vi]; if(!v) return;
+      if(vf==='rateOverride'){ const raw=el.value; v.rateOverride = raw===''?null:(isNaN(+raw)?null:+raw);
+        const base=pmBaseRate(draft.priceGroup||groupKey(draft)); const um=unitOf(draft); const eff=v.rateOverride!=null?v.rateOverride:base;
+        const comp=eff==null?'—':(um==='sqft'?inr(Math.round(eff*(+draft.sqft||0)))+'/roll':inr(eff)+'/pc');
+        const row=el.closest('.pm-vrow'); const cs=row&&row.querySelector('.pm-vcomp'); if(cs){ cs.textContent=comp+' · '+(v.rateOverride!=null?'override':'inherited'); cs.classList.toggle('custom', v.rateOverride!=null); }
+      } else { v[vf]=el.value; }
+      return; }
     const f=el.getAttribute('data-field');
     if(f){
       let v=el.value;
@@ -26908,10 +26973,10 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
       if(f==='sku'){ skuDirty=true; draft.sku=v; return; }
       draft[f]=v;
       if(f==='category'){ // reset category-driven defaults
-        draft.gst = CAT_GST[v]!=null?CAT_GST[v]:18; draft.hsn = CAT_HSN[v]||'5703'; draft.unit = v==='FOOTMAT'?'Piece':'Roll';
+        draft.gst = CAT_GST[v]!=null?CAT_GST[v]:18; draft.hsn = CAT_HSN[v]||'39189090'; draft.unit = v==='FOOTMAT'?'Piece':'Roll';
         recompute(); renderHeader(); selectTab('general'); return;
       }
-      if(['model','height','backing','type','width','length','size','colour'].includes(f)){ recompute(); renderHeader(); }
+      if(['model','height','backing','type','width','length','size'].includes(f)){ recompute(); renderHeader(); }
       return;
     }
     // BOM cell
@@ -26948,6 +27013,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     if((i=t.getAttribute('data-docdel'))!=null){ draft.documents.splice(+i,1); selectTab('documents'); return; }
     if((i=t.getAttribute('data-bomdel'))!=null){ draft.bom.materials.splice(+i,1); selectTab('bom'); return; }
     if(t.id==='pm-bomadd'){ draft.bom.materials.push({material:'',qty:'',unit:'',scrap:''}); selectTab('bom'); return; }
+    if(t.id==='pm-vadd'){ draft.variants=draft.variants||[]; draft.variants.push({id:null,sku:'',colour:'',status:'Active',rateOverride:null,stock:null,availability:'Available'}); selectTab('variants'); return; }
+    if((i=t.getAttribute('data-vdel'))!=null){ draft.variants.splice(+i,1); selectTab('variants'); return; }
     if(t.id==='pm-imgdrop'){ $('pm-img-input').click(); return; }
     if(t.id==='pm-docadd'){ $('pm-doc-input').click(); return; }
     const rr=t.getAttribute('data-reladd'); if(rr){ const k=t.getAttribute('data-relgrpk'); addRel(k, t.getAttribute('data-id')); return; }
@@ -26960,10 +27027,17 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   function saveDetail(){
     recompute();
     if(!(draft.model||draft.height)){ setMsg('Enter a '+(draft.category==='ARTIFICIAL GRASS'?'height':'model')+'.'); selectTab('general'); return; }
-    if(!draft.colour){ setMsg('Colour is required (Specifications).'); selectTab('specs'); return; }
     let sku=(draft.sku||'').trim()||genSku(draft);
-    if(all().some(x=>x.sku===sku && x.id!==draft.id)){ setMsg('SKU '+sku+' already exists.'); selectTab('general'); return; }
+    if(allSkus(draft.id).has(sku)){ setMsg('SKU '+sku+' already exists.'); selectTab('general'); return; }
     draft.sku=sku;
+    // Generate/refresh variant SKUs from the parent SKU + colour; require a colour per variant.
+    const taken=allSkus(draft.id); taken.add(sku);
+    for(const v of (draft.variants||[])){
+      if(!v.colour || !v.colour.trim()){ setMsg('Every colour variant needs a colour (Variants tab).'); selectTab('variants'); return; }
+      if(!v.sku){ v.sku=genVariantSku(draft, v.colour, taken); taken.add(v.sku); }
+      if(!v.id){ v.id='V'+Date.now().toString(36).toUpperCase()+Math.floor(Math.random()*1000); }
+      if(!v.status) v.status='Active'; if(v.availability==null) v.availability='Available';
+    }
     // lock SKU once it leaves Draft (proxy for "used in ERP")
     if(draft.status && draft.status!=='Draft') draft.skuLocked=true;
     // audit
@@ -26983,7 +27057,7 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     saveOv(); closeDetail(); render();
   }
   function changeStatus(id, st){ const p=byId(id); if(!p) return; const patch={status:st, updatedBy:'Catalogue', updatedOn:new Date().toISOString().slice(0,10)}; if(st!=='Draft') patch.skuLocked=true; if(seed.some(s=>s.id===id)) ov.over[id]=Object.assign({},ov.over[id],patch); else { const i=ov.add.findIndex(x=>x.id===id); if(i>=0) Object.assign(ov.add[i],patch); } saveOv(); if(draft&&draft.id===id){ Object.assign(draft,patch); renderHeader(); selectTab(activeTab); } render(); }
-  function duplicateProduct(id){ const src=byId(id); if(!src) return; const copy=JSON.parse(JSON.stringify(src)); copy.id=null; copy.status='Draft'; copy.skuLocked=false; copy.colour=(copy.colour||'')+' COPY'; copy.name=''; openDetail(null); draft=Object.assign(draft, copy); nameDirty=false; skuDirty=false; recompute(); renderHeader(); selectTab('general'); }
+  function duplicateProduct(id){ const src=byId(id); if(!src) return; const copy=JSON.parse(JSON.stringify(src)); copy.id=null; copy.status='Draft'; copy.skuLocked=false; copy.sku=''; copy.name=''; copy.variants=(copy.variants||[]).map(v=>({...v, id:null, sku:''})); openDetail(null); draft=Object.assign(draft, copy); nameDirty=false; skuDirty=false; recompute(); renderHeader(); selectTab('general'); }
   function exportProducts(rows){ const data=rows.map(p=>Object.assign({},p,{sellingPrice:priceOf(p)})); const blob='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(data,null,1)); const a=document.createElement('a'); a.href=blob; a.download='products-export.json'; a.click(); }
 
   // ---- wire ----
@@ -27070,16 +27144,18 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   try { store = Object.assign({lists:{}}, JSON.parse(localStorage.getItem(PL_KEY)||'{}')); } catch(e){}
   if(!store.lists) store.lists = {};
   const saveStore = () => { try { localStorage.setItem(PL_KEY, JSON.stringify(store)); } catch(e){} };
+  let bulkSeed = null; // { name, overrides } captured from products.json (updated spec Bulk column)
   const SEED = [
-    ['default','Default','Product Master default rate — every product inherits this. No overrides.',true,true],
+    ['default','Default','Product Master base rate — every product inherits this. No overrides.',true,true],
+    ['bulk','Bulk','Bulk / wholesale rates — seeded from the master price sheet.',true,false],
     ['dealer','Dealer','Rates for dealers / trade partners.',true,false],
-    ['distributor','Distributor','Bulk distributor rates.',true,false],
+    ['distributor','Distributor','Distributor rates.',true,false],
     ['institutional','Institutional','Institutional & project rates.',true,false],
     ['export','Export','Export pricing.',true,false],
     ['government','Government','Government / tender rates.',true,false],
   ];
   function ensureSeed(){
-    SEED.forEach(([id,name,desc,system,readonly])=>{ if(!store.lists[id]) store.lists[id]={ id,name,description:desc,status:'Active',system,readonly,isDefault:(id==='default'),overrides:{},parties:[],createdBy:'System',createdOn:today(),updatedBy:'System',updatedOn:today() }; });
+    SEED.forEach(([id,name,desc,system,readonly])=>{ if(!store.lists[id]){ const ov = (id==='bulk' && bulkSeed && bulkSeed.overrides) ? Object.assign({}, bulkSeed.overrides) : {}; store.lists[id]={ id,name,description:desc,status:'Active',system,readonly,isDefault:(id==='default'),overrides:ov,parties:[],createdBy:'System',createdOn:today(),updatedBy:'System',updatedOn:today() }; } });
     // Exactly one company-wide default (is_default) must exist.
     if(!Object.values(store.lists).some(l=>l.isDefault)){ const d=store.lists['default']||Object.values(store.lists)[0]; if(d) d.isDefault=true; }
     saveStore();
@@ -27108,10 +27184,11 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   window.nativeLoadPriceLists = async function(){
     if(!loaded){
       try { const res=await fetch('data/products.json'); const j=await res.json(); seedPG=j.priceGroups||{};
-        const gm={}; (j.products||[]).forEach(p=>{ const k=p.priceGroup; if(!gm[k]) gm[k]={key:k,rep:p,variants:0}; gm[k].variants++; });
-        groups = Object.values(gm).map(g=>{ const p=g.rep; const size=p.category==='FOOTMAT'?p.size:(p.width?(widthLabel(p.width)+'×'+lenNum(p.length)+'m'):''); return {
+        bulkSeed = (j.priceListSeeds && j.priceListSeeds.bulk) || null;
+        const gm={}; (j.products||[]).forEach(p=>{ const k=p.priceGroup; if(!gm[k]) gm[k]={key:k,rep:p,variants:0}; gm[k].variants += (p.variants||[]).length||1; });
+        groups = Object.values(gm).map(g=>{ const p=g.rep; const size=p.category==='FOOTMAT'?p.size:(p.width?(widthLabel(p.width)+'×'+lenNum(p.length)+'m'):''); const cols=(p.variants||[]).map(v=>v.colour).join(' '); return {
           key:g.key, category:p.category, gst:p.gst, hsn:p.hsn, sqft:p.sqft, unit:(p.category==='FOOTMAT'?'piece':'sqft'), variants:g.variants,
-          label:[p.model||p.height, p.backing, p.type, size].filter(Boolean).join(' '), search:[p.model,p.height,p.backing,p.type,p.colour,p.sku,size].filter(Boolean).join(' ').toLowerCase()
+          label:[p.model||p.height, p.backing, p.type, size].filter(Boolean).join(' '), search:[p.model,p.height,p.backing,p.type,cols,p.sku,size].filter(Boolean).join(' ').toLowerCase()
         }; });
       } catch(e){ groups=[]; }
       loaded = true;

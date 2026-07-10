@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Version** | 2.1 |
+| **Version** | 3.0 |
 | **Status** | ✅ Implemented (standalone; SO integration next phase) |
 | **Last Updated** | 10 Jul 2026 |
-| **Related ADRs** | ADR-0001, ADR-0004, ADR-0005, ADR-0006, ADR-0008 |
+| **Related ADRs** | ADR-0001, ADR-0004, ADR-0005, ADR-0006, ADR-0008, ADR-0009 |
 | **Related Modules** | Sales Orders · Inventory · Dispatch · Warehouse · Production · Purchase · Price Lists · CRM |
 
 > Product Master is the **single source of truth for every product in Native** — a
@@ -33,6 +33,33 @@ Production, Purchase, Pricing and CRM all reference the **same** product by the
 
 Under the dedicated **`MASTER DATA`** section: Party Master · **Product Master** ·
 Price Lists *(future)* · Transporters *(future)* · Employees *(future)*.
+
+## Parent product → colour variant (ADR-0009)
+
+Colour is a **variant under a single parent product**, not a separate SKU and not
+a throwaway display attribute — because **stock and production are managed by
+colour**.
+
+```
+Parent product        LP-ALTO-DIA-061X15   "ALTO DIAMOND 2ft×15m"
+  common data         dimensions · Sq.Ft. · weight · HSN · GST · specs · base rate
+  └── Colour variants
+        LP-ALTO-DIA-061X15-BEI   BEIGE   · own stock · production · availability
+        LP-ALTO-DIA-061X15-BLK   BLACK   · own stock · production · availability
+        …                        (price inherited from parent unless overridden)
+```
+
+- The **parent** owns everything common: name, category, model/height,
+  backing/type, dimensions, Sq.Ft., weight, HSN, GST, specifications, images,
+  documents, BOM, manufacturing, and the **base rate**. Its SKU is
+  colour-independent.
+- Each **variant** carries its own **SKU** (parent SKU + colour code), **stock,
+  production planning and availability**, and an optional **rate override**;
+  otherwise it inherits the parent's base rate.
+- **Sales, Purchase and Production Orders reference the variant SKU.** Common
+  info and pricing are read from the parent unless the variant overrides them.
+- The catalogue holds **124 parents / 516 variants** (updated master spec),
+  replacing the old flat 532 per-colour SKUs.
 
 ## Product Families
 
@@ -67,8 +94,9 @@ Transitions and performers are documented in
 
 ## SKU rules
 
-- **Auto-generated** from attributes, deterministic and unique
-  (e.g. `LP-CIRRO-SPK-061X12-GRY`).
+- **Auto-generated** from attributes, deterministic and unique. The **parent**
+  SKU is colour-independent (e.g. `LP-CIRRO-SPK-061X12`); each **variant** SKU
+  appends the colour code (e.g. `LP-CIRRO-SPK-061X12-GRY`).
 - **Editable only until first use.** Once the product is referenced by any Sales
   Order, Inventory Transaction or Production Record it is **locked forever**
   (`skuLocked`). Present-day proxy until those modules integrate: SKU locks when
@@ -89,7 +117,7 @@ catalogue.
 
 ### 2 · Product List (catalogue)
 **Columns:** Thumbnail · Product Name (with SKU beneath) · Category · Model ·
-**Backing · Size · Colour** (attributes split for scanning) · **Stock** (snapshot
+**Backing · Size · Colours** (a swatch + count of colour variants) · **Stock** (snapshot
 indicator 🟢/🟡/🔴) · **Completeness %** · Status · quick-action icons.
 **Completeness** = share of {image, price, BOM, documents, specs} present; surfaces
 which products need attention. **Stock** is a placeholder snapshot today, wired to
@@ -108,8 +136,9 @@ A tabbed layout so future features slot in without redesign:
 
 | Tab | Now |
 |---|---|
-| **General** | Primary image, Category, Product Family, Model, Variant, Product Name, SKU (auto, locks on use), Status |
-| **Specifications** | Category-specific attributes (see below) + Unit, Weight, Sq Ft |
+| **General** | Primary image, Category, Product Family, Model, Product Name, SKU (auto, colour-independent, locks on use), Status |
+| **Specifications** | Category-specific attributes (see below) + Unit, Weight, Sq Ft (shared by all colour variants) |
+| **Variants** | **Colour variants** — colour, variant SKU (parent + colour), stock, availability, selling rate (inherited base rate or per-variant override). Add / remove variants. Stock/production/availability are placeholders until Inventory & Production land (ADR-0009) |
 | **Pricing** | Default Selling Price (via **price group** — shared by a base's variants), HSN, GST · *Default Cost — future.* Tiered pricing (Dealer/Distributor/Customer/Qty-break/Export) lives in the future **Price List** module, not here (ADR-0006) |
 | **Images** | Multiple images: Primary · Catalogue · Technical Drawing · Installation; drag & drop, reorder · *360° — future* |
 | **Documents** | Product Catalogue PDF · Technical Data Sheet · Installation Guide · QC Sheet |
@@ -141,16 +170,22 @@ customers, Last manufactured date, Last sold date, Last purchased raw materials,
 Product profitability. When reporting is built, **every product becomes its own
 dashboard**.
 
-## Data model (V2)
+## Data model (V3 — parent/variant)
 
-**Identity & lifecycle:** `id`, `sku`, `skuLocked`, `status`, `name`, `family`,
-`category`.
+**Identity & lifecycle:** `id`, `sku` (colour-independent), `skuLocked`, `status`,
+`name`, `family`, `category`.
 **Specifications:** category-specific attributes + `unit`, `weight`, `sqft`.
-**Commercial:** `priceGroup` (→ **base rate** stored **once per colour-independent
-base**, inherited by variants — no duplicated pricing). The rate is per **unit** —
-₹/Sq.Ft. for rolls, ₹/Piece for footmats/car sets; per-roll/piece totals are
-**computed** (rate × Sq.Ft.), never stored (ADR-0007). `hsn`, `gst` (defaults:
-Artificial Grass **5%**, others **18%**) (+ Default Cost future).
+**Colour variants:** `variants[]` — each `{ id, sku (parent + colour code),
+colour, status, rateOverride, stock, availability }`. Variants carry their own
+stock / production / availability and inherit the parent base rate unless
+`rateOverride` is set. Sales / Purchase / Production Orders reference the variant
+SKU (ADR-0009).
+**Commercial:** `priceGroup` (→ **base rate** stored **once per parent**,
+inherited by every colour variant — no duplicated pricing). The rate is per
+**unit** — ₹/Sq.Ft. for rolls, ₹/Piece for footmats/car sets; per-roll/piece
+totals are **computed** (rate × Sq.Ft.), never stored (ADR-0007). `hsn`, `gst`
+(updated spec — **Artificial Grass & Mono Grass → HSN 57033100 / GST 5 %**; all
+other categories → **HSN 39189090 / GST 18 %**) (+ Default Cost future).
 
 > **Product Master is independent of Price Lists (ADR-0008).** It exposes the
 > **base rate only** and never resolves or displays an *effective* price via any
@@ -163,8 +198,11 @@ Artificial Grass **5%**, others **18%**) (+ Default Cost future).
 `relationships` (`{compatible[],accessories[],replacement[],upgradedBy[],discontinuedBy[]}`).
 **Audit:** `createdBy`, `createdOn`, `updatedBy`, `updatedOn`.
 
-Seed: `public/data/products.json` (532 products, 7 categories). Edits/additions
-persist to a browser-local overlay (`native-products-overlay`) over the static seed;
+Seed: `public/data/products.json` (schemaVersion 3 — **124 parents / 516 colour
+variants**, 7 categories; imported from the updated master spec). It also emits
+`priceGroups` (parent base rate) and `priceListSeeds.bulk.overrides` (the spec's
+Bulk column, used to seed the Bulk price list). Edits/additions persist to a
+browser-local overlay (`native-products-overlay-v3`) over the static seed;
 rich containers default empty and are stored only when set — the same pattern as
 orders, until the backend Product Master lands.
 
