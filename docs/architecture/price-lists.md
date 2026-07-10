@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Version** | 1.1 |
+| **Version** | 1.2 |
 | **Status** | ✅ Implemented (standalone; Sales Order integration next) |
 | **Last Updated** | 10 Jul 2026 |
 | **Related ADRs** | ADR-0001, ADR-0006, ADR-0007, ADR-0008 |
@@ -104,13 +104,29 @@ Cards/rows for each list (name, description, status, #overrides, #parties,
 updated) + **New Price List**.
 
 ### Product Pricing screen (per list)
-Columns: **Product · HSN · Unit · Sq.Ft. · GST % · Default rate · Override rate ·
-Computed price · Difference · Updated** — with **Search**, **Filters** and **Bulk
-Update**; Import / Export *(future)*. **HSN and GST are read-only, mirrored from
-Product Master** (they update automatically when changed there and are never
-editable here), so tax is visible during price verification, export and order
-creation. Rows are price groups (a base covers its colour variants). The
-seeded **Default** list is read-only (it *is* the base).
+Columns: **Product · HSN · Unit · Sq.Ft. · GST % · Base Rate · Selling Rate ·
+Updated** — with **Search**, **Filters** and **Bulk Update**; Import / Export
+*(future)*. **HSN and GST are read-only, mirrored from Product Master** (they
+update automatically when changed there and are never editable here), so tax is
+visible during price verification, export and order creation. Rows are price
+groups (a base covers its colour variants). The seeded **Default** list is
+read-only (it *is* the base).
+
+**Editing hierarchy — one obvious action.** The screen reads as a *pricing
+workspace*, not a spreadsheet: the **Selling Rate** is the single primary control.
+- **Base Rate** — muted, read-only text (the Product Master rate; the fallback).
+- **Selling Rate** — a large, bordered, high-contrast input with a **₹** prefix,
+  unit suffix and a **pencil** affordance; the whole cell is clickable and it has
+  a strong hover / focus state. It defaults to the Base Rate (shown as
+  placeholder) so an untouched row inherits automatically.
+- **When Selling Rate ≠ Base Rate** the field is highlighted, a small **Custom**
+  badge appears, and a **↺ Base** reset button restores inheritance (clears the
+  override).
+- The **computed roll/piece price** sits *beneath* the Selling Rate as secondary
+  supporting text — informative, not competing for attention.
+
+This makes the primary action unmistakable — "this is where I change the selling
+price" — without any per-row difference column or spreadsheet noise.
 
 ## Statuses
 

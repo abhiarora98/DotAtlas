@@ -3465,13 +3465,36 @@
   .pl-ed-body { flex: 1; overflow-y: auto; padding: 16px 22px 22px; }
   .pl-meta { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-bottom: 14px; font-family: var(--fm); font-size: 11px; color: var(--text-3); }
   .pl-meta b { color: var(--text); }
-  .pl-rate-in { width: 92px; text-align: right; font-family: var(--fm); font-variant-numeric: tabular-nums; font-size: 12px; padding: 6px 8px; border: 1px solid var(--line-2); border-radius: 7px; background: var(--surface); color: var(--text); }
-  .pl-rate-in.set { border-color: var(--emerald-mute); color: var(--emerald); background: var(--emerald-soft); }
-  .pl-rate-in:disabled { opacity: 0.5; }
-  .pl-diff { font-family: var(--fm); font-variant-numeric: tabular-nums; font-size: 11.5px; }
-  .pl-diff.up { color: var(--blue); } .pl-diff.down { color: var(--rose); } .pl-diff.same { color: var(--text-4); }
-  .pl-def { color: var(--text-3); font-family: var(--fm); font-variant-numeric: tabular-nums; }
-  .pl-computed { color: var(--text); font-weight: 600; font-family: var(--fm); font-variant-numeric: tabular-nums; }
+  /* Price List — pricing workspace row: Base Rate = muted read-only, Selling Rate = primary editable field */
+  .pl-sell-h { color: var(--text-2); }
+  .pl-base { color: var(--text-4); font-family: var(--fm); font-variant-numeric: tabular-nums; font-size: 12px; white-space: nowrap; }
+  .pl-sell-td { padding-top: 10px; padding-bottom: 10px; cursor: text; }
+  .pl-sell-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+  .pl-sell-field { display: inline-flex; align-items: center; gap: 3px; min-width: 138px; justify-content: flex-end;
+    background: var(--surface-4); border: 1px solid var(--line-2); border-radius: 9px; padding: 8px 11px; cursor: text;
+    transition: border-color .15s var(--ease), box-shadow .15s var(--ease), background .15s var(--ease); }
+  body[data-mode="light"] .pl-sell-field { background: #FFFFFF; }
+  .pl-sell-field:hover { border-color: var(--line-3); }
+  .pl-sell-field:focus-within { border-color: var(--emerald); box-shadow: 0 0 0 3px var(--emerald-soft); }
+  .pl-cur { font-family: var(--fm); font-size: 13px; color: var(--text-3); }
+  .pl-sell-in { border: 0; background: transparent; outline: none; padding: 0; width: 66px; text-align: right;
+    font-family: var(--fm); font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 700; color: var(--text); }
+  .pl-sell-in::placeholder { color: var(--text-4); font-weight: 500; }
+  .pl-unit { font-family: var(--fm); font-size: 10.5px; color: var(--text-4); }
+  .pl-pencil { font-size: 11px; color: var(--text-4); margin-left: 3px; transition: color .15s var(--ease); }
+  .pl-sell-field:hover .pl-pencil, .pl-sell-field:focus-within .pl-pencil { color: var(--emerald); }
+  .pl-sell-field.ro { opacity: 0.45; pointer-events: none; }
+  .pl-sell-wrap.custom .pl-sell-field { border-color: var(--emerald-mute); background: var(--emerald-soft); }
+  .pl-sell-wrap.custom .pl-sell-in { color: var(--emerald); }
+  .pl-sell-meta { display: flex; align-items: center; gap: 8px; font-family: var(--fm); font-variant-numeric: tabular-nums; }
+  .pl-computed { font-size: 11px; font-weight: 600; color: var(--text-3); }
+  .pl-custom { display: none; font-size: 8.5px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+    color: var(--amber); background: var(--amber-soft); border-radius: 5px; padding: 2px 6px; }
+  .pl-reset { display: none; align-items: center; gap: 3px; font-family: var(--fm); font-size: 10px; color: var(--text-3);
+    background: transparent; border: 1px solid var(--line-2); border-radius: 6px; padding: 2px 7px; cursor: pointer;
+    transition: color .15s var(--ease), border-color .15s var(--ease); }
+  .pl-reset:hover { color: var(--text); border-color: var(--line-3); }
+  .pl-sell-wrap.custom .pl-custom, .pl-sell-wrap.custom .pl-reset { display: inline-flex; }
   .pl-parties { margin-top: 24px; }
   .pl-relsearch input { max-width: 320px; }
   #pl-party-chips:empty::after { content: 'No parties assigned yet.'; font-family: var(--fm); font-size: 11px; color: var(--text-4); }
@@ -4719,10 +4742,8 @@
                 <th>Unit</th>
                 <th class="r">Sq.Ft.</th>
                 <th class="r">GST %</th>
-                <th class="r">Default rate</th>
-                <th class="r">Override rate</th>
-                <th class="r">Computed price</th>
-                <th class="r">Diff</th>
+                <th class="r">Base Rate</th>
+                <th class="r pl-sell-h">Selling Rate</th>
                 <th>Updated</th>
               </tr></thead>
               <tbody id="pl-rows"></tbody>
@@ -27147,8 +27168,8 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
   function closeList(){ $('pl-editor').hidden=true; cur=null; }
   function renderMeta(){
     const nov=Object.keys(draftOver).length;
-    $('pl-meta').innerHTML = 'Base <b>Product Master default rate</b> · Overrides <b>'+(cur.id==='default'?'—':nov)+'</b> · Created by <b>'+esc(cur.createdBy||'—')+'</b> · '
-      + (cur.readonly?'<b style="color:var(--emerald)">Read-only — mirrors Product Master</b>':'Effective rate = <b>override ?? default</b>, price computed from Sq.Ft.');
+    $('pl-meta').innerHTML = 'Base Rate from <b>Product Master</b> · Custom prices <b>'+(cur.id==='default'?'—':nov)+'</b> · Created by <b>'+esc(cur.createdBy||'—')+'</b> · '
+      + (cur.readonly?'<b style="color:var(--emerald)">Read-only — mirrors Product Master</b>':'Selling Rate defaults to Base Rate; edit it to set a custom price. Roll/piece price computed from Sq.Ft.');
   }
   function plFiltered(){
     const q=plState.q.toLowerCase();
@@ -27170,19 +27191,27 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const ro = cur.readonly;
     $('pl-rows').innerHTML = slice.map(g=>{
       const def=defRate(g.key); const ov=draftOver[g.key]; const eff = ov!=null?ov:def;
-      const comp=computed(eff,g); const perU = g.unit==='sqft'?'/sqft':'/pc';
-      const diff = (ov!=null&&def!=null) ? (ov-def) : null;
-      const diffCls = diff==null?'same':diff>0?'up':diff<0?'down':'same';
+      const comp=computed(eff,g); const perU = g.unit==='sqft'?'/sqft':'/pc'; const compU = g.unit==='sqft'?'/roll':'/pc';
+      const custom = ov!=null && ov!==def;
       return '<tr data-key="'+esc(g.key)+'">'
         + '<td class="pm-c-name"><div class="pm-name">'+esc(g.label)+'</div><div class="pm-sku">'+esc(g.category)+' · '+g.variants+' colour'+(g.variants!==1?'s':'')+'</div></td>'
         + '<td class="pm-mono">'+esc(g.hsn||'—')+'</td>'
         + '<td class="pm-meta">'+(g.unit==='sqft'?'Sq.Ft.':'Piece')+'</td>'
         + '<td class="r pm-mono">'+(g.unit==='sqft'?(g.sqft!=null?g.sqft:'—'):'—')+'</td>'
         + '<td class="r pm-meta">'+(g.gst!=null?g.gst+'%':'—')+'</td>'
-        + '<td class="r pl-def">'+(def!=null?inr(def)+perU:'—')+'</td>'
-        + '<td class="r"><input class="pl-rate-in'+(ov!=null?' set':'')+'" data-rate="'+esc(g.key)+'" inputmode="decimal" value="'+(ov!=null?ov:'')+'" placeholder="'+(def!=null?def:'')+'"'+(ro?' disabled':'')+'></td>'
-        + '<td class="r pl-computed" data-comp="'+esc(g.key)+'">'+(comp!=null?inr(comp)+(g.unit==='sqft'?'/roll':'/pc'):'—')+'</td>'
-        + '<td class="r"><span class="pl-diff '+diffCls+'" data-diff="'+esc(g.key)+'">'+(diff==null?'—':(diff>0?'+':'')+inr(diff)+perU)+'</span></td>'
+        + '<td class="r pl-base">'+(def!=null?inr(def)+perU:'—')+'</td>'
+        + '<td class="r pl-sell-td" data-cell="'+esc(g.key)+'">'
+          + '<div class="pl-sell-wrap'+(custom?' custom':'')+'" data-wrap="'+esc(g.key)+'">'
+            + '<label class="pl-sell-field'+(ro?' ro':'')+'"><span class="pl-cur">₹</span>'
+              + '<input class="pl-sell-in" data-rate="'+esc(g.key)+'" inputmode="decimal" value="'+(ov!=null?ov:'')+'" placeholder="'+(def!=null?def:'0')+'"'+(ro?' disabled':'')+'>'
+              + '<span class="pl-unit">'+perU+'</span><span class="pl-pencil">✎</span></label>'
+            + '<div class="pl-sell-meta">'
+              + '<span class="pl-computed" data-comp="'+esc(g.key)+'">'+(comp!=null?inr(comp)+compU:'—')+'</span>'
+              + '<span class="pl-custom">Custom</span>'
+              + '<button type="button" class="pl-reset" data-reset="'+esc(g.key)+'" title="Restore Base Rate">↺ Base</button>'
+            + '</div>'
+          + '</div>'
+        + '</td>'
         + '<td class="pm-updated">'+esc(cur.updatedOn||'—')+'</td>'
         + '</tr>';
     }).join('');
@@ -27197,13 +27226,20 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     const g=groups.find(x=>x.key===key); if(!g) return;
     let v = val===''?null:Math.round(+val*100)/100; if(v!=null && (isNaN(v)||v<0)) v=null;
     if(v==null) delete draftOver[key]; else draftOver[key]=v;
-    // live update the row's computed + diff + input state
-    const def=defRate(key); const eff=v!=null?v:def; const comp=computed(eff,g);
-    const compEl=document.querySelector('[data-comp="'+CSS.escape(key)+'"]'); if(compEl) compEl.textContent = comp!=null?inr(comp)+(g.unit==='sqft'?'/roll':'/pc'):'—';
-    const diff=(v!=null&&def!=null)?(v-def):null; const de=document.querySelector('[data-diff="'+CSS.escape(key)+'"]');
-    if(de){ de.className='pl-diff '+(diff==null?'same':diff>0?'up':'down'); de.textContent=diff==null?'—':(diff>0?'+':'')+inr(diff)+(g.unit==='sqft'?'/sqft':'/pc'); }
-    const inp=document.querySelector('[data-rate="'+CSS.escape(key)+'"]'); if(inp) inp.classList.toggle('set', v!=null);
+    refreshCell(key);
     renderMeta();
+  }
+  function refreshCell(key){
+    const g=groups.find(x=>x.key===key); if(!g) return;
+    const def=defRate(key); const ov=draftOver[key]; const eff=ov!=null?ov:def;
+    const comp=computed(eff,g); const compU=g.unit==='sqft'?'/roll':'/pc';
+    const compEl=document.querySelector('[data-comp="'+CSS.escape(key)+'"]'); if(compEl) compEl.textContent = comp!=null?inr(comp)+compU:'—';
+    const wrap=document.querySelector('[data-wrap="'+CSS.escape(key)+'"]'); if(wrap) wrap.classList.toggle('custom', ov!=null && ov!==def);
+  }
+  function resetRate(key){
+    delete draftOver[key];
+    const inp=document.querySelector('[data-rate="'+CSS.escape(key)+'"]'); if(inp){ inp.value=''; }
+    refreshCell(key); renderMeta();
   }
   function saveList(){
     if(cur.readonly){ closeList(); return; }
@@ -27247,6 +27283,10 @@ _x000D_</div><div class="sec">0 INVOICES · LAST RECEIPT —</div></div>
     $('pl-bulk').addEventListener('click', bulkUpdate);
     $('pl-export').addEventListener('click', exportList);
     $('pl-rows').addEventListener('input', e=>{ const inp=e.target.closest('[data-rate]'); if(inp) setRate(inp.getAttribute('data-rate'), inp.value); });
+    $('pl-rows').addEventListener('click', e=>{
+      const rs=e.target.closest('[data-reset]'); if(rs){ e.preventDefault(); resetRate(rs.getAttribute('data-reset')); return; }
+      const cell=e.target.closest('.pl-sell-td'); if(cell){ const inp=cell.querySelector('.pl-sell-in'); if(inp && !inp.disabled) inp.focus(); }
+    });
     $('pl-party-input').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); const v=e.target.value.trim(); if(v && !draftParties.includes(v)){ draftParties.push(v); renderParties(); } e.target.value=''; } });
     $('pl-party-chips').addEventListener('click', e=>{ const b=e.target.closest('[data-party-del]'); if(b){ draftParties=draftParties.filter(p=>p!==b.getAttribute('data-party-del')); renderParties(); } });
     document.addEventListener('keydown', e=>{ if(e.key==='Escape' && !$('pl-editor').hidden) closeList(); });
