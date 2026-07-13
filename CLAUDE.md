@@ -15,6 +15,10 @@
 - `receivables.json` schema: `{ generated, parties: { <slug>: { name, bf24, opening, billed, received, outstanding, fy25:[…], fy26:[…] } } }`, where each transaction is `{ d, t, v, dr, cr }`. FY26 dates are `"DD Mon"` (current FY, no year); FY25 dates carry the `"YY"` suffix.
 - Updating receivables = append new vouchers to each party's `fy26`, recompute `billed`/`received`/`outstanding`, bump `generated`. Dedupe by voucher no.
 
-## Architecture direction (goal, not yet done)
-- Move the UI toward **fully data-driven rendering**: the dashboard, party list, KPIs, chips, and filters should build themselves in the browser from the data source (JSON now, Supabase later) — so uploading a new Excel/data file updates the UI automatically, with **no separate HTML-generation step**.
-- The Receivables cockpit is the current exception: its Level-1 rows + hero/KPIs/concentration are still generated as static HTML and must be regenerated when data changes. This is the first thing to make data-driven. The account-statement drawer already reads `receivables.json` at runtime — extend that pattern to the rest of the page.
+## Current priority
+- **Complete and stabilize the core ERP modules** (Orders, Receivables, Product Master, Price Lists, Dispatch, …). Build these out incrementally.
+- The current data flow is fine as-is: uploading a new Tally Excel updates `receivables.json` and the receivables page. Keep this approach for now.
+
+## Architecture direction (deferred — do NOT start unless explicitly asked)
+- **Only after** the core ERP is feature-complete: move the UI toward **fully data-driven rendering** so the dashboard, party list, KPIs, chips, and filters build themselves in the browser from the data source (JSON now, Supabase later) — uploading a new file updates the UI automatically, with **no separate HTML-generation step**.
+- First target when that time comes: the Receivables cockpit Level-1 (rows + hero/KPIs/concentration are currently generated as static HTML). The account-statement drawer already reads `receivables.json` at runtime — extend that pattern to the rest of the page. Until then, regenerate the static HTML when the data changes.
